@@ -1,0 +1,419 @@
+.date-range lightning-input {
+    margin-bottom: 0.5rem;
+}
+
+.expense-form lightning-input,
+.expense-form lightning-combobox,
+.expense-form lightning-file-upload {
+    width: 100%;
+}
+
+.grand-total {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #16325c;
+}
+
+/* Mobile adjustments */
+@media only screen and (max-width: 768px) {
+    .day-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* General Styles for Expense Entry */
+.slds-card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.slds-p-around_medium {
+    padding: 1rem; /* Reduced padding for overall */
+}
+
+.expense-day-modern {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    overflow: visible;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+
+
+.day-header-modern {
+    background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
+    border-bottom: 2px solid #2196f3;
+    font-weight: 600;
+}
+
+
+/* Day Header */
+.day-header {
+    border-radius: 10px;
+    border-bottom: 2px solid #2196f3;
+    font-weight: 600;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+}
+
+
+
+
+.day-date-label {
+    font-weight: 600;
+    font-size: 16px;
+    color: #0d47a1;
+}
+
+
+/* Remove border and shadow from lightning-button-icon */
+.icon1{
+    --slds-g-color-border-base-4: transparent !important; /* Set border color to transparent */
+}
+/* Ensure everything aligns nicely and with proper spacing */
+
+
+.slds-text-align_center {
+    display: flex;
+    justify-content: center; /* Ensure buttons are centered */
+    align-items: center;
+}
+
+.slds-text-align_right {
+    display: flex;
+    justify-content: flex-end; /* Ensure Grand Total is aligned to the right */
+}
+
+.slds-m-top_medium {
+    margin-top: 1rem; /* Adds some space above the Grand Total and Buttons row */
+}
+
+
+.slds-text-heading_small {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+/* Chevron Toggle Icon */
+.slds-button-icon {
+    padding: 0.25rem;
+}
+
+/* Line Items */
+.expense-row {
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Spacing for each Line Item Field */
+.expense-row lightning-combobox,
+.expense-row lightning-input,
+.expense-row lightning-file-upload {
+    margin-bottom: 0.75rem;
+}
+
+/* Styling the Add/Remove Buttons */
+.slds-m-top_small {
+    margin-top: 0.75rem;
+    text-align: right;
+}
+
+.slds-button {
+    margin-right: 0.5rem;
+    padding: 0.5rem 1rem;
+}
+
+.slds-button-brand {
+    background-color: #0070d2;
+    border: none;
+}
+
+.slds-button-neutral {
+    background-color: #f4f6f9;
+    border: none;
+}
+
+.slds-button-icon {
+    background-color: transparent;
+    border: none;
+}
+.red{
+  --slds-g-color-neutral-base-50: red;
+}
+.green{
+  --slds-g-color-neutral-base-50: green  !important; /* Icon color */
+}
+.legend-colorBlock {
+    display: flex;      /* shrink to text size */
+    max-width: 100%;          /* prevent overflow */
+    padding: 2px 6px;
+    color:white;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;  
+    overflow-x: auto; 
+}
+.status-box-modern {
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+
+.slds-modal__content {
+    overflow-y: auto;
+    background-color: white;
+}
+
+
+
+/* Mobile responsiveness */
+@media only screen and (max-width: 768px) {
+    .slds-col1 {
+        width: 100% !important;
+    }
+
+    .expense-row {
+        padding: 0.5rem;
+    }
+
+    .slds-text-heading_small {
+        font-size: 1rem;
+        font-weight: 600;
+    }
+}
+
+
+@media only screen and (max-width: 768px) {
+.border {
+    /* Add the border style here */
+    border-style: solid;
+    border-width: 0.5px;
+    border-color: rgba(50, 50, 93, 0.25);
+    border-radius: 5px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+    }
+}
+.readonly-bordered {
+  --slds-c-input-shadow: 0 0 0 0.45px black;
+  --slds-c-input-color-background: #ffffff;
+  --slds-c-input-color-border: #d8dde6;
+  --slds-c-input-radius-border: 0.25rem;
+}
+:host {
+    /* Removes SF Card Header padding/margin top/bottom only */
+    --slds-c-card-header-spacing-block-end: 0px;
+    --slds-c-card-header-spacing-block-start: 0px;
+}
+.customMargin
+{
+    margin-top:0;
+    margin-bottom:0;
+}
+.slds_CustomClass {
+    padding:2px;
+     background: linear-gradient(135deg, rgb(6 88 169) 10%, rgb(3, 45, 96) 100%);
+    border-radius: 20px;
+}
+.custom-padding {
+    padding-left: 10px; 
+    padding-right: 10px; 
+}
+.floatright
+{
+    float: right;
+}
+floatleft
+{
+    float: left;
+}
+
+.customcontainer{
+    background-color: #f3f3f2;
+    border-style: solid;
+    border-width: 0.5px;
+    border-color: rgba(50, 50, 93, 0.25);
+    border-radius: 5px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+    text-align: right;
+}
+
+.customcard{
+    padding:15px;
+    border-style: solid;
+    border-width: 0.5px;
+    border-color: rgba(50, 50, 93, 0.25);
+    border-radius: 10px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
+
+
+.readonly-bordered {
+  --slds-c-input-shadow: 0 0 0 0.45px black;
+  --slds-c-input-color-background: #ffffff;
+  --slds-c-input-color-border: #d8dde6;
+  --slds-c-input-radius-border: 0.25rem;
+}
+.custom-header {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: azure;
+    background: #014486;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    padding: 6px 12px; /* for some spacing inside */
+}
+.file-error {
+    border: 2px solid red;
+    border-radius: 6px;
+    padding: 4px;
+}
+
+
+/* ===== SELECT ALL ===== */
+.select-all-modern {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border-radius: 10px;
+    border-left: 4px solid #2196f3;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+
+.colorIdentification {
+    border-left: 4px solid red;
+
+}
+.blueColor {
+    border-left: 4px solid #2196f3;
+}
+
+.select-all-label {
+    font-weight: 600;
+    font-size: 15px;
+    color: #0d47a1;
+}
+
+
+.notsubmitted-exp {
+    background: linear-gradient(135deg, #ffb74d 0%, #ffa726 100%);
+}
+
+.submitted-exp {
+    background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+}
+
+.approved-exp {
+    background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
+}
+
+.rejected-exp {
+    background: linear-gradient(135deg, #ef5350 0%, #d32f2f 100%);
+}
+
+.readonly-container {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+
+
+.day-total-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.total-label {
+    font-weight: 600;
+    color: #1565c0;
+    font-size: 15px;
+}
+
+.total-amount {
+    background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 15px;
+    box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
+}
+
+
+
+.dailylogPopup{
+    height: auto;
+}
+@media screen and (max-width: 767px) {
+
+    .dailylogPopup {
+   /* min-height: 100vh;*/
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: white; /* ensures grey doesn't bleed through */
+    -webkit-overflow-scrolling: touch;
+    }
+
+}
+
+
+.pb-100 {
+     margin-bottom: 30px;
+}
+.footer-bg {
+    background-color: #ffffff;
+}
+
+/* Card container */
+.footer-summary {
+    border-radius: 10px;
+}
+
+/* Each card */
+.footer-card {
+    text-align: center;
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Remove divider on last card (mobile) */
+.footer-card:last-child {
+    border-bottom: none;
+}
+
+/* Label text */
+.footer-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: #6b7280;
+    margin-bottom: 0.35rem;
+}
+
+/* Value text */
+.footer-value {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #15803d;
+}
+
+/* Tablet & Desktop */
+@media (min-width: 48em) {
+    .footer-card {
+        border-bottom: none;
+        border-right: 1px solid #e5e7eb;
+    }
+
+    .footer-card:last-child {
+        border-right: none;
+    }
+}

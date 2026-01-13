@@ -1,0 +1,19 @@
+:host {
+    /* Removes SF Card Header padding/margin top/bottom only */
+    --slds-c-card-header-spacing-block-end: 0px;
+    --slds-c-card-header-spacing-block-start: 0px;
+    --slds-c-card-body-spacing-block-end: 0; 
+}
+.border {
+    /* Add the border style here */
+    border-style: solid;
+    border-width: 0.5px;
+    border-color: rgba(50, 50, 93, 0.25);
+    border-radius: 10px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
+.error-border {
+    border: 1px solid red;
+    border-radius: 0.25rem;
+    padding: 0.25rem;
+}

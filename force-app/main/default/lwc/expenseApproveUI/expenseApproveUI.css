@@ -1,0 +1,106 @@
+/* Horizontal scroll for table */
+.slds-table_container {
+    overflow-x: auto;
+}
+
+.attachment-cell {
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+}
+
+.file-title {
+    margin-left: 4px;
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+
+/* Input width */
+lightning-input {
+    max-width: 80px;
+}
+
+/* Highlight editable/selectable rows in green */
+tr.editable-row {
+    background-color: #d9fdd3; /* light green */
+}
+
+/* Table borders */
+.slds-table_col-bordered th,
+.slds-table_col-bordered td {
+    border: 1px solid #d8dde6;
+}
+
+/* Reduce font/padding on medium screens */
+@media screen and (max-width: 1200px) {
+    .slds-table th,
+    .slds-table td {
+        font-size: 0.85rem;
+        padding: 0.25rem 0.5rem;
+    }
+}
+.highlight-row {
+    background-color: #d9fdd3 !important; /* light green */
+}
+table.slds-table tr.highlight-row td {
+    background-color: #d9fdd3 !important; /* light green */
+}
+.footer-wrapper {
+    background: #fff;
+    padding: 8px 4px;
+}
+
+/* Section spacing */
+.ta-section {
+    padding-top: 8px;
+}
+
+/* Card */
+.ta-card {
+    text-align: center;
+    padding: 10px 6px;
+}
+
+/* Label */
+.ta-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: #6b6d70;
+    margin-bottom: 4px;
+}
+
+/* Value */
+.ta-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Colors */
+.ta-value.success {
+    color: #2e844a;
+}
+
+.ta-value.error {
+    color: #ba0517;
+}
+
+/* Desktop enhancement */
+@media (min-width: 768px) {
+    .ta-label {
+        font-size: 0.7rem;
+    }
+    .ta-value {
+        font-size: 1rem;
+    }
+}

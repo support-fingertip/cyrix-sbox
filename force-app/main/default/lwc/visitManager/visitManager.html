@@ -1,0 +1,297 @@
+<template>
+
+    <template lwc:if={isvisitDesktop}>
+        <div class="custom1 ">
+            <div class="screen-1  ">
+
+                <!-- When page is loading -->
+                <template lwc:if={isPageLoaded}>
+                    <c-on-loading-screen></c-on-loading-screen>
+                </template>
+
+                <!-- When page loaded -->
+                <template lwc:else>
+                    <lightning-card>
+
+                        <template if:true={isDesktop}>
+                            <!--Visit plan-->
+                            <div class="slds-p-horizontal_xx-small">
+                                <h2 class="slds-text-heading_medium slds-p-horizontal_small"> {header}</h2>
+                            </div>
+                        </template>
+                        <template if:true={isPhone}>
+                            <template lwc:if={isShowBackButton}>
+                                <div class="slds-p-horizontal_small"> {header}
+                                </div>
+                            </template>
+                        </template>
+
+                        <!--Visit plan-->
+
+                        <div class="buttonalign">
+                            <div class="slds-col slds-size_1-of-3 slds-max-small-size_1-of-3 slds-p-horizontal_small  ">
+                                <template lwc:if={isShowBackButton}>
+                                    <!--Back Icon-->
+                                    <div class="back-button" onclick={goBackScreen}> <lightning-icon
+                                            icon-name="utility:back" alternative-text="back" size="small"
+                                            class="back-icon"> </lightning-icon>
+                                        <p class="button-text">Go Back</p>
+                                    </div>
+
+                                </template>
+                                <template lwc:else>
+                                    <!--Refresh Icon-->
+                                    <div class="refresh-button" onclick={refreshData}> <lightning-icon
+                                            icon-name="utility:refresh" alternative-text="Refresh Icon" size="small"
+                                            class="refresh-icon"> </lightning-icon>
+                                        <p class="button-text">Refresh</p>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <template lwc:if={isDailyLog}>
+                                <template if:false={outletPage}>
+                                    <template lwc:if={isVisitCreate}>
+                                        <div
+                                            class="slds-col slds-size_1-of-3 slds-max-small-size_1-of-3 slds-p-horizontal_small  slds-border_left ">
+                                            <div class="visit-createButton" onclick={visitCreate}> <lightning-icon
+                                                    icon-name="utility:checkin" alternative-text="Visit Icon"
+                                                    size="small">
+                                                </lightning-icon>
+                                                <p class="button-text">Create visit</p>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <div
+                                        class="slds-col slds-size_1-of-3 slds-max-small-size_1-of-3 slds-p-horizontal_small   slds-border_left">
+                                        <div class="visit-button" onclick={isStartEndDay}> <lightning-icon
+                                                icon-name="utility:tour_check" alternative-text="Visit Icon"
+                                                size="xx-medium">
+                                            </lightning-icon>
+                                            <p class="button-text">{buttonName}</p>
+                                        </div>
+                                    </div>
+                                </template>
+
+
+
+                                <template if:true={outletPage}>
+                                    <div
+                                        class="slds-col slds-size_1-of-2 slds-max-small-size_1-of-2 slds-p-horizontal_small  slds-p-top_xx-small slds-border_left ">
+
+                                        <template lwc:if={executeScreenData.isInProgress}>
+                                            <template if:true={isExecuteScreen}>
+                                                <div class="visit-completeButton" onclick={completeVisit}>
+                                                    <lightning-icon icon-name="utility:resource_territory"
+                                                        alternative-text="Visit Icon" size="small">
+                                                    </lightning-icon>
+                                                    <p class="button-text">Complete Visit</p>
+                                                </div>
+                                            </template>
+                                        </template>
+                                    </div>
+                                </template>
+
+                            </template>
+                            <template lwc:else>
+                                <div class="status-card ended">
+                                    <lightning-icon icon-name="utility:error" size="small"
+                                        class="status-icon"></lightning-icon>
+                                    <h4 class="status-text">Day Ended</h4>
+                                </div>
+                            </template>
+
+                        </div>
+
+                    </lightning-card>
+
+
+                    <div class="screen-1-body">
+
+
+                        <!-- Home screen view -->
+                        <template lwc:if={isHomePage}>
+                        <!---->    <c-home-screen></c-home-screen>-->
+                        </template>
+
+                        <!-- Visit screen view -->
+                        <template lwc:if={Outlet}>
+                            <c-visit-summary-screen is-desktop={isDesktop} screen-height={screenHeight}
+                                onmycustomevent={handleCustomEvent} onsendvisitdata={getVisitDataFromOutletScreen}
+                                is-parent-comp="true" daily-log-data={dailylogData}></c-visit-summary-screen>
+                        </template>
+
+                        <!-- Execute Screen -->
+                        <template lwc:if={isExecuteScreen}>
+                            <template lwc:if={recordId}>
+                                <div>
+                                    <c-visit-Order-execute-screen record-id={recordId} index={index}
+                                        onscreen3={handleProductScreen}
+                                        is-progress-visit={executeScreenData.isProgressVisit}
+                                        is-acc={executeScreenData.isAcc} is-completed={executeScreenData.isCompleted}
+                                        is-in-progress={executeScreenData.isInProgress} visit-parent-data={visitData}
+                                        is-desktop={isDesktop} isplay-button-clicked={isplayButtonClicked}
+                                        daily-log-data={dailylogData}>
+                                    </c-visit-Order-execute-screen>
+                                </div>
+                            </template>
+                        </template>
+
+
+
+                        <!-- Camera screen -->
+                        <template lwc:if={isCameraScreen}>
+                            <template lwc:if={recordId}>
+                                <div>
+                                    <c-camera-screen record-id={recordId} is-desktop={isDesktop} open-camera-value=true
+                                        visit-data={visitData} onmyvisitclick={handleOrderScreen}></c-camera-screen>
+                                </div>
+                            </template>
+                        </template>
+                    </div>
+
+                </template>
+
+            </div>
+        </div>
+
+    </template>
+
+    <!-- Visit popup -->
+    <template lwc:if={newVisitPoup}>
+        <c-visit-form-popup daily-log-id={currentLogId} record-id={recordId} visit-outlet-data={VisitDataFromOutlet}
+            is-desktop={isDesktop} onmyvisitclick={onClickVisitPopup}
+            new-visit-create={newVisitPoup}></c-visit-form-popup>
+    </template>
+
+    <!-- Daily log popup -->
+    <template lwc:if={isDailyLogPopup}>
+
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-1" class={modalClass}>
+            <div class="slds-modal__container">
+
+                <template lwc:if={isDesktop}>
+
+                    <lightning-button-icon icon-name="utility:close" onclick={closeDailypopup} variant="container"
+                        alternative-text="Close" class="slds-modal__close"></lightning-button-icon>
+                </template>
+                <template lwc:if={createDailyLog}>
+                    <div class="slds-modal__header ">
+                        <div class="slds-grid slds-gutters">
+                            <template if:false={isDesktop}>
+                                <div class="slds-col  slds-clearfix">
+                                    <div class="slds-float_left">
+                                        <lightning-button variant="base" label="Save" disabled={isDisabled}
+                                            onclick={saveDailyLogLocation}
+                                            class="slds-m-left_x-small"></lightning-button>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <div class="slds-col slds-align_absolute-center">
+                                <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate " tabindex="-1">
+                                    Start Visit</h1>
+                            </div>
+
+                            <template if:false={isDesktop}>
+                                <div class="slds-col  slds-clearfix">
+                                    <div class="slds-float_right">
+                                        <lightning-button variant="base" label="Cancel" disabled={isDisabled}
+                                            onclick={closeDailypopup} class="slds-m-left_x-small"></lightning-button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="slds-modal__content slds-p-around_medium customHeight" id="modal-content-id-1">
+                        <!-- Spinner -->
+                        <template lwc:if={isLoading}>
+                            <div style="overflow: hidden;">
+                                <c-on-loading-screen size={loadingScreenSize}></c-on-loading-screen>
+                            </div>
+                        </template>
+                        <template lwc:else>
+                            <lightning-combobox name="Travel_Type__c" label="Work Type" value={worktype}
+                                placeholder="Select Work Type" required options={pickListData1}
+                                onchange={handleworktype}></lightning-combobox>
+                            <lightning-combobox name="Vehicle_Used__c" required label="Vehicle Type" value={vehicleType}
+                                placeholder="Select a Vehicle Type" options={pickListData2}
+                                onchange={handleVehicleTypeChange}></lightning-combobox>
+                            <lightning-combobox name="Mode_of_Transport__c" required label="Mode of Transport"
+                                value={transport} placeholder="Select a Mode of Transport"
+                                options={filteredTransportModes} onchange={handletransport}></lightning-combobox>
+                            <template lwc:if={ownVehicle}>
+                                <lightning-input type="number" required autocomplete="true" label="ODO Meter Reading"
+                                    value={kmTravelled} onchange={handlekmTravelled}></lightning-input>
+                            </template>
+                            <lightning-combobox name="With Companion" required label="With Companion"
+                                value={withCompanion} options={withCompanionList}
+                                onchange={handleCompanionPicklistChange}> </lightning-combobox>
+                            <template if:true={isWithCompanionYes}>
+                                <lightning-input type="text" name="Companion_Name__c" autocomplete="true"
+                                    label="Companion" value={companion} onchange={handlecompanion}></lightning-input>
+                            </template>
+                        </template>
+                    </div>
+
+                </template>
+
+                <template lwc:if={isDailyLogOutPopup}>
+
+                    <div class="slds-modal__header ">
+                        <div class="slds-grid slds-gutters">
+                            <template if:false={isDesktop}>
+                                <div class="slds-col  slds-clearfix">
+                                    <div class="slds-float_left">
+                                        <lightning-button variant="base" label="Save" disabled={isDisabled}
+                                            onclick={saveDailyLogLocation}
+                                            class="slds-m-left_x-small"></lightning-button>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <div class="slds-col slds-align_absolute-center">
+                                <h1 id="modal-heading-02" class="slds-modal__title slds-hyphenate" tabindex="-1">Are you
+                                    sure you want to end today’s visit?</h1>
+                            </div>
+
+                            <template if:false={isDesktop}>
+                                <div class="slds-col  slds-clearfix">
+                                    <div class="slds-float_right">
+                                        <lightning-button variant="base" label="Cancel" disabled={isDisabled}
+                                            onclick={closeDailypopup} class="slds-m-left_x-small"></lightning-button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="slds-modal__content slds-p-around_medium customHeight" id="modal-content-id-2">
+                        <lightning-input type="number" required autocomplete="true"
+                            label="Odometer Reading (in Kilometers) " value={kmTravelled}
+                            onchange={handlekmTravelled}></lightning-input>
+                    </div>
+                </template>
+
+                <!-- Footer for visit poup -->
+                <template lwc:if={isDesktop}>
+                    <div class="slds-modal__footer">
+                        <button class="slds-button slds-button_neutral" aria-label="Cancel and close"
+                            onclick={closeDailypopup} disabled={isDisabled}>Cancel</button>
+
+                        <button class="slds-button slds-button_brand " onclick={saveDailyLogLocation}
+                            disabled={isDisabled}>
+                            <template lwc:if={createDailyLog}>Start Visit</template>
+                            <template lwc:if={isDailyLogOutPopup}>End Day</template>
+                        </button>
+                    </div>
+                </template>
+
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    </template>
+
+
+</template>

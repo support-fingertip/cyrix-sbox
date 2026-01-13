@@ -1,0 +1,135 @@
+/* BUTTON ROW */
+.camera-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 12px;
+
+    padding: 8px 6px;
+    background: #ffffff94;
+    border-radius: 10px;
+    width: 100%;
+
+    position: relative;
+    z-index: 10;
+}
+
+/* DIV BUTTON */
+.camera-btn {
+    display: flex;
+    flex-direction: column;   /* icon top, text bottom */
+    align-items: center;
+    justify-content: center;
+
+    width: 60px;
+    height: 60px;
+
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* ICON */
+.camera-icon {
+    margin-bottom: 4px;
+}
+
+/* TEXT */
+.camera-text {
+    font-size: 11px;
+    line-height: 1;
+    text-align: center;
+}
+
+/* TAP FEEDBACK */
+.camera-btn:active {
+    transform: scale(0.92);
+}
+
+/* MOBILE */
+@media (max-width: 480px) {
+    .camera-btn {
+        width: 52px;
+        height: 52px;
+    }
+    .camera-text {
+        font-size: 10px;
+    }
+}
+
+/* CAMERA VIEW */
+.videoElement {
+    width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+    border-radius: 10px;
+
+    pointer-events: none; /* 🔑 FIX CLICK ISSUE */
+}
+
+/* SPINNER */
+.spinner-wrap {
+    margin-top: 8px;
+    text-align: center;
+}
+/* CAMERA CONTAINER */
+.camera-container {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+}
+
+/* VIDEO */
+.videoElement {
+    width: 100%;
+    max-height: 280px;
+    object-fit: cover;
+    border-radius: 10px;
+
+    pointer-events: none;
+}
+
+@media (max-width: 600px) {
+    .videoElement {
+        height: 70vh;
+        max-height: none;
+    }
+
+    .preview-image {
+        object-fit: contain;
+    }
+}
+.preview-image {
+    position: absolute;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;          /* ❗ correct preview */
+    background: #fffafa2e;
+    border-radius: 12px;
+}
+/* DESKTOP HOVER ZOOM */
+@media (hover: hover) {
+    .preview-image:hover {
+        transform: scale(1.15);
+        z-index: 20;
+    }
+}
+
+/* MOBILE TAP FEEDBACK (NO STUCK HOVER) */
+@media (hover: none) {
+    .preview-image:active {
+        transform: scale(1.08);
+    }
+}

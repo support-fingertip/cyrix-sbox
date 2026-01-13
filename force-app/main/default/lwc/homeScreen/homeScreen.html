@@ -1,0 +1,325 @@
+<template>
+
+    <div class="custom1">
+        <div class="screen-1 ">  
+            <div class="home">
+
+                <!-- When page is loading -->
+                <template lwc:if={isPageLoaded}>
+                    <c-on-loading-screen></c-on-loading-screen>
+                </template>
+         
+                <!-- When page loaded -->
+                <template lwc:else> 
+                    <div class="dropdowns">
+         
+                        <!-- My Targets --> 
+                        <template lwc:if={myTargets}>
+                        <div class="dropdown"  >
+                            <div class="dropdown-head">
+                                <div class="dropdown-head-left" onclick={toggleTargetDropdown}>
+                                    <i class="material-icons dropdown-head-nav-icon">
+                                        <!-- keyboard_arrow_down -->
+                                        <lightning-icon icon-name="utility:chevronup" size="x-small" alternative-text="" class="chevron-icon" ></lightning-icon>
+                                    </i>
+                                    <h4 class="dropdown-head-title">
+                                        <img src={visitIcon.overallSummery} width="15" height="15" > &nbsp;&nbsp;
+                                        Overall Summary 
+                                    </h4>
+                                </div>
+                                <div data-name="target" onclick={isExpandForm}>
+                                    <lightning-icon icon-name="utility:expand" size="x-small" alternative-text="Expand" ></lightning-icon>
+                                </div>
+                                
+                            </div>
+                                <div class="dropdown-body active">
+                                    <div class="dropdown-head">
+                                        <template lwc:if={isSpinner}>
+                                            <!-- <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner> -->
+                                        </template>
+                                        <template lwc:if={targetData}>
+                                            <table class="dropdown-table">
+                                                <tr >
+                                                    <template  for:each={targerHeading} for:item="item" for:index="index">
+                                                            <th class="slds-border_top " key={item}><b>{item}</b></th> 
+                                                    </template>
+                                                </tr>
+                    
+                                                <template if:true={targetData} for:each={targetData} for:item="tar" for:index="index">
+                                                    <tr class="slds-border_top slds-border_bottom" key={tar.ownerName}>
+                                                        <td>{tar.kpiName}</td>
+                                                        <td>{tar.target}</td>
+                                                        <td>{tar.actual}</td>
+                                                        <td>{tar.achivedPer}%</td>
+                                                    </tr>
+                                                </template>
+                                            </table>
+                                        </template>
+                                        <template lwc:else>
+                                            <div class="slds-align_absolute-center">
+                                                <b>No Target found yet</b>
+                                            </div>
+                                        </template>
+                                        
+                                    </div>
+                                    <!-- <button class="dropdown-button" onclick={loadMoreTarget}>
+                                        More
+                                    </button> -->
+                                </div>
+                            <!-- </div> -->
+                        </div>
+                        </template>
+                        
+                         <!-- My Achivements --> 
+                        <template lwc:if={myAchivements}>
+                        <div class="dropdown"  >
+                            <div class="dropdown-head">
+                                <div class="dropdown-head-left" onclick={toggleAchiveDropdown}>
+                                    <i class="material-icons dropdown-head-nav-icon">
+                                        <!-- keyboard_arrow_down -->
+                                        <lightning-icon icon-name="utility:chevrondown" size="x-small" alternative-text="" class="chevron-icon-achive" ></lightning-icon>
+                                    </i>
+                                    <h4 class="dropdown-head-title">
+                                        <img src={visitIcon.achive} width="15" height="15" > &nbsp;&nbsp;
+                                        Achivements
+                                    </h4>
+                                </div>
+                                <div data-name="achivement" onclick={isExpandForm}>
+                                    <lightning-icon icon-name="utility:expand" size="x-small" alternative-text="Expand" ></lightning-icon>
+                                </div>
+                               
+                            </div>
+                            <div class="dropdown-body-achive slds-scrollable">
+                                <div class="dropdown-head slds-scrollable">
+                                    <canvas lwc:dom="manual" class="chart slds-scrollable"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        </template>                        
+                        
+                        <!-- Day summary -->
+                        <template lwc:if={myDaySummary}>
+                            <div class="dropdown">
+                                <div class="dropdown-head">
+                                    <div class="dropdown-head-left" onclick={toggleDayDropdown}>
+                                        <i class="material-icons dropdown-head-nav-icon">
+                                            <!-- keyboard_arrow_down -->
+                                            <lightning-icon icon-name="utility:chevronup" size="x-small" alternative-text="" class="chevron-icon-day" ></lightning-icon>
+                                        </i>
+                                        <h4 class="dropdown-head-title">
+                                            <img src={visitIcon.daySummery} width="15" height="15" > &nbsp;&nbsp;
+                                            Day Summary
+                                        </h4>
+                                    </div>
+                                    <!-- <i class="material-icons dropdown-head-crop-icon">crop_free</i> -->
+                                    <div data-name="summary" onclick={isExpandForm}>
+                                        <lightning-icon icon-name="utility:expand" size="x-small" alternative-text="Expand" ></lightning-icon>
+                                    </div>
+                                    
+                                </div>
+                                <div class="dropdown-body-day active">
+                                    <div class="dropdown-head">
+                                        <div class="expenses">
+                                            <!-- <div class="expenses-title">{currentMonthYear}</div> -->
+                                            <!-- <template  for:each={productiveToday} for:item="item" for:index="index"> -->
+                                                <div class="expenses-details" >
+                                                    <div class="expenses-col" >
+                                                        <div class="expenses-col-1">Total outlets</div>
+                                                        <div class="expenses-col-2">{productiveToday.visCount}</div>
+                                                    </div>
+                                                    <div class="expenses-col" >
+                                                        <div class="expenses-col-1">Productive Calls</div>
+                                                        <div class="expenses-col-2">{productiveToday.productiveData}</div>
+                                                    </div>
+                                                    <div class="expenses-col" >
+                                                        <div class="expenses-col-1">Travel KM</div>
+                                                        <div class="expenses-col-2">{productiveToday.totalKm}</div>
+                                                    </div>
+                                                    <!-- <div class="expenses-col" >
+                                                        <div class="expenses-col-1">DA Amount</div>
+                                                        <div class="expenses-col-2">{item.DtAmount}</div>
+                                                    </div>
+                                                    <div class="expenses-col" >
+                                                        <div class="expenses-col-1">TA Amount</div>
+                                                        <div class="expenses-col-2">{item.TAAMount}</div>
+                                                    </div> -->
+                                                    <div class="expenses-col" >
+                                                        <div class="expenses-col-1">Expense</div>
+                                                        <div class="expenses-col-2">{productiveToday.TotalAmount}</div>
+                                                    </div>
+                                                </div>
+                                            <!-- </template> -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        
+                        <!-- Productivity -->
+                        <template lwc:if={myProductivity}>
+                            <div class="dropdown">
+                                <div class="dropdown-head">
+                                    <div class="dropdown-head-left" onclick={toggleProductiveDropdown}>
+                                        <i class="material-icons dropdown-head-nav-icon">
+                                            <!-- keyboard_arrow_down -->
+                                            <lightning-icon icon-name="utility:chevrondown" size="x-small" alternative-text="" class="chevron-icon-pro" ></lightning-icon>
+                                        </i>
+                                        <h4 class="dropdown-head-title">
+                                            <img src={visitIcon.Productivity} width="15" height="15" > &nbsp;&nbsp;
+                                            Productivity
+                                        </h4>
+                                    </div>
+                                    <div data-name="productivity" onclick={isExpandForm}>
+                                        <lightning-icon icon-name="utility:expand" size="x-small" alternative-text="Expand" ></lightning-icon>
+                                    </div>
+                                    
+                                </div>
+                
+                                <div class="dropdown-body-pro ">
+                                    <div class="dropdown-head">
+                                        <div class="expenses productive">
+                                            <template lwc:if={productive}> 
+                                                <template  for:each={productive} for:item="item1" for:index="index">
+                                                    <!-- <template  for:each={item.expenseItems} for:item="item1" for:index="index1"> -->
+                                                        <div class="expenses-date" key={item1.id}>{item1.formattedDate}</div>
+                                                        <div class="expenses-row" key={item1.id}>
+                    
+                                                            <div class="expenses-details">
+                                                                <div class="expenses-col">
+                                                                    <div class="expenses-col-1">&nbsp;TLS: {item1.TSL}</div>
+                                                                    <div class="expenses-col-2">LPPC: {item1.LPPC}</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="expenses-details">
+                                                                <div class="expenses-col">
+                                                                    <!-- <div class="expenses-col-1">LPPC: {item1.LPPC}</div> -->
+                                                                    <div class="expenses-col-2">Productive Calls :{item1.productiveCalls}</div>
+                                                                </div>
+                                                            </div> 
+                                                        </div>
+                                                    <!-- </template> -->
+                                                </template>
+                                            </template>
+                                            <template lwc:else>
+                                                <div class="slds-align_absolute-center">
+                                                    <b>Nothing found yet</b>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>                        
+            
+                        <!-- Visit -->
+                        <template lwc:if={myVisits}>
+                            <div class="dropdown"  >
+                                <div class="dropdown-head">
+                                    <div class="dropdown-head-left" onclick={toggleVisitDropdown}>
+                                        <i class="material-icons dropdown-head-nav-icon">
+                                            <lightning-icon icon-name="utility:chevrondown" size="x-small" alternative-text="" class="chevron-icon-visit" ></lightning-icon>
+                                        </i>
+                                        <h4 class="dropdown-head-title">
+                                            <img src={visitIcon.visit} width="15" height="15" > &nbsp;&nbsp;
+                                            Visit for today
+                                        </h4>
+                                    </div>
+                                    <div data-name="map" onclick={isExpandForm}>
+                                        <lightning-icon icon-name="utility:expand" size="x-small" alternative-text="Expand" ></lightning-icon>
+                                    </div>
+                                    
+                                </div>
+                                <div class="dropdown-body-visit">
+                                    <div class="dropdown-head">
+                                      
+                                        <template lwc:if={mapMarkers}>
+                                            <lightning-map map-markers={mapMarkers}
+                                                        
+                                        > </lightning-map>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>                        
+                        
+                        <!-- Expense -->
+                        <template lwc:if={myExpense}>
+                            <div class="dropdown">
+                                <div class="dropdown-head">
+                                    <div class="dropdown-head-left" onclick={toggleExpenseDropdown}>
+                                        <i class="material-icons dropdown-head-nav-icon">
+                                            <!-- keyboard_arrow_down -->
+                                            <lightning-icon icon-name="utility:chevrondown" size="x-small" alternative-text="" class="chevron-icon-ex" ></lightning-icon>
+                                        </i>
+                                        <h4 class="dropdown-head-title">
+                                            <img src={visitIcon.expense} width="15" height="15" > &nbsp;&nbsp;
+                                            Expense
+                                        </h4>
+                                    </div>
+                                    <div data-name="Expense" onclick={isExpandForm}>
+                                        <lightning-icon icon-name="utility:expand" size="x-small" alternative-text="Expand" ></lightning-icon>
+                                    </div>
+                                    <!-- <i class="material-icons dropdown-head-crop-icon">crop_free</i> -->
+                                    
+                                </div>
+                
+                                <div class="dropdown-body-ex ">
+                                    <div class="dropdown-head">
+                                        <!-- <template lwc:if={isSpinner}>
+                                            <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                                        </template> -->
+                                        <div class="expenses">
+                                            <!-- <div class="expenses-title">{currentMonthYear}</div> -->
+                                            <template  for:each={ExpenseData} for:item="item" for:index="index">
+                                                <div class="expenses-details" key={item.id}>
+                                                    <div class="expenses-col" >
+                                                        <div class="expenses-col-1">Travel KM</div>
+                                                        <div class="expenses-col-2">{item.totalKm}</div>
+                                                    </div>
+                                                    <div class="expenses-col" >
+                                                        <div class="expenses-col-1">DA Amount</div>
+                                                        <div class="expenses-col-2">{item.DtAmount}</div>
+                                                    </div>
+                                                    <div class="expenses-col" >
+                                                        <div class="expenses-col-1">TA Amount</div>
+                                                        <div class="expenses-col-2">{item.TAAMount}</div>
+                                                    </div>
+                                                    <div class="expenses-col" >
+                                                        <div class="expenses-col-1">Total Amount</div>
+                                                        <div class="expenses-col-2">{item.TotalAmount}</div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <template  for:each={item.expenseItems} for:item="item1" for:index="index1">
+                                                    <div class="expenses-date" key={item1.id}>{item1.ExpenseDate}</div>
+                                                    <div class="expenses-row" key={item1.id}>
+                
+                                                        <div class="expenses-details">
+                                                            <div class="expenses-col">
+                                                                <div class="expenses-col-1">{item1.FromCity} to {item1.ToCity}</div>
+                                                                <div class="expenses-col-2">{item1.allowanceType}</div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="expenses-details">
+                                                            <div class="expenses-col">
+                                                                <div class="expenses-col-1">{item1.expenseType}</div>
+                                                                <div class="expenses-col-2">{item1.amount}</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                                
+                                        </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>                      
+            
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+    
+</template>

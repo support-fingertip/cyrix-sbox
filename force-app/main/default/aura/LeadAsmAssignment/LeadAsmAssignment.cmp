@@ -1,0 +1,80 @@
+<aura:component controller="leadCmpController" implements="force:appHostable,flexipage:availableForAllPageTypes,force:lightningQuickActionwithoutHeader,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction,lightning:isUrlAddressable" access="global" >
+    <!-- Id fields -->
+    <aura:attribute name="recordId"  access="global"  type="string" description="record Id" default="" /> 
+     <aura:attribute name="manager"  access="global"  type="string"  description="manager" default=""/>
+    <aura:attribute name="SalesExecutive"  access="global"  type="string"  description="ASM" default=""/>
+     <aura:attribute name="regionName"  access="global"  type="string" description="regionName" default="" /> 
+    <!--spinner -->
+    <aura:attribute name="spinner" access="private" type="boolean" default="false" description="" />
+    <!--handler -->
+     <aura:handler name="init" value="{!this}" action="{!c.doInit}"></aura:handler>
+
+    <aura:html tag="style">
+        .slds-modal__container{ 
+        max-width: 80rem !important;
+        width:80% !important;
+        } 
+        
+        .cuf-content {
+        padding: 0 0rem !important;
+        }
+        .slds-p-around--medium {
+        padding: 0rem !important;
+        }
+        
+        .closeIcon{
+        display:none;
+        }
+        .slds-col{
+        margin-left:5px;
+        }
+    </aura:html >
+    
+    <div role="dialog" tabindex="-1" aria-labelledby="header43" aura:id="Modalbox" class="slds-modal  slds-fade-in-open">
+        <div class="slds-modal__container">
+           <lightning:buttonIcon iconName="utility:close"  onclick="{!c.closeModal}"  alternativeText="close"  variant=""  class="slds-modal__close"/>
+            <header class="slds-modal__header">
+                <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Lead Assignment </h1>
+            </header>
+            <div class="slds-modal__content   slds-p-around_medium" id="modal-content-id-1">
+                <div class="slds-grid slds-wrap slds-grid_pull-padded-x-small listSections slds-p-around--x-large">
+                      <lightning:messages /> 
+                    <div class="slds-form-element_horizontal">
+                        <div class="slds-text-heading--small  sectionTagline">
+                           Lead assignment 
+                        </div>
+                        <div class="slds-form-element__control">
+                            <lightning:select name="select1" label="Choose Option" required="true" onchange="{!c.changeOption}">
+                                <option value="">choose one...</option>
+                                <option value="ASM Transfer">ASM Transfer</option>
+                                <option value="Sales Exe Transfer">Sales Exe Transfer</option>
+                            </lightning:select>
+                        </div>
+                        <div class="slds-form-element__control slds-p-top_small">
+                            <div class="slds-text-heading--small slds-p-bottom--small setupFlowHeader ">
+                                Region Name : {!v.regionName}
+                             </div> 
+                        </div>
+          
+                        <div class="slds-form-element__control slds-p-top_small">
+                            <div class="slds-text-heading--small slds-p-bottom--small setupFlowHeader ">
+                                ASM  : {!v.regionName}
+                            </div> 
+                        </div>
+                              <div class="slds-form-element__control">
+                            <div class="slds-text-heading--small slds-p-bottom--small setupFlowHeader ">
+                                Sales Executive  : {!v.regionName}
+                            </div> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer slds-modal__footer slds-modal__footer--directional">
+                <div class="setupFlowFooter onesetupSetupFlowFooter">
+                    <lightning:button label="Cancel" onclick="{!c.closeModel}" />
+                    <lightning:button variant="brand" label="Submit" title="Brand action" onclick="{!c.doSubmit}" />
+                </div>
+            </div>
+        </div>
+    </div>
+</aura:component>
