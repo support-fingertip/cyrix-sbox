@@ -1,0 +1,52 @@
+<template>
+  <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+            <lightning-button-icon icon-name="utility:close" onclick={closeModal} alternative-text="Close" class="slds-modal__close slds-button_icon">
+             </lightning-button-icon>
+
+                <header class="slds-modal__header">
+                    <h2 class="slds-text-heading_medium slds-hyphenate">New Campaign</h2>
+                </header>
+
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-record-edit-form object-api-name="Campaign" onsuccess={handleSuccess} onerror={handleError}>
+                        <lightning-messages></lightning-messages>
+
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-size_1-of-2">
+                                <lightning-input-field field-name="Name" required></lightning-input-field>
+                            </div>
+                            <div class="slds-size_1-of-2">
+                                <lightning-input-field field-name="Type" required value={campaignType}></lightning-input-field>
+                            </div>
+                            <div class="slds-size_1-of-2">
+                                <lightning-input-field field-name="Campaign_Source__c" required></lightning-input-field>
+                            </div>
+                            <div class="slds-size_1-of-2">
+                                <lightning-input-field field-name="Campaign_Medium__c" required></lightning-input-field>
+                            </div>
+                            <div class="slds-size_1-of-2">
+                                <lightning-input-field field-name="StartDate" required></lightning-input-field>
+                            </div>
+                            <div class="slds-size_1-of-2">
+                                <lightning-input-field field-name="Country_Code__c" required={isTelephony}></lightning-input-field>
+                            </div>
+                            <div class="slds-size_1-of-2">
+                                <lightning-input-field field-name="EndDate"></lightning-input-field>
+                            </div>
+                            <div class="slds-size_1-of-2">
+                                <lightning-input-field field-name="Landing_Number__c" required={isTelephony}></lightning-input-field>
+                            </div>
+                            <div class="slds-size_1-of-2">
+                                <lightning-input-field field-name="BudgetedCost" required></lightning-input-field>
+                            </div>
+                        </div>
+                        <footer class="slds-modal__footer">
+                            <lightning-button label="Cancel" onclick={closeModal}></lightning-button>
+                            <lightning-button type="submit" variant="brand" label="Save"></lightning-button>
+                        </footer>
+                    </lightning-record-edit-form>
+                </div>
+            </div>
+        </section>
+    </template>

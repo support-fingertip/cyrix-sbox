@@ -1,0 +1,45 @@
+<template> 
+ 
+  <div class="slds-grid slds-gutters camera-container">
+    <div class="slds-col">
+      <canvas class="slds-hide canvas"></canvas>
+      <img src="" class="slds-hide imageElement" alt="captured image"/>
+      <template if:false={showSaveButton}>
+        <video class="videoElement" autoplay></video>
+      </template>
+    </div>
+  </div> 
+  <div class="camera-wrapper">
+    <div class="icon-container" if:true={showStartButton} onclick={CheckCameraPermission}><!--initCamera-->
+      <lightning-icon icon-name="action:add_photo_video" size="small" class="icon"></lightning-icon>
+      <div class="icon-label">{buttonLable}</div>
+    </div>
+    <template if:true={showCaptureButton}>
+      <div class="icon-container" onclick={closeOpenedCamera}>
+        <lightning-icon icon-name="action:remove" size="small" class="icon"></lightning-icon>
+        <div class="icon-label">Stop Camera</div>
+      </div>
+      <div class="icon-container" onclick={captureImage}>
+        <lightning-icon icon-name="action:add_photo_video" size="small" class="icon"></lightning-icon>
+        <div class="icon-label">Capture Image</div>
+      </div>
+      <div class="icon-container" onclick={toggleCamera}>
+        <lightning-icon icon-name="action:refresh" size="small" class="icon"></lightning-icon>
+        <div class="icon-label">Switch Camera</div>
+      </div>
+    </template>
+    
+    <template if:true={showSaveButton}>
+      <div class="icon-container" onclick={saveImage}>
+        <lightning-icon icon-name="action:upload" size="small" class="icon"></lightning-icon>
+        <div class="icon-label">Upload Image</div>
+          <template if:true={showSpinner}>
+          <div class="spinner-overlay">
+              <lightning-spinner alternative-text="Uploading" variant="brand" size="large"></lightning-spinner>
+          </div>
+          </template>
+      </div>
+    </template>
+  </div>
+  
+</template>

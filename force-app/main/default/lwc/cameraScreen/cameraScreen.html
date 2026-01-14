@@ -1,0 +1,83 @@
+<template>
+    <div class="camerahome">
+
+        <!-- ACTION BUTTONS -->
+        <div class="camera-wrapper CameraTask">
+            <div class="camera-actions">
+
+                <!-- START CAMERA -->
+                <template if:true={showStartButton}>
+                    <div class="camera-btn"
+                         role="button"
+                         tabindex="0"
+                         onclick={CheckCameraPermission}>
+                        <lightning-icon
+                            icon-name="action:add_photo_video"
+                            size="small"
+                            class="camera-icon">
+                        </lightning-icon>
+                        <span class="camera-text">{buttonLable}</span>
+                    </div>
+                </template>
+
+                <!-- CAMERA CONTROLS -->
+                <template if:true={showCaptureButton}>
+                    <div class="camera-btn" onclick={closeOpenedCamera}>
+                        <lightning-icon icon-name="action:remove"
+                                        size="small"
+                                        class="camera-icon">
+                        </lightning-icon>
+                        <span class="camera-text">Stop</span>
+                    </div>
+
+                    <div class="camera-btn" onclick={captureImage}>
+                        <lightning-icon icon-name="action:add_photo_video"
+                                        size="small"
+                                        class="camera-icon">
+                        </lightning-icon>
+                        <span class="camera-text">Capture</span>
+                    </div>
+
+                    <div class="camera-btn" onclick={toggleCamera}>
+                        <lightning-icon icon-name="action:refresh"
+                                        size="small"
+                                        class="camera-icon">
+                        </lightning-icon>
+                        <span class="camera-text">Switch</span>
+                    </div>
+                </template>
+
+                <!-- SAVE -->
+                <template if:true={showSaveButton}>
+                    <div class="camera-btn" onclick={saveImage}>
+                        <lightning-icon icon-name="action:upload"
+                                        size="small"
+                                        class="camera-icon">
+                        </lightning-icon>
+                        <span class="camera-text">Upload</span>
+                    </div>
+                </template>
+
+            </div>
+
+            <!-- SPINNER -->
+            <template if:true={showSpinner}>
+                <div class="spinner-wrap">
+                    <lightning-spinner size="small"></lightning-spinner>
+                </div>
+            </template>
+        </div>
+
+        <!-- CAMERA VIEW -->
+        <div class="CameraTask slds-m-top_small">
+            <div class="camera-container slds-align_absolute-center">
+                <canvas class="slds-hide canvas"></canvas>
+                <img class="slds-hide imageElement  preview-image" alt="captured image" />
+                <video class="videoElement" autoplay></video>
+            </div>
+        </div>
+
+         
+
+    </div>
+</template>

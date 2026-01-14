@@ -1,0 +1,27 @@
+.THIS .forceRecordsComparisonTemplate.fieldConflictItem {
+    padding: 0 var(--lwc-spacingLarge, 1.5rem);
+border-bottom: var(--lwc-borderWidthThick, 2px) solid var(--slds-g-color-border-base-1, var(--lwc-colorBorder, rgb(229, 229, 229)));
+                    }
+.THIS .forceRecordsComparisonTemplate .fieldConflictItem .fieldValue .field {
+    display: block;
+    cursor: pointer;
+    padding: var(--lwc-spacingSmall, 0.75rem) 0 var(--lwc-spacingSmall, 0.75rem) var(--lwc-spacingSmall, 0.75rem);
+    overflow: hidden;
+
+}
+ .THIS .table {
+    width: 100%;
+    border-spacing: 0;
+    text-indent: initial;
+    border-spacing: 2px;
+}  
+ .THIS .slds-table .slds-radio [type='radio'] + .slds-radio__label .slds-radio_faux  {
+    margin-inline-end: var(--slds-g-spacing-2);
+}
+ .THIS .slds-table .slds-radio [type='radio'] + .slds-radio__label .slds-radio--faux  {
+    margin-inline-end: var(--slds-g-spacing-2);
+}
+.THIS .forceRecordsComparisonTemplate .fieldConflictItem  .fieldValue {
+    position: relative;
+    text-decoration: none;
+}

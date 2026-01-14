@@ -1,0 +1,696 @@
+<template>
+    <template lwc:if={isLoading}>
+       <c-on-loading-screen></c-on-loading-screen> 
+    </template>
+    <template lwc:else>
+        <template lwc:if={showBody}>    
+            <!--Header-->
+            <div class="slds-modal__header slds-size_1-of-1">
+                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">
+                    <b>{expenseTitle}</b>
+                </h2>
+            </div>
+    
+            <!--Body-->
+            <div class="slds-modal__content slds-p-around_medium">
+                <!--Header-->
+                <div class="customcard" >
+                    <!--Expense Date and trvel type-->
+                    <div class="slds-grid slds-wrap slds-grid_pull-padded-x-small">
+                        <!--Start_Date__c-->
+                        <div class={customheaderClass}>
+                            <lightning-input 
+                                name="Start_Date__c" 
+                                label="Expense Start Date" 
+                                type="date" 
+                                value={expense.Start_Date__c} 
+                                message-when-value-missing="Please Enter Expense Start Date" 
+                                disabled="true">
+                            </lightning-input>
+                        </div>
+                        <!--Expense_End_Date__c-->
+                        <div class={customheaderClass}>
+                            <lightning-input 
+                                name="End_Date__c" 
+                                label="Expense End Date" 
+                                type="date" 
+                                value={expense.End_Date__c} 
+                                message-when-value-missing="Please Enter Expense End Date" 
+                                disabled="true">
+                            </lightning-input>
+                        </div>
+                        <div class={customheaderClass}>
+                            <lightning-input 
+                                label="Executive Name" 
+                                type="text"
+                                value={expense.Executive_Name__c}
+                                disabled="true">
+                            </lightning-input>
+                        </div>                                 
+                    </div>
+                    <!-- customCommentAccordion.html -->
+                    <div class="slds-m-top_medium">
+                        <!-- Custom Accordion Header -->
+                        <div  class="slds-accordion__section" onclick={handleToggle}>
+                            <div id="accordion-summary" class="slds-accordion__summary">
+                                <h3 class="slds-accordion__summary-heading slds-text-heading_small">
+                                    <button class="slds-button_reset slds-accordion__summary-action" aria-expanded={isExpanded} aria-controls="accordion-content">
+                                        <lightning-icon
+                                            icon-name={toggleIconName}
+                                            alternative-text={toggleIconAltText}
+                                            size="x-small"
+                                            class="slds-m-right_x-small">
+                                        </lightning-icon>
+                                        <span class="slds-accordion__summary-content">
+                                            <span class="slds-assistive-text">Toggle </span>
+                                            <span class="slds-accordion__summary-title">Comments History</span>
+                                        </span>
+                                        
+                                    </button>
+                                </h3>
+                            </div>
+                        </div>
+                        
+                        <!-- Custom Accordion Content -->
+                        <div id="accordion-content" class={sectionClass} role="region" aria-labelledby="accordion-summary">
+                            <template if:true={showComments}>
+                                <template for:each={commentHistoryList} for:item="comment">
+                                    <div key={comment.meta} class="slds-p-vertical_x-small">
+                                        <p class="slds-text-title_caps slds-text-color_weak">{comment.meta}</p>
+                                        <p class="slds-text-body_regular slds-m-top_xx-small">{comment.text}</p>
+                                        <hr class="slds-m-vertical_x-small"/>
+                                    </div>
+                                </template>
+                            </template>
+                            <template if:false={showComments}>
+                                <p class="slds-text-color_weak">No comments yet.</p>
+                            </template>
+                        </div>
+                    </div>
+
+                </div>
+
+
+
+
+                <!-- add expense   -->
+                <template lwc:if={showExpense}>
+                    <div class="slds_CustomClass slds-m-vertical_medium" style="font-size: 1.3em; font-weight:bold; color:azure;">
+                        <div class="slds-text-color_inverse slds-text-align_center" >
+                        ADD DAY EXPENSES
+                        </div>
+                    </div>
+                </template>
+
+                <div >
+                    <div class="select-all-modern slds-p-around_small" style="margin-bottom:10px">
+                        <div class="slds-col1 slds-size_1-of-2 slds-text-align_left">
+                            <div class="slds-grid slds-grid_align-start slds-grid_vertical-align-center">
+                                <!-- Checkbox -->
+                                <lightning-input type="checkbox" 
+                                    label="" 
+                                    class="slds-m-left_small modern-checkbox"
+                                    checked={isAllDaysSelected}  
+                                    onchange={handleAllCheckbox}>
+                                </lightning-input>
+                                <!-- Date -->
+                                <div class="select-all-label slds-m-left_small">
+                                    Select All Days
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Right Section: Total -->
+                        <div class="slds-col1 slds-size_1-of-2 slds-text-align_right"> 
+                        </div>
+                    </div>
+
+
+
+
+<!--ITEMS-->
+
+
+                    <!---    ..............................................................................................................................-->
+                    <template for:each={days} for:item="day">
+                        <div key={day.Date__c} class={day.dayclass}>
+                            <!--Header-->
+                            <div class={day.dayheaderClass}>
+                                <div class="slds-col1 slds-size_1-of-2 slds-text-align_left">
+                                    <div class="slds-grid slds-grid_align-start slds-grid_vertical-align-center">
+                                        <!-- Icon -->
+                                        <lightning-button-icon class="icon1" 
+                                            icon-name={day.iconName} 
+                                            data-date={day.Date__c}
+                                            onclick={toggleDayCollapse} 
+                                            alternative-text="Toggle">
+                                        </lightning-button-icon>
+                                        <!-- Checkbox -->
+                                        <lightning-input type="checkbox" 
+                                            label="" 
+                                            class="slds-m-left_small"
+                                            checked={day.isSelected}  
+                                            data-date={day.Date__c}
+                                            disabled={day.isCheckBoxDisabled}
+                                            onchange={handleDayCheckbox}>
+                                        </lightning-input>
+                                        <!-- Date -->
+                                        <div class="day-date-label slds-m-left_small">
+                                            {day.DateFormatted} ({day.Travel_Type__c})
+                                        </div>
+                                    </div>
+                                </div>
+            
+                                <!-- Right Section: Total -->
+                                <div class="slds-col1 slds-size_1-of-2 slds-text-align_right day-total-badge">
+                                    <span class="total-label">Total:</span>
+                                    <span class="total-amount">₹{day.totalExpense}</span>
+                                </div>
+                            </div>
+                            <!--Line Items-->
+                            <template if:false={day.isCollapsed}>
+                                <template for:each={day.lineItems} for:item="item">
+                                    <div key={item.localId__c}  class="border" style="margin:10px">
+                                        <lightning-card >
+                                            <div class="slds-grid slds-wrap slds-grid_pull-padded-x-small custom-padding">
+                                                <!--Actions-->
+                                                <div class="slds-size_1-of-1" >
+                                                    <div class="slds-grid slds-grid_align-spread">
+                                                        <!-- Index on the left side -->
+                                                        <div class="slds-col slds-size_1-of-2 status-box-modern" style="font-size:17px; padding-left:15px; display: flex; align-items: center;">
+                                                            <!-- Checkbox after date -->
+                                                            <lightning-input type="checkbox" 
+                                                                label="" 
+                                                                checked={item.isSelected}  
+                                                                class="slds-m-right_small"
+                                                                data-localid={item.localId__c}
+                                                                data-date={day.Date__c}
+                                                                disabled={item.isCheckboxDisabled}
+                                                                onchange={handleItemCheckbox}>
+                                                            </lightning-input>
+                                                            <span class={item.customClass}>{item.Approval_Status__c}</span>
+                                                        </div>
+                                                        <!-- Action buttons on the right side -->
+                                                        <div class="slds-col slds-size_1-of-2 slds-text-align_right" style="padding-right:10px">
+                                                            <template if:true={isShowAddDeleteButtons}>
+                                                                <lightning-button-icon 
+                                                                    icon-name="utility:add"
+                                                                    data-date={day.Date__c}
+                                                                    alternative-text="Add"
+                                                                    class="green"
+                                                                        onclick={addLineItem}>
+                                                                </lightning-button-icon>
+                                                                <template if:true={item.isShowDeleteButton}>
+                                                                    <lightning-button-icon icon-name="utility:delete" alternative-text="Remove" class="red"
+                                                                        data-date={day.Date__c} data-localid={item.localId__c} onclick={removeLineItem}>
+                                                                    </lightning-button-icon>
+                                                                </template>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!--Expense Type-->
+                                                <div class={item.customClassLine}>
+                                                    <lightning-combobox data-date={day.Date__c}
+                                                        label="Expense Type" value={item.Expense_Type__c} options={item.expenseTypes}
+                                                        onchange={handleExpenseTypeChange} data-localid={item.localId__c}
+                                                        data-id={item.expenseTypeId}
+                                                        disabled={item.disableExpenseType}>
+                                                    </lightning-combobox>
+                                                </div>
+                                             
+                                             
+
+
+
+
+
+
+
+
+<!--.................................................................................................................-->
+                                                  <!--Daily KM Limit-->
+
+
+                                                    <!--TA-->
+                                                <template if:true={item.isTA}>
+                                                        <div class={item.customClassLine}>
+                                                    <lightning-combobox data-date={day.Date__c}
+                                                        label="Travel Mode" value={item.Travel_Mode__c} options={item.travelModes}
+                                                        onchange={handleTravelModeChange} data-localid={item.localId__c}
+                                                        data-id={item.travelModeId} data-name="Travel_Mode" required="true"
+                                                        disabled={item.isDisabled}
+                                                        >
+                                                    </lightning-combobox>
+                                                </div>
+                                                <template if:true={item.isTransportCarBike}>
+                                                    <div class={item.customClassLine}>
+                                                        <lightning-input 
+                                                            label="KM Travelled " 
+                                                            type="number"
+                                                            required="true"
+                                                            data-name="Total_KM"
+                                                            data-localid={item.localId__c}
+                                                            value={item.Total_KM__c}
+                                                              max={item.TA_Limit__c}
+                                                            data-id="distance_Travelled"
+                                                            onchange={handleDailyKmLimit}
+                                                             message-when-range-overflow="TA limit has been exceeded"
+                                                             message-when-value-missing="Please enter amount"
+                                                             disabled={item.isDisabled}
+                                                            >
+                                                        </lightning-input>
+                                                    </div>
+                            
+                                                <!--System Calculated KM-->
+                                                <div class={item.customClassLine}>
+                                                    <lightning-input 
+                                                        label="System Calculated Distance"
+                                                        type="number"
+                                                        value={item.Calculated_KM__c}
+                                                        disabled="true">
+                                                    </lightning-input>
+                                                </div>
+                                                
+                                                    <!--Expense limit-->
+                                                    <template if:true={showLimitFields}>
+                                                        <div class={item.customClassLine}>
+                                                            <lightning-input  
+                                                                label="System Calculated Amount"
+                                                                type="number" 
+                                                                formatter="currency"
+                                                                step="0.01"
+                                                                value={item.System_Calculated_Amount__c} 
+                                                                data-localid={item.localId__c}
+                                                                data-id="Amount"
+                                                                data-date={day.Date__c}
+                                                                disabled="true"
+                                                                onchange={handleAmountChange}>
+                                                            </lightning-input>
+                                                        </div>
+                                                    </template>
+                                                    <div class={item.customClassLine}>
+                                                    <lightning-input 
+                                                        label="Amount"
+                                                        data-localid={item.localId__c}
+                                                        data-id="Amount"
+                                                        data-name="Amount"
+                                                        type="number"
+                                                        value={item.Amount__c}
+                                                        formatter="currency"
+                                                        step="0.01"
+                                                        data-index={index}
+                                                        onchange={handleInputChange}
+                                                        required ="true"
+                                                       message-when-value-missing="Please enter amount"
+                                                        disabled="true">
+                                                    </lightning-input>
+                                                </div>
+                                                </template>
+                                                  <template if:false={item.isTransportCarBike}>
+                                                <div class={item.customClassLine}>
+                                                    <lightning-input 
+                                                        label="Amount"
+                                                        data-localid={item.localId__c}
+                                                        data-id="Amount"
+                                                        data-name="Amount"
+                                                        type="number"
+                                                        value={item.Amount__c}
+                                                        formatter="currency"
+                                                        step="0.01"
+                                                        data-index={index}
+                                                        onchange={handleInputChange}
+                                                        required ="true"
+                                                        max={item.TA_Limit__c}
+                                                       message-when-value-missing="Please enter amount"
+                                                       message-when-range-overflow="TA limit has been exceeded"
+                                                        disabled={item.isDisabled}>
+                                                    </lightning-input>
+                                                </div>
+                                                </template>
+                                                </template>
+
+
+
+
+
+
+
+
+
+
+
+
+                                                <!--Travel Conveyance-->
+                                                <template if:true={item.isShowModeTransport}>
+                                                    <div class={item.customClassLine}>
+                                                        <lightning-combobox data-date={day.Date__c}
+                                                            label="Travel Mode" value={item.Travel_Mode__c} options={item.travelModes}
+                                                            onchange={handleTravelModeChange} data-localid={item.localId__c}
+                                                            data-id={item.travelModeId} data-name="Travel_Mode" required="true"
+                                                            disabled={item.disableExpenseType}>
+                                                        </lightning-combobox>
+                                                    </div>
+                                                </template>
+
+
+                                                <!-- DA Amount -->
+                                                <template if:true={item.isDA}>
+                                                    <div class={item.customClassLine}>
+                                                        <lightning-input 
+                                                            label="Amount"
+                                                            data-localid={item.localId__c}
+                                                            data-id="Amount"
+                                                            data-name="Amount"
+                                                            type="number"
+                                                            value={item.Amount__c}
+                                                            formatter="currency"
+                                                            step="0.01"
+                                                            data-index={index}
+                                                            onchange={handleInputChange}
+                                                            required ="true"
+                                                            message-when-value-missing="Please enter amount"
+                                                            disabled={item.disableDaAmout}>
+                                                        </lightning-input>
+                                                    </div>
+                                                </template>
+
+                                                <!--Logding-->
+                                                <template if:true={item.isLodging}>
+                                                    <div class={item.customClassLine}>
+                                                        <lightning-input 
+                                                            label="Amount"
+                                                            data-localid={item.localId__c}
+                                                            data-id="Amount"
+                                                            data-name="Amount"
+                                                            type="number"
+                                                            value={item.Amount__c}
+                                                            formatter="currency"
+                                                            step="0.01"
+                                                            data-index={index}
+                                                            onchange={handleInputChange}
+                                                            required
+                                                            message-when-value-missing="Please enter amount"
+                                                            message-when-range-overflow="Lodging Limit has been exceeded"
+                                                            max={item.lodging_Limit__c}
+                                                            disabled={item.isDisabled}>
+                                                        </lightning-input>
+                                                    </div>
+                                                    <template if:true={showLimitFields}>
+                                                        <div class={item.customClassLine} data-day={day.Date__c}>
+                                                            <lightning-input 
+                                                                label="Logding Limit"
+                                                                type="number"
+                                                                value={item.lodging_Limit__c}
+                                                                formatter="currency"
+                                                                step="1"
+                                                                data-index={index}
+                                                                disabled="true">
+                                                            </lightning-input>
+                                                        </div>
+                                                    </template> 
+                                                </template>
+
+                                              
+                                                <template if:true={item.isLocalConveyance}>
+                                                    <div class={item.customClassLine} data-day={day.Date__c}>
+                                                        <lightning-input 
+                                                            label="Amount"
+                                                            data-localid={item.localId__c}
+                                                            data-id="Amount"
+                                                            data-name="Amount"
+                                                            type="number"
+                                                            value={item.Amount__c}
+                                                            formatter="currency"
+                                                            step="0.01"
+                                                            data-index={index}
+                                                            onchange={handleInputChange}
+                                                            required
+                                                            message-when-value-missing="Please enter amount"
+                                                            message-when-range-overflow="Local Conveyance Limit has been exceeded"
+                                                            max={item.Local_Conveyance_Limit__c}
+                                                            disabled={item.isDisabled}>
+                                                        </lightning-input>
+                                                    </div>
+                                                    <template if:true={showLimitFields}>
+                                                        <div class={item.customClassLine} data-day={day.Date__c}>
+                                                            <lightning-input 
+                                                                label="Local Conveyance Limit"
+                                                                type="number"
+                                                                value={item.Local_Conveyance_Limit__c}
+                                                                formatter="currency"
+                                                                step="1"
+                                                                data-index={index}
+                                                                disabled="true">
+                                                            </lightning-input>
+                                                        </div>  
+                                                    </template>
+                                                </template>
+
+                                                <!--Lodging_Food_Expense_Limit__c
+                                                <template if:true={item.isLodgingFoodExpense}>
+                                                    <div class={item.customClassLine} data-day={day.Date__c}>
+                                                        <lightning-input 
+                                                            label="Amount"
+                                                            data-localid={item.localId__c}
+                                                            data-id="Amount"
+                                                            data-name="Amount"
+                                                            type="number"
+                                                            value={item.Amount__c}
+                                                            formatter="currency"
+                                                            step="0.01"
+                                                            data-index={index}
+                                                            onchange={handleInputChange}
+                                                            required
+                                                            message-when-value-missing="Please enter amount"
+                                                            message-when-range-overflow="Lodging+Food Limit has been exceeded"
+                                                            max={item.Lodging_Food_Expense_Limit__c}
+                                                            disabled={item.isDisabled}>
+                                                        </lightning-input>
+                                                    </div>
+                                                    <template if:true={showLimitFields}>
+                                                        <div class={item.customClassLine} data-day={day.Date__c}>
+                                                            <lightning-input 
+                                                                label="Lodging Food Expense Limit"
+                                                                type="number"
+                                                                value={item.Lodging_Food_Expense_Limit__c}
+                                                                formatter="currency"
+                                                                step="1"
+                                                                data-index={index}
+                                                                disabled="true">
+                                                            </lightning-input>
+                                                        </div>  
+                                                    </template>
+                                                
+                                                </template>-->
+
+                                                 
+                                                <template if:true={item.isOtherExpense}>
+                                                    <div class={item.customClassLine}>
+                                                        <lightning-input 
+                                                            label="Amount"
+                                                            data-localid={item.localId__c}
+                                                            data-id="Amount"
+                                                            data-name="Amount"
+                                                            type="number"
+                                                            value={item.Amount__c}
+                                                            formatter="currency"
+                                                            step="0.01"
+                                                            data-index={index}
+                                                            onchange={handleInputChange}
+                                                            required ="true"
+                                                            message-when-value-missing="Please enter amount"
+                                                            disabled={item.isDisabled}>
+                                                        </lightning-input>
+                                                    </div>
+                                                </template>
+                                          
+
+                                                <!--Remarks-->
+                                               <!---<template if:true={item.remarksMandatory}> -->
+                                                    <div class={item.customClassLine}>
+                                                        <lightning-input 
+                                                            name="Remarks"
+                                                            data-name="Remarks"
+                                                            data-id="Remarks__c"
+                                                            data-localid={item.localId__c}
+                                                            data-index={index}
+                                                            required={item.remarksMandatory}
+                                                            value={item.Remarks__c}
+                                                            label="Remarks"
+                                                            message-when-value-missing=" Please enter Remarks"
+                                                            onchange={handleInputChange}>
+                                                        </lightning-input>
+                                                    </div>
+                                          <!--      </template> -->
+
+                                                <!--<div class="slds-size_1-of-1 slds-p-horizontal_small">
+                                                    <lightning-textarea 
+                                                        name="Remarks"
+                                                        data-name="Remarks"
+                                                        data-id="Remarks__c"
+                                                        data-localid={item.localId__c}
+                                                        data-index={index}
+                                                        required={item.remarksMandatory}
+                                                        value={item.Remarks__c}
+                                                        label="Remarks"
+                                                        message-when-value-missing=" Please enter Remarks"
+                                                        onchange={handleInputChange}
+                                                        disabled={item.isDisabled}>
+                                                    </lightning-textarea>
+                                                </div>-->
+
+                                                <!--File Upload-->
+                                                <template if:true={item.fileUploadMandatory}>
+                                                    <div class="slds-size_1-of-1 slds-p-horizontal_small" style="overflow-x: hidden;">
+                                                        <br/>
+                                                        <c-file-upload-l-w-c unique-id={item.fileUId} showdelete={item.isDisabled} is-required ={item.fileUploadMandatory} 
+                                                        label="upload bill/receipts"
+                                                        record-id={item.fileRecordId}></c-file-upload-l-w-c>
+                                                    </div>
+                                                </template>
+                                            
+                                            </div>
+                                        </lightning-card>
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            
+            </div>
+            
+         <!-- Footer -->
+<div class="modal-footer slds-modal__footer slds-size_1-of-1 footer-bg">
+    <div class="slds-grid slds-wrap slds-box slds-theme_default footer-summary">
+
+        <!-- Auto -->
+        <template if:true={isAutoEnabled}>
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 footer-card">
+                <p class="footer-label">Total TA – Autorickshaw</p>
+                <p class="footer-value">₹ {totalAutoAmt}</p>
+            </div>
+        </template>
+
+        <!-- Car -->
+        <template if:true={isCarEnabled}>
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 footer-card">
+                <p class="footer-label">Total TA – Car</p>
+                <p class="footer-value">{totalCarKM} KM</p>
+            </div>
+        </template>
+
+        <!-- Bike -->
+        <template if:true={isBikeEnabled}>
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 footer-card">
+                <p class="footer-label">Total TA – Bike</p>
+                <p class="footer-value">{totalBikeKM} KM</p>
+            </div>
+        </template>
+
+    </div>
+</div>
+
+
+
+
+                <div class="slds-p-around_medium customcontainer">
+                    <b>Grand Total : </b>
+                    <span style="color:green; font-size:15px; font-weight:bold; padding:10px;">₹{grandTotal}</span>
+                    <br/><br/>
+                    <lightning-button variant="neutral" label="Cancel" onclick={closeExpense}  disabled={isButtonDisabled}></lightning-button>
+
+                    <template if:true={OpenedByOwner}>
+                        <lightning-button variant="brand" label="Save" class="slds-m-left_small" onclick={doSave} disabled={isButtonDisabled}></lightning-button>
+                        <template if:true={showSubmitforApproval}>
+                            <lightning-button variant="success" label="Save &amp; Submit" disabled={disableButtons} class="slds-m-left_small" onclick={saveAndSubmitExpense} ></lightning-button>
+                        </template>
+                    </template>
+                    <template if:true={OpenedByApprover}>
+                        <lightning-button variant="success" label="Save &amp; Approve" disabled={disableButtons} class="slds-m-left_small" onclick={saveAndApprove}></lightning-button>   
+                        <lightning-button variant="destructive" label="Reject" class="slds-m-left_small" disabled={disableButtons} onclick={saveAndReject} ></lightning-button>                                  
+                    </template>
+                    <template if:true={showDoneButton}>
+                        <lightning-button variant="brand" label="Done" class="slds-m-left_small" onclick={closeExpense}></lightning-button>
+                    </template> 
+                </div>
+           
+        </template>
+    
+        <!-- Approval Popup -->
+        <template lwc:if={isShowApprovalPopUp}>
+            <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+                <div class={containerClass}>
+                    <!--Header-->
+                    <div class="slds-modal__header">
+                        <div class="slds-grid slds-gutters  slds-grid_align-center slds-grid_vertical-align-center">
+                            <template if:false={isDesktop}>
+                                <div class="slds-col  slds-clearfix mobile-button">
+                                    <div class="slds-float_right">
+                                        <lightning-button variant="base" label="Cancel" disabled={isApprovalDisabled} onclick={closeApprovalPopup} class="slds-m-left_x-small"></lightning-button>
+                                    </div>
+                                </div>
+                            </template>
+        
+                            <div class="slds-col slds-align_absolute-center mobile-header">
+                                <h1 id="modal-heading-02" class="slds-modal__title slds-hyphenate " tabindex="-1">{approvalHeader}</h1>
+                            </div>
+
+                            <template if:false={isDesktop}>
+                                <div class="slds-col  slds-clearfix mobile-button">
+                                    <div class="slds-float_left">
+                                        <lightning-button variant="base" label={approvalButtonLabel} disabled={isApprovalDisabled}  onclick={createExpenses} class="slds-m-left_x-small"></lightning-button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!--Body-->
+                    <div class="slds-modal__content slds-p-around_medium dailylogPopup" id="modal-content-id-1">
+                        
+                        <!-- Expense Summary -->
+                        <div class="slds-box slds-theme_shade slds-m-bottom_medium">
+                             <lightning-layout multiple-rows>
+                                <lightning-layout-item size="12">
+                                    <b>Executive :</b> {expense.Executive_Name__c}
+                                </lightning-layout-item>
+                                <lightning-layout-item size="12">
+                                    <b>Period :</b> {periodName}
+                                </lightning-layout-item>
+                                <lightning-layout-item size="12">
+                                    <b>Total Amount :</b> {selectedAmount}
+                                </lightning-layout-item>
+                                <lightning-layout-item size="12">
+                                    <b>Selected Days :</b> {selectedDays}
+                                </lightning-layout-item>
+                            </lightning-layout>
+                        </div>
+
+                        <!-- Comments Section -->
+                        <lightning-textarea 
+                            name="Comments"
+                            data-id="Comments__c"
+                            data-index={index}
+                            value={approvalComments}
+                            label="Comments"
+                            message-when-value-missing="Please enter Comments"
+                            onchange={hadleExpenseCommentsChange}
+                            disabled={isDisabled}>
+                        </lightning-textarea>
+                    </div>
+
+
+                    <!-- Footer for visit poup -->
+                    <template lwc:if={isDesktop}>
+                        <div class="slds-modal__footer footer-card">
+                            <lightning-button variant="neutral" label="Cancel" class="slds-m-left_small" disabled={isApprovalDisabled} onclick={closeApprovalPopup} ></lightning-button>  
+                            <lightning-button variant="brand" label={approvalButtonLabel} disabled={isApprovalDisabled} class="slds-m-left_small" onclick={createExpenses}></lightning-button>   
+                        </div>
+                    </template>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+        </template>
+    </template>
+</template>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Odometer_Reading_End__c</fullName>
+    <description>Ending odometer reading for the visit</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Enter the odometer reading at the end of the visit.</inlineHelpText>
+    <label>Odometer Reading End</label>
+    <precision>7</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

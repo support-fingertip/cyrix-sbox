@@ -1,0 +1,201 @@
+<template>
+<!-- Header -->
+<!--<div class="slds-modal__header slds-size_1-of-1">
+    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">
+        <b>{expenseTitle}</b>
+    </h2>
+</div>-->
+  <template lwc:if={isspinner}>
+ <div class="exampleHolder">
+        <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+    </div>
+    </template>
+<template if:true={data}>
+    <template lwc:if={isLoading}>
+        <c-on-loading-screen></c-on-loading-screen> 
+    </template>
+    <template lwc:else>
+        <lightning-card>
+            <div slot="title" class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                <span class="slds-text-heading_small" style="padding-right:10px">Expense Items</span>
+                <lightning-button-icon
+                    icon-name="utility:refresh"
+                    alternative-text="Refresh"
+                    onclick={handleRefresh}
+                    title="Refresh"
+                    variant="border-filled">
+                </lightning-button-icon>
+            </div>
+            <div class="slds-table_container">
+                <!-- Responsive Table -->
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped slds-table_col-bordered">
+                    <thead>
+                        <tr>
+                            <template if:false={isOpenedByOwner}>
+                                <th>
+                                    <div class="slds-grid slds-grid_vertical-align-center">
+                                        <template if:true={hasSelectableRows}>
+                                            <lightning-input 
+                                                type="checkbox" 
+                                                checked ={isAllSelected}
+                                                onchange={handleSelectAll}
+                                                class="slds-m-right_x-small"
+                                                variant="label-hidden">
+                                            </lightning-input>
+                                        </template>
+                                        <span>Select</span>
+                                    </div>
+                                </th>
+                            </template>
+                            <th>Status</th>
+                            <th>Expense Date</th>
+                            <th>Expense Type</th>
+                            <th>Travel Mode</th>
+                            <!--   <th>City</th>-->
+                            <template if:false={isOpenedByOwner}>
+                                <th>Expense Limit/submitted Amt</th>
+                                <th>Sys. Cal. KM</th>
+                            </template>
+                            <th> KM Travelled </th>
+                            <th>Amount</th>
+                            <th>Attachments</th> 
+                            <th>Remarks</th> 
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={data} for:item="row">
+                            <tr key={row.recordId} class={row.highlightClass}>
+                                <!-- Selection -->
+                                <template if:false={isOpenedByOwner}>
+                                    <td>
+                                        <template if:true={row.isSelectable}>
+                                            <lightning-input 
+                                                type="checkbox" 
+                                                checked ={row.isChecked}
+                                                data-id={row.recordId} 
+                                                onchange={handleRowSelection}>
+                                            </lightning-input>
+                                        </template>
+                                    </td>
+                                </template>
+                                <td>{row.status}</td>
+                                <td>{row.expDateFormatted}</td>
+                                <td>{row.expType}</td>
+                                <td>{row.travelMode}</td>
+                                <template if:false={isOpenedByOwner}>
+                                    <td>{row.lLimit}</td>
+                                    <td>{row.systemCalculatedKm}</td>
+                                </template>
+                                <td>{row.totKM}</td>
+                                <!-- Editable Amount -->
+                                <td>
+                                    <template if:true={row.isEditable}>
+                                        <lightning-input 
+                                            type="number" 
+                                            value={row.amount} 
+                                            data-id={row.recordId} 
+                                            onchange={handleAmountChange}>
+                                        </lightning-input>
+                                    </template>
+                                    <template if:false={row.isEditable}>
+                                        {row.amount}
+                                    </template>
+                                </td>
+                                <!-- Attachments -->
+                                <td class="attachment-cell">
+                                    <template if:true={row.files}>
+                                        <template for:each={row.files} for:item="file">
+                                            <div key={file.id} class="file-item">
+                                                <a  title={file.title} data-id={file.id} onclick={previewFile}>
+                                                    <lightning-icon icon-name="doctype:attachment" size="x-small"></lightning-icon>
+                                                    <span class="file-title">{file.title}</span>
+                                                </a>
+                                            </div>
+                                        </template>
+                                    </template>
+                                    <template if:false={row.files}>
+                                        <p>No Files</p>
+                                    </template>
+                                </td>
+                                <td>{row.remarks}</td>
+
+                            
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Footer -->
+<div class="modal-footer slds-modal__footer footer-wrapper">
+
+    <!-- AUTORICKSHAW -->
+    <template if:true={isAutoEnabled}>
+        <div class="ta-section slds-grid slds-wrap slds-border_top">
+            <template for:each={autoStats} for:item="item">
+                <div key={item.label}
+                     class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 ta-card">
+                    <p class="ta-label">{item.label}</p>
+                    <p class={item.valueClass}>₹{item.value}</p>
+                </div>
+            </template>
+        </div>
+    </template>
+
+    <!-- CAR -->
+    <template if:true={isCarEnabled}>
+        <div class="ta-section slds-grid slds-wrap slds-border_top">
+            <template for:each={carStats} for:item="item">
+                <div key={item.label}
+                     class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 ta-card">
+                    <p class="ta-label">{item.label}</p>
+                    <p class={item.valueClass}>{item.value} KM</p>
+                </div>
+            </template>
+        </div>
+    </template>
+
+    <!-- BIKE -->
+    <template if:true={isBikeEnabled}>
+        <div class="ta-section slds-grid slds-wrap slds-border_top">
+            <template for:each={bikeStats} for:item="item">
+                <div key={item.label}
+                     class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 ta-card">
+                    <p class="ta-label">{item.label}</p>
+                    <p class={item.valueClass}>{item.value} KM</p>
+                </div>
+            </template>
+        </div>
+    </template>
+
+</div>
+
+            <template if:true={hasSelectableRows}>
+                    <!-- Comments Section -->
+                <lightning-textarea 
+                    name="Approval Comments"
+                    data-id="Comments__c"
+                    data-index={index}
+                    value={approvalComments}
+                    label="Comments"
+                    message-when-value-missing="Please enter Comments"
+                    onchange={hadleExpenseCommentsChange}>
+                </lightning-textarea>
+                <!-- Action Buttons -->
+                <div class="slds-m-top_medium slds-flex slds-gap_small slds-wrap" style="text-align:center">
+                    <template if:true={showSaveButton}>
+                        <lightning-button variant="brand" label="Save" onclick={handleSave}></lightning-button>&nbsp;
+                    </template>
+                    <lightning-button variant="destructive" label="Reject" onclick={handleReject}></lightning-button>&nbsp;
+                    <lightning-button variant="success" label="Approve Selected" onclick={handleApprove}></lightning-button>
+                </div>
+            </template>
+        </lightning-card>
+        
+    
+</template>
+
+<!-- No Data -->
+<template if:false={data}>
+    <p class="slds-p-around_small">No expense line items found.</p>
+</template>
+</template>
