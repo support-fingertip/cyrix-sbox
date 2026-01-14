@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "salesforce.salesforcedx-vscode",
+    "salesforce.salesforcedx-vscode-apex",
+    "salesforce.salesforcedx-vscode-lwc",
+    "redhat.vscode-xml"
+  ]
+}

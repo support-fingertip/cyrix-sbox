@@ -1,0 +1,35 @@
+# Salesforce
+.sf/
+.sfdx/
+.localdevserver/
+
+# LWC
+**/lwc/**/*.css.map
+**/lwc/**/*.js.map
+
+# Logs
+*.log
+logs/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Node
+node_modules/
+package-lock.json
+
+# Auth files
+authfile.txt
+*.key
+*.crt
+
+# Deployment
+deployment-result.json
+changed-files.txt
+delta-package/
