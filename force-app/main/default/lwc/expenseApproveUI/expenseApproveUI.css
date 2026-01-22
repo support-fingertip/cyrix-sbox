@@ -24,7 +24,11 @@
     display: inline-block;
     vertical-align: middle;
 }
-
+.Highlight-in-red {
+   color: #ba0517; 
+   font-weight:bold;
+   
+}
 
 /* Input width */
 lightning-input {

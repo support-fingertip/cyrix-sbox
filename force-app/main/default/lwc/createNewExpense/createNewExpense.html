@@ -375,8 +375,18 @@
                                                 </template>
 
                                                 <!--Logding-->
+                                                
                                                 <template if:true={item.isLodging}>
-                                                    <div class={item.customClassLine}>
+                                       
+                                                      <div class={item.customClassLine}>
+                                                        <lightning-combobox data-date={day.Date__c}
+                                                            label="Accommodation Type" value={item.Accommodation_Type__c} options={item.accomodationTypes}
+                                                            onchange={handleAccommodationChange} data-localid={item.localId__c}
+                                                            data-id={item.accommodationId} data-name="accomodation_type" required="true"
+                                                             disabled={item.isDisabled}>
+                                                        </lightning-combobox>
+                                                    </div>
+                                                   <div class={item.customClassLine}>
                                                         <lightning-input 
                                                             label="Amount"
                                                             data-localid={item.localId__c}
@@ -384,6 +394,7 @@
                                                             data-name="Amount"
                                                             type="number"
                                                             value={item.Amount__c}
+                                                             data-date={day.Date__c}
                                                             formatter="currency"
                                                             step="0.01"
                                                             data-index={index}
@@ -395,6 +406,9 @@
                                                             disabled={item.isDisabled}>
                                                         </lightning-input>
                                                     </div>
+
+                                                   
+
                                                     <template if:true={showLimitFields}>
                                                         <div class={item.customClassLine} data-day={day.Date__c}>
                                                             <lightning-input 

@@ -382,6 +382,10 @@ isLoading =false;
             return;
         }
 
+        if (!this.approvalComments) {
+            this.showToast('Approval Comments Required', 'Please enter approval comments before approving.', 'warning');
+            return;
+        }
         approveExpenseItems({
             expenseIds: this.selectedRows,
             expId: this.recordId,
@@ -406,6 +410,10 @@ isLoading =false;
     async handleReject() {
         if (this.selectedRows.length === 0) {
             this.showToast('No rows selected', 'Please select at least one row to reject.', 'warning');
+            return;
+        }
+        if (!this.approvalComments) {
+            this.showToast('Approval Comments Required', 'Please enter approval comments before rejecting.', 'warning');
             return;
         }
 

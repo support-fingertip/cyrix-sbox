@@ -51,12 +51,15 @@
                             <th>Expense Date</th>
                             <th>Expense Type</th>
                             <th>Travel Mode</th>
+                             <th>Submitted Amt</th>
                             <!--   <th>City</th>-->
                             <template if:false={isOpenedByOwner}>
-                                <th>Expense Limit/submitted Amt</th>
-                                <th>Sys. Cal. KM</th>
+                                <th>Expense Limit</th>
+                                <th>Google.Dist</th>
                             </template>
-                            <th> KM Travelled </th>
+                            <th> KM Travelled <br/>
+                              </th>
+                                <th>ODO Meter<br/>Dist.</th>
                             <th>Amount</th>
                             <th>Attachments</th> 
                             <th>Remarks</th> 
@@ -82,11 +85,13 @@
                                 <td>{row.expDateFormatted}</td>
                                 <td>{row.expType}</td>
                                 <td>{row.travelMode}</td>
+                                 <td>{row.submittedAmt}</td>
                                 <template if:false={isOpenedByOwner}>
                                     <td>{row.lLimit}</td>
                                     <td>{row.systemCalculatedKm}</td>
                                 </template>
-                                <td>{row.totKM}</td>
+                                <td class={row.limitExceeded}>{row.totKM}</td>
+                                <td>{row.systemCalculatedODOKm}</td>
                                 <!-- Editable Amount -->
                                 <td>
                                     <template if:true={row.isEditable}>
@@ -176,6 +181,7 @@
                     data-id="Comments__c"
                     data-index={index}
                     value={approvalComments}
+                    required="true"
                     label="Comments"
                     message-when-value-missing="Please enter Comments"
                     onchange={hadleExpenseCommentsChange}>

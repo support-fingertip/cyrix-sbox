@@ -40,6 +40,7 @@ export default class CreateNewExpense extends LightningElement {
     @track approvalStatus = [];
     @track travelModes = [];
     @track expenseTypes = [];
+    @track accomodationTypes = [];
     @track travelTypeOptions = [];
     @track foodTypeOptions = [];
     @track DeleteExpLine = [];
@@ -174,6 +175,7 @@ export default class CreateNewExpense extends LightningElement {
                     this.lodgingLimit = this.eligibilities.Lodging__c || 0;
                     this.travelTypeOptions = this.getPicklistValueFromList(data.travelTypes || []);
                     this.expenseTypes = this.getPicklistValueFromList(data.expenseTypes || []);
+                    this.accomodationTypes = this.getPicklistValueFromList(data.accomodationTypes || []);
                     this.travelModes = this.getPicklistValueFromList(data.travelModes || []);
                     this.foodTypeOptions = this.getPicklistValueFromList(data.foodTypes || []);
                     this.approvalStatus = this.getFilteredPicklistValueList(data.approvalStatus || []);
@@ -282,6 +284,7 @@ export default class CreateNewExpense extends LightningElement {
                         Travel_Mode__c: item.Travel_Mode__c,
                         Working_Hours__c: item.Working_Hours__c || 0,
                         Total_KM__c: item.Total_KM__c || 0,
+                        Total_Distance_Calculated_by_ODM_Reading__c: item.Total_Distance_Calculated_by_ODM_Reading__c || 0,
                         Amount__c: item.Amount__c || 0,
                         System_Calculated_Amount__c: item.System_Calculated_Amount__c || 0,
                         Remarks__c: item.Remarks__c,
@@ -291,9 +294,11 @@ export default class CreateNewExpense extends LightningElement {
                         lodging_Limit__c: item.lodging_Limit__c,
                         TA_Limit__c: item.TA_Limit__c,
                         DA_Limit__c: item.DA_Limit__c,
+                        customClassLine: this.isDesktop ? ' slds-size_1-of-3 slds-p-horizontal_small' : ' slds-size_1-of-2 slds-p-horizontal_small',
                         Local_Conveyance_Limit__c: item.Local_Conveyance_Limit__c,
                         expenseTypes: this.getExpenseTypePicklistValues(item),
                         travelModes: this.getTravelModePicklistValues(item),
+                        accomodationTypes: this.accomodationTypes,
                         isTA: this.checkIsTA(item),
                         isTransportCarBike: this.checkIsTransportCarBike(item),
                         isTransportNotBikeCar: this.checkIsTransportNotBikeCar(item),
@@ -422,8 +427,7 @@ export default class CreateNewExpense extends LightningElement {
             else {
                 customTAClass = 'slds-size_1-of-4 slds-p-horizontal_small';
             }
-            let customDAClass = this.isDesktop ? isDARemarksMandate ? 'slds-size_1-of-3 slds-p-horizontal_small' : 'slds-size_1-of-2 slds-p-horizontal_small' : 'slds-size_1-of-2 slds-p-horizontal_small';
-
+            let customDAClass = this.isDesktop ? 'slds-size_1-of-3 slds-p-horizontal_small' : 'slds-size_1-of-2 slds-p-horizontal_small';
             // TA Item
             const taItem = {
                 sObjectType: 'Expense_Line_Item__c',
@@ -445,6 +449,7 @@ export default class CreateNewExpense extends LightningElement {
                 City_Name__c: '',
                 Working_Hours__c: dayData.Working_Hours_For_Expense__c || 0,
                 Total_KM__c: dayData.KMs_Travelled__c || 0,
+                Total_Distance_Calculated_by_ODM_Reading__c: dayData.Total_Distance_Calculated_by_ODM_Reading__c || 0,
                 Amount__c: taAmount,
                 Remarks__c: '',
                 Expense__c: '',
@@ -458,6 +463,7 @@ export default class CreateNewExpense extends LightningElement {
                 fileUploaded: false,
                 expenseTypes: this.getExpenseTypePicklistValues(dayData),
                 travelModes: this.getTravelModePicklistValues(dayData),
+                accomodationTypes: this.accomodationTypes,
                 isTA: true,
                 isTransportCarBike: this.checkIsNewTransportCarBike(dayData),
                 isTransportNotBikeCar: this.checkIsNewTransportNotBikeCar(dayData),
@@ -500,6 +506,7 @@ export default class CreateNewExpense extends LightningElement {
                 remarksMandatory: isDARemarksMandate,
                 fileUploadMandatory: isDAFileMandate,
                 disableDaAmout: true,
+                isShowDeleteButton: false,
                 isSelected: false,
             };
 
@@ -512,6 +519,7 @@ export default class CreateNewExpense extends LightningElement {
     createEmptyLineItem(date, dayData) {
         var expenseTypes = [];
         var travelModes = [];
+        var accomadationTypes = [];
         const travelType = dayData.Travel_Type__c || '';
 
         if (travelType == 'Field - Other State' || travelType == 'Field - Other District') {
@@ -564,6 +572,7 @@ export default class CreateNewExpense extends LightningElement {
         // Add "Select option" at the beginning
         travelModes = [{ label: 'Select option', value: '' }, ...travelModes];
         expenseTypes = [{ label: 'Select option', value: '' }, ...expenseTypes];
+        accomadationTypes = [{ label: 'Select option', value: '' }, ...accomadationTypes];
         const uid = this.generateUUID();
         return {
             sObjectType: 'Expense_Line_Item__c',
@@ -574,17 +583,19 @@ export default class CreateNewExpense extends LightningElement {
             Approval_Status__c: 'Not Submitted',
             customClass: 'legend-colorBlock notsubmitted-exp',
             iseditEnabled: false,
-            customClassLine: this.isDesktop ? 'slds-size_1-of-3 slds-p-horizontal_small' : 'slds-size_1-of-2 slds-p-horizontal_small',
+            customClassLine: this.isDesktop ? 'slds-size_1-of-3 slds-p-horizontal_small' : 'slds-size_1-of-3 slds-p-horizontal_small',
             expenseTypeId: 'Expense_Type' + uid,
             travelModeId: 'Travel_Mode' + uid,
             Expense_Date__c: date,
             Travel_Type__c: travelType,
             Expense_Type__c: '',
+            Accommodation_Type__c: '',
             Travel_Mode__c: '',
             System_Calculated_Amount__c: 0,
             City_Name__c: '',
             Working_Hours__c: dayData.Working_Hours_For_Expense__c || 0,
             Total_KM__c: '',
+            Total_Distance_Calculated_by_ODM_Reading__c: '',
             Amount__c: '',
             Remarks__c: '',
             Expense__c: '',
@@ -594,6 +605,7 @@ export default class CreateNewExpense extends LightningElement {
             Local_Conveyance_Limit__c: 0,
             fileUploaded: false,
             expenseTypes: expenseTypes,
+            accomodationTypes: this.accomodationTypes,
             travelModes: travelModes,
             isTA: false,
             isTransportCarBike: false,
@@ -710,10 +722,23 @@ export default class CreateNewExpense extends LightningElement {
             }
         }
 
-        this.days = this.days.map(day => {
-            if (day.Date__c === date) {
-                // Find the line item to remove
-                const removedItem = day.lineItems.find(item => item.localId__c === localId);
+    this.days = this.days.map(day => {
+        if (day.Date__c === date) {
+            // Find the line item to remove
+            const removedItem = day.lineItems.find(item => item.localId__c === localId);
+
+            if (day.Travel_Type__c == 'Field - Other District' && removedItem.Expense_Type__c == 'Accommodation') {
+                const lineItemDA = day.lineItems.find(item => (item.isDA));
+                if (lineItemDA) {
+                    lineItemDA.Amount__c = this.daAmountDIS;
+                    if (this.eligibilities.Mandatory_File_Expense_Types__c &&
+        this.eligibilities.Mandatory_File_Expense_Types__c.split(';').includes('DA')
+    ) {
+        lineItemDA.fileUploadMandatory = true;
+    }
+
+                    }
+                }
 
                 // If it has a Salesforce Id, add to DeleteExpLine
                 if (removedItem && removedItem.Id) {
@@ -754,6 +779,7 @@ export default class CreateNewExpense extends LightningElement {
         lineItem.Amount__c = null;
         lineItem.Travel_Mode__c = '';
         lineItem.Total_KM__c = null;
+        lineItem.Total_Distance_Calculated_by_ODM_Reading__c = null;
         lineItem.isTA = false;
         lineItem.isDA = false;
         lineItem.isLodging = false;
@@ -885,7 +911,52 @@ export default class CreateNewExpense extends LightningElement {
 
         this.getGrandTotal();
     }
+    handleAccommodationChange(event) {
+        const localId = event.target.dataset.localid;
+        const value = event.currentTarget.value;
+        // Find the day containing the line item using the localId
+        const dayData = this.days.find(day =>
+            day.lineItems.some(item => item.localId__c === localId)
+        );
+        if (!dayData) return;
 
+        const lineItem = dayData.lineItems.find(item => item.localId__c === localId);
+        lineItem.Accommodation_Type__c = event.detail.value;
+        if (dayData.Travel_Type__c == 'Field - Other District') {
+            const datadate = event.target.dataset.date;
+
+            const lineItemDA = dayData.lineItems.find(item => (datadate === dayData.Date__c && item.isDA));
+            if (lineItemDA) {
+                lineItemDA.Amount__c = 0;
+                lineItemDA.fileUploadMandatory=false;
+                this.showToast('Warning', 'If Stay allowance eligible, DA will be removed', "warning");
+            }
+        }
+
+        if (lineItem.Accommodation_Type__c == 'Single Occupancy') {
+            if (dayData.Travel_Type__c == 'Field - Other District') {
+                lineItem.lodging_Limit__c = this.eligibilities.Accommodation_Other_District__c;
+            } else if (dayData.Travel_Type__c == 'In Office' || dayData.Travel_Type__c == 'Field - Home District') {
+                lineItem.lodging_Limit__c = this.eligibilities.In_State_Single_Occupancy_Accommodation__c;
+            } else if (dayData.Travel_Type__c == 'Field - Other State') {
+                lineItem.lodging_Limit__c = this.eligibilities.OutofStateSingle_Occupancy_Accommodation__c;
+            } else {
+                lineItem.lodging_Limit__c = '';
+            }
+        } else if (lineItem.Accommodation_Type__c == 'Double Occupancy') {
+            if (dayData.Travel_Type__c == 'Field - Other District') {
+                lineItem.lodging_Limit__c = this.eligibilities.Accommodation_Other_District__c;
+            } else if (dayData.Travel_Type__c == 'In Office' || dayData.Travel_Type__c == 'Field - Home District') {
+                lineItem.lodging_Limit__c = this.eligibilities.In_State_Double_Occupancy_Accommodation__c;
+            } else if (dayData.Travel_Type__c == 'Field - Other State') {
+                lineItem.lodging_Limit__c = this.eligibilities.OutofStateDouble_Occupancy_Accommodation__c;
+            } else {
+                lineItem.lodging_Limit__c = '';
+            }
+        }
+
+
+    }
     handleTravelModeChange(event) {
         const field = event.currentTarget.dataset.name;
         const localId = event.target.dataset.localid;
@@ -1299,12 +1370,12 @@ export default class CreateNewExpense extends LightningElement {
             }
         } catch (error) {
             this.isLoading = false;
-            console.error('y'+error.message);
-           this.showToast(
-                    'Error',
-                    'error.message',
-                    'error'
-                );  
+            console.error('y' + error.message);
+            this.showToast(
+                'Error',
+                'error.message',
+                'error'
+            );
         }
     }
     async validateFilesForItems() {
@@ -1672,8 +1743,8 @@ export default class CreateNewExpense extends LightningElement {
             let customClass = this.isDesktop ? retnval ? 'slds-size_1-of-3 slds-p-horizontal_small' : 'slds-size_1-of-2 slds-p-horizontal_small' : 'slds-size_1-of-2 slds-p-horizontal_small';
             return customClass;
         }
-        else if (item.Expense_Type__c === 'Lodging') {
-            let customClass = this.isDesktop ? retnval ? 'slds-size_1-of-4 slds-p-horizontal_small' : 'slds-size_1-of-3 slds-p-horizontal_small' : 'slds-size_1-of-2 slds-p-horizontal_small';
+        else if (item.Expense_Type__c === 'Accommodation') {
+            let customClass = this.isDesktop ? retnval ? 'slds-size_1-of-4 slds-p-horizontal_small' : 'slds-size_1-of-4 slds-p-horizontal_small' : 'slds-size_1-of-2 slds-p-horizontal_small';
             return customClass;
         }
         else if (item.Expense_Type__c === 'Local Conveyance') {
