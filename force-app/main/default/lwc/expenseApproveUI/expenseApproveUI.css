@@ -25,7 +25,22 @@
     vertical-align: middle;
 }
 .Highlight-in-red {
-   color: #ba0517; 
+   color: #cc3300; 
+   font-weight:bold;
+   
+}
+.Highlight-in-green {
+   color: #34fd02; 
+   font-weight:bold;
+   
+}
+.Highlight-in-blue {
+   color: #fffb0c; 
+   font-weight:bold;
+   
+}
+.Highlight-in-orange{
+   color: #ffcc00; 
    font-weight:bold;
    
 }

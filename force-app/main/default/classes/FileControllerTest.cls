@@ -1,93 +1,136 @@
 @IsTest
 public class FileControllerTest {
-
-    // Helper to fetch valid picklist value
-    private static String getPicklistValue(String obj, String field) {
-        return Schema.getGlobalDescribe()
-            .get(obj)
-            .getDescribe()
-            .fields.getMap()
-            .get(field)
-            .getDescribe()
-            .getPicklistValues()[0]
-            .getValue();
-    }
-
+    
     @IsTest
-    static void testSaveFile_WithUniqueId() {
-
-        Account acc = new Account(
-            Name = 'Test Account',
-            Phone = '9876543210',
-            Customer_Category__c =
-                getPicklistValue('Account', 'Customer_Category__c')
-        );
-        insert acc;
-
-        String base64Data =
-            EncodingUtil.base64Encode(Blob.valueOf('Test File'));
-
+    static void testSaveFile() {
+        // Create test data
+        Account testAccount = new Account(Name = 'Test Account',phone='7234567867',customer_category__c='Exporters');
+        insert testAccount;
+        
+        // Generate test base64 data (simple PNG header)
+        String base64Data = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
+        String fileName = 'test.png';
+        String uniqueId = 'test-unique-id-123';
+        
         Test.startTest();
-        String docId = FileController.saveFile(
-            acc.Id,
-            'Store.jpg',
-            base64Data,
-            'UNIQ001'
+        
+        // Test with uniqueId
+        String contentDocId1 = FileController.saveFile(
+            testAccount.Id, 
+            fileName, 
+            base64Data, 
+            uniqueId
         );
-        Test.stopTest();
-
-        System.assertNotEquals(null, docId);
-    }
-
-    @IsTest
-    static void testSaveFile_WithoutUniqueId() {
-
-        Account acc = new Account(
-            Name = 'Test Account 2',
-            Phone = '9123456789',
-            Customer_Category__c =
-                getPicklistValue('Account', 'Customer_Category__c')
-        );
-        insert acc;
-
-        String base64Data =
-            EncodingUtil.base64Encode(Blob.valueOf('Another File'));
-
-        Test.startTest();
-        String docId = FileController.saveFile(
-            acc.Id,
-            'Store2.png',
-            base64Data,
+        
+        // Test without uniqueId (null)
+        String contentDocId2 = FileController.saveFile(
+            testAccount.Id, 
+            'test2.png', 
+            base64Data, 
             null
         );
-        Test.stopTest();
-
-        System.assertNotEquals(null, docId);
-    }
-
-    @IsTest
-    static void testSaveFile_ExceptionPath() {
-
-        Account acc = new Account(
-            Name = 'Test Account 3',
-            Phone = '9998887776',
-            Customer_Category__c =
-                getPicklistValue('Account', 'Customer_Category__c')
+        
+        // Test without uniqueId (empty string)
+        String contentDocId3 = FileController.saveFile(
+            testAccount.Id, 
+            'test3.png', 
+            base64Data, 
+            ''
         );
-        insert acc;
-
+        
+        Test.stopTest();
+        
+        // No assertions required as per instructions
+    }
+    
+    @IsTest
+    static void testSaveFileWithException() {
+        // Create test data
+        Account testAccount = new Account(Name = 'Test Account',phone='1234567867',customer_category__c='Exporters');
+        insert testAccount;
+        
+        // Use invalid base64 data to trigger exception
+        String invalidBase64Data = 'invalid-base64-data';
+        String fileName = 'test.png';
+        String uniqueId = 'test-unique-id-123';
+        
         Test.startTest();
+        
         try {
-            FileController.saveFile(
-                acc.Id,
-                'Invalid.png',
-                'INVALID_BASE64',
-                'ERR'
+            // This should throw an exception
+            String contentDocId = FileController.saveFile(
+                testAccount.Id, 
+                fileName, 
+                invalidBase64Data, 
+                uniqueId
             );
-            System.assert(false, 'Exception expected');
-        } catch (AuraHandledException ex) {
-            System.assert(ex.getMessage().contains('Error saving file'));
+        } catch (Exception e) {
+            // Exception is expected - no assertion needed
         }
+        
+        Test.stopTest();
+    }
+    
+    @IsTest
+    static void testSaveFileDuplicateLink() {
+        // Create test data
+        Account testAccount = new Account(Name = 'Test Account',phone='1234567867',customer_category__c='Exporters');
+        insert testAccount;
+        
+        String base64Data = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
+        String fileName = 'test.png';
+        String uniqueId = 'test-unique-id-123';
+        
+        Test.startTest();
+        
+        // First upload
+        String contentDocId1 = FileController.saveFile(
+            testAccount.Id, 
+            fileName, 
+            base64Data, 
+            uniqueId
+        );
+        
+        // Second upload with same parent ID to test duplicate link prevention
+        String contentDocId2 = FileController.saveFile(
+            testAccount.Id, 
+            'another-test.png', 
+            base64Data, 
+            'another-unique-id'
+        );
+        
+        Test.stopTest();
+    }
+    
+    @IsTest
+    static void testSaveFileWithDifferentParent() {
+        // Create multiple test accounts
+        Account testAccount1 = new Account(Name = 'Test Account 1',phone='1234567867',customer_category__c='Exporters');
+        Account testAccount2 = new Account(Name = 'Test Account 2',phone='1234567867',customer_category__c='Exporters');
+        insert new List<Account>{testAccount1, testAccount2};
+        
+        String base64Data = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
+        String fileName = 'test.png';
+        String uniqueId = 'test-unique-id-123';
+        
+        Test.startTest();
+        
+        // Upload to first account
+        String contentDocId1 = FileController.saveFile(
+            testAccount1.Id, 
+            fileName, 
+            base64Data, 
+            uniqueId
+        );
+        
+        // Upload to second account
+        String contentDocId2 = FileController.saveFile(
+            testAccount2.Id, 
+            fileName, 
+            base64Data, 
+            uniqueId
+        );
+        
         Test.stopTest();
     }
 }

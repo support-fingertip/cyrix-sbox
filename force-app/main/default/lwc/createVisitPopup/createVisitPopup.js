@@ -3,6 +3,7 @@ import VisitData from '@salesforce/apex/beatPlannerlwc.getVisitCreateData';
 import { createRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { getPicklistValues,getObjectInfo } from 'lightning/uiObjectInfoApi';
+import { NavigationMixin } from 'lightning/navigation';
 import getFiles from '@salesforce/apex/beatPlannerlwc.getFiles';
 import FORM_FACTOR from '@salesforce/client/formFactor';
 //fields
@@ -13,8 +14,10 @@ import VISIT_PURPOSE_FIELD from '@salesforce/schema/Visit__c.Visit_Purpose__c';
 import VISIT_FEEDBACK_FIELD from '@salesforce/schema/Visit__c.Visit_Feedback__c';
 
 import deleteFile from '@salesforce/apex/beatPlannerlwc.deleteFile';
+import LightningAlert from 'lightning/alert';
 
-export default class CreateVisitPopup extends LightningElement {
+
+export default class CreateVisitPopup extends NavigationMixin(LightningElement) {
 
 
 isSearchValueSelected = false; searchPlaceHolder; searchLabel; isValueSearched = false; searchValueName = '';
@@ -111,6 +114,19 @@ isPhone = false; isDesktop = false;
 showUploadedFiles = false; 
 @track uploadedFiles = [];
 @track showCameraModal = false;
+@track missedVisitReason;
+@track missedVisitOtherReason;
+@track showOtherReason = false;
+
+missedVisitOptions = [
+    { label: 'Customer Not Available', value: 'Customer Not Available' },
+    { label: 'Customer Postponed / Rescheduled Meeting', value: 'Customer Postponed / Rescheduled Meeting' },
+    { label: 'Customer Denied', value: 'Customer Denied' },
+    { label: 'Demo Postponed', value: 'Demo Postponed' },
+    { label: 'Demo Machine not Available', value: 'Demo Machine not Available' },
+    { label: 'Other', value: 'Other' }
+];
+
 
 
 @track visitData = {
@@ -160,6 +176,12 @@ connectedCallback(){
     }
     else if(this.completeVisit){
         this.headerVisit = 'Complete Visit' ;
+            this.showToastInfo(
+        'Selfie Required',
+        'Please take a selfie with the hospital/customer in the background to complete the visit.',
+        'info',
+        'dismissible'
+    );
 
     }
     this.containerClass = this.isDesktop ? 'slds-modal__container ' : '';
@@ -167,6 +189,16 @@ connectedCallback(){
     this.isPhone = FORM_FACTOR === 'Small'? true : false;
     this.loadAllFiles();
 }
+showToastInfo(title, message, variant, mode) {
+    const evt = new ShowToastEvent({
+        title: title,
+        message: message,
+        variant: variant,
+        mode: mode
+    });
+    this.dispatchEvent(evt);
+}
+
 
 getVisitData() {
 
@@ -429,6 +461,26 @@ handleChange(event) {
         }
         
 }
+
+  handleMissedReasonChange(event) {
+    this.missedVisitReason = event.detail.value;
+
+    if (this.missedVisitReason === 'Other') {
+        this.showOtherReason = true;
+        this.visitData.Missed_PostPone_Reason__c = '';
+    } else {
+        this.showOtherReason = false;
+        this.missedVisitOtherReason = '';
+        this.visitData.Missed_PostPone_Reason__c = this.missedVisitReason;
+    }
+}
+
+handleOtherReasonChange(event) {
+    this.missedVisitOtherReason = event.detail.value;
+    this.visitData.Missed_PostPone_Reason__c = this.missedVisitOtherReason;
+}
+
+
 handleSearch(event){
     this.searchValueName = event.target.value;
     // console.log(userName);
@@ -487,10 +539,12 @@ handleOrderScreen(event){
     }
 }
 //camera addedd
-    openCamera()
-{
+  async openCamera() {
+    
     this.showCameraModal = true;
 }
+
+
 handleCameraStopped()
 {
     this.showCameraModal = false;
@@ -558,6 +612,7 @@ async deleteFile(event) {
 }
 
 previewFile(event) {
+    try{
     let recordId1 = event.currentTarget.dataset.id;
     //  const filetype = event.currentTarget.id
         this[NavigationMixin.Navigate]({
@@ -569,7 +624,9 @@ previewFile(event) {
                 selectedRecordId: recordId1
             }
         });
-
+    }catch(e){
+        console.error(e.message);
+    }
 
 }
 }

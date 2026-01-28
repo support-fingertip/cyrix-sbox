@@ -15,14 +15,14 @@ public without sharing class SendEmailCustomNotification {
         message.setSubject(subject);
         message.setHtmlBody(htmlBody);
         message.toAddresses = emailArray;
-        Id orgWideEmailAddressId = [SELECT Id FROM OrgWideEmailAddress WHERE address  = '' ].Id;
+       /* Id orgWideEmailAddressId = [SELECT Id FROM OrgWideEmailAddress WHERE address  = '' ].Id;
         message.setOrgWideEmailAddressId(orgWideEmailAddressId);  
         
         Messaging.SingleEmailMessage[] messages = new List<Messaging.SingleEmailMessage> {message};
             Messaging.SendEmailResult[] results = null;
         if(!Test.isRunningTest())
             results = Messaging.sendEmail(messages);  
-        system.debug(results);  
+        system.debug(results);  */
         
         
     }
@@ -31,8 +31,8 @@ public without sharing class SendEmailCustomNotification {
         message.setSubject(subject);
         message.setHtmlBody(htmlBody);
         message.toAddresses = emailArray;
-        Id orgWideEmailAddressId = [SELECT Id FROM OrgWideEmailAddress WHERE address  = '' ].Id;
-        message.setOrgWideEmailAddressId(orgWideEmailAddressId); 
+      //  Id orgWideEmailAddressId = [SELECT Id FROM OrgWideEmailAddress WHERE address  = '' ].Id;
+       // message.setOrgWideEmailAddressId(orgWideEmailAddressId); 
         return message;
 
                                     

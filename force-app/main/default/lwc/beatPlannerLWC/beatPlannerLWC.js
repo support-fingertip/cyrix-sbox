@@ -38,7 +38,7 @@ export default class BeatPlannerLWC extends LightningElement {
     searchPro = '';
     objName;
     screenHeight;
-    buttonName = 'Start Visit'; createDailyLog = false; isDisabled = false;
+    buttonName = 'Start Day'; createDailyLog = false; isDisabled = false;
     isPageLoaded = false; isVisitCreate = true; newVisitPoup = false; isvisitDesktop = true;
     @track placeholders = [];
     isDailyLog = true; outletPage = false; isCameraScreen = false;
@@ -212,7 +212,7 @@ export default class BeatPlannerLWC extends LightningElement {
                 }
                 if (result.dailyLog == undefined) {
                     this.isVisitCreate = false;
-                    this.buttonName = 'Start Visit';
+                    this.buttonName = 'Start Day';
                 }
                 this.isPageLoaded = false;
             })
@@ -679,7 +679,7 @@ saveUpdateRecord(actionToPerform, recordInput, toastMessage){
              } else if (toastMessage === 'Day Ended Successfully') {
                  this.isVisitCreate = false;         // no new visit until restart
                  this.isDailyLog = false;            // log closed
-                 this.buttonName = 'Start Visit';      // show Start Day button
+                 this.buttonName = 'Start Day';      // show Start Day button
              }
  
              // ✅ NEW: hard refresh Daily Log state from server
@@ -713,7 +713,7 @@ saveUpdateRecord(actionToPerform, recordInput, toastMessage){
                     this.currentLocationRequestId = null;
 
                     if (locationProgress === 'Checkin') {
-                        this.buttonName = 'Start Visit';
+                        this.buttonName = 'Start Day';
                     }
                     this.genericDispatchEvent('Error', 'Unable to fetch location in time. Please try again.', 'error');
                 }, 15000);
@@ -797,7 +797,7 @@ saveUpdateRecord(actionToPerform, recordInput, toastMessage){
                             this.isPageLoaded = false;
 
                             if (locationProgress === 'Checkin') {
-                                this.buttonName = 'Start Visit';
+                                this.buttonName = 'Start Day';
                             }
                             this.genericDispatchEvent('Error', 'Unable to fetch location. Please ensure location is enabled.', 'error');
                         });
@@ -841,7 +841,7 @@ saveUpdateRecord(actionToPerform, recordInput, toastMessage){
                             this.isPageLoaded = false;
 
                             if (locationProgress === 'Checkin') {
-                                this.buttonName = 'Start Visit';
+                                this.buttonName = 'Start Day';
                             }
 
                             // ✅ better message based on real error
@@ -866,7 +866,7 @@ saveUpdateRecord(actionToPerform, recordInput, toastMessage){
                 this.isLoading = false;
 
                 if (locationProgress === 'Checkin') {
-                    this.buttonName = 'Start Visit';
+                    this.buttonName = 'Start Day';
                 }
                 this.genericDispatchEvent('Error', 'Location not supported on this device.', 'error');
             }
@@ -874,7 +874,7 @@ saveUpdateRecord(actionToPerform, recordInput, toastMessage){
 
                 this.isRenderDataLoaded = true;
                 const headerName = this.buttonName;
-                if (headerName == 'Start Visit') {
+                if (headerName == 'Start Day') {
                     this.isDailyLogPopup = true;
                     this.createDailyLog = true;
                     this.isDisabled = false;
@@ -954,7 +954,7 @@ saveUpdateRecord(actionToPerform, recordInput, toastMessage){
 
                     if (kmDis <= 0) {
                         if (
-                            (this.buttonName == 'Start Visits' && this.ownVehicle == true) ||
+                            (this.buttonName == 'Start Day' && this.ownVehicle == true) ||
                             (this.buttonName == 'End Day' &&
                                 (this.dailylogData.Vehicle_Used__c == 'Office' ||
                                     this.dailylogData.Vehicle_Used__c == 'Personal/own'))
@@ -967,28 +967,28 @@ saveUpdateRecord(actionToPerform, recordInput, toastMessage){
                         }
                     }
 
-                    if ((this.worktype == '' || this.worktype == undefined) && this.buttonName == 'Start Visit') {
+                    if ((this.worktype == '' || this.worktype == undefined) && this.buttonName == 'Start Day') {
                         const msg = "Add Work type..";
                         const title = '';
                         const variant = 'warning';
                         this.genericDispatchEvent(title, msg, variant);
                         return;
                     }
-                    else if ((this.vehicleType == '' || this.vehicleType == undefined) && this.buttonName == 'Start Visit') {
+                    else if ((this.vehicleType == '' || this.vehicleType == undefined) && this.buttonName == 'Start Day') {
                         const msg = "Add Vehicle Type .";
                         const title = '';
                         const variant = 'warning';
                         this.genericDispatchEvent(title, msg, variant);
                         return;
                     }
-                    else if ((this.transport == '' || this.transport == undefined) && this.buttonName == 'Start Visit') {
+                    else if ((this.transport == '' || this.transport == undefined) && this.buttonName == 'Start Day') {
                         const msg = "Add Mode Of Transport.";
                         const title = '';
                         const variant = 'warning';
                         this.genericDispatchEvent(title, msg, variant);
                         return;
                     }
-                    else if ((this.companion == '' || this.companion == undefined) && this.buttonName == 'Start Visit' && this.withCompanion == 'Yes') {
+                    else if ((this.companion == '' || this.companion == undefined) && this.buttonName == 'Start Day' && this.withCompanion == 'Yes') {
                         const msg = "Add Companion Name.";
                         const title = '';
                         const variant = 'warning';
@@ -999,7 +999,7 @@ saveUpdateRecord(actionToPerform, recordInput, toastMessage){
                     this.isDisabled = true;
                     this.isPageLoaded = true;
 
-                    if (this.buttonName == 'Start Visit') {
+                    if (this.buttonName == 'Start Day') {
                         this.buttonName = 'End Day';
                         this.handleGetLatLon('Checkin');
                     }

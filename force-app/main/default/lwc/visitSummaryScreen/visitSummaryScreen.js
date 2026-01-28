@@ -198,7 +198,7 @@ export default class visitSummaryScreen extends NavigationMixin(LightningElement
             const msg = "Are you sure you want to Start " + visName + "?";
 
             const label = "warning";
-            const variant = "Start Day";
+            const variant = "Start Visit";
             const theme = "warning";
             this.handleConfirmClick(msg, label, variant, message);
         }
@@ -445,9 +445,11 @@ export default class visitSummaryScreen extends NavigationMixin(LightningElement
         else if (msg.message == 'missedReason') {
             this.missedReason = msg.missedReason;
             this.missedDate = msg.missedDate;
+              this.missedpicklist = msg.missedpicklist;
             let data = {
                 Id: this.currentVisitId,
                 PostPoned_Start_Time__c: msg.missedDate,
+                 Missed_Visit_Reason__c: msg.missedpicklist,
                 Missed_PostPone_Reason__c: msg.missedReason,
                 Daily_Log__c: this.dailyLogData.Id,
                 Status__c: 'Missed'

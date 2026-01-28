@@ -286,7 +286,7 @@ console.log('Proceeding with visit:', itemId);
             const msg =  "Are you sure you want to Start "+visName+"?";
             
             const label =  "warning";
-            const variant = "Start Day";
+            const variant = "Start Visit";
             const theme = "warning";
             this.handleConfirmClick(msg,label,variant,message);
          }
@@ -455,7 +455,7 @@ console.log('Proceeding with visit:', itemId);
         const recordInput= {
             fields : data
         }
-        this.saveUpdateRecord(recordInput,'Visit Ended successfully');
+        this.saveUpdateRecord(recordInput,'Visit Completed successfully');
     }
     saveUpdateRecord(recordInput,msg){
         updateRecord(recordInput)

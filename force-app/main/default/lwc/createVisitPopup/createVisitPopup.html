@@ -94,7 +94,8 @@
                                                                 <span>{srch.Phone}</span>
                                                             </template>
                                                             <template if:false={isCustomer}>
-                                                              <b> Mob: </b> <span>{srch.MobilePhone}</span>
+                                                                 <b> Mob1: </b> <span>{srch.Phone}</span><br>
+                                                              <b> Mob2: </b> <span>{srch.MobilePhone}</span>
                                                             </template>
                                                             </span>
                                                         </span>
@@ -119,7 +120,7 @@
                         <lightning-combobox name="Visit_Type__c" required="true" label="Visit Type" value={visitData.Visit_Type__c}  placeholder="Select a Visit Type " options={pickData1} onchange={handleVisitType} ></lightning-combobox>
                          <lightning-combobox name="Visit_Purpose__c" required="true" label="Visit Purpose" value={visitData.Visit_Purpose__c}  placeholder="Select Visit Purpose " options={pickDatapurpose} onchange={handleVisitPurpose} ></lightning-combobox>
 
-                </div> 
+                </div>    
             </template>
 
             <!-- Complete visit -->
@@ -129,7 +130,28 @@
                     <lightning-textarea name="Comments__c" label="Comment" value={visitData.Comments__c} placeholder="Enter comments..." onchange={onCommentChange} required></lightning-textarea>
                  <!--   <c-camera-screen record-id={recordId} is-desktop={isDesktop} complete-visit={completeVisit} onmyvisitclick={handleOrderScreen}></c-camera-screen>
               -->
-              
+      <div class="selfie-minimal slds-m-vertical_medium">
+    <div class="slds-media slds-media_center">
+        <div class="slds-media__figure">
+            <div class="emoji-wrapper">
+                📸
+            </div>
+        </div>
+        <div class="slds-media__body">
+            <div class="slds-text-heading_small slds-m-bottom_xx-small">
+                <span class="primary-text">Take a selfie</span>
+            </div>
+            <p class="slds-text-body_regular">
+                with the hospital or customer in the background
+            </p>
+            <div class="slds-m-top_xx-small">
+                <span class="slds-badge slds-theme_light">Required for verification</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 
                 <template if:true={showCameraModal}>    
@@ -149,6 +171,7 @@
                                         label=""
                                         record-id={recordId}
                                         multiple
+                                        
                                         onuploadfinished={handleUploadFinished}>
                                     </lightning-file-upload>
                                 </template>
@@ -190,25 +213,52 @@
               
               
               
-              
-              
-              
-              
-              
-              
-              
-              
                 </div>
             </template>
             
             <!-- Missed visit -->
-             <template lwc:if={reshedule}>
+             <!-- <template lwc:if={reshedule}>
                 <div class="slds-modal__content slds-p-around_medium customHeight" id="modal-content-id-3">
                     <lightning-textarea required name="Missed_PostPone_Reason__c" label="Missed Reason" value={visitData.Missed_PostPone_Reason__c} onchange={onCommentChange}></lightning-textarea>
                    <br/>
                     <lightning-input required="true" type="datetime" name="PostPoned_Start_Time__c" label="Rescheduled Date" value={visitData.PostPoned_Start_Time__c} onchange={onCommentChange}></lightning-input>
                 </div>
-             </template>
+             </template> -->
+             <!-- Missed visit -->
+        <template lwc:if={reshedule}>
+       <div class="slds-modal__content slds-p-around_medium customHeight">
+
+        <lightning-combobox
+            label="Missed Visit Reason"
+            value={missedVisitReason}
+            options={missedVisitOptions}
+            onchange={handleMissedReasonChange}
+            required>
+        </lightning-combobox>
+
+        <template lwc:if={showOtherReason}>
+            <lightning-textarea
+                label="Other Reason"
+                value={missedVisitOtherReason}
+                onchange={handleOtherReasonChange}
+                required>
+            </lightning-textarea>
+        </template>
+        <br/>
+        <lightning-input
+            required="true"
+            type="datetime"
+            name="PostPoned_Start_Time__c"
+            label="Rescheduled Date"
+            value={visitData.PostPoned_Start_Time__c}
+            onchange={onCommentChange}>
+        </lightning-input>
+          </div>
+       </template>
+
+
+
+
 
             <!-- Footer for visit poup -->
              <template lwc:if={isDesktop}>

@@ -9,14 +9,18 @@ public class ExpenseApprovalController {
     @AuraEnabled public boolean isCarEnabled  {get;set;}
     @AuraEnabled public boolean isBikeEnabled {get;set;}
     @AuraEnabled public boolean isAutoEnabled {get;set;}
-    
+        @AuraEnabled public string bikeExpenseExceeded {get;set;}
+         @AuraEnabled public string carExpenseExceeded {get;set;}
+         @AuraEnabled public string autoExpenseExceeded{get;set;}
     
     @AuraEnabled(cacheable=true)
     public static ExpenseApprovalController getExpenseLineItems(Id recordId) {
         ExpenseApprovalController exp = new ExpenseApprovalController();
-         string systemCalCulatedKm = '';
+         string systemCalCulatedKm = '',systemCalculatedODOKm='',limitExceeded='';
         List<ExpenseWrapper> result = new List<ExpenseWrapper>();
         string userId = UserInfo.getUserId();
+        Id profileId = UserInfo.getProfileId();
+           Profile p = [SELECT Name FROM Profile WHERE Id = :profileId];
         Expense__c expense = [select Id,Expense_Approver_L1__c, Expense_Approver_L2__c, Executive_Profile__c,totalApprovedTAAuto__c, totalApprovedTABike__c, totalApprovedTACar__c, totalSubmittedTABike__c, totalSubmittedTAAuto__c, Total_KM_Car__c, Total_KM_Bike__c, Total_Amount_Auto__c, totalSubmittedTACar__c,
                               Expense_Finance_Department_Approver__c,OwnerId from Expense__c where Id =:recordId];
         exp.expense =expense;
@@ -28,7 +32,9 @@ public class ExpenseApprovalController {
                                                        Monthly_limit_Auto__c,Monthly_limit_Bike__c,Monthly_Limit_Car__c,
                                                        Mandatory_Remarks_File_Types__c,Mandatory_File_Expense_Types__c,
                                                        Lodging_Expense_per_Day_Metro__c, Lodging_Expense_per_Day_Non_Metro__c, 
-                                                       Lodging_Food_Expenses__c, Travel_Mode_HQ__c,
+                                                       Lodging_Food_Expenses__c, Travel_Mode_HQ__c,OutofStateSingle_Occupancy_Accommodation__c,
+                                                        Accommodation_Other_District__c,In_State_Double_Occupancy_Accommodation__c,
+                                                   OutofStateDouble_Occupancy_Accommodation__c,In_State_Single_Occupancy_Accommodation__c,
                                                        Local_Conveyance__c,Travel_Mode_UC__c,Expense_Type_UC__c,Expense_Type_HQ__c
                                                     FROM Travel_Eligibility__c WHERE Profile__c = :Executive_Profile];
         if(profileElig.size() >0)  {
@@ -56,6 +62,27 @@ public class ExpenseApprovalController {
                     exp.isAutoEnabled =true;
                 }
             }
+            if(exp.isCarEnabled){
+                if(exp.travelEligibile.Monthly_Limit_Car__c !=null && expense.Total_KM_Car__c !=null &&  exp.travelEligibile.Monthly_Limit_Car__c < expense.Total_KM_Car__c){
+                    exp.carExpenseExceeded ='ta-value Highlight-in-red';
+                }else{
+                     exp.carExpenseExceeded ='ta-value Highlight-in-green';
+                }
+            }
+             if(exp.isBikeEnabled){
+                if( exp.travelEligibile.Monthly_limit_Bike__c !=null && expense.Total_KM_Bike__c!=null &&  exp.travelEligibile.Monthly_limit_Bike__c < expense.Total_KM_Bike__c){
+                    exp.bikeExpenseExceeded ='ta-value Highlight-in-red';
+                }else{
+                     exp.bikeExpenseExceeded ='ta-value Highlight-in-green';
+                }
+            }
+            if(exp.isAutoEnabled){
+                if( exp.travelEligibile.Monthly_limit_Auto__c!=null&& expense.Total_Amount_Auto__c !=null && exp.travelEligibile.Monthly_limit_Auto__c < expense.Total_Amount_Auto__c){
+                    exp.autoExpenseExceeded =' ta-value Highlight-in-red';
+                }else{
+                     exp.autoExpenseExceeded ='ta-value Highlight-in-green';
+                }
+            }
         }
         
         List<Expenses_Line_Item__c> lineItems = new List<Expenses_Line_Item__c>();
@@ -63,7 +90,7 @@ public class ExpenseApprovalController {
         {
             // Step 1: Query line items
             lineItems = [
-                SELECT Id, Approval_Status__c,Name, Expense_Type__c,Submitted_Amount__c, Total_KM__c, Local_Conveyance_Limit__c,Lodging_Food_Expense_Limit__c,lodging_Limit__c,TA_Limit__c,DA_Limit__c,
+                SELECT Id, Approval_Status__c,Name, Expense_Type__c,Submitted_Amount__c, Total_Distance_Calculated_by_ODM_Reading__c,Total_KM__c, Local_Conveyance_Limit__c,Lodging_Food_Expense_Limit__c,lodging_Limit__c,TA_Limit__c,DA_Limit__c,
                 Amount__c,City_Name__c,Expense_Date__c,expense__r.Expense_Approver_L1__c,expense__r.Expense_Approver_L2__c,Travel_Mode__c,
                 System_Calculated_Amount__c,Calculated_KM__c,Remarks__c
                 FROM Expenses_Line_Item__c
@@ -76,7 +103,7 @@ public class ExpenseApprovalController {
         {
             
             lineItems = [
-                SELECT Id, Approval_Status__c,Name, Expense_Type__c,Submitted_Amount__c, Total_KM__c, Local_Conveyance_Limit__c,Lodging_Food_Expense_Limit__c,lodging_Limit__c,TA_Limit__c,DA_Limit__c,
+                SELECT Id, Approval_Status__c,Name, Expense_Type__c,Submitted_Amount__c, Total_KM__c,Total_Distance_Calculated_by_ODM_Reading__c ,Local_Conveyance_Limit__c,Lodging_Food_Expense_Limit__c,lodging_Limit__c,TA_Limit__c,DA_Limit__c,
                 Amount__c,City_Name__c,Expense_Date__c,expense__r.Expense_Approver_L1__c,expense__r.Expense_Approver_L2__c,Travel_Mode__c,
                 System_Calculated_Amount__c,Calculated_KM__c,Remarks__c
                 FROM Expenses_Line_Item__c
@@ -87,7 +114,7 @@ public class ExpenseApprovalController {
         }
         else{
             lineItems = [
-                SELECT Id, Approval_Status__c,Name, Expense_Type__c, Submitted_Amount__c,Total_KM__c, Local_Conveyance_Limit__c,Lodging_Food_Expense_Limit__c,lodging_Limit__c,TA_Limit__c,DA_Limit__c,
+                SELECT Id, Approval_Status__c,Name, Expense_Type__c, Submitted_Amount__c,Total_Distance_Calculated_by_ODM_Reading__c,Total_KM__c, Local_Conveyance_Limit__c,Lodging_Food_Expense_Limit__c,lodging_Limit__c,TA_Limit__c,DA_Limit__c,
                 Amount__c,City_Name__c,Expense_Date__c,expense__r.Expense_Approver_L1__c,expense__r.Expense_Approver_L2__c,Travel_Mode__c,
                 System_Calculated_Amount__c,Calculated_KM__c,Remarks__c
                 FROM Expenses_Line_Item__c
@@ -138,24 +165,58 @@ public class ExpenseApprovalController {
             
             List<FileWrapper> files = fileMap.containsKey(item.Id) ? fileMap.get(item.Id) : new List<FileWrapper>();
             
-            decimal explimtAmt = 0;string expenseLimit='';
+            decimal explimtAmt = 0,varianceGoogle=0,varianceODO=0;string expenseLimit='',submittedAmt='',varianceClassGoogle='',varianceClassOdo='',otherExpenseLimitClass='';
             if(item.Expense_Type__c == 'Local Conveyance'){  explimtAmt = item.Local_Conveyance_Limit__c;}
-                else if(item.Expense_Type__c == 'Accomadation'){ explimtAmt = item.lodging_Limit__c;}
+                else if(item.Expense_Type__c == 'Accommodation'){ explimtAmt = item.lodging_Limit__c;}
               else if(item.Expense_Type__c == 'DA'){ explimtAmt = item.DA_Limit__c;}
                else if(item.Expense_Type__c == 'TA'){ explimtAmt = item.TA_Limit__c;}
-            
-           expenseLimit =explimtAmt+'/'+item.Submitted_Amount__c; 
+           
+           expenseLimit =(explimtAmt==null? '':explimtAmt+'');
+            submittedAmt =item.Submitted_Amount__c+'';
             if(item.Expense_Type__c == 'TA') {
                 systemCalCulatedKm = string.valueof(item.Calculated_KM__c !=null ?item.Calculated_KM__c :0);   
+                systemCalculatedODOKm= string.valueof(item.Total_Distance_Calculated_by_ODM_Reading__c !=null ?item.Total_Distance_Calculated_by_ODM_Reading__c :0); 
             } else{
                 systemCalCulatedKm = '';   
+                systemCalculatedODOKm='';
             }
-            
+            //limits
+            if(item.Expense_Type__c == 'TA'){
+                if((item.Travel_Mode__c =='Bike' || item.Travel_Mode__c=='Car') && item.TA_Limit__c!=null &&  item.Total_KM__c!=null) {
+                    limitExceeded= ((item.TA_Limit__c < item.Total_KM__c) && (canEditOrApprove || p.Name=='System Administrator'))?'Highlight-in-red':'';
+                    if(item.Calculated_KM__c !=null && item.Calculated_KM__c!=0){
+                        if(item.Total_KM__c !=null  ){
+                            varianceGoogle =((item.Total_KM__c -item.Calculated_KM__c)/item.Calculated_KM__c)*100;
+                            if(varianceGoogle > 15){
+                                varianceClassGoogle='Highlight-in-orange';
+                            }
+                        }        
+                        if(item.Total_Distance_Calculated_by_ODM_Reading__c !=null  ){
+                            varianceODO =((item.Total_Distance_Calculated_by_ODM_Reading__c -item.Calculated_KM__c)/item.Calculated_KM__c)*100;
+                            if(varianceODO > 15){
+                                varianceClassOdo='Highlight-in-orange';
+                            }
+                        }
+                    }
+                }
+                  otherExpenseLimitClass='';
+            }else{
+                limitExceeded='';
+                varianceClassGoogle='';
+                varianceClassOdo='';
+                if(item.Expense_Type__c == 'DA' && item.DA_Limit__c !=null && item.Amount__c !=null && item.DA_Limit__c< item.Amount__c){
+                    otherExpenseLimitClass='Highlight-in-blue';
+                }else if(item.Expense_Type__c == 'Accommodation' && item.lodging_Limit__c !=null &&  item.Amount__c !=null && item.lodging_Limit__c < item.Amount__c){
+                      otherExpenseLimitClass='Highlight-in-blue';
+                }else{
+                      otherExpenseLimitClass='';
+                }
+            }
             
             result.add(new ExpenseWrapper(item.Id,item.Name,item.Approval_Status__c,item.Expense_Date__c,
                                           item.Expense_Type__c,item.Travel_Mode__c, item.City_Name__c,
-                                          expenseLimit, systemCalCulatedKm,item.System_Calculated_Amount__c,item.Total_KM__c,
-                                          item.Amount__c, canEditOrApprove, files,item.Remarks__c
+                                          expenseLimit,submittedAmt, systemCalCulatedKm,systemCalculatedODOKm,item.System_Calculated_Amount__c,item.Total_KM__c,
+                                          item.Amount__c, canEditOrApprove, files,item.Remarks__c,limitExceeded,varianceClassGoogle,varianceClassOdo,otherExpenseLimitClass
                                          ));
             
         }
@@ -451,22 +512,26 @@ public class ExpenseApprovalController {
         @AuraEnabled public String travelMode;
         @AuraEnabled public String city;
         @AuraEnabled public string lLimit;
+        @AuraEnabled public string submittedAmt;
         @AuraEnabled public string systemCalculatedKm; 
+        @AuraEnabled public string systemCalculatedODOKm; 
         @AuraEnabled public Decimal systemCalculatedAmount; 
         @AuraEnabled public Decimal totKM;
         @AuraEnabled public Decimal amount;
         @AuraEnabled public Boolean canEditOrApprove;
         @AuraEnabled public List<FileWrapper> files;
         @AuraEnabled public String remarks;
-        
+        @AuraEnabled public String limitExceeded;
         @AuraEnabled public String highlightClass;
+        @AuraEnabled public String varianceClassOdo;
+        @AuraEnabled public String varianceClassGoogle;
         @AuraEnabled public Boolean isEditable;
         @AuraEnabled public Boolean isSelectable;
-       
+          @AuraEnabled public String otherExpenseLimitClass;
         public ExpenseWrapper(Id recordId,string name, String status,date expDate,String expType, 
-                              String travelMode,String city,string lLimit,string systemCalculatedKm,
+                              String travelMode,String city,string lLimit,string submittedAmt,string systemCalculatedKm,string systemCalculatedODOKm,
                               Decimal systemCalculatedAmount,Decimal totKM, Decimal amount,
-                              Boolean canEditOrApprove, List<FileWrapper> files,String remarks 
+                              Boolean canEditOrApprove, List<FileWrapper> files,String remarks,string limitExceeded,string varianceClassGoogle,string varianceClassOdo,string otherExpenseLimitClass
                               )
         {
             
@@ -482,8 +547,10 @@ public class ExpenseApprovalController {
             }
             this.city = city;
             this.lLimit = lLimit;
+              this.submittedAmt = submittedAmt;
             this.systemCalculatedKm = systemCalculatedKm;
             this.systemCalculatedAmount = systemCalculatedAmount;
+            this.systemCalculatedODOKm = systemCalculatedODOKm;
             this.totKM = totKM;
             this.amount = amount;
             this.canEditOrApprove = canEditOrApprove;
@@ -492,6 +559,10 @@ public class ExpenseApprovalController {
             this.isEditable = false;
             this.isSelectable = false;
             this.highlightClass = 'highlight-cell';
+             this.limitExceeded = limitExceeded;
+              this.varianceClassOdo = varianceClassOdo;
+            this.varianceClassGoogle=varianceClassGoogle;
+             this.otherExpenseLimitClass=otherExpenseLimitClass;
         }
     }
     
@@ -515,6 +586,7 @@ public class ExpenseApprovalController {
         @AuraEnabled public Expense__c expense;
         @AuraEnabled public boolean isOpenedByOwner;
         @AuraEnabled public boolean isOpenedByAdmin;
+      
     }
     
 }

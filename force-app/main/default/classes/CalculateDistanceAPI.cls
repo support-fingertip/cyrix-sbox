@@ -149,6 +149,7 @@ public class CalculateDistanceAPI {
     
 
     public static void distanceCalculationSF(List<String> dailyLogIds){
+        try{
         list<log__c> logs= new list<log__c>();
         list<Daily_Log__c> dailylogsToUpdate= new list<Daily_Log__c>();
         list<Visit__c> visitsToUpdate= new list<Visit__c>();
@@ -225,9 +226,31 @@ public class CalculateDistanceAPI {
         if(logs.size() > 0){
             database.insert(logs);
         }
-        
+        }catch(exception ex){
+            ExceptionHandler.addLog(ex);
+        }
         
     }
+    
+  /**
+ * Calculate distance traveled between two odometer readings
+ * @param startReading Starting odometer reading
+ * @param endReading Ending odometer reading
+ * @return Distance traveled
+ */
+public static Decimal calculateDistanceTraveled(Decimal startReading, Decimal endReading) {
+   
+    
+    if (endReading < startReading) {
+        // Handle odometer rollover (common in older vehicles with 6-digit odometers)
+        // Assuming max odometer reading is 999,999 before rollover
+        Decimal maxOdometerValue = 1000000; // 1,000,000 km/miles
+        return (maxOdometerValue - startReading) + endReading;
+    }
+    
+    return endReading - startReading;
+}  
+    
     public class distanceValue{  
         public decimal distance; 
         public log__c log;

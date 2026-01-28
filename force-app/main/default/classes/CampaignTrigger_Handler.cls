@@ -25,17 +25,17 @@ public class CampaignTrigger_Handler {
                 SendEmailCustomNotification.sendNotification(body, title, senderId, notificationId, camp.Id, recUserIds);
         } 
     }  
-      @TestVisible
-      public static Boolean skipInTest = false;
-    
+     
     public static void mapApproverUser(list<Campaign> campaignList){
-         if (Test.isRunningTest() && skipInTest) {
-        return;
-          }
-        General_Settings__c settings =[select Id, Campaign_Marketing_Manager_Approver__c, Campaign_Final_Approver__c, 
+         
+       list< General_Settings__c> settingsList =[select Id, Campaign_Marketing_Manager_Approver__c, Campaign_Final_Approver__c, 
                                        Campaign_Expense_Approver__c, Telephony_Campaign_Approver__c, Academy_Campaign_Approver__c, 
                                        Sales_Campaign_Approver__c, Service_Campaign_Approver__c, Marketing_Campaign_Approver__c, 
                                        HR_Campaign_Approver__c, Digital_Campaign_Approver__c from General_Settings__c limit 1];  
+        if(settingsList.isEmpty())
+           return;
+        if(settingsList.size() > 0){
+        General_Settings__c settings= settingsList[0];
         for(Campaign camp : campaignList){ 
 
             if(settings.Campaign_Marketing_Manager_Approver__c !=null){
@@ -53,7 +53,7 @@ public class CampaignTrigger_Handler {
                 camp.Budget_Holder_Approver__c = settings.Service_Campaign_Approver__c;
             }else if(camp.Budget_Source__c == 'Academy'){
                 camp.Budget_Holder_Approver__c = settings.Academy_Campaign_Approver__c;
-            }else if(camp.Budget_Source__c == 'Telephony'){
+            }else if(camp.Budget_Source__c == 'Corporate'){
                 camp.Budget_Holder_Approver__c = settings.Telephony_Campaign_Approver__c;
             }
                if(settings.Campaign_Expense_Approver__c !=null){
@@ -62,6 +62,7 @@ public class CampaignTrigger_Handler {
                if(settings.Campaign_Final_Approver__c !=null){
                 camp.Campaign_Final_Approver__c = settings.Campaign_Final_Approver__c;
             }
+        }
         }
     } 
 }

@@ -1,4 +1,4 @@
-trigger VisitTrigger on Visit__c (before insert, after update, before delete,after undelete) {
+trigger VisitTrigger on Visit__c (before insert,after insert, after update, before delete,after undelete) {
   /**************************************************************** 
 * Class Name  : VisitTrigger  @Company  : Fingertip    @Created Date  : 29-9-2025  
 @description : visit object trigger   @author  :Nanma T V   @User By  : -visittriggerHandler
@@ -13,6 +13,11 @@ trigger VisitTrigger on Visit__c (before insert, after update, before delete,aft
       if(trigger.operationType == TriggerOperation.BEFORE_INSERT ){
         VisitTriggerHandler.beforeInsert(Trigger.new);
     }
+    
+      if(trigger.operationType == TriggerOperation.AFTER_INSERT ){
+        VisitTriggerHandler.visitAssignedNotification(Trigger.new);
+    }
+
 
      if(trigger.operationType == TriggerOperation.AFTER_UPDATE ){
         // Missed visit creation

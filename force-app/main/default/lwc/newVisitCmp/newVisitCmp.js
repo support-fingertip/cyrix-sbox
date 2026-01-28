@@ -321,7 +321,7 @@ this.isPhone = FORM_FACTOR === 'Small';
 
                 return;
 
-            }
+            } 
 
             this.isDisabled = true;
 

@@ -24,14 +24,15 @@ public with sharing class ExpenseTriggerHandler {
  
             if(userManagerMap.containsKey(exp.OwnerId)){
                 exp.Expense_Approver_L1__c = userManagerMap.get(exp.OwnerId);
-            }else {
+            }else if(settingsList.size() >0){
                 if (settingsList[0].Expense_Level_1_Approver__c != null) 
                 exp.Expense_Approver_L1__c =  settingsList[0].Expense_Level_1_Approver__c;
-            }
+            
          
             if (settingsList[0].Expense_Level_2_Approver__c != null) {
                 exp.Expense_Finance_Department_Approver__c =settingsList[0].Expense_Level_2_Approver__c;
             }
         }
+    }
     }
 }

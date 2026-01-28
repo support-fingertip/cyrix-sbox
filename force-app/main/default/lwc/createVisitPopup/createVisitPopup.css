@@ -12,3 +12,26 @@
 .CompleteHeight{
     height: 100% !important; 
 }
+ .selfie-minimal {
+        padding: 1.25rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+    }
+    
+    .emoji-wrapper {
+        font-size: 2rem;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .primary-text {
+        color: #005fb2;
+        font-weight: 600;
+    }

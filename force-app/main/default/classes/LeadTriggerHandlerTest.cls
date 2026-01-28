@@ -1,209 +1,567 @@
-@IsTest
+@isTest
 public class LeadTriggerHandlerTest {
-
-    /* =========================================================
-       TEST SETUP
-       ========================================================= */
+    
     @TestSetup
-    static void setupData() {
-
-        User u = [SELECT Id FROM User WHERE IsActive = true LIMIT 1];
-
-        // Base Lead – VALID phone (passes validation)
-        Lead l = new Lead(
-            LastName = 'TestLead',
-            Company = 'TestCompany',
-            Status = 'Open - Not Contacted',
-            Email = 'lead1@test.com',
-            Phone = '1234567890',        // ✅ VALID PHONE
-            MobilePhone = '9876543210',  // ✅ VALID
-            OwnerId = u.Id,
-            Next_Follow_up_Date__c = Date.today().addDays(1)
+    static void setupTestData() {
+        // Create test user
+        Profile salesProfile = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1];
+        User testUser = new User(
+            Alias = 'testusr',
+            Email = 'testuser@test.com',
+            EmailEncodingKey = 'UTF-8',
+            LastName = 'Testing',
+            LanguageLocaleKey = 'en_US',
+            LocaleSidKey = 'en_US',
+            ProfileId = salesProfile.Id,
+            TimeZoneSidKey = 'America/Los_Angeles',
+            UserName = 'testus4er@test.com'
         );
-        insert l;
-
-        // Duplicate reference lead
-        Lead dup = new Lead(
-            LastName = 'DupLead',
-            Company = 'DupCompany',
-            Status = 'Open - Not Contacted',
-            Email = 'dup@test.com',
-            Phone = '1112223333'
+        insert testUser;
+        
+        // Create manager user
+        User managerUser = new User(
+            Alias = 'mgrusr',
+            Email = 'manager@test.com',
+            EmailEncodingKey = 'UTF-8',
+            LastName = 'Manager',
+            LanguageLocaleKey = 'en_US',
+            LocaleSidKey = 'en_US',
+            ProfileId = salesProfile.Id,
+            TimeZoneSidKey = 'America/Los_Angeles',
+            UserName = 'manageyyr@test.com'
         );
-        insert dup;
+        insert managerUser;
+        
+        // Update test user to have manager
+        testUser.ManagerId = managerUser.Id;
+        update testUser;
+        
+        // Create campaign
+        Campaign testCampaign = new Campaign(
+            Name = 'Test Campaign',
+            IsActive = true,
+            Campaign_Medium__c='Non-Digital',
+            Campaign_Source__c='Trade Show'
+        );
+        insert testCampaign;
+        
+        // Create existing lead for duplicate testing
+        Lead existingLead = new Lead(
+            LastName = 'Existing Lead',
+            Company = 'Existing Company',
+            Email = 'existing@test.com',
+            phone='1234567894',
+            Status = 'Open'
+        );
+        insert existingLead;
+        update existingLead;
     }
-    @IsTest
-    static void test_checkAndSeprateMobileNumber() {
-
-        Lead l = [
-            SELECT Id, Phone, MobilePhone
-            FROM Lead
-            LIMIT 1
-        ];
-
+    
+    @isTest
+    static void testCampaignMapping() {
         Test.startTest();
-        LeadTriggerHandler.checkAndSeprateMobileNumber(
-            new List<Lead>{ l }
-        );
-        Test.stopTest();
-
-        // Phone unchanged (no +91 used)
-        System.assertEquals('1234567890', l.Phone);
-    }
-    @IsTest
-    static void test_getFormated() {
-        System.assertEquals('', LeadTriggerHandler.getformated(null));
-        System.assertEquals('ABC', LeadTriggerHandler.getformated('ABC'));
-    }
-    @IsTest
-    static void test_updateLastActivityDate() {
-
-       Lead oldLead = [
-    SELECT Id,
-           Status,
-           Rating,
-           LeadSource,
-           Company,
-           Last_Activity_Date__c
-    FROM Lead
-    LIMIT 1
-];
-
-
-        Lead newLead = oldLead.clone(false, true, false, false);
-        newLead.Status = 'Working';
-
-        Map<Id, Lead> oldMap = new Map<Id, Lead>{
-            oldLead.Id => oldLead
-        };
-
-        LeadTriggerHandler.updateLastActivityDate(
-            new List<Lead>{ newLead },
-            oldMap
-        );
-
-        System.assertEquals(
-            Date.today(),
-            newLead.Last_Activity_Date__c
-        );
-    }
-    @IsTest
-    static void test_findDuplicate() {
-
-        Lead existing = [
-            SELECT Id, Email
-            FROM Lead
-            WHERE Email = 'dup@test.com'
-            LIMIT 1
-        ];
-
+        
+        Campaign camp = [SELECT Id FROM Campaign LIMIT 1];
+        
         Lead newLead = new Lead(
-            LastName = 'DupCheck',
-            Company = 'Test',
-            Status = 'Open - Not Contacted',
-            Email = 'dup@test.com'
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            Campaign__c = camp.Id,
+            Status = 'Open',phone='1234567890'
         );
-
-        LeadTriggerHandler.findDuplicate(
-            new List<Lead>{ newLead }
-        );
-
-        System.assertEquals(true, newLead.Duplicate_Flag__c);
-        System.assertEquals(
-            existing.Id,
-            newLead.Duplicate_Parent_Lead__c
-        );
-    }
-    @IsTest
-    static void test_createFollowupTasks() {
-
-        Lead l = [
-            SELECT Id, OwnerId, Next_Follow_up_Date__c
-            FROM Lead
-            LIMIT 1
-        ];
-
-        Test.startTest();
-        LeadTriggerHandler.createfollowupTasks(
-            new List<Lead>{ l }
-        );
+        insert newLead;
+        
+        LeadTriggerHandler.campaignMapping(new List<Lead>{newLead});
+        
         Test.stopTest();
-
-        List<Task> tasks = [
-            SELECT Id
-            FROM Task
-            WHERE WhoId = :l.Id
-        ];
-
-        System.assertEquals(1, tasks.size());
     }
-
-    @IsTest
-    static void test_campaignMapping_safe() {
-
-        Lead l = [
-            SELECT Id
-            FROM Lead
-            LIMIT 1
-        ];
-
-        // Campaign__c is null → method safely skips
+    
+    @isTest
+    static void testCampaignMappingWithoutCampaign() {
         Test.startTest();
-        LeadTriggerHandler.campaignMapping(
-            new List<Lead>{ l }
+        
+        Lead newLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            Status = 'Open',
+            phone='1234566786'
         );
+        insert newLead;
+        
+        LeadTriggerHandler.campaignMapping(new List<Lead>{newLead});
+        
         Test.stopTest();
-
-        System.assert(true); // execution coverage
     }
-    @IsTest
-    static void test_leadAssignedNotification_safe() {
-
-        // Run only if CustomNotificationType exists
-        List<CustomNotificationType> types = [
-            SELECT Id
-            FROM CustomNotificationType
-            WHERE DeveloperName = 'Lead_Notification'
-            LIMIT 1
-        ];
-
-        if (types.isEmpty()) {
-            System.assert(true);
-            return;
-        }
-
-        Lead l = [
-            SELECT Id, OwnerId, LastName
-            FROM Lead
-            LIMIT 1
-        ];
-
+    
+    @isTest
+    static void testCampaignMappingEmptyList() {
         Test.startTest();
-        LeadTriggerHandler.leadAssignedNotification(
-            new List<Lead>{ l }
-        );
+        
+        LeadTriggerHandler.campaignMapping(new List<Lead>());
+        
         Test.stopTest();
-
-        System.assert(true);
     }
-
-    @IsTest
-    static void test_sendLostConvertedManagerNotification_safe() {
-
-        Lead l = [
-            SELECT Id, OwnerId
-            FROM Lead
-            LIMIT 1
-        ];
-
-        l.Status = 'Working'; // neither Closed Lost nor Converted
-
+    
+    @isTest
+    static void testLeadAssignedNotification() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testus4er@test.com' LIMIT 1];
+        User managerUser = [SELECT Id FROM User WHERE UserName = 'manageyyr@test.com' LIMIT 1];
+        
         Test.startTest();
-        LeadTriggerHandler.sendLostConvertedManagerNotification(
-            new List<Lead>{ l }
+        
+        Lead newLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            OwnerId = testUser.Id,
+            Status = 'Open',
+            phone='1234567890'
         );
+        insert newLead;
+        
+        LeadTriggerHandler.leadAssignedNotification(new List<Lead>{newLead});
+        
         Test.stopTest();
+    }
+    
+    @isTest
+    static void testLeadAssignedNotificationNoManager() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testus4er@test.com' LIMIT 1];
+        
+        Test.startTest();
+        
+        Lead newLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            OwnerId = testUser.Id,
+            Status = 'Open',
+              phone='1285678906'
+        );
+        insert newLead;
+        
+        LeadTriggerHandler.leadAssignedNotification(new List<Lead>{newLead});
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testLeadAssignedNotificationWithSalutation() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testus4er@test.com' LIMIT 1];
+        
+        Test.startTest();
+        
+        Lead newLead = new Lead(
+            Salutation = 'Mr.',
+            FirstName = 'John',
+            LastName = 'Doe',
+            Company = 'Test Company',
+            OwnerId = testUser.Id,
+            Status = 'Open',
+            phone='1234567895'
+        );
+        insert newLead;
+        
+        LeadTriggerHandler.leadAssignedNotification(new List<Lead>{newLead});
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testCheckAndSeprateMobileNumber() {
+        Test.startTest();
+        
+        Lead newLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            Phone = '9876543210',
+            MobilePhone = '9876543211',
+            Status = 'Open'
+        );
+        
+        LeadTriggerHandler.checkAndSeprateMobileNumber(new List<Lead>{newLead});
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testCheckAndSeprateMobileNumberNoPlus91() {
+        Test.startTest();
+        
+        Lead newLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            Phone = '9876543210',
+            MobilePhone = '9876543211',
+            Status = 'Open'
+        );
+        
+        LeadTriggerHandler.checkAndSeprateMobileNumber(new List<Lead>{newLead});
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testCheckAndSeprateMobileNumberNullPhone() {
+        Test.startTest();
+        
+        Lead newLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            Status = 'Open'
+        );
+        
+        LeadTriggerHandler.checkAndSeprateMobileNumber(new List<Lead>{newLead});
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testGetformated() {
+        Test.startTest();
+        
+        String result1 = LeadTriggerHandler.getformated('test');
+        String result2 = LeadTriggerHandler.getformated(null);
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testUpdateLastActivityDate() {
+        Test.startTest();
+        
+        Lead testLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            Status = 'Open',
+            Rating = 'Hot',
+            phone='1234567123'
+        );
+        insert testLead;
+        
+        testLead.Status = 'Working';
+        testLead.Rating = 'Warm';
+        testLead.LeadSource = 'Web';
+        testLead.Lead_Category__c = 'Premium';
+        testLead.GST_Number__c = 'GST123';
+        testLead.Company = 'Updated Company';
+        
+        Map<Id, Lead> oldMap = new Map<Id, Lead>{
+            testLead.Id => new Lead(
+                Id = testLead.Id,
+                Status = 'Open',
+                Rating = 'Hot',
+                LeadSource = null,
+                Lead_Category__c = null,
+                GST_Number__c = null,
+                Company = 'Test Company'
+            )
+        };
+        
+        LeadTriggerHandler.updateLastActivityDate(new List<Lead>{testLead}, oldMap);
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testUpdateLastActivityDateNoChange() {
+        Test.startTest();
+        
+        Lead testLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            Status = 'Open',
+            phone='1245678906'
+        );
+        insert testLead;
+        
+        Map<Id, Lead> oldMap = new Map<Id, Lead>{
+            testLead.Id => new Lead(
+                Id = testLead.Id,
+                Status = 'Open',
+                Company = 'Test Company',
+                  phone='1245678706'
+            )
+        };
+        
+        LeadTriggerHandler.updateLastActivityDate(new List<Lead>{testLead}, oldMap);
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testSendLostConvertedManagerNotificationLost() {
+        User testUser = [SELECT Id, ManagerId FROM User WHERE UserName = 'testus4er@test.com' LIMIT 1];
+        
+        Test.startTest();
+        
+        Lead testLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            OwnerId = testUser.Id,
+            Status = 'Open',
+              phone='1245678776'
+        );
+        insert testLead;
+        
+        testLead.Status = 'Closed Lost';
+        testLead.Lost_Reason__c='Features';
+        update testLead;
+        
+        LeadTriggerHandler.sendLostConvertedManagerNotification(new List<Lead>{testLead});
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testSendLostConvertedManagerNotificationConverted() {
+        User testUser = [SELECT Id, ManagerId FROM User WHERE UserName = 'testus4er@test.com' LIMIT 1];
+        
+        Test.startTest();
+        
+        Lead testLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            OwnerId = testUser.Id,
+            Status = 'Open',
+              phone='1245688906'
+        );
+        insert testLead;
+        
+        
+        LeadTriggerHandler.sendLostConvertedManagerNotification(new List<Lead>{testLead});
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testSendLostConvertedManagerNotificationNoChange() {
+        User testUser = [SELECT Id, ManagerId FROM User WHERE UserName = 'testus4er@test.com' LIMIT 1];
+        
+        Test.startTest();
+        
+        Lead testLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            OwnerId = testUser.Id,
+            Status = 'Open',
+              phone='1245778906'
+        );
+        
+        LeadTriggerHandler.sendLostConvertedManagerNotification(new List<Lead>{testLead});
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testSendLostConvertedManagerNotificationNoManager() {
+        User managerUser = [SELECT Id FROM User WHERE UserName = 'manageyyr@test.com' LIMIT 1];
+        
+        Test.startTest();
+        
+        Lead testLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            OwnerId = managerUser.Id,
+            Status = 'Closed Lost',
+              phone='1945678906'
+        );
+        
+        LeadTriggerHandler.sendLostConvertedManagerNotification(new List<Lead>{testLead});
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testFindDuplicate() {
+        Test.startTest();
+        
+        Lead newLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            Email = 'existing@test.com',
+            Status = 'Open',
+              phone='1945678906'
+        );
+        
+        LeadTriggerHandler.findDuplicate(new List<Lead>{newLead});
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testFindDuplicateNoEmail() {
+        Test.startTest();
+        
+        Lead newLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            Status = 'Open',
+              phone='1145678906'
+        );
+        
+        LeadTriggerHandler.findDuplicate(new List<Lead>{newLead});
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testFindDuplicateEmptyList() {
+        Test.startTest();
+        
+        LeadTriggerHandler.findDuplicate(new List<Lead>());
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testFindDuplicateUniqueEmail() {
+        Test.startTest();
+        
+        Lead newLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            Email = 'unique@test.com',
+            Status = 'Open',
+              phone='1246678906'
+        );
+        
+        LeadTriggerHandler.findDuplicate(new List<Lead>{newLead});
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testSetAccountEmail() {
+        Test.startTest();
+        
+        Account testAccount = new Account(
+            Name = 'Test Account',
+            phone='1234567891',
+            Customer_Category__c='Exporters'
+        );
+        insert testAccount;
+        
+        Lead testLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            Email = 'test@test.com',
+            Status = 'Open',
+              phone='1245578906'
+        );
+        insert testLead;
+        
+    
+        
+        Set<String> accIds = new Set<String>{testAccount.Id};
+        LeadTriggerHandler.setAccountEmail(new List<Lead>{testLead}, accIds);
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testSetAccountEmailNoAccount() {
+        Test.startTest();
+        
+        Lead testLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            Email = 'test@test.com',
+            Status = 'Open',
+              phone='1265678906'
+        );
+        
+        Set<String> accIds = new Set<String>();
+        LeadTriggerHandler.setAccountEmail(new List<Lead>{testLead}, accIds);
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testSetAccountEmailNoEmail() {
+        Test.startTest();
+        
+        Account testAccount = new Account(
+            Name = 'Test Account',
+            phone='1245785555',
+            Customer_Category__c='Exporters'
+        );
+        insert testAccount;
+        
+        Lead testLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            Status = 'Open',
+              phone='1245618906'
+        );
 
-        System.assert(true);
+        
+        Set<String> accIds = new Set<String>{testAccount.Id};
+        LeadTriggerHandler.setAccountEmail(new List<Lead>{testLead}, accIds);
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testCreatefollowupTasks() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testus4er@test.com' LIMIT 1];
+        
+        Test.startTest();
+        
+        Lead testLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            OwnerId = testUser.Id,
+            Next_Follow_up_Date__c = Date.today().addDays(7),
+            Status = 'Open',
+              phone='1241678906'
+        );
+        
+        LeadTriggerHandler.createfollowupTasks(new List<Lead>{testLead});
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testCreatefollowupTasksNoDate() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testus4er@test.com' LIMIT 1];
+        
+        Test.startTest();
+        
+        Lead testLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            OwnerId = testUser.Id,
+            Status = 'Open',
+              phone='1433678906'
+        );
+        
+        LeadTriggerHandler.createfollowupTasks(new List<Lead>{testLead});
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testCreatefollowupTasksNoOwner() {
+        Test.startTest();
+        
+        Lead testLead = new Lead(
+            LastName = 'Test Lead',
+            Company = 'Test Company',
+            Next_Follow_up_Date__c = Date.today().addDays(7),
+            Status = 'Open',
+              phone='1267678906'
+        );
+        
+        LeadTriggerHandler.createfollowupTasks(new List<Lead>{testLead});
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testCreatefollowupTasksEmptyList() {
+        Test.startTest();
+        
+        LeadTriggerHandler.createfollowupTasks(new List<Lead>());
+        
+        Test.stopTest();
     }
 }

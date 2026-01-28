@@ -55,11 +55,10 @@
                             <!--   <th>City</th>-->
                             <template if:false={isOpenedByOwner}>
                                 <th>Expense Limit</th>
-                                <th>Google.Dist</th>
+                                <th>Syst. Cal. KM<br/>(Google.Dist)</th>
+                                 <th>ODO Meter<br/>Dist.</th>
                             </template>
-                            <th> KM Travelled <br/>
-                              </th>
-                                <th>ODO Meter<br/>Dist.</th>
+                            <th> KM Travelled   </th>
                             <th>Amount</th>
                             <th>Attachments</th> 
                             <th>Remarks</th> 
@@ -85,13 +84,14 @@
                                 <td>{row.expDateFormatted}</td>
                                 <td>{row.expType}</td>
                                 <td>{row.travelMode}</td>
-                                 <td>{row.submittedAmt}</td>
+                                 <td class={row.otherExpenseLimitClass}>{row.submittedAmt}</td>
                                 <template if:false={isOpenedByOwner}>
-                                    <td>{row.lLimit}</td>
-                                    <td>{row.systemCalculatedKm}</td>
+                                    <td >{row.lLimit}</td>
+                                    <td class={row.varianceClassGoogle}>{row.systemCalculatedKm}</td>
+                                      <td class={row.varianceClassOdo}>{row.systemCalculatedODOKm}</td>
                                 </template>
                                 <td class={row.limitExceeded}>{row.totKM}</td>
-                                <td>{row.systemCalculatedODOKm}</td>
+                              
                                 <!-- Editable Amount -->
                                 <td>
                                     <template if:true={row.isEditable}>

@@ -27,6 +27,7 @@ public class VisitTriggerHandler {
         // Avoid callouts during test execution
         if (!dailylogIds.isEmpty() && !Test.isRunningTest() && label.ActivateGMapAPI=='TRUE') {
             CalculateDistanceAPI.distanceCalculation(dailylogIds);
+              CalculateDistanceAPI.distanceCalculationSF(dailylogIds);
         }
     
     }
@@ -112,6 +113,25 @@ public class VisitTriggerHandler {
             if(v.Assign_To__c !=null){
                 v.OwnerId = v.Assign_To__c; 
             }
+        }
+    }
+        public static void visitAssignedNotification(List<visit__c> visits) {
+
+        CustomNotificationType type = [
+            SELECT Id
+            FROM CustomNotificationType
+            WHERE DeveloperName = 'Lead_Notification'
+            LIMIT 1
+        ];
+
+        String senderId = UserInfo.getUserId();
+
+        for (visit__c v : visits) {
+
+            if (v.OwnerId == null) continue;
+       
+            SendEmailCustomNotification.sendNotification( 'Visit - ' + v.Name + ' is assigned to you',
+                'Visit Assigned',senderId, type.Id,v.Id,new Set<String>{ v.OwnerId } );
         }
     }
 }

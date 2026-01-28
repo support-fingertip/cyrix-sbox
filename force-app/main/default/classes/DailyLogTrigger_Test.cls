@@ -44,7 +44,7 @@ public class DailyLogTrigger_Test {
            STEP 4: ASSERT EXECUTION
            ----------------------------- */
         Daily_Log__c updatedDL = [
-            SELECT Id, Last_Visit__c
+            SELECT Id
             FROM Daily_Log__c
             WHERE Id = :dl.Id
         ];

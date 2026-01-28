@@ -51,6 +51,8 @@ public class SystemEndDayControllerTest {
 
         Test.startTest();
         SystemEndDayController.autoEndDailyLogs();
+         SystemEndDayScheduler scheduler = new SystemEndDayScheduler();
+        scheduler.execute(null);
         Test.stopTest();
 
         Daily_Log__c unchangedDL = [

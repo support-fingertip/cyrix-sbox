@@ -7,11 +7,7 @@ public class LeadTriggerHandler {
 
         for (Lead l : leads) {
             if (l.Id != null && l.Campaign__c != null) {
-                cms.add(new CampaignMember(
-                    LeadId = l.Id,
-                    CampaignId = l.Campaign__c,
-                    Status = 'Sent'
-                ));
+                cms.add(new CampaignMember( LeadId = l.Id,  CampaignId = l.Campaign__c,  Status = 'Sent' ));
             }
         }
 
@@ -19,12 +15,7 @@ public class LeadTriggerHandler {
             try {
                 insert cms;
             } catch (Exception ex) {
-                ExceptionHandler.addLog(
-                    ex,
-                    String.valueOf(cms),
-                    'LeadTriggerHandler',
-                    'campaignMapping'
-                );
+                ExceptionHandler.addLog( ex,String.valueOf(cms), 'LeadTriggerHandler', 'campaignMapping');
             }
         }
     }
@@ -43,21 +34,15 @@ public class LeadTriggerHandler {
 
         for (Lead l : leads) {
 
-            if (l.OwnerId == null) continue;
+          
+            String name = (l.Salutation != null ? l.Salutation + ' ' : '') + (l.FirstName != null ? l.FirstName + ' ' : '') + l.LastName;
 
-            String name =
-                (l.Salutation != null ? l.Salutation + ' ' : '') +
-                (l.FirstName != null ? l.FirstName + ' ' : '') +
-                l.LastName;
-
-            SendEmailCustomNotification.sendNotification(
-                'Lead - ' + name + ' is assigned to you',
-                'Lead Assigned',
-                senderId,
-                type.Id,
-                l.Id,
-                new Set<String>{ l.OwnerId }
-            );
+            SendEmailCustomNotification.sendNotification( 'Lead - ' + name + ' is assigned to you',
+                'Lead Assigned',senderId, type.Id,l.Id,new Set<String>{ l.OwnerId } );
+            if(l.ManagerId__c !=null && l.ManagerId__c !=''){
+               SendEmailCustomNotification.sendNotification( 'Lead - ' + name + ' is assigned to '+l.Lead_Owner_Name__c,
+                'Lead Assigned',senderId, type.Id,l.Id,new Set<String>{ l.ManagerId__c } ); 
+            }
         }
     }
 
@@ -189,23 +174,12 @@ public class LeadTriggerHandler {
        Account Email Sync
        ============================================================ */
 
-    // REQUIRED wrapper to keep trigger compatibility
-    public static void setAccountEmail(List<Lead> leadList, Set<String> accountIds) {
-        // accountIds intentionally ignored
-        setAccountEmail(leadList);
-    }
+ 
 
     // Actual implementation
-    public static void setAccountEmail(List<Lead> leads) {
+    public static void setAccountEmail(List<Lead> leads, Set<string> accIds) {
 
-        Set<Id> accIds = new Set<Id>();
-        for (Lead l : leads) {
-            if (l.IsConverted && l.ConvertedAccountId != null) {
-                accIds.add(l.ConvertedAccountId);
-            }
-        }
-
-        if (accIds.isEmpty()) return;
+ 
 
         Map<Id, Account> accMap = new Map<Id, Account>(
             [SELECT Id, Email__c FROM Account WHERE Id IN :accIds]
@@ -256,4 +230,9 @@ public class LeadTriggerHandler {
             insert tasks;
         }
     }
+    
+
+
+
+
 }

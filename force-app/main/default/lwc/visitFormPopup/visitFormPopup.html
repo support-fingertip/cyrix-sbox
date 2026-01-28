@@ -127,6 +127,26 @@
                         placeholder="Enter comments..." onchange={onCommentChange} required></lightning-textarea>
                     <!--   <c-camera-screen record-id={recordId} is-desktop={isDesktop} complete-visit={completeVisit} onmyvisitclick={handleOrderScreen}></c-camera-screen>
               -->
+                    <div class="selfie-minimal slds-m-vertical_medium">
+                        <div class="slds-media slds-media_center">
+                            <div class="slds-media__figure">
+                                <div class="emoji-wrapper">
+                                    📸
+                                </div>
+                            </div>
+                            <div class="slds-media__body">
+                                <div class="slds-text-heading_small slds-m-bottom_xx-small">
+                                    <span class="primary-text">Take a selfie</span>
+                                </div>
+                                <p class="slds-text-body_regular">
+                                    with the hospital or customer in the background
+                                </p>
+                                <div class="slds-m-top_xx-small">
+                                    <span class="slds-badge slds-theme_light">Required for verification</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
 
 
@@ -137,7 +157,8 @@
                     </template>
                     <!--File Upload-->
                     <template if:false={showCameraModal}>
-                        <div class="slds-text-align_center slds-box upload-wrapper slds-p-bottom_medium scrollable_y" style="margin-top:10px">
+                        <div class="slds-text-align_center slds-box upload-wrapper slds-p-bottom_medium scrollable_y"
+                            style="margin-top:10px">
 
                             <!-- Desktop Upload -->
                             <template if:true={isDesktop}>
@@ -192,9 +213,16 @@
 
             <!-- Missed visit -->
             <template lwc:if={reshedule}>
+
                 <div class="slds-modal__content slds-p-around_medium customHeight" id="modal-content-id-3">
-                    <lightning-textarea required name="Missed_PostPone_Reason__c" label="Missed Reason"
-                        value={visitData.Missed_PostPone_Reason__c} onchange={onCommentChange}></lightning-textarea>
+                    <lightning-combobox label="Missed Reason" value={visitData.Missed_Visit_Reason__c}
+                        name="Missed_Visit_Reason__c" options={missedVisitOptions} onchange={onCommentChange} required>
+                    </lightning-combobox>
+                    <br />
+                    <template lwc:if={showOtherReason}>
+                        <lightning-textarea required name="Missed_PostPone_Reason__c" label="Missed Reason"
+                            value={visitData.Missed_PostPone_Reason__c} onchange={onCommentChange}></lightning-textarea>
+                    </template>
                     <br />
                     <lightning-input required="true" type="datetime" name="PostPoned_Start_Time__c"
                         label="Rescheduled Date" value={visitData.PostPoned_Start_Time__c}

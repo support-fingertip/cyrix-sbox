@@ -6,16 +6,17 @@ import { getPicklistValues, getObjectInfo } from 'lightning/uiObjectInfoApi';
 import getFiles from '@salesforce/apex/visitManager.getFiles';
 import FORM_FACTOR from '@salesforce/client/formFactor';
 import deleteFile from '@salesforce/apex/visitManager.deleteFile';
+import { NavigationMixin } from 'lightning/navigation';
 //fields
 import VISIT_OBJECT from '@salesforce/schema/Visit__c';
 import VISIT_FOR_FIELD from '@salesforce/schema/Visit__c.Visit_for__c';
 import VISIT_TYPE_FIELD from '@salesforce/schema/Visit__c.Visit_Type__c';
 import VISIT_PURPOSE_FIELD from '@salesforce/schema/Visit__c.Visit_Purpose__c';
 import VISIT_FEEDBACK_FIELD from '@salesforce/schema/Visit__c.Visit_Feedback__c';
+import VISIT_MISSEDREASON from '@salesforce/schema/Visit__c.Missed_Visit_Reason__c';
 
 
-
-export default class visitformpopup extends LightningElement {
+export default class visitformpopup extends NavigationMixin(LightningElement)  {
 
 
     isSearchValueSelected = false; searchPlaceHolder; searchLabel; isValueSearched = false; searchValueName = '';
@@ -28,11 +29,12 @@ export default class visitformpopup extends LightningElement {
     pickData1;
     pickDatapurpose;
     pickDataFeedback;
+    missedVisitOptions;
     @wire(getObjectInfo, { objectApiName: VISIT_OBJECT })
     visitInfo;
     @api newVisitCreate;
     @api reshedule;
-
+showOtherReason=false;
 
     @api dailyLogId;
     @api isDesktop;
@@ -89,6 +91,24 @@ get searchNameData() {
             console.error('Error fetching Zone picklist values:', error);
         }
     };
+    
+    @wire(getPicklistValues, {
+        recordTypeId: '$visitInfo.data.defaultRecordTypeId',
+        fieldApiName: VISIT_MISSEDREASON
+    })
+    missedVisitOption({ error, data }) {
+        if (data) {
+            this.missedVisitOptions = [
+                ...data.values.map(plValue => ({
+                    label: plValue.label,
+                    value: plValue.value
+                }))
+            ];
+        } else if (error) {
+            console.error('Error fetching missed picklist values:', error);
+        }
+    };
+
 
     @wire(getPicklistValues, {
         recordTypeId: '$visitInfo.data.defaultRecordTypeId',
@@ -158,6 +178,7 @@ get searchNameData() {
         Account__c: '',
         Daily_Log__c: '',
         Comments__c: '',
+        Missed_Visit_Reason__c:'',
         //  Other_Visit__c  : '',
         PostPoned_Start_Time__c: null,
         Missed_PostPone_Reason__c: '',
@@ -175,19 +196,36 @@ get searchNameData() {
             this.headerVisit = 'Create New Visit';
             this.getVisitData();
         }
-        else if (this.reshedule) {
-            this.headerVisit = 'Missed Visit';
-        }
-        else if (this.completeVisit) {
-            this.headerVisit = 'Complete Visit';
+        else if(this.completeVisit){
+        this.headerVisit = 'Complete Visit' ;
+            this.showToastInfo(
+        'Selfie Required',
+        'Please take a selfie with the hospital/customer in the background to complete the visit.',
+        'info',
+        'dismissible'
+    );
 
-        }
+    }else if(this.reshedule){
+        this.headerVisit = 'Missed Visit' ; 
+    }
+  
+  
   this.isDesktop = FORM_FACTOR === 'Large';
 this.isPhone = FORM_FACTOR === 'Small';
 //this.containerClass = this.isDesktop ? 'slds-modal__container' : '';
         this.loadAllFiles();
     }
 
+
+
+    showToastInfo(title, message, variant, mode) {
+    const evt = new ShowToastEvent({
+        title: title,
+        message: message,
+        variant: variant,
+        mode: mode
+    });
+}
 handleEnable(e) {
     this.isDisabled = e.detail.isDisabled;
 
@@ -291,10 +329,14 @@ handleEnable(e) {
 
         }
         else if (this.reshedule) {
-            if (this.visitData.Missed_PostPone_Reason__c == '') {
+            if (this.visitData.Missed_Visit_Reason__c == '' || this.visitData.Missed_Visit_Reason__c == undefined) {
                 const warningMsg = 'Please enter missed reason';
                 this.genericDispatchEvent('Warning', warningMsg, 'warning');
                 return;
+            }else if(this.visitData.Missed_Visit_Reason__c == 'Other' && !this.visitData.Missed_Visit_Reason__c){
+                 const warningMsg = 'Please enter missed reason description';
+                this.genericDispatchEvent('Warning', warningMsg, 'warning');
+                return; 
             }
             else if (this.visitData.PostPoned_Start_Time__c == undefined || this.visitData.PostPoned_Start_Time__c == '') {
                 const msg = "Add a Visit date";
@@ -309,6 +351,7 @@ handleEnable(e) {
                     message: 'missedReason',
                     missedReason: this.visitData.Missed_PostPone_Reason__c,
                     missedDate: this.visitData.PostPoned_Start_Time__c,
+                     missedpicklist: this.visitData.Missed_Visit_Reason__c
                 }
             });
             this.dispatchEvent(message);
@@ -400,6 +443,13 @@ handleEnable(e) {
                 }
             }
         }
+         if (fieldTarget =='Missed_Visit_Reason__c' && fieldValue && fieldValue=='Other') {
+        this.showOtherReason = true;
+        this.visitData.Missed_PostPone_Reason__c = '';
+    } else if (fieldTarget =='Missed_Visit_Reason__c' && fieldValue && fieldValue !='Other'){
+        this.showOtherReason = false;
+        this.visitData.Missed_PostPone_Reason__c = '';
+    }
     }
     handleVisitType(event) {
         this.visitData.Visit_Type__c = event.detail.value;
@@ -570,9 +620,10 @@ handleEnable(e) {
         }
     }
 
-    previewFile(event) {
-        let recordId1 = event.currentTarget.dataset.id;
-        //  const filetype = event.currentTarget.id
+previewFile(event) {
+    try{
+    let recordId1 = event.currentTarget.dataset.id;
+    //  const filetype = event.currentTarget.id
         this[NavigationMixin.Navigate]({
             type: 'standard__namedPage',
             attributes: {
@@ -582,7 +633,9 @@ handleEnable(e) {
                 selectedRecordId: recordId1
             }
         });
-
-
+    }catch(e){
+        console.error(e.message);
     }
+
+}
 }

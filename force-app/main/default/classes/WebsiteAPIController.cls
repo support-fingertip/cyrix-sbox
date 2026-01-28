@@ -81,6 +81,7 @@ global without sharing class WebsiteAPIController {
                     ld.Course_Center__c =leaddData.courseCenter;
                     ld.Payment_Id__c=leaddData.paymentId;
                     ld.Order_Id__c=leaddData.orderId;
+                     ld.Company=leaddData.institute;
                 }else if(webFormName =='medical-equipment-maintenance' || webFormName =='hospital-equipment-maintenance'){
                     ld.Number_of_Hospital_Beds__c =leaddData.noofHospitalBeds;
                 }else if(webFormName =='buyback'){
@@ -117,6 +118,7 @@ global without sharing class WebsiteAPIController {
                     ld.Qualification__c =leaddData.qualification;
                     ld.course_Interested__c =leaddData.courseInterested;
                     ld.Request_Counselling__c =leaddData.requestCounselling;
+                     ld.Company=leaddData.institute;
                 } if(webFormName =='career'){
                     ld.Webform_State__c =leaddData.state;
                     ld.Job_Name__c =leaddData.jobName;
@@ -132,6 +134,7 @@ global without sharing class WebsiteAPIController {
                     ld.would_like_to_know_more_about__c= leaddData.wouldLiketoKnowMoreAbout;
                     ld.Message__c= leaddData.message;
                     ld.Location__c= leaddData.location;
+                     ld.Company=leaddData.institute;
                     ld.Consent_to_Receive_Updates__c= leaddData.consentToReceiveUpdates;
                 }else if(webFormName =='TradeIndia'){
                     ld.Webform_State__c =leaddData.state;
@@ -232,6 +235,7 @@ global without sharing class WebsiteAPIController {
         public String institution;
         public String hospital;
         public String company;
+         public String institute;
         public String message;
         public String campaign;
         public String campaignId;

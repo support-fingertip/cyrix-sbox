@@ -41,7 +41,7 @@ export default class visitManager extends LightningElement {
     searchPro = '';
     objName;
     screenHeight;
-    buttonName = 'Start Visits';
+    buttonName = 'Start Day';
     createDailyLog = false;
     isDisabled = false;
     isPageLoaded = false;
@@ -52,6 +52,7 @@ export default class visitManager extends LightningElement {
     isDailyLog = true;
     outletPage = false;
     isCameraScreen = false;
+    isCameraOpen=true;
     isDailyLogPopup = false;
     isDailyLogOutPopup = false;
     isProductScreen = false;
@@ -237,7 +238,7 @@ export default class visitManager extends LightningElement {
                       }
                       if (result.dailyLog == undefined) {
                           this.isVisitCreate = false;
-                          this.buttonName = 'Start Visit';
+                          this.buttonName = 'Start Day';
                       }
                       this.isPageLoaded = false;
                   })
@@ -413,7 +414,7 @@ export default class visitManager extends LightningElement {
         var changeShadow = false;
         if (sc == 0) {
             this.Outlet = true;
-            this.header = 'Visit type';
+            this.header = 'Visit Plan';
             this.isVisitCreate = true;
             this.isShowBackButton = false;
         }
@@ -428,7 +429,7 @@ export default class visitManager extends LightningElement {
         }
         else if (sc == 2) {
             changeShadow = true;
-            this.header = 'Visit type';
+            this.header = 'Visit Plan';
             // this.isHomePage = true;
             // this.header = 'Home';
             this.Outlet = true;
@@ -439,7 +440,7 @@ export default class visitManager extends LightningElement {
         }
         else if (sc == 2.2) {
             this.Outlet = true;
-            this.header = 'Visit type';
+            this.header = 'Visit Plan';
             this.screen = 2;
             this.isVisitCreate = true;
             this.isShowBackButton = false;
@@ -516,7 +517,7 @@ handleGetLatLon(locationProgress) {
         this.currentLocationRequestId = null;
 
         if (locationProgress === 'Checkin') {
-            this.buttonName = 'Start Visit';
+            this.buttonName = 'Start Day';
         }
         this.genericDispatchEvent('Error', 'Unable to fetch location in time. Please try again.', 'error');
     }, 15000);
@@ -600,7 +601,7 @@ handleGetLatLon(locationProgress) {
                 this.isPageLoaded = false;
 
                 if (locationProgress === 'Checkin') {
-                    this.buttonName = 'Start Visit';
+                    this.buttonName = 'Start Day';
                 }
                 this.genericDispatchEvent('Error', 'Unable to fetch location. Please ensure location is enabled.', 'error');
             });
@@ -644,7 +645,7 @@ handleGetLatLon(locationProgress) {
                 this.isPageLoaded = false;
 
                 if (locationProgress === 'Checkin') {
-                    this.buttonName = 'Start Visit';
+                    this.buttonName = 'Start Day';
                 }
 
                 // ✅ better message based on real error
@@ -669,7 +670,7 @@ handleGetLatLon(locationProgress) {
     this.isLoading = false;
 
     if (locationProgress === 'Checkin') {
-        this.buttonName = 'Start Visit';
+        this.buttonName = 'Start Day';
     }
     this.genericDispatchEvent('Error', 'Location not supported on this device.', 'error');
 }
@@ -744,7 +745,7 @@ handleGetLatLon(locationProgress) {
                 } else if (toastMessage === 'Day Ended Successfully') {
                     this.isVisitCreate = false;         // no new visit until restart
                     this.isDailyLog = false;            // log closed
-                    this.buttonName = 'Start Visit';      // show Start Day button
+                    this.buttonName = 'Start Day';      // show Start Day button
                 }
 
                 // ✅ NEW: hard refresh Daily Log state from server
@@ -762,7 +763,7 @@ handleGetLatLon(locationProgress) {
 
         this.isRenderDataLoaded = true;
         const headerName = this.buttonName;
-        if (headerName == 'Start Visit') {
+        if (headerName == 'Start Day') {
             this.isDailyLogPopup = true;
             this.createDailyLog = true;
             this.isDisabled = false;
@@ -836,7 +837,7 @@ handleGetLatLon(locationProgress) {
 
 
             if (kmDis <= 0) {
-                if ((this.buttonName == 'Start Visit' && this.ownVehicle == true) ||
+                if ((this.buttonName == 'Start Day' && this.ownVehicle == true) ||
                     (this.buttonName == 'End Day' &&
                         (this.dailylogData.Vehicle_Used__c == 'Office' ||
                             this.dailylogData.Vehicle_Used__c == 'Personal/own'))) {
@@ -848,28 +849,41 @@ handleGetLatLon(locationProgress) {
                 }
             }
 
-            if ((this.worktype == '' || this.worktype == undefined) && this.buttonName == 'Start Visit') {
+               if (this.buttonName === 'End Day'){
+if(this.VisitDataFromOutlet){
+                const activeVisit = this.VisitDataFromOutlet.find(visit => visit.status === 'In Progress');
+                if (activeVisit) {
+                    const msg = "You have an active visit. Please complete it before end the day.";
+                const title = '';
+                const variant = 'warning';
+                this.genericDispatchEvent(title, msg, variant);
+                return;
+                }
+            }
+        }
+
+            if ((this.worktype == '' || this.worktype == undefined) && this.buttonName == 'Start Day') {
                 const msg = "Add Work type..";
                 const title = '';
                 const variant = 'warning';
                 this.genericDispatchEvent(title, msg, variant);
                 return;
             }
-            else if ((this.vehicleType == '' || this.vehicleType == undefined) && this.buttonName == 'Start Visit') {
+            else if ((this.vehicleType == '' || this.vehicleType == undefined) && this.buttonName == 'Start Day') {
                 const msg = "Add Vehicle Type .";
                 const title = '';
                 const variant = 'warning';
                 this.genericDispatchEvent(title, msg, variant);
                 return;
             }
-            else if ((this.transport == '' || this.transport == undefined) && this.buttonName == 'Start Visit') {
+            else if ((this.transport == '' || this.transport == undefined) && this.buttonName == 'Start Day') {
                 const msg = "Add Mode Of Transport.";
                 const title = '';
                 const variant = 'warning';
                 this.genericDispatchEvent(title, msg, variant);
                 return;
             }
-            else if ((this.companion == '' || this.companion == undefined) && this.buttonName == 'Start Visit' && this.withCompanion == 'Yes') {
+            else if ((this.companion == '' || this.companion == undefined) && this.buttonName == 'Start Day' && this.withCompanion == 'Yes') {
                 const msg = "Add Companion Name.";
                 const title = '';
                 const variant = 'warning';
@@ -880,7 +894,7 @@ handleGetLatLon(locationProgress) {
             this.isDisabled = true;
             this.isPageLoaded = true;
 
-            if (this.buttonName == 'Start Visit') {
+            if (this.buttonName == 'Start Day') {
                 this.buttonName = 'End Day';
                 this.handleGetLatLon('Checkin');
             }
@@ -928,19 +942,20 @@ handleGetLatLon(locationProgress) {
         this.newVisitPoup = true;
     }
     onClickVisitPopup(event) {
+ 
         const msg = event.detail;
-        console.log(msg);
+
         if (msg.message == 'Close') {
             this.newVisitPoup = false;
             this.isvisitDesktop = true;
         }
-        if (msg.message == 'Save') {
+      if (msg.message == 'Save') {
             this.genericDispatchEvent('Success', 'Visit Created successfully', 'success');
             this.newVisitPoup = false;
             this.isvisitDesktop = true;
             if (this.Outlet) {
                 setTimeout(() => {
-                    const childComp = this.template.querySelector('c-outlet-screen');
+                    const childComp = this.template.querySelector('c-visit-summary-screen');
                     if (childComp) {
                         childComp.handleUpdateChange();
                     } else {
@@ -952,6 +967,7 @@ handleGetLatLon(locationProgress) {
                
             }
         }
+    
     }
     completeVisit() {
         setTimeout(() => {

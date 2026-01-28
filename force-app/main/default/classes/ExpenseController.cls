@@ -3,7 +3,7 @@ public with sharing class ExpenseController {
     public static Boolean skipHeavyLogic = false;
     
     
-/**************************************************************** 
+    /**************************************************************** 
 * Class Name  : ExpenseData  @Company  : Fingertip    @Created Date  : 22/10/2025   
 @description : newexpense LWC  @Used By  : - Expense New/Edit Button 
 * Change Log: 
@@ -23,6 +23,7 @@ public with sharing class ExpenseController {
         @AuraEnabled public List<String> travelTypes;
         @AuraEnabled public List<String> travelModes;
         @AuraEnabled public List<String> expenseTypes;
+        @AuraEnabled public List<String> accomodationTypes;
         @AuraEnabled public List<String> foodTypes;
         @AuraEnabled public List<String> approvalStatus;
         @AuraEnabled public Date startDate;
@@ -33,8 +34,8 @@ public with sharing class ExpenseController {
         @AuraEnabled public String expenseId;
         @AuraEnabled public String expenseCommnents;
         @AuraEnabled public boolean isCarEnabled  {get;set;}
-    @AuraEnabled public boolean isBikeEnabled {get;set;}
-    @AuraEnabled public boolean isAutoEnabled {get;set;}
+        @AuraEnabled public boolean isBikeEnabled {get;set;}
+        @AuraEnabled public boolean isAutoEnabled {get;set;}
     }
     
     
@@ -49,7 +50,7 @@ public with sharing class ExpenseController {
         String Executive_Band;
         String Executive_Profile = userRec.Profile.Name;
         String ExectiveId = userRec.Id;
-
+        
         //======================================
         //Expense Start Date and End Date setting
         //========================================
@@ -58,21 +59,22 @@ public with sharing class ExpenseController {
         Integer endDay   = Date.daysInMonth(today.year(), today.month());
         Date startDate = Date.newInstance(today.year(), today.month(), startDay);  // 1st of month
         Date endDate   = Date.newInstance(today.year(), today.month(), endDay);    // last of month
-
+        
         ExpenseData data = new ExpenseData();
         data.startDate = startDate;
         data.endDate = endDate;
         data.travelModes = getPicklistValues('Expenses_Line_Item__c','Travel_Mode__c');
         data.expenseTypes = getPicklistValues('Expenses_Line_Item__c','Expense_Type__c');
+        data.accomodationTypes = getPicklistValues('Expenses_Line_Item__c','Accommodation_Type__c');
         data.travelTypes = getPicklistValues('Expenses_Line_Item__c','Travel_Type__c');
         data.foodTypes = getPicklistValues('Expenses_Line_Item__c','Food_Type__c');
         data.approvalStatus = getPicklistValues('Expenses_Line_Item__c','Approval_Status__c');
         data.LoggedInUser = userRec;
         system.debug('recordId'+recordId);
-
+        
         
         Expense__c exp;
-   //expense record Id is available then fetch expense record
+        //expense record Id is available then fetch expense record
         if (recordId != null) {
             List<Expense__c> expList = [ SELECT Id, Name, Start_Date__c, End_Date__c, Employee__c, OwnerId, Comments__c, Approval_Status__c, Expense_Approver_L1__c,Executive_Name__c,Expense_Approver_L2__c,Executive_Profile__c,Total_Amount_Auto__c,Total_KM_Bike__c,Total_KM_Car__c  FROM Expense__c WHERE Id = :recordId LIMIT 1 ];
             if (!expList.isEmpty()) {
@@ -81,7 +83,7 @@ public with sharing class ExpenseController {
                 data.startDate = exp.Start_Date__c;
                 data.endDate = exp.End_Date__c;
                 startDate= exp.Start_Date__c;
-               endDate =exp.End_Date__c;
+                endDate =exp.End_Date__c;
             }
         }
         
@@ -95,16 +97,16 @@ public with sharing class ExpenseController {
         if (exp != null) {
             Executive_Profile = exp.Executive_Profile__c;
             data.lineItems = [
-                SELECT Id, Name, Travel_Type__c, Expense_Type__c, Daily_Log__c, Amount__c, Expense__c, Expense_Date__c,City_Name__c,
-                Remarks__c, Total_KM__c,Working_Hours__c,Calculated_KM__c,Food_Type__c,lodging_Limit__c,TA_Limit__c,DA_Limit__c,
+                SELECT Id, Name, Travel_Type__c, Expense_Type__c, Daily_Log__c,Accommodation_Type__c, Amount__c, Expense__c, Expense_Date__c,City_Name__c,
+                Remarks__c, Total_KM__c,Working_Hours__c,Total_Distance_Calculated_by_ODM_Reading__c,Calculated_KM__c,Food_Type__c,lodging_Limit__c,TA_Limit__c,DA_Limit__c,
                 Local_Conveyance_Limit__c,localId__c,Approval_Status__c,Travel_Mode__c,System_Calculated_Amount__c, Lodging_Food_Expense_Limit__c,Is_Updated__c
                 FROM Expenses_Line_Item__c WHERE Expense__c = :exp.Id  ORDER BY Expense_Date__c ASC ];
             data.expense = exp;
         }
-     
+        
         // daily logs in between startdate and enddate
-        list<Daily_Log__c> logs = [SELECT Id,Name,Date__c,Travel_Type__c,Total_KM_Travelled__c,Mode_of_transport__c FROM Daily_Log__c WHERE OwnerId=:ExectiveId AND 
-                     (Date__c >=:startDate AND Date__c <=:endDate) order by Date__c asc]; 
+        list<Daily_Log__c> logs = [SELECT Id,Name,Date__c,Travel_Type__c,Total_KM_Travelled__c,Total_Distance_Calculated_by_ODM_Reading__c,Mode_of_transport__c FROM Daily_Log__c WHERE OwnerId=:ExectiveId AND 
+                                   (Date__c >=:startDate AND Date__c <=:endDate) order by Date__c asc]; 
         for(Daily_Log__c l:logs){
             if(l.Total_KM_Travelled__c !=null){
                 l.KMs_Travelled__c =(l.Total_KM_Travelled__c).setScale(0, RoundingMode.HALF_UP);
@@ -112,47 +114,50 @@ public with sharing class ExpenseController {
         }
         
         data.days= logs;
-       
+        
         //Travel Eligibliy
         Travel_Eligibility__c travelEligibility;
-
-       Executive_Profile= Executive_Profile=='PT1'? 'System Administrator': Executive_Profile;
-            List<Travel_Eligibility__c> profileElig = [SELECT Id,Name,Eligibility_For__c, Profile__c,Conveyance_Allowance_per_KM_Bike__c,
-                                                       Conveyance_Allowance_per_KM_Own_Car__c,
-                                                       Daily_Allowance_HQ__c, DA_Other_State__c,DA_Other_District__c,
-                                                       Monthly_limit_Auto__c,Monthly_limit_Bike__c,Monthly_Limit_Car__c,
-                                                       Mandatory_Remarks_File_Types__c,Mandatory_File_Expense_Types__c,
-                                                       Lodging_Expense_per_Day_Metro__c, Lodging_Expense_per_Day_Non_Metro__c, 
-                                                       Lodging_Food_Expenses__c, Travel_Mode_HQ__c,
-                                                       Local_Conveyance__c,Travel_Mode_UC__c,Expense_Type_UC__c,Expense_Type_HQ__c
-                                                       FROM Travel_Eligibility__c WHERE Profile__c = :Executive_Profile];
+        
+        Executive_Profile= Executive_Profile=='PT1'? 'System Administrator': Executive_Profile;
+        List<Travel_Eligibility__c> profileElig = [SELECT Id,Name,Eligibility_For__c, Profile__c,Conveyance_Allowance_per_KM_Bike__c,
+                                                   Conveyance_Allowance_per_KM_Own_Car__c,
+                                                   Daily_Allowance_HQ__c, DA_Other_State__c,DA_Other_District__c,
+                                                   Monthly_limit_Auto__c,Monthly_limit_Bike__c,Monthly_Limit_Car__c,
+                                                   Mandatory_Remarks_File_Types__c,Mandatory_File_Expense_Types__c,
+                                                   Lodging_Expense_per_Day_Metro__c, Lodging_Expense_per_Day_Non_Metro__c, 
+                                                   Lodging_Food_Expenses__c, Travel_Mode_HQ__c,OutofStateSingle_Occupancy_Accommodation__c,
+                                                   Local_Conveyance__c,Travel_Mode_UC__c,Expense_Type_UC__c,Expense_Type_HQ__c,
+                                                   Accommodation_Other_District__c,In_State_Double_Occupancy_Accommodation__c,
+                                                   OutofStateDouble_Occupancy_Accommodation__c,In_State_Single_Occupancy_Accommodation__c
+                                                   
+                                                   FROM Travel_Eligibility__c WHERE Profile__c = :Executive_Profile];
         system.debug('Executive_Profile>>'+Executive_Profile);   
         if (!profileElig.isEmpty()) {
-                travelEligibility = profileElig[0];
-             if(travelEligibility.Travel_Mode_HQ__c !=null){
+            travelEligibility = profileElig[0];
+            if(travelEligibility.Travel_Mode_HQ__c !=null){
                 if(travelEligibility.Travel_Mode_HQ__c.contains('Car')){   
                     data.isCarEnabled =true;
                 }
                 if(travelEligibility.Travel_Mode_HQ__c.contains('Bike')){   
                     data.isBikeEnabled =true;
                 }
-            if(travelEligibility.Travel_Mode_HQ__c.contains('Autorishaw')){   
+                if(travelEligibility.Travel_Mode_HQ__c.contains('Autorishaw')){   
                     data.isAutoEnabled =true;
                 }
             }
             
-             if(travelEligibility.Travel_Mode_UC__c !=null){
+            if(travelEligibility.Travel_Mode_UC__c !=null){
                 if(travelEligibility.Travel_Mode_UC__c.contains('Car')){   
                     data.isCarEnabled =true;
                 }
                 if(travelEligibility.Travel_Mode_UC__c.contains('Bike')){   
                     data.isBikeEnabled =true;
                 }
-            if(travelEligibility.Travel_Mode_UC__c.contains('Autorishaw')){   
+                if(travelEligibility.Travel_Mode_UC__c.contains('Autorishaw')){   
                     data.isAutoEnabled =true;
                 }
             }
-            }
+        }
         data.eligibilities = travelEligibility;
         return data;
     }
@@ -205,7 +210,7 @@ public with sharing class ExpenseController {
         // Query by localId__c (stored in Description)
         Set<String> foundLocalIds = new Set<String>();
         if (!localIds.isEmpty()) {
-         
+            
             for (ContentVersion ver : [
                 SELECT Description FROM ContentVersion WHERE Description IN :localIds
             ]) {
@@ -250,13 +255,8 @@ public with sharing class ExpenseController {
         }
         if(expense !=null ){
             if(expense.Id == null){
-                User usr = [
-                    SELECT Name,managerId 
-                    FROM User 
-                    WHERE Id = :UserInfo.getUserId() 
-                    LIMIT 1
-                ];
-               expense.Expense_Approver_L1__c=usr.managerId; 
+                User usr = [ SELECT Name,managerId  FROM User  WHERE Id = :UserInfo.getUserId()  LIMIT 1 ];
+                expense.Expense_Approver_L1__c=usr.managerId; 
                 Date startDate = expense.Start_Date__c;
                 Date endDate   = expense.End_Date__c;
                 
@@ -271,7 +271,7 @@ public with sharing class ExpenseController {
                 
                 // Build label depending on year change
                 String datePart = startDay + ' ' + startMonth + ' ' + startYear + ' To ' + endDay + ' ' + endMonth + ' ' + endYear;
-
+                
                 // Final Name
                 expense.Name = datePart + ' / ' + usr.Name;
             }
@@ -279,7 +279,7 @@ public with sharing class ExpenseController {
             // FIRST: Map child type â†’ parent allowed picklist value
             if (!expenseItems.isEmpty()) {
                 String childType = expenseItems[0].Expense_Type__c;
-            
+                
                 // Mapping TA/DA to actual picklist values
                 if (childType == 'TA') {
                     expense.Expense_Type__c = 'Travel';
@@ -293,24 +293,25 @@ public with sharing class ExpenseController {
             
             // SECOND: Save parent record (MUST be after mapping)
             upsert expense;
-             
+            
             // STEP 3 + 4: Now process child line items
             Set<Date> updatedDates = new Set<Date>();
             
             for (Expenses_line_item__c itm : expenseItems) {
-            
+                
                 if (itm.Is_Updated__c == true && itm.Expense_Date__c != null) {
                     updatedDates.add(itm.Expense_Date__c);
                 }
-            
+                
                 if (String.isEmpty(itm.Id)) {
-            
+                    
                     // NEW CHILD RECORD
                     Expenses_line_item__c exp = new Expenses_line_item__c();
                     exp.localId__c = itm.localId__c;
                     exp.Expense_Date__c = itm.Expense_Date__c;
                     exp.Expense_Type__c = itm.Expense_Type__c;
-                    exp.Travel_Type__c = itm.Travel_Type__c;
+                    exp.Accommodation_Type__c = itm.Accommodation_Type__c; 
+                     exp.Travel_Type__c = itm.Travel_Type__c;
                     exp.Travel_Mode__c = itm.Travel_Mode__c;
                     exp.Daily_Log__c = itm.Daily_Log__c;
                     exp.Working_Hours__c = itm.Working_Hours__c;
@@ -318,29 +319,30 @@ public with sharing class ExpenseController {
                     exp.Amount__c = itm.Amount__c;
                     exp.Remarks__c = itm.Remarks__c;
                     exp.Calculated_KM__c = itm.Calculated_KM__c;
+                    exp.Total_Distance_Calculated_by_ODM_Reading__c = itm.Total_Distance_Calculated_by_ODM_Reading__c;
                     exp.Food_Type__c = itm.Food_Type__c;
                     exp.lodging_Limit__c = itm.lodging_Limit__c;
-                       exp.TA_Limit__c = itm.TA_Limit__c;
-                       exp.DA_Limit__c = itm.DA_Limit__c;
+                    exp.TA_Limit__c = itm.TA_Limit__c;
+                    exp.DA_Limit__c = itm.DA_Limit__c;
                     exp.Local_Conveyance_Limit__c = itm.Local_Conveyance_Limit__c;
                     exp.System_Calculated_Amount__c = itm.System_Calculated_Amount__c;
-            
+                    
                     if (submitforApproval && itm.Approval_Status__c == 'Pending') {
                         exp.Approval_Status__c = 'Pending';
                     } else {
                         exp.Approval_Status__c = itm.Approval_Status__c;
                     }
-            
+                    
                     // LINK CHILD â†’ PARENT
                     exp.Expense__c = expense.Id;
-            
+                    
                     expenseItemsToUpsert.add(exp);
-            
+                    
                 } else {
-            
+                    
                     // EXISTING CHILD UPDATE
                     if (!expenseIdsToDelete.contains(itm.Id)) {
-            
+                        
                         Expenses_line_item__c exp = new Expenses_line_item__c();
                         exp.Id = itm.Id;
                         exp.localId__c = itm.localId__c;
@@ -348,10 +350,12 @@ public with sharing class ExpenseController {
                         exp.Expense_Type__c = itm.Expense_Type__c;
                         exp.Travel_Type__c = itm.Travel_Type__c;
                         exp.Travel_Mode__c = itm.Travel_Mode__c;
+                          exp.Accommodation_Type__c = itm.Accommodation_Type__c; 
                         exp.Daily_Log__c = itm.Daily_Log__c;
                         exp.Working_Hours__c = itm.Working_Hours__c;
                         exp.TA_Limit__c = itm.TA_Limit__c;
                         exp.Total_KM__c = itm.Total_KM__c;
+                        exp.Total_Distance_Calculated_by_ODM_Reading__c = itm.Total_Distance_Calculated_by_ODM_Reading__c;
                         exp.DA_Limit__c = itm.DA_Limit__c;
                         exp.Amount__c = itm.Amount__c;
                         exp.Remarks__c = itm.Remarks__c;
@@ -360,10 +364,10 @@ public with sharing class ExpenseController {
                         exp.lodging_Limit__c = itm.lodging_Limit__c;
                         exp.Local_Conveyance_Limit__c = itm.Local_Conveyance_Limit__c;
                         exp.System_Calculated_Amount__c = itm.System_Calculated_Amount__c;
-            
+                        
                         if (itm.Is_Updated__c == true)
                             exp.Approval_Status__c = itm.Approval_Status__c;
-            
+                        
                         expenseItemsToUpsert.add(exp);
                     }
                 }
@@ -371,8 +375,8 @@ public with sharing class ExpenseController {
             
             // STEP 4: Save all child rows
             upsert expenseItemsToUpsert;
-
-           
+            
+            
             ExpenseData data = new ExpenseData();
             //When Submitted
             if(expense.Id != null)
@@ -381,7 +385,7 @@ public with sharing class ExpenseController {
                 user currentUser = [select Id,Name from User where Id =:currentUserId ];
                 list<Expense__c> expenseRecord = [select Id,Name,Expense_Approver_L1__c,Expense_Executive_Name__c,
                                                   OwnerId,Comments__c
-                                                   from Expense__c where Id =:expense.Id ];
+                                                  from Expense__c where Id =:expense.Id ];
                 //,Expense_Finance_Department_Approver__c,Expense_Approver_L2__c
                 
                 // After upsert of expense and items
@@ -410,9 +414,9 @@ public with sharing class ExpenseController {
                     update expenseRecord[0];
                     
                 }
-
+                
                 data.expenseCommnents = expenseRecord[0].Comments__c;
-
+                
                 if (!updatedDates.isEmpty() && !expenseRecord.isEmpty() ) {
                     expense__c expRec =  expenseRecord[0];
                     // Find min and max date
@@ -450,7 +454,7 @@ public with sharing class ExpenseController {
                             new Set<String>{expRec.OwnerId }, 
                             notificationType.Id
                         );
-
+                        
                         
                         // ---- Notification for Approver ----
                         Id approverId;
@@ -458,7 +462,7 @@ public with sharing class ExpenseController {
                         {
                             approverId = expRec.Expense_Approver_L1__c;
                         } 
-                     
+                        
                         
                         if (approverId != null) {
                             CustomNotificationService.notificationSend(
@@ -478,11 +482,8 @@ public with sharing class ExpenseController {
                             Daily_Log__c, Amount__c, Expense__c, Expense_Date__c,City_Name__c,
                             Remarks__c, Total_KM__c,Working_Hours__c,Calculated_KM__c,Food_Type__c,lodging_Limit__c,
                             Local_Conveyance_Limit__c,localId__c,Approval_Status__c,System_Calculated_Amount__c,
-                            Lodging_Food_Expense_Limit__c
-                            FROM Expenses_Line_Item__c 
-                            WHERE Expense__c = :expense.Id
-                            ORDER BY Expense_Date__c ASC
-                        ];
+                            Lodging_Food_Expense_Limit__c,Total_Distance_Calculated_by_ODM_Reading__c
+                            FROM Expenses_Line_Item__c  WHERE Expense__c = :expense.Id  ORDER BY Expense_Date__c ASC ];
                         //City__c,Day__c
                         if(approveRecord == true)
                         {
@@ -500,7 +501,7 @@ public with sharing class ExpenseController {
                                 CustomNotificationService.notificationSend(
                                     'Approval request for expense is approved', 
                                     expRec.Id, 
-                                     'Executive Name : ' + expRec.Expense_Executive_Name__c+'\n'+dateRange,
+                                    'Executive Name : ' + expRec.Expense_Executive_Name__c+'\n'+dateRange,
                                     new Set<String>{currentUserId }, 
                                     notificationType.Id
                                 );
@@ -532,7 +533,7 @@ public with sharing class ExpenseController {
                     } 
                 }    
             }
-       
+            
             data.expenseId = expense.Id;
             
             return data;

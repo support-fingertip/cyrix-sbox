@@ -282,7 +282,8 @@ Quantity__c, Unit_Price__c from Dealer_Stock__c where Visit__c =:recordId ];
                                  Visit_Type__c,
                                  Lead__c, Lead__r.Name, Check_In_Location__c,
                                  Check_Out_Location__c,Comments__c, Planned_Start_Time__c,
-                                 Account__r.Customer_Code__c
+                                 Account__r.Customer_Code__c, Account__r.Name,Check_In_Location__Latitude__s,Check_In_Location__Longitude__s,
+                                 Check_Out_Location__Latitude__s,Check_Out_Location__Longitude__s,Status__c
                                  FROM Visit__c WHERE OwnerId = :userinfo.getUserId()
                                  AND Visit_Date__c = TODAY 
                                  ORDER BY status__c asc, createddate desc 

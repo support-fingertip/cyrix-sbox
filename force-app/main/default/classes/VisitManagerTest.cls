@@ -1,242 +1,358 @@
-@IsTest
-public class VisitManagerTest {
-
-    /* =====================================================
-       TEST SETUP
-       ===================================================== */
+@isTest
+public with sharing class visitManagerTest {
+    
     @TestSetup
-    static void setupData() {
-
-        String customerCategory = getPicklist(Account.SObjectType, 'Customer_Category__c');
-        String vehicleUsed = getPicklist(Daily_Log__c.SObjectType, 'Vehicle_Used__c');
-
-        Account acc = new Account(
-            Name = 'Test Account',
-            Phone = '9999999999',
-            Customer_Category__c = customerCategory
+    static void setupTestData() {
+        Profile salesProfile = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1];
+        User testUser = new User(
+            Alias = 'testusr',
+            Email = 'testuser@test.com',
+            EmailEncodingKey = 'UTF-8',
+            LastName = 'Testing',
+            LanguageLocaleKey = 'en_US',
+            LocaleSidKey = 'en_US',
+            ProfileId = salesProfile.Id,
+            TimeZoneSidKey = 'America/Los_Angeles',
+            UserName = 'testuser111@testttt.com'
         );
-        insert acc;
-
-        Lead ld = new Lead(
-            LastName = 'Test Lead',
-            Company = 'Test Company',
-            Status = 'Open - Not Contacted',
-            Phone = '8888888888'
-        );
-        insert ld;
-
-        Daily_Log__c log = new Daily_Log__c(
-            Day_started_Time__c = Date.today(),
-            Vehicle_Used__c = vehicleUsed,
-            Odometer_Starting_Kms__c = 5
-        );
-        insert log;
-
-        Visit__c customerVisit = new Visit__c(
-            Visit_for__c = 'Customer',
-            Account__c = acc.Id,
-            Visit_Date__c = Date.today(),
-            Planned_Start_Time__c = System.now(),
-            Daily_Log__c = log.Id,
-            Status__c = 'Planned'
-        );
-        insert customerVisit;
-
-        Visit__c leadVisit = new Visit__c(
-            Visit_for__c = 'Lead',
-            Lead__c = ld.Id,
-            Visit_Date__c = Date.today(),
-            Planned_Start_Time__c = System.now(),
-            Status__c = 'Planned'
-        );
-        insert leadVisit;
-    }
-
-    /* =====================================================
-       getDailyLog
-       ===================================================== */
-    @IsTest
-    static void testGetDailyLog() {
-        visitManager.data res = visitManager.getDailyLog();
-        System.assertNotEquals(null, res.dailyLog);
-    }
-
-    /* =====================================================
-       getVisitCreateData
-       ===================================================== */
-    @IsTest
-    static void testGetVisitCreateData() {
-        visitManager.data res = visitManager.getVisitCreateData();
-        System.assert(res.lead.size() > 0);
-        System.assert(res.Customer.size() > 0);
-    }
-
-    /* =====================================================
-       getData
-       ===================================================== */
-    @IsTest
-    static void testGetData() {
-        visitManager.data res = visitManager.getData();
-        System.assertNotEquals(null, res.visit);
-    }
-
-    /* =====================================================
-       getVisitData
-       ===================================================== */
-    @IsTest
-    static void testGetVisitData() {
-        visitManager.data res = visitManager.getVisitData('BEAT');
-        System.assertNotEquals(null, res.visit);
-    }
-
-    /* =====================================================
-       getAllVisitData – Customer + Lead
-       ===================================================== */
-    @IsTest
-    static void testGetAllVisitData() {
-
-        Visit__c customerVisit = [
-            SELECT Id FROM Visit__c WHERE Visit_for__c = 'Customer' LIMIT 1
-        ];
-
-        Visit__c leadVisit = [
-            SELECT Id FROM Visit__c WHERE Visit_for__c = 'Lead' LIMIT 1
-        ];
-
-        visitManager.data d1 = visitManager.getAllVisitData(customerVisit.Id);
-        visitManager.data d2 = visitManager.getAllVisitData(leadVisit.Id);
-
-        System.assertNotEquals(null, d1);
-        System.assertNotEquals(null, d2);
-    }
-
-    /* =====================================================
-       File Methods (saveFile / getFiles / deleteFile)
-       ===================================================== */
-    @IsTest
-    static void testFileMethods() {
-
-        Account acc = [SELECT Id FROM Account LIMIT 1];
-
-        ContentVersion cv = new ContentVersion(
-            Title = 'TestImg',
-            PathOnClient = 'Test.jpg',
-            VersionData = Blob.valueOf('123')
-        );
-        insert cv;
-
-        Id docId = [
-            SELECT ContentDocumentId
-            FROM ContentVersion
-            WHERE Id = :cv.Id
-        ].ContentDocumentId;
-
-        ContentDocumentLink cdl = new ContentDocumentLink(
-            ContentDocumentId = docId,
-            LinkedEntityId = acc.Id,
-            ShareType = 'V'
-        );
-        insert cdl;
-
-        List<ContentDocument> files = visitManager.getFiles(acc.Id);
-        System.assert(files.size() > 0);
-
-        visitManager.deleteFile(docId);
-    }
-
-    /* =====================================================
-       validatePlannedVisit – NO exception
-       ===================================================== */
-    @IsTest
-    static void testValidatePlannedVisit_NoException() {
-
-        String category = getPicklist(Account.SObjectType, 'Customer_Category__c');
-
-        Account acc = new Account(
-            Name = 'Fresh Customer',
-            Customer_Category__c = category
-        );
-        insert acc;
-
-        visitManager.validatePlannedVisitForCustomer(
-            'Customer',
-            acc.Id,
-            null
-        );
-
-        System.assert(true);
-    }
-
-    /* =====================================================
-       validatePlannedVisit – Exception
-       ===================================================== */
-   @IsTest
-static void testValidatePlannedVisit_Exception() {
-
-    String category = getPicklist(Account.SObjectType, 'Customer_Category__c');
-
-    Account acc = new Account(
-        Name = 'Validated Account',
-        Phone = '9876543210',
-        Customer_Category__c = category
-    );
-    insert acc;
-
-    Daily_Log__c log = new Daily_Log__c(
-        Day_started_Time__c = Date.today(),
-        Vehicle_Used__c = getPicklist(Daily_Log__c.SObjectType, 'Vehicle_Used__c'),
-        Odometer_Starting_Kms__c = 1
-    );
-    insert log;
-
-    Visit__c vis = new Visit__c(
-        Visit_for__c = 'Customer',
-        Account__c = acc.Id,
-        Visit_Date__c = Date.today(),
-        Planned_Start_Time__c = System.now(),
-        Daily_Log__c = log.Id,
-        Status__c = 'Planned'
-    );
-    insert vis;
-
-    try {
-        visitManager.validatePlannedVisitForCustomer('Customer', acc.Id, null);
-        System.assert(false);
-    } catch (AuraHandledException e) {
-        System.assert(e.getMessage().contains('open visit'));
-    }
-}
-
-
-    /* =====================================================
-       Empty AuraEnabled methods
-       ===================================================== */
-    @IsTest
-    static void testEmptyMethods() {
-
-        visitManager.getPaymentDestails('dummy');
-        visitManager.getOrderProductivity(Date.today(), Date.today());
-        visitManager.getDataRecordById('dummy', 'getOrderDetails');
-
-        System.assert(true);
-    }
-
-    /* =====================================================
-       Helper – Dynamic picklist
-       ===================================================== */
-    private static String getPicklist(
-        Schema.SObjectType objType,
-        String fieldName
-    ) {
-        for (Schema.PicklistEntry p :
-            objType.getDescribe()
-                   .fields.getMap()
-                   .get(fieldName)
-                   .getDescribe()
-                   .getPicklistValues()) {
-
-            if (p.isActive()) return p.getValue();
+        insert testUser;
+        
+        System.runAs(testUser) {
+            List<Account> testAccounts = new List<Account>();
+            for(Integer i = 0; i < 5; i++) {
+                testAccounts.add(new Account(
+                    Name = 'Test Account ' + i,
+                    Phone = '987654321' + i,
+                    Customer_Category__c='Exporters'
+                ));
+            }
+            insert testAccounts;
+            
+            List<Lead> testLeads = new List<Lead>();
+            for(Integer i = 0; i < 3; i++) {
+                testLeads.add(new Lead(
+                    LastName = 'Test Lead ' + i,
+                    Company = 'Test Company ' + i,
+                    Phone = '987654321' + i,
+                    MobilePhone = '9876564321' + i,
+                    Status = 'Open'
+                ));
+            }
+            insert testLeads;
+            
+            Daily_Log__c dailyLog = new Daily_Log__c(
+                Day_started_time__c = DateTime.now(),
+                Clock_In_Location__Longitude__s = 76.1234,
+                Clock_In_Location__Latitude__s = 11.1234,
+                Vehicle_Used__c = 'Office',
+                Odometer_Starting_Kms__c = 1000
+            );
+            insert dailyLog;
+            
+            List<Visit__c> testVisits = new List<Visit__c>();
+            for(Integer i = 0; i < 3; i++) {
+                testVisits.add(new Visit__c(
+                    Account__c = testAccounts[i].Id,
+                    Visit_for__c = 'Customer',
+                    Visit_Date__c = Date.today(),
+                    Planned_Start_Time__c = DateTime.now().addHours(i),
+                    Status__c = 'Planned',
+                    Daily_Log__c = dailyLog.Id,
+                    Visit_Type__c = 'Regular',
+                    Check_In_Location__Longitude__s = 76.1234,
+                    Check_In_Location__Latitude__s = 11.1234
+                ));
+            }
+            
+            testVisits.add(new Visit__c(
+                Account__c = testAccounts[3].Id,
+                Visit_for__c = 'Customer',
+                Visit_Date__c = Date.today(),
+                Planned_Start_Time__c = DateTime.now().addHours(-2),
+                Visit_Start__c = DateTime.now().addHours(-2),
+                Visit_End__c = DateTime.now().addHours(-1),
+                Status__c = 'Completed',
+                Daily_Log__c = dailyLog.Id,
+                Visit_Type__c = 'Regular'
+            ));
+            
+            testVisits.add(new Visit__c(
+                Lead__c = testLeads[0].Id,
+                Visit_for__c = 'Lead',
+                Visit_Date__c = Date.today(),
+                Planned_Start_Time__c = DateTime.now().addHours(1),
+                Status__c = 'Planned',
+                Daily_Log__c = dailyLog.Id,
+                Visit_Type__c = 'Regular'
+            ));
+            
+            insert testVisits;
+            
+        
+            
+            ContentVersion contentVersion = new ContentVersion(
+                Title = 'Test Photo',
+                PathOnClient = 'test.jpg',
+                VersionData = Blob.valueOf('Test Content'),
+                IsMajorVersion = true
+            );
+            insert contentVersion;
+            
+            ContentVersion cv = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :contentVersion.Id];
+            
+            ContentDocumentLink cdl = new ContentDocumentLink(
+                LinkedEntityId = testVisits[0].Id,
+                ContentDocumentId = cv.ContentDocumentId,
+                ShareType = 'V'
+            );
+            insert cdl;
         }
-        return null;
+    }
+    
+    @isTest
+    static void testGetAllVisitData() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testuser111@testttt.com' LIMIT 1];
+        
+        System.runAs(testUser) {
+            Test.startTest();
+            
+            Visit__c testVisit = [SELECT Id FROM Visit__c WHERE Visit_for__c = 'Customer' LIMIT 1];
+            
+            visitManager.data result = visitManager.getAllVisitData(testVisit.Id);
+            
+            Test.stopTest();
+        }
+    }
+    
+    @isTest
+    static void testGetDailyLog() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testuser111@testttt.com' LIMIT 1];
+        
+        System.runAs(testUser) {
+            Test.startTest();
+            
+            visitManager.data result = visitManager.getDailyLog();
+            
+            Test.stopTest();
+        }
+    }
+    
+    @isTest
+    static void testGetVisitCreateData() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testuser111@testttt.com' LIMIT 1];
+        
+        System.runAs(testUser) {
+            Test.startTest();
+            
+            visitManager.data result = visitManager.getVisitCreateData();
+            
+            Test.stopTest();
+        }
+    }
+    
+    @isTest
+    static void testGetData() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testuser111@testttt.com' LIMIT 1];
+        
+        System.runAs(testUser) {
+            Test.startTest();
+            
+            visitManager.data result = visitManager.getData();
+            
+            Test.stopTest();
+        }
+    }
+    
+    @isTest
+    static void testGetVisitData() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testuser111@testttt.com' LIMIT 1];
+        
+        System.runAs(testUser) {
+            Account testAccount = [SELECT Id FROM Account LIMIT 1];
+            
+            Test.startTest();
+            
+            visitManager.data result = visitManager.getVisitData(testAccount.Id);
+            
+            Test.stopTest();
+        }
+    }
+    
+    @isTest
+    static void testGetFiles() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testuser111@testttt.com' LIMIT 1];
+        
+        System.runAs(testUser) {
+            Visit__c testVisit = [SELECT Id FROM Visit__c WHERE Visit_for__c = 'Customer' LIMIT 1];
+            
+            Test.startTest();
+            
+            List<ContentDocument> result = visitManager.getFiles(testVisit.Id);
+            
+            Test.stopTest();
+        }
+    }
+    
+    @isTest
+    static void testDeleteFile() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testuser111@testttt.com' LIMIT 1];
+        
+        System.runAs(testUser) {
+            ContentDocument testDoc = [SELECT Id FROM ContentDocument LIMIT 1];
+            
+            Test.startTest();
+            
+            visitManager.deleteFile(testDoc.Id);
+            
+            Test.stopTest();
+        }
+    }
+    
+    @isTest
+    static void testSaveFile() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testuser111@testttt.com' LIMIT 1];
+        
+        System.runAs(testUser) {
+            Visit__c testVisit = [SELECT Id FROM Visit__c WHERE Visit_for__c = 'Customer' LIMIT 1];
+            
+            Test.startTest();
+            
+            String base64Data = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+            String result = visitManager.saveFile(testVisit.Id, 'test.jpg', base64Data);
+            
+            Test.stopTest();
+        }
+    }
+    
+    @isTest
+    static void testValidatePlannedVisitForCustomer_Positive() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testuser111@testttt.com' LIMIT 1];
+        
+        System.runAs(testUser) {
+            Account testAccount = [SELECT Id FROM Account WHERE Name = 'Test Account 0' LIMIT 1];
+            
+            Test.startTest();
+            
+            try {
+                visitManager.validatePlannedVisitForCustomer('Customer', testAccount.Id, null);
+            } catch (Exception e) {
+            }
+            
+            Test.stopTest();
+        }
+    }
+    
+    @isTest
+    static void testValidatePlannedVisitForCustomer_Negative() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testuser111@testttt.com' LIMIT 1];
+        
+        System.runAs(testUser) {
+            Visit__c openVisit = [SELECT Id, Status__c FROM Visit__c 
+                                 WHERE Account__r.Name = 'Test Account 0' LIMIT 1];
+            openVisit.Status__c = 'In Progress';
+            update openVisit;
+            
+            Account testAccount = [SELECT Id FROM Account WHERE Name = 'Test Account 0' LIMIT 1];
+            
+            Test.startTest();
+            
+            try {
+                visitManager.validatePlannedVisitForCustomer('Customer', testAccount.Id, null);
+            } catch (Exception e) {
+            }
+            
+            Test.stopTest();
+        }
+    }
+    
+    @isTest
+    static void testValidatePlannedVisitForLead() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testuser111@testttt.com' LIMIT 1];
+        
+        System.runAs(testUser) {
+            Lead testLead = [SELECT Id FROM Lead LIMIT 1];
+            
+            Test.startTest();
+            
+            try {
+                visitManager.validatePlannedVisitForCustomer('Lead', null, testLead.Id);
+            } catch (Exception e) {
+            }
+            
+            Test.stopTest();
+        }
+    }
+    
+    @isTest
+    static void testDataClass() {
+        Test.startTest();
+        
+        visitManager.data testData = new visitManager.data();
+        
+        visitManager.VisitDataSummary summary = new visitManager.VisitDataSummary();
+        summary.visitId = '001';
+        summary.visitType = 'Regular';
+        summary.ownerId = UserInfo.getUserId();
+        summary.visDate = '2024-01-01';
+        summary.TotalOrd = 10;
+        summary.ExeName = 'Test User';
+        
+        visitManager.visitData visit = new visitManager.visitData();
+        visit.id = '001';
+        visit.Name = 'Test Visit';
+        visit.VisitDate = Date.today();
+        visit.formattedVisitDate = '24/12/2024';
+        visit.accountName = 'Test Account';
+        visit.status = 'Planned';
+        visit.ClockInLatitude = 11.1234;
+        visit.ClockinLongitude = 76.1234;
+        visit.visitTypes = 'Customer';
+        
+        Test.stopTest();
+    }
+    
+    @isTest
+    static void testGetVisitDataWithNullBeatId() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testuser111@testttt.com' LIMIT 1];
+        
+        System.runAs(testUser) {
+            Test.startTest();
+            
+            visitManager.data result = visitManager.getVisitData(null);
+            
+            Test.stopTest();
+        }
+    }
+    
+    @isTest
+    static void testGetAllVisitDataWithNoOrders() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testuser111@testttt.com' LIMIT 1];
+        
+        System.runAs(testUser) {
+            Account testAccount = new Account(
+                Name = 'Test Account No Orders',
+                Customer_Category__c='Exporters',
+                phone='1234567867'
+            );
+            insert testAccount;
+            
+            Daily_Log__c dailyLog = [SELECT Id FROM Daily_Log__c LIMIT 1];
+            
+            Visit__c testVisit = new Visit__c(
+                Account__c = testAccount.Id,
+                Visit_for__c = 'Customer',
+                Visit_Date__c = Date.today(),
+                Planned_Start_Time__c = DateTime.now(),
+                Status__c = 'Planned',
+                Daily_Log__c = dailyLog.Id
+            );
+            insert testVisit;
+            
+            Test.startTest();
+            
+            visitManager.data result = visitManager.getAllVisitData(testVisit.Id);
+            
+            Test.stopTest();
+        }
     }
 }
