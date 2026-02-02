@@ -1,14 +1,19 @@
 <aura:component controller="leadCmpController" implements="force:appHostable,flexipage:availableForAllPageTypes,force:lightningQuickActionwithoutHeader,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction,lightning:isUrlAddressable" access="global" >
     <!-- Id fields -->
     <aura:attribute name="recordId"  access="global"  type="string" description="record Id" default="" /> 
-     <aura:attribute name="manager"  access="global"  type="string"  description="manager" default=""/>
-    <aura:attribute name="SalesExecutive"  access="global"  type="string"  description="ASM" default=""/>
-     <aura:attribute name="regionName"  access="global"  type="string" description="regionName" default="" /> 
-    <!--spinner -->
-    <aura:attribute name="spinner" access="private" type="boolean" default="false" description="" />
+    <aura:attribute name="leadOwner"  access="global"  type="string"  description="manager" default=""/>
+      <aura:attribute name="isLeadOwnerSelectd"  access="global"  type="boolean"  description="manager" default="false"/>
+    <aura:attribute name="subRegionVal"  access="global"  type="string"  description="subRegionVal" default=""/>
+    <aura:attribute name="optionSelected"  access="global"  type="string"  description="optionSelected" default=""/>
+    <aura:attribute name="regionName"  access="global"  type="string" description="regionName" default="" /> 
+    <aura:attribute name="subRegionRecord"  access="global"  type="object" description="regionName" default="{}" /> 
+     <aura:attribute name="subRegionRecords"  access="global"  type="list" description="regionName" default="[]" /> 
+    <aura:attribute name="regionRecord"  access="global"  type="object" description="regionName" default="{}" /> 
+    <aura:attribute name="subRegionOptions"  access="global"  type="list" description="regionName" default="[]" /> 
+   
     <!--handler -->
-     <aura:handler name="init" value="{!this}" action="{!c.doInit}"></aura:handler>
-
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"></aura:handler>
+    
     <aura:html tag="style">
         .slds-modal__container{ 
         max-width: 80rem !important;
@@ -32,49 +37,137 @@
     
     <div role="dialog" tabindex="-1" aria-labelledby="header43" aura:id="Modalbox" class="slds-modal  slds-fade-in-open">
         <div class="slds-modal__container">
-           <lightning:buttonIcon iconName="utility:close"  onclick="{!c.closeModal}"  alternativeText="close"  variant=""  class="slds-modal__close"/>
+            <lightning:buttonIcon iconName="utility:close"  onclick="{!c.closeModal}"  alternativeText="close"  variant=""  class="slds-modal__close"/>
             <header class="slds-modal__header">
                 <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Lead Assignment </h1>
             </header>
             <div class="slds-modal__content   slds-p-around_medium" id="modal-content-id-1">
                 <div class="slds-grid slds-wrap slds-grid_pull-padded-x-small listSections slds-p-around--x-large">
-                      <lightning:messages /> 
-                    <div class="slds-form-element_horizontal">
-                        <div class="slds-text-heading--small  sectionTagline">
-                           Lead assignment 
+                    <lightning:messages /> 
+                    
+                    <aura:if isTrue="{!v.regionRecord !=null}">
+                        <div class="slds-card slds-m-bottom_medium slds-size_1-of-1">
+                            <div class="slds-card__header slds-grid">
+                                <div class="slds-media slds-media_center slds-has-flexi-truncate">
+                                    <div class="slds-media__figure">
+                                        <lightning:icon iconName="standard:location" alternativeText="Region" size="small"></lightning:icon>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <h2 class="slds-card__header-title">
+                                            <span class="slds-text-heading_small">Region</span>
+                                        </h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-card__body slds-p-around_medium">
+                                <p><strong>Name: </strong> {!v.regionRecord.Name}</p>
+                            </div>
                         </div>
-                        <div class="slds-form-element__control">
-                            <lightning:select name="select1" label="Choose Option" required="true" onchange="{!c.changeOption}">
-                                <option value="">choose one...</option>
-                                <option value="ASM Transfer">ASM Transfer</option>
-                                <option value="Sales Exe Transfer">Sales Exe Transfer</option>
+                        <!-- Sub Region Dropdown -->
+                        <div class="slds-size_1-of-1 slds-m-bottom_medium">
+                            <lightning:select label="Sub Region"  value="{!v.subRegionVal}"  onchange="{!c.Mapsubregion}">
+                                <aura:iteration items="{!v.subRegionOptions}" var="reg">
+                                    <option value="{!reg.value}"> {!reg.label}</option>
+                                </aura:iteration>
                             </lightning:select>
                         </div>
-                        <div class="slds-form-element__control slds-p-top_small">
-                            <div class="slds-text-heading--small slds-p-bottom--small setupFlowHeader ">
-                                Region Name : {!v.regionName}
-                             </div> 
-                        </div>
-          
-                        <div class="slds-form-element__control slds-p-top_small">
-                            <div class="slds-text-heading--small slds-p-bottom--small setupFlowHeader ">
-                                ASM  : {!v.regionName}
-                            </div> 
-                        </div>
-                              <div class="slds-form-element__control">
-                            <div class="slds-text-heading--small slds-p-bottom--small setupFlowHeader ">
-                                Sales Executive  : {!v.regionName}
-                            </div> 
-                        </div>
-                    </div>
+                        <aura:if isTrue="{!v.subRegionVal !=''}">
+                            <div class="slds-size_1-of-1 slds-m-bottom_medium">
+                                <lightning:select name="select1" value="{!v.optionSelected}" label="Choose Option" required="true" onchange="{!c.changeOption}">
+                                    <option value="">choose one...</option>
+                                    <option value="ASM Transfer">ASM Transfer</option>
+                                    <option value="Sales Exe Transfer">Sales Exe Transfer</option>
+                                </lightning:select>
+                            </div>
+                        </aura:if>
+                        
+                        <!-- ASM Section -->
+                        <aura:if isTrue="{!v.optionSelected =='ASM Transfer'}">
+                            <aura:if isTrue="{!v.subRegionRecord.ASM__c !=null}">   
+                                <div class="slds-card slds-m-bottom_medium slds-size_1-of-1">
+                                    <div class="slds-card__header slds-grid">
+                                        <div class="slds-media slds-media_center slds-has-flexi-truncate">
+                                            <div class="slds-media__figure">
+                                                <lightning:icon iconName="standard:user" alternativeText="ASM" size="small"></lightning:icon>
+                                            </div>
+                                            <div class="slds-media__body">
+                                                <h2 class="slds-card__header-title">
+                                                    <span class="slds-text-heading_small">ASM</span>
+                                                </h2>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="slds-card__body slds-p-around_medium">
+                                        <p><strong>Name:</strong> {!v.subRegionRecord.ASM__r.Name}</p>
+                                    </div>
+                                </div>
+                                <aura:set attribute="else">
+                                    <div class="slds-card slds-theme_warning slds-m-bottom_medium slds-size_1-of-1">
+                                        <div class="slds-card__body slds-p-around_medium">
+                                            <lightning:icon iconName="utility:warning" alternativetext="Warning" size="small" class="slds-m-right_small"></lightning:icon>
+                                            <span class="slds-text-heading_small">ASM not available</span>
+                                            <p class="slds-m-top_x-small">No ASM is assigned for this sub-region. Please contact your manager for assistance.</p>
+                                        </div>
+                                    </div>
+                                </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        
+                        
+                        <!-- Sales Executive Section -->
+                        <aura:if isTrue="{!v.optionSelected =='Sales Exe Transfer'}">
+                            <aura:if isTrue="{!v.subRegionRecord.Sales_Engineer__c !=null}">   
+                                <div class="slds-card slds-m-bottom_medium slds-size_1-of-1">
+                                    <div class="slds-card__header slds-grid">
+                                        <div class="slds-media slds-media_center slds-has-flexi-truncate">
+                                            <div class="slds-media__figure">
+                                                <lightning:icon iconName="standard:employee" alternativetext="Sales Executive" size="small"></lightning:icon>
+                                            </div>
+                                            <div class="slds-media__body">
+                                                <h2 class="slds-card__header-title">
+                                                    <span class="slds-text-heading_small">Sales Executive</span>
+                                                </h2>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="slds-card__body slds-p-around_medium">
+                                        <p><strong>Name:</strong> {!v.subRegionRecord.Sales_Engineer__r.Name}</p>
+                                    </div>
+                                </div>
+                                <aura:set attribute="else">
+                                    <div class="slds-card slds-theme_warning slds-m-bottom_medium slds-size_1-of-1">
+                                        <div class="slds-card__body slds-p-around_medium">
+                                            <lightning:icon iconName="utility:warning" alternativetext="Warning" size="small" class="slds-m-right_small"></lightning:icon>
+                                            <span class="slds-text-heading_small">Sales Executive not available</span>
+                                            <p class="slds-m-top_x-small">No Sales Executive is assigned for this sub-region. Please verify your selection or reach out to support.</p>
+                                        </div>
+                                    </div>    
+                                </aura:set>
+                            </aura:if>
+                        </aura:if>
+                        
+                        <aura:set attribute="else">
+                            <div class="slds-card slds-theme_error slds-m-bottom_medium slds-size_1-of-1">
+                                <div class="slds-card__body slds-p-around_medium">
+                                    <lightning:icon icon-name="utility:error" alternative-text="Error" size="small" class="slds-m-right_small"></lightning:icon>
+                                    <span class="slds-text-heading_small">Region data is missing</span>
+                                    <p class="slds-m-top_x-small">We couldn’t find the region record. Please check your selection or try again later.</p>
+                                </div>
+                            </div>
+                        </aura:set>
+                    </aura:if>
+                    
                 </div>
             </div>
-            <div class="modal-footer slds-modal__footer slds-modal__footer--directional">
-                <div class="setupFlowFooter onesetupSetupFlowFooter">
-                    <lightning:button label="Cancel" onclick="{!c.closeModel}" />
-                    <lightning:button variant="brand" label="Submit" title="Brand action" onclick="{!c.doSubmit}" />
-                </div>
-            </div>
+                    <div class="modal-footer slds-modal__footer slds-modal__footer--directional">
+        <div class="setupFlowFooter onesetupSetupFlowFooter">
+            <lightning:button label="Cancel" onclick="{!c.closeModel}" />
+            <lightning:button variant="brand" label="Submit" title="Brand action" onclick="{!c.doSubmit}" />
         </div>
     </div>
+        </div>
+ 
+    </div>
+   
+    
 </aura:component>

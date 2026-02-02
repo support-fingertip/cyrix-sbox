@@ -144,63 +144,72 @@ export default class visitOrderExecuteScreen extends NavigationMixin(LightningEl
         });
     }
     /*Getting geoLocation*/
-    handleGetLatLon(checkOutIn) {
-        console.log('this.isMobilePublisher: ' + this.isMobilePublisher);
-        if(this.isMobilePublisher)
-        {
-            //invoke Location Service native mobile capability feature
-            //to get current position
-            getLocationService().getCurrentPosition({
-            enableHighAccuracy: true
-                }).then((result) => {
-
-                    var newEvent = new CustomEvent('locationPharmacySearch:getLatLonResponse',{detail:{}});
-                    newEvent.detail.lat = result.coords.latitude;
-                    newEvent.detail.lon = result.coords.longitude; 
-                    newEvent.detail.latlonsource = 'nimbus';
-                    newEvent.detail.status = 'success';
-
-                    console.log('newEvent: ' + JSON.stringify(newEvent));
-                    this.handleSaveVisitData(newEvent,checkOutIn);
-
-                }).catch((error) => {
-                    console.log(JSON.stringify(error));
-                    this.isPageLoaded = false;
-                }).finally(() => {
-
-                });
-
-        }
-        else if(window.navigator && window.navigator.geolocation)
-        {
-            //invoke browser native capability to get current position
-            window.navigator.geolocation.getCurrentPosition((r,err) => {
-                var newEvent = new CustomEvent('locationPharmacySearch:getLatLonResponse',{detail:{}});
-                if(r && r.coords)
-                {
-                    
-                    newEvent.detail.lat = r.coords.latitude;
-                    newEvent.detail.lon = r.coords.longitude; 
-                    newEvent.detail.latlonsource = 'browser';
-                    newEvent.detail.status = 'success';
-                    this.handleSaveVisitData(newEvent,checkOutIn);
-
-                }
-                else if(err)
-                {
-                  console.log(JSON.stringify(err));
-                  this.isPageLoaded = false;
-                }
-            });
-        
-        }
-        else 
-        {
-            console.log('Unable to get user location.');
-            this.isPageLoaded = false;
-        }
-    }
+  handleGetLatLon(checkOutIn) {
+    console.log('this.isMobilePublisher: ' + this.isMobilePublisher);
     
+    if(this.isMobilePublisher)
+    {
+        //invoke Location Service native mobile capability feature
+        //to get current position
+        getLocationService().getCurrentPosition({
+        enableHighAccuracy: true
+            }).then((result) => {
+
+                var newEvent = new CustomEvent('locationPharmacySearch:getLatLonResponse',{detail:{}});
+                newEvent.detail.lat = result.coords.latitude;
+                newEvent.detail.lon = result.coords.longitude; 
+                newEvent.detail.latlonsource = 'nimbus';
+                newEvent.detail.status = 'success';
+
+                console.log('newEvent: ' + JSON.stringify(newEvent));
+                this.handleSaveVisitData(newEvent,checkOutIn);
+
+            }).catch((error) => {
+                console.log(JSON.stringify(error));
+                this.isPageLoaded = false;
+            });
+
+    }
+    else if(window.navigator && window.navigator.geolocation)
+    {
+        //invoke browser native capability to get current position
+        window.navigator.geolocation.getCurrentPosition((r,err) => {
+            var newEvent = new CustomEvent('locationPharmacySearch:getLatLonResponse',{detail:{}});
+            if(r && r.coords)
+            {
+                
+                newEvent.detail.lat = r.coords.latitude;
+                newEvent.detail.lon = r.coords.longitude; 
+                newEvent.detail.latlonsource = 'browser';
+                newEvent.detail.status = 'success';
+                this.handleSaveVisitData(newEvent,checkOutIn);
+
+            }
+            else if(err)
+            {
+              console.log(JSON.stringify(err));
+              this.isPageLoaded = false;
+            }
+        },
+        (error) => {
+            // Add error callback for better error handling
+            console.log('Geolocation error: ' + JSON.stringify(error));
+            this.isPageLoaded = false;
+        },
+        {
+            // Add options for better control
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 60000
+        });
+    
+    }
+    else 
+    {
+        console.log('Unable to get user location.');
+        this.isPageLoaded = false;
+    }
+} 
     handleSaveVisitData(event,checkOutIn){
          if (!navigator.onLine) {
             this.genericDispatchToastEvent('Error', 'No internet connection. Please check your network and try again.', 'error');
@@ -260,7 +269,7 @@ export default class visitOrderExecuteScreen extends NavigationMixin(LightningEl
                 this.isPageLoaded = false;
                 console.error('Error creating record:', error);
                 const child = this.template.querySelector('c-visit-form-popup');
-if (child) child.setDisabled(false);
+            if (child) child.setDisabled(false);
             const errMsg = this.getLdsErrorMessage(error);
 
             console.error('Error updating record:', JSON.stringify(error));

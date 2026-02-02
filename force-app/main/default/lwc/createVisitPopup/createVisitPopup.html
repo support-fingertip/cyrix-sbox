@@ -127,7 +127,17 @@
             <template lwc:if={completeVisit}>
                 <div class="slds-modal__content slds-p-around_medium CompleteHeight" id="modal-content-id-2">
                        <lightning-combobox name="Visit_Feedback__c" required="true" label="Visit Feedback" value={visitData.Visit_Feedback__c}  placeholder="Select a Visit Feedback " options={pickDataFeedback} onchange={handleVisitFeedback} ></lightning-combobox>
+
                     <lightning-textarea name="Comments__c" label="Comment" value={visitData.Comments__c} placeholder="Enter comments..." onchange={onCommentChange} required></lightning-textarea>
+        <lightning-input
+    type="datetime-local"
+    name="Next_Follow_Up_Date__c"
+    label="Next Follow-Up Date"
+    value={visitData.Next_Follow_Up_Date__c}
+    onchange={onCommentChange}>
+   </lightning-input>
+
+
                  <!--   <c-camera-screen record-id={recordId} is-desktop={isDesktop} complete-visit={completeVisit} onmyvisitclick={handleOrderScreen}></c-camera-screen>
               -->
       <div class="selfie-minimal slds-m-vertical_medium">

@@ -192,6 +192,7 @@ get searchNameData() {
 
 
     connectedCallback() {
+
         if (this.newVisitCreate) {
             this.headerVisit = 'Create New Visit';
             this.getVisitData();
@@ -225,6 +226,7 @@ this.isPhone = FORM_FACTOR === 'Small';
         variant: variant,
         mode: mode
     });
+    this.dispatchEvent(evt);
 }
 handleEnable(e) {
     this.isDisabled = e.detail.isDisabled;
@@ -297,11 +299,11 @@ handleEnable(e) {
                 const warningMsg = 'Please select visit for';
                 this.genericDispatchEvent('Warning', warningMsg, 'warning');
                 return;
-            } else if (this.visitData.Visit_for__c == 'Lead' && this.visitData.Lead__c == '') {
+            } else if (this.visitData.Visit_for__c == 'Lead' && !this.visitData.Lead__c) {
                 const warningMsg = 'Please select Lead';
                 this.genericDispatchEvent('Warning', warningMsg, 'warning');
                 return;
-            } else if (this.Visit_for__c == 'Customer' && this.visitData.Account__c == '') {
+            } else if (this.Visit_for__c == 'Customer' && !this.visitData.Account__c) {
                 const warningMsg = 'Please select Customer';
                 this.genericDispatchEvent('Warning', warningMsg, 'warning');
                 return;

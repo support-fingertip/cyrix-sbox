@@ -269,6 +269,7 @@ export default class visitManager extends LightningElement {
 
 
     handleCustomEvent(event) {
+        try{
         this.isShowBackButton = true;
         const msg = event.detail;
 
@@ -279,14 +280,16 @@ export default class visitManager extends LightningElement {
             this.Outlet = false;
             this.recordId = msg.recordID;
             this.index = msg.index;
+              this.executeScreenData.isProgressVisit = msg.isProgressVisit;
+             this.outletPage = true;
             this.isExecuteScreen = true;
             this.screen = msg.screen;
-            this.executeScreenData.isProgressVisit = msg.isProgressVisit;
+          
             this.executeScreenData.isAcc = msg.isAcc;
             this.executeScreenData.isCompleted = msg.isCompleted;
             this.executeScreenData.isInProgress = msg.isInProgress;
             this.showVisitButton = msg.isInProgress
-            this.outletPage = true;
+        
             this.acccountId = msg.accId;
             this.visitfor = msg.visitfor;
             this.objName = msg.objName;
@@ -299,7 +302,7 @@ export default class visitManager extends LightningElement {
                 this.executeScreenData.isInProgress = true;
             }
         }
-
+    }catch(e){console.error(e.message);}
     }
     resetAllScreen() {
         this.isBusinessSummaryScreen = false;

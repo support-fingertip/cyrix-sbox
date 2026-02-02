@@ -24,8 +24,9 @@ public with sharing class ExpenseTriggerHandler {
  
             if(userManagerMap.containsKey(exp.OwnerId)){
                 exp.Expense_Approver_L1__c = userManagerMap.get(exp.OwnerId);
-            }else if(settingsList.size() >0){
-                if (settingsList[0].Expense_Level_1_Approver__c != null) 
+            }
+            if(settingsList.size() >0){
+                if ( exp.Expense_Approver_L1__c == null) 
                 exp.Expense_Approver_L1__c =  settingsList[0].Expense_Level_1_Approver__c;
             
          

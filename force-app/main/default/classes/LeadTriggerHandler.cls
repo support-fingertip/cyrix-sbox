@@ -1,16 +1,16 @@
 public class LeadTriggerHandler {
-
+    
     /* ---------------- Campaign Mapping ---------------- */
     public static void campaignMapping(List<Lead> leads) {
-
+        
         List<CampaignMember> cms = new List<CampaignMember>();
-
+        
         for (Lead l : leads) {
             if (l.Id != null && l.Campaign__c != null) {
                 cms.add(new CampaignMember( LeadId = l.Id,  CampaignId = l.Campaign__c,  Status = 'Sent' ));
             }
         }
-
+        
         if (!cms.isEmpty()) {
             try {
                 insert cms;
@@ -19,47 +19,47 @@ public class LeadTriggerHandler {
             }
         }
     }
-
+    
     /* ---------------- Lead Assigned Notification ---------------- */
     public static void leadAssignedNotification(List<Lead> leads) {
-
+        
         CustomNotificationType type = [
             SELECT Id
             FROM CustomNotificationType
             WHERE DeveloperName = 'Lead_Notification'
             LIMIT 1
         ];
-
+        
         String senderId = UserInfo.getUserId();
-
+        
         for (Lead l : leads) {
-
-          
+            
+            
             String name = (l.Salutation != null ? l.Salutation + ' ' : '') + (l.FirstName != null ? l.FirstName + ' ' : '') + l.LastName;
-
+            
             SendEmailCustomNotification.sendNotification( 'Lead - ' + name + ' is assigned to you',
-                'Lead Assigned',senderId, type.Id,l.Id,new Set<String>{ l.OwnerId } );
+                                                         'Lead Assigned',senderId, type.Id,l.Id,new Set<String>{ l.OwnerId } );
             if(l.ManagerId__c !=null && l.ManagerId__c !=''){
-               SendEmailCustomNotification.sendNotification( 'Lead - ' + name + ' is assigned to '+l.Lead_Owner_Name__c,
-                'Lead Assigned',senderId, type.Id,l.Id,new Set<String>{ l.ManagerId__c } ); 
+                SendEmailCustomNotification.sendNotification( 'Lead - ' + name + ' is assigned to '+l.Lead_Owner_Name__c,
+                                                             'Lead Assigned',senderId, type.Id,l.Id,new Set<String>{ l.ManagerId__c } ); 
             }
         }
     }
-
+    
     /* ---------------- Phone & Mobile Split ---------------- */
     public static void checkAndSeprateMobileNumber(List<Lead> leads) {
-
+        
         Map<String, String> countryCodeMap =
             Utility.getAllCountryCodeMappings(true);
-
+        
         for (Lead l : leads) {
-
+            
             if (l.Phone != null && l.Phone.startsWith('+91')) {
                 l.Country_Code_Phone__c = '+91';
                 l.Country__c = countryCodeMap.get('91');
                 l.Phone = l.Phone.replace('+91', '');
             }
-
+            
             if (l.MobilePhone != null && l.MobilePhone.startsWith('+91')) {
                 l.Country_Code_Mobile__c = '+91';
                 l.MobilePhone_Country__c = countryCodeMap.get('91');
@@ -67,12 +67,12 @@ public class LeadTriggerHandler {
             }
         }
     }
-
+    
     /* ---------------- Utility ---------------- */
     public static String getformated(String value) {
         return value == null ? '' : value;
     }
-
+    
     /* ---------------- Last Activity Date ---------------- */
     public static void updateLastActivityDate(
         List<Lead> newLeads,
@@ -87,39 +87,39 @@ public class LeadTriggerHandler {
                  l.Lead_Category__c != oldL.Lead_Category__c ||
                  l.GST_Number__c != oldL.GST_Number__c ||
                  l.Company != oldL.Company)) {
-
-                l.Last_Activity_Date__c = Date.today();
-            }
+                     
+                     l.Last_Activity_Date__c = Date.today();
+                 }
         }
     }
-
+    
     /* ---------------- Lost / Converted Notification ---------------- */
     public static void sendLostConvertedManagerNotification(List<Lead> leads) {
-
+        
         CustomNotificationType type = [
             SELECT Id
             FROM CustomNotificationType
             WHERE DeveloperName = 'Lead_Notification'
             LIMIT 1
         ];
-
+        
         Set<Id> ownerIds = new Set<Id>();
         for (Lead l : leads) {
             if (l.OwnerId != null) ownerIds.add(l.OwnerId);
         }
-
+        
         Map<Id, User> ownerMap = new Map<Id, User>(
             [SELECT Id, ManagerId FROM User WHERE Id IN :ownerIds]
         );
-
+        
         for (Lead l : leads) {
-
+            
             User u = ownerMap.get(l.OwnerId);
             if (u == null || u.ManagerId == null) continue;
-
+            
             String body;
             String title;
-
+            
             if (l.Status == 'Closed Lost') {
                 body = 'Lead lost';
                 title = 'Lead Closed Lost';
@@ -129,7 +129,7 @@ public class LeadTriggerHandler {
             } else {
                 continue;
             }
-
+            
             SendEmailCustomNotification.sendNotification(
                 body,
                 title,
@@ -140,19 +140,19 @@ public class LeadTriggerHandler {
             );
         }
     }
-
+    
     /* ---------------- Duplicate Check ---------------- */
     public static void findDuplicate(List<Lead> leads) {
-
+        
         if (leads.isEmpty()) return;
-
+        
         Set<String> emails = new Set<String>();
         for (Lead l : leads) {
             if (l.Email != null) emails.add(l.Email);
         }
-
+        
         if (emails.isEmpty()) return;
-
+        
         Map<String, Lead> existing = new Map<String, Lead>();
         for (Lead l : [
             SELECT Id, Email
@@ -161,7 +161,7 @@ public class LeadTriggerHandler {
         ]) {
             existing.put(l.Email, l);
         }
-
+        
         for (Lead l : leads) {
             if (l.Email != null && existing.containsKey(l.Email)) {
                 l.Duplicate_Parent_Lead__c = existing.get(l.Email).Id;
@@ -169,22 +169,22 @@ public class LeadTriggerHandler {
             }
         }
     }
-
+    
     /* ============================================================
-       Account Email Sync
-       ============================================================ */
-
- 
-
+Account Email Sync
+============================================================ */
+    
+    
+    
     // Actual implementation
     public static void setAccountEmail(List<Lead> leads, Set<string> accIds) {
-
- 
-
+        
+        
+        
         Map<Id, Account> accMap = new Map<Id, Account>(
             [SELECT Id, Email__c FROM Account WHERE Id IN :accIds]
         );
-
+        
         List<Account> updates = new List<Account>();
         for (Lead l : leads) {
             if (accMap.containsKey(l.ConvertedAccountId) && l.Email != null) {
@@ -193,7 +193,7 @@ public class LeadTriggerHandler {
                 updates.add(a);
             }
         }
-
+        
         if (!updates.isEmpty()) {
             try {
                 update updates;
@@ -207,15 +207,15 @@ public class LeadTriggerHandler {
             }
         }
     }
-
+    
     /* ---------------- Follow-up Tasks ---------------- */
     public static void createfollowupTasks(List<Lead> leads) {
-
+        
         List<Task> tasks = new List<Task>();
-
+        
         for (Lead l : leads) {
             if (l.Next_Follow_up_Date__c == null || l.OwnerId == null) continue;
-
+            
             tasks.add(new Task(
                 Subject = 'Lead Follow-up',
                 ActivityDate = l.Next_Follow_up_Date__c,
@@ -225,14 +225,36 @@ public class LeadTriggerHandler {
                 Priority = 'Normal'
             ));
         }
-
+        
         if (!tasks.isEmpty()) {
-            insert tasks;
+            try{
+                insert tasks;
+            }catch(exception ex){
+                ExceptionHandler.addLog(ex,String.valueOf(tasks),'LeadTriggerHandler','inserttasks' );
+            }
         }
     }
     
-
-
-
-
+    
+    
+    public static void shareWithCreator(List<Id> leadIds) {
+        List<LeadShare> leadShares = new List<LeadShare>();
+        list<AssignmentRule> leadAR = [  SELECT Id  FROM AssignmentRule   WHERE SobjectType = 'Lead'   AND Active = true and Name='Telecaller Lead Assignment' LIMIT 1 ];//Fetch the active Lead Assignment Rule (if you want a specific rule, filter by Name)
+        if(!leadAR.isEmpty()){
+            List<Lead> leads = [SELECT Id, CreatedById FROM Lead WHERE Id IN :leadIds];
+            
+            for (Lead l : leads) {
+                LeadShare share = new LeadShare();
+                share.LeadId = l.Id;
+                share.UserOrGroupId = l.CreatedById;
+                share.LeadAccessLevel = 'Read'; // or 'Edit'
+                share.RowCause = 'Manual';
+                leadShares.add(share);
+            }
+            
+            database.insert(leadShares,true);
+        }
+    }
+    
+    
 }

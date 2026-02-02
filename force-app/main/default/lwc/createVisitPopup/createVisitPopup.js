@@ -140,6 +140,8 @@ missedVisitOptions = [
     Daily_Log__c : '',
     Comments__c : '',
     //  Other_Visit__c  : '',
+    Next_Follow_Up_Date__c: null,
+
     PostPoned_Start_Time__c: null,
     Missed_PostPone_Reason__c : '',
     // Approval_Status__c : 'Approved',
@@ -252,10 +254,12 @@ saveVisit(){
         this.isDisabled = true;
         const message = new CustomEvent('myvisitclick', {
             detail: {
-                message: 'createNewVisit' ,
-                Comment: this.visitData.Comments__c,
-                    feedback: this.visitData.Visit_Feedback__c
-            }
+          message: 'createNewVisit',
+          Comment: this.visitData.Comments__c,
+          feedback: this.visitData.Visit_Feedback__c,
+          nextFollowUpDate: this.visitData.Next_Follow_Up_Date__c
+}
+
         });
         this.dispatchEvent(message);
     }else if(this.newVisitCreate){

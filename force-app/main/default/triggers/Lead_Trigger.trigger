@@ -24,6 +24,7 @@ trigger Lead_Trigger on Lead (before insert,after insert,before update,after upd
         
         list<lead> campaignMemberList= new list<lead>();
         list<lead> leadOwnerList= new list<lead>();
+              list<Id> leadAssignment= new list<Id>();
         
         for(lead ld : trigger.New){
             if(ld.Campaign__c !=null && trigger.isInsert){
@@ -31,6 +32,7 @@ trigger Lead_Trigger on Lead (before insert,after insert,before update,after upd
             }
             if(trigger.isInsert){
                 leadOwnerList.add(ld);  
+             
             }
             if(trigger.isUpdate){
                 lead oldLead= trigger.oldMap.get(ld.Id);
@@ -42,8 +44,9 @@ trigger Lead_Trigger on Lead (before insert,after insert,before update,after upd
                 }
             }
             
-        } 
-        if(!campaignMemberList.isEmpty()){
+        }
+            
+            if(!campaignMemberList.isEmpty()){
             LeadTriggerHandler.campaignMapping(campaignMemberList);   
         }
         if(!leadOwnerList.isEmpty()){

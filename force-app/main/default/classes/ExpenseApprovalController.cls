@@ -62,7 +62,7 @@ public class ExpenseApprovalController {
                     exp.isAutoEnabled =true;
                 }
             }
-            if(exp.isCarEnabled){
+          /*  if(exp.isCarEnabled){
                 if(exp.travelEligibile.Monthly_Limit_Car__c !=null && expense.Total_KM_Car__c !=null &&  exp.travelEligibile.Monthly_Limit_Car__c < expense.Total_KM_Car__c){
                     exp.carExpenseExceeded ='ta-value Highlight-in-red';
                 }else{
@@ -82,7 +82,7 @@ public class ExpenseApprovalController {
                 }else{
                      exp.autoExpenseExceeded ='ta-value Highlight-in-green';
                 }
-            }
+            }*/
         }
         
         List<Expenses_Line_Item__c> lineItems = new List<Expenses_Line_Item__c>();

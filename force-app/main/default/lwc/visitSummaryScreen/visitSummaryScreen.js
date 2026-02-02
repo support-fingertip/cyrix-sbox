@@ -27,6 +27,7 @@ export default class visitSummaryScreen extends NavigationMixin(LightningElement
     @api isParentComp;
     @track isDropdownfilterOpen = false;
     @api isDesktop;
+    
 
     @api dailyLogData;
     searchVisit = '';
@@ -90,7 +91,6 @@ export default class visitSummaryScreen extends NavigationMixin(LightningElement
 
     forOneDayData(result) {
         const today = new Date().toISOString().split('T')[0]; // Get today's date in 'YYYY-MM-DD' format
-
         let todayDay = new Date(); // Get the current date
         let day = String(todayDay.getDate()).padStart(2, '0'); // Get day and add leading zero if necessary
         let month = String(todayDay.getMonth() + 1).padStart(2, '0'); // Get month (January is 0!) and add leading zero
@@ -112,6 +112,7 @@ export default class visitSummaryScreen extends NavigationMixin(LightningElement
             itm.isMoreLoad = true;
             itm.isShowAllData = itm.formattedVisitDate == formattedDate ? false : true;
             itm.execute = visitDate === today ? true : false;
+           
             itm.openPopup = false;
         });
 
@@ -272,12 +273,23 @@ export default class visitSummaryScreen extends NavigationMixin(LightningElement
                 this.genericDispatchToastEvent('', 'Cannot open page', 'info');
             }
 
+        } else if(itemName == 'Navigate'){
+            const lattitudCordinate = event.currentTarget.dataset.latitude;
+            const longitudeCordinate = event.currentTarget.dataset.longitude;
+            if (lattitudCordinate && longitudeCordinate) {
+                var url = 'https://www.google.com/maps?q=' + lattitudCordinate + ',' + longitudeCordinate;
+                window.open(url, '_blank');
+            } else {
+                this.genericDispatchToastEvent('Error','Latitude and Longitude not found for Customer','error');
+            }
+
         }
         // console.log('Execute clicked for item: ', itemId);
         // this.closeAllMenus();
     }
 
     async handleConfirmClick(msg, variant, label, message) {
+        
         const result = await LightningConfirm.open({
             message: msg,
             variant: variant, // headerless
@@ -367,6 +379,7 @@ export default class visitSummaryScreen extends NavigationMixin(LightningElement
     handleSaveVisitData(event, itemId) {
         let details = JSON.parse(JSON.stringify(event.detail));
         const now = new Date();
+        
 
         let data = {
             Id: itemId,
@@ -374,6 +387,9 @@ export default class visitSummaryScreen extends NavigationMixin(LightningElement
             Check_Out_Location__Longitude__s: details.lon,
             Check_Out_Location__Latitude__s: details.lat,
             Visit_End__c: now.toISOString(),
+            Next_Follow_Up_Date__c: this.nextFollowUpDate
+            ? new Date(this.nextFollowUpDate).toISOString()
+            : null,
             Status__c: 'Completed'
         };
         const recordInput = {
@@ -434,6 +450,7 @@ export default class visitSummaryScreen extends NavigationMixin(LightningElement
         const msg = event.detail;
         if (msg.message == 'createNewVisit') {
             this.comment = msg.Comment;
+            this.nextFollowUpDate = msg.nextFollowUpDate; 
             this.handleGetLatLon(this.currentVisitId);
         }
         else if (msg.message == 'Close') {

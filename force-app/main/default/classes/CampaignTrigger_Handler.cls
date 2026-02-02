@@ -41,7 +41,7 @@ public class CampaignTrigger_Handler {
             if(settings.Campaign_Marketing_Manager_Approver__c !=null){
                 camp.Marketing_Manager_Approver__c = settings.Campaign_Marketing_Manager_Approver__c;
             }
-            if(camp.Budget_Source__c == 'Marketing' || camp.Budget_Source__c == 'Corporate'){
+            if(camp.Budget_Source__c == 'Marketing' ){
                 camp.Budget_Holder_Approver__c = settings.Marketing_Campaign_Approver__c;
             }else if(camp.Budget_Source__c == 'Digital'){
                 camp.Budget_Holder_Approver__c = settings.Digital_Campaign_Approver__c;
@@ -53,8 +53,10 @@ public class CampaignTrigger_Handler {
                 camp.Budget_Holder_Approver__c = settings.Service_Campaign_Approver__c;
             }else if(camp.Budget_Source__c == 'Academy'){
                 camp.Budget_Holder_Approver__c = settings.Academy_Campaign_Approver__c;
-            }else if(camp.Budget_Source__c == 'Corporate'){
+            }else if(camp.Budget_Source__c == 'Telephony'){
                 camp.Budget_Holder_Approver__c = settings.Telephony_Campaign_Approver__c;
+            }else if(camp.Budget_Source__c == 'Others'){
+                camp.Budget_Holder_Approver__c = settings.Others_Campaign_Approver__c;
             }
                if(settings.Campaign_Expense_Approver__c !=null){
                 camp.Final_Expense_Approver__c = settings.Campaign_Expense_Approver__c;

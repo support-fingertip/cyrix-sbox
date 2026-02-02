@@ -67,16 +67,15 @@ public class VisitTriggerHandler {
             
             Visit__c newVisit = new Visit__c();
             
-            /* ---------- REQUIRED LOOKUPS ---------- */
-            newVisit.Account__c   = v.Account__c;
-            newVisit.Lead__c      = v.Lead__c;
-            
-            /* ---------- OWNER (FIXED ISSUE) ---------- */
-            newVisit.OwnerId = (v.OwnerId != null)
+           if( v.Visit_for__c  =='Customer'){
+            newVisit.Account__c  = v.Account__c;
+           }else{
+            newVisit.Lead__c = v.Lead__c;
+           }
+ newVisit.OwnerId = (v.OwnerId != null)
                 ? v.OwnerId
                 : UserInfo.getUserId();
-            
-            /* ---------- PICKLISTS ---------- */
+
             newVisit.Visit_for__c     = v.Visit_for__c;
             newVisit.Visit_Purpose__c = v.Visit_Purpose__c;
             newVisit.Visit_Type__c    = v.Visit_Type__c;

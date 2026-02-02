@@ -4,7 +4,7 @@ public class leadCmpController {
       @auraEnabled
     public Region__c region {get;set;}
     
-    @auraEnabled(cacheable=true)
+    @auraEnabled
     public static leadCmpController fetchLead(string leadId){
         if (String.isEmpty(leadId)) {
             return null;
@@ -14,7 +14,7 @@ public class leadCmpController {
             list<Map_Sub_Region__c> subRegions = new list<Map_Sub_Region__c>();
             leadCmpController l = new leadCmpController();
             l.region =[select Id,Name from Region__c where Id=:lead.Region__c];
-            l.subRegions =[select Id,name,Sales_Engineer__c,Sales_Engineer__r.Name,ASM__c,ASM__r.Name from Map_Sub_Region__c where Region__c=:lead.Region__c and Active__c=true];
+            l.subRegions =[select Id,Name,Sales_Engineer__c,Sales_Engineer__r.Name,ASM__c,ASM__r.Name from Map_Sub_Region__c where Region__c=:lead.Region__c and Active__c=true];
           return l;
         }else{
            return null;
