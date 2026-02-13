@@ -124,6 +124,7 @@ public class CalculateDistanceAPI {
                 d.distance= dm.rows[0].elements[0].distance.value/1000; 
             }   
         }
+        log.Object__c='Distance Matrix';
         log.Status_Message__c='Success';
         d.log =log;
         return d;

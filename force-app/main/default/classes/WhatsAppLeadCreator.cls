@@ -3,11 +3,19 @@ global class WhatsAppLeadCreator {
     
     @HttpPost
     global static void createLeadFromWhatsApp() {
+          Integer maxSize = 32000;
+          Log__c log = new Log__c();
         try {
             RestRequest req = RestContext.request;
             String requestBody = req.requestBody.toString();
+             String key = RestContext.request.params.get('key');
+             if(requestBody.length() > maxSize ){
+            log.Request__c = requestBody.substring(0, maxSize);
+        }else{
+            log.Request__c = requestBody;
+        }
             System.debug('Received payload: ' + requestBody);
-            
+          if(Label.API_Key == key ){   
             // Parse the JSON payload
             WhatsAppWebhookPayload payload = (WhatsAppWebhookPayload) JSON.deserialize(requestBody, WhatsAppWebhookPayload.class);
             
@@ -128,12 +136,23 @@ global class WhatsAppLeadCreator {
                 RestContext.response.statusCode = 201;
                 RestContext.response.responseBody = Blob.valueOf(JSON.serialize(new Response('Success', 'Lead created', newLead.Id)));
             }
+          }else{
+             RestContext.response.statusCode = 400;
+             RestContext.response.addHeader('Content-Type', 'application/json');
+             RestContext.response.responseBody = Blob.valueOf(JSON.serialize(new Map<String, Object>{
+                'success'=> false ,'Authorisation error'=> 'Invalid Key.'}));
+            log.Status_Code__c ='400';
+            log.Status_Message__c='Failed';
+        }
             
         } catch (Exception e) {
             System.debug('Error creating lead: ' + e.getMessage() + ' | ' + e.getStackTraceString());
             RestContext.response.statusCode = 500;
             RestContext.response.responseBody = Blob.valueOf(JSON.serialize(new Response('Error', e.getMessage(), null)));
         }
+            
+         log.Response__c = RestContext.response.tostring() ; 
+        insert log;
     }
     
     private static Lead findDuplicateLead(String email, String phone) {

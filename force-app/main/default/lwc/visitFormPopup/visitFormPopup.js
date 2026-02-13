@@ -285,16 +285,32 @@ handleEnable(e) {
                 this.genericDispatchEvent('Warning', warningMsg, 'warning');
                 return;
             }
+            if(this.visitData.Next_Follow_Up_Date__c){
+            const selectedDate = new Date(this.visitData.Next_Follow_Up_Date__c);
+            const today = new Date();
+            
+            selectedDate.setHours(0, 0, 0, 0);
+            today.setHours(0, 0, 0, 0);
+            
+            if (selectedDate <= today) {
+                 const warningMsg = 'Next Followup date should be greather than today';
+                this.genericDispatchEvent('Warning', warningMsg, 'warning');
+                return;
+            }
+               
+            }
             this.isDisabled = true;
             const message = new CustomEvent('myvisitclick', {
                 detail: {
                     message: 'createNewVisit',
                     Comment: this.visitData.Comments__c,
-                    feedback: this.visitData.Visit_Feedback__c
+                    feedback: this.visitData.Visit_Feedback__c,
+                     nextFollowupDate: this.visitData.Next_Follow_Up_Date__c
                 }
             });
             this.dispatchEvent(message);
         } else if (this.newVisitCreate) {
+            
             if (this.visitData.Visit_for__c == '') {
                 const warningMsg = 'Please select visit for';
                 this.genericDispatchEvent('Warning', warningMsg, 'warning');
@@ -303,7 +319,7 @@ handleEnable(e) {
                 const warningMsg = 'Please select Lead';
                 this.genericDispatchEvent('Warning', warningMsg, 'warning');
                 return;
-            } else if (this.Visit_for__c == 'Customer' && !this.visitData.Account__c) {
+            } else if (this.visitData.Visit_for__c == 'Customer' && !this.visitData.Account__c) {
                 const warningMsg = 'Please select Customer';
                 this.genericDispatchEvent('Warning', warningMsg, 'warning');
                 return;

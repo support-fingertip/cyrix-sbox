@@ -1,25 +1,30 @@
 ({
-     doInit : function(component,event,helper){
+	doInit : function(component,event,helper){
         component.set('v.showpopup',true);
              var device = $A.get("$Browser.formFactor");
          component.set('v.formFactor',device);
         if(device == 'DESKTOP'){
              var cmpTarget = component.find('model');
         $A.util.removeClass(cmpTarget, 'slds-modal_full');
+          helper.handleFetchObj(component, event, helper);
         }
-    },    
-    handleSave : function(component, event, helper) {
-        // Find form and submit
-        var form = component.find("campaign");
-        if (form) {
-            form.submit();
+    },  
+  handleSubmit: function(component, event, helper){
+        event.preventDefault();
+        try{
+                const fields = event.getParam('fields');
+                 fields["Credated_From_ui__c"] = true;         
+                component.find('visit').submit(fields);
+            }
+       catch (error) {  
+            console.error("An error occurred:", error.message);
         }
     },
 
     handleSuccess : function(component, event, helper) {
         var payload = event.getParams().response;
          component.set('v.showpopup',false);
-        // Navigate to new Campaign record
+        // Navigate to new visit record
         var navEvt = $A.get("e.force:navigateToSObject");
         navEvt.setParams({
             recordId: payload.id,
@@ -29,7 +34,7 @@
     },
 
  handleError: function (component, event, helper) {
-         component.set('v.disableSave',false); 
+   
       // Extract error details from the event
         var errorDetails = event.getParam("error");
         console.error('Error Details:', JSON.stringify(errorDetails));
@@ -55,8 +60,7 @@
         // Display the toast message
         helper.showToast("Error", toastMessage, "error");
     },
-
-      closeModal: function(component, event, helper) {
+     closeModal: function(component, event, helper) {
   component.set('v.showpopup',false);
             var homeEvt = $A.get("e.force:navigateToObjectHome");
             homeEvt.setParams({

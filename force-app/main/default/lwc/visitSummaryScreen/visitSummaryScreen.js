@@ -16,7 +16,8 @@ export default class visitSummaryScreen extends NavigationMixin(LightningElement
         sort: GOOGLE_ICONS + "/googleIcons/sort.png",
         progress: GOOGLE_ICONS + "/googleIcons/progress.png",
         play: GOOGLE_ICONS + "/googleIcons/play.png",
-        forward: GOOGLE_ICONS + "/googleIcons/forward.png"
+        forward: GOOGLE_ICONS + "/googleIcons/forward.png",
+          rename: GOOGLE_ICONS + "/googleIcons/rename.png"
     }
     hrs = PLANNER_ICON + "/planner/screen-1-24.png";
     week = PLANNER_ICON + "/planner/screen-1-week.png";
@@ -499,5 +500,10 @@ export default class visitSummaryScreen extends NavigationMixin(LightningElement
                 a.accountName > b.accountName ? 1 : -1
             ); // Sorting in Ascending Order
         }
+    }
+
+    get isDailylog(){
+  let isDailyLog = this.dailyLogData.Day_ended_Time__c != null && this.dailyLogData.Day_started_Time__c != null ? false : true;
+  return isDailyLog;
     }
 }

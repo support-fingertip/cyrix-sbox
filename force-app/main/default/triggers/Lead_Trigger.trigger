@@ -16,7 +16,23 @@ trigger Lead_Trigger on Lead (before insert,after insert,before update,after upd
             }
     }
      if(trigger.operationType == TriggerOperation.BEFORE_INSERT || trigger.operationType == TriggerOperation.BEFORE_UPDATE){
-        LeadTriggerHandler.checkAndSeprateMobileNumber(trigger.New);
+          for (Lead l : trigger.New) {
+                if (l.purchaseDate__c != null && trigger.isInsert) {
+                    l.PurchaseDate_Last_Updated__c = Date.today();
+                }
+              if(trigger.isInsert){
+                LeadTriggerHandler.findDuplicate(trigger.new);  
+              }
+              if(trigger.isUpdate){
+               if (trigger.oldMap.get(l.Id).purchaseDate__c != l.purchaseDate__c ) {
+                    l.PurchaseDate_Last_Updated__c = Date.today();
+                }
+                  if(l.ownerId !=trigger.oldMap.get(l.Id).ownerId){
+                      l.old_Lead_Owner__c=trigger.oldMap.get(l.Id).ownerId;
+                  }
+              }
+            }
+     LeadTriggerHandler.checkAndSeprateMobileNumber(trigger.New);
         
     }
     
@@ -32,7 +48,7 @@ trigger Lead_Trigger on Lead (before insert,after insert,before update,after upd
             }
             if(trigger.isInsert){
                 leadOwnerList.add(ld);  
-             
+                leadAssignment.add(ld.Id);
             }
             if(trigger.isUpdate){
                 lead oldLead= trigger.oldMap.get(ld.Id);
@@ -45,7 +61,7 @@ trigger Lead_Trigger on Lead (before insert,after insert,before update,after upd
             }
             
         }
-            
+         
             if(!campaignMemberList.isEmpty()){
             LeadTriggerHandler.campaignMapping(campaignMemberList);   
         }

@@ -34,19 +34,9 @@ public with sharing class visitManager {
                 orderIds.add(ord.Id);
             }
             
-            // Fetch related Order_Item__c records
-            /*   dt.orList = [SELECT Id, Name, Product__c, Product__r.Name, Product_Category__c, Product_Category__r.Name,
-Total_Amount__c, Account__r.Name, Visit__c, Visit__r.Name, Daily_log__r.Name, Quantity__c
-FROM OrderItem 
-WHERE Order IN :orderIds];*/
         }
         
         dt.VisitPhoto = LightningFileUploadHandler.getFiles(recordId);
-        /* dt.Stock = [select Id,name,Product__c,Product__r.Name,Product_Category__c,Product_Category__r.Name,
-Quantity__c, Unit_Price__c from Dealer_Stock__c where Visit__c =:recordId ];
-*/
-        //    dt.paymentFollowUp = getPaymentDestails(recordId).paymentFollowUp;
-        
         
         visit__c vs = [select id,Daily_Log__c ,Visit_for__c,Account__c,Lead__c
                        from visit__c where id=:recordID];//Status__c,Lead__c,Account__c,
@@ -62,22 +52,13 @@ Quantity__c, Unit_Price__c from Dealer_Stock__c where Visit__c =:recordId ];
             ids = vs.Lead__c;
             allVisit = [select id,Status__c,Lead__c from Visit__c where Lead__c =:ids ];//and Actual_Start_Time__c != null];            
         }
-        
-        //       List<Invoice__c> inv = new List<Invoice__c>();
-        //     List<Sale__c> sales = new List<Sale__c>();
+       
         List<Order> allOrders = new List<Order>();
         Decimal totalOrderAmt = 0, totalSalesAmt = 0, totalSumOutStanding = 0;
         
         if(ids != null){
             system.debug('invoicesss '+vs.Visit_for__c);
-            if(vs.Visit_for__c == 'Lead' ){
-                //           dt.outletTask = [Select id,name,Description__c,Task_Status__c from Outlet_Task__c where Lead__c=:ids];
-            }else{
-                //              dt.outletTask = [Select id,name,Description__c,Task_Status__c from Outlet_Task__c where Account__c=:ids];
-                //            inv = [Select id, name,Grand_Total__c from Invoice__c where Store__c =: ids];
-                //          sales = [Select id, Total_Amount__c from Sale__c where Account__c =: ids];
-                //          system.debug('invoicesss '+inv);
-            } 
+           
             
             if ([SELECT Id FROM Account  WHERE Id = :ids LIMIT 1].size() > 0) {
                 allOrders.addAll([SELECT Id, TotalAmount FROM Order WHERE  AccountId= :ids]);
@@ -97,7 +78,7 @@ Quantity__c, Unit_Price__c from Dealer_Stock__c where Visit__c =:recordId ];
     public static data getDailyLog(){
         data db = new data();
         List<Daily_Log__c> dailylogs = [SELECT Id,Day_started_time__c,Clock_In_Location__Longitude__s,Clock_In_Location__Latitude__s,Clock_Out_Location__Longitude__s
-                                              ,Clock_Out_Location__Latitude__s,Day_ended_Time__c,Vehicle_Used__c ,Odometer_Starting_Kms__c from  Daily_Log__c  WHERE Day_started_time__c = TODAY AND
+                                              ,Clock_Out_Location__Latitude__s,Day_ended_Time__c,Vehicle_Used__c ,Odometer_Starting_Kms__c from  Daily_Log__c  WHERE Day_started_time__c = TODAY AND createddate=today AND
                                               OwnerId =:UserInfo.getUserId()  ORDER BY createddate desc limit 1]; 
         
         if(dailyLogs.size() != 0){
@@ -185,7 +166,7 @@ Quantity__c, Unit_Price__c from Dealer_Stock__c where Visit__c =:recordId ];
         system.debug('visdata '+visdata);
         dta.visit = visdata;
         List<Daily_Log__c> clockinClockout = [SELECT Id,OwnerId,Day_ended_Time__c from  Daily_Log__c  WHERE
-                                              Day_started_time__c = TODAY AND OwnerId =:UserInfo.getUserId()  ORDER BY createddate desc limit 1]; 
+                                              Day_started_time__c = TODAY AND createddate=today AND  OwnerId =:UserInfo.getUserId()  ORDER BY createddate desc limit 1]; 
         dta.isDayStarted = !clockinClockout.isEmpty() ? true : false;
         return dta;
     }
@@ -266,7 +247,7 @@ Quantity__c, Unit_Price__c from Dealer_Stock__c where Visit__c =:recordId ];
         string currentUserId = UserInfo.getUserId();
         User us = [select Id,Name from User where Id =:currentUserId];
         List<Daily_Log__c> dailyLog = [SELECT Id,Name,Day_ended_Time__c,Vehicle_Used__c
-                                       from  Daily_Log__c  WHERE Day_started_Time__c = TODAY
+                                       from  Daily_Log__c  WHERE Day_started_Time__c = TODAY AND createddate=today 
                                        AND OwnerId =:currentUserId  ORDER BY createddate desc limit 1]; 
         
         List<visitData> visdata = new List<visitData>();

@@ -9,7 +9,10 @@ public class Utility {
 * 1.0 |   Nanma  |  10-10-2025 |   Initial version      
 * -------------------------------------------------------------------
 **************************************************************** */
-    
+   @auraEnabled
+    public string objectName{get;set;}
+     @auraEnabled
+    public string profileName{get;set;} 
     
      public static Map<String, String> getAllCountryCodeMappings(Boolean codeAsKey) {
         Map<String, String> countryCodeMappingsMap = new Map<String, String>();
@@ -23,4 +26,18 @@ public class Utility {
         }
         return countryCodeMappingsMap;
     }  
+   @auraEnabled  
+    public static Utility getObjectAndCurrentUser(string recordId){
+
+        if(recordId ==null){
+            return null;
+        }
+        Utility u= new Utility();
+        if(recordId != null && recordId !=''){
+            Id recId =recordId;
+            u.objectName = recId.getSObjectType().getDescribe().getName();
+    }
+    u.profileName=[select Id,profile.Name from user where Id=:userinfo.getuserId()].profile.Name;    
+        return u;
+    }
 }

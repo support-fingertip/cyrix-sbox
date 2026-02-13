@@ -32,7 +32,7 @@
                                                         height="15" />
                                                 </span>
                                                 &nbsp;&nbsp;
-                                                <b>{item.accountName}</b> &nbsp;&nbsp;
+                                             <div class="visit-text">  <b>{item.accountName}</b> </div>
                                                 <template lwc:if={item.showMenuMissed}>
                                                     <lightning-icon icon-name="utility:close" size="x-small"
                                                         alternative-text="" class="missed-icon slds-m-left_large"
@@ -57,21 +57,24 @@
 
                                         <div class="outlet-icon">
                                             <!-- <template lwc:if={item.openPopup}> -->
-                                            <template lwc:if={isDayStarted}>
+                                         
+                                                     <template lwc:if={isDayStarted}>
                                                 <template lwc:if={item.showMenuPlanned}>
                                                     <template if:false={isProgressVisit}>
+                                                          <template if:true={isDailylog}>
                                                         <div class="icon-container">
-                                                            <div onclick={handleOnclickMenu} data-id={item.id}
+                                                            <div onclick={handleOnclickMenu} data-id={item.id} class="play-button"
                                                                 data-index={index} data-name="Execute_StartCall">
-                                                                <img src={googleIcons.play} width="15" height="15">
+                                                                <img src={googleIcons.play} width="17" height="17">
                                                             </div>
                                                         </div>
+                                                        </template>
                                                     </template>
                                                 </template>
                                                 <template lwc:if={item.showMenu}>
                                                     <template lwc:if={item.showMenuInProgress}>
                                                         <div class="icon-container">
-                                                            <div onclick={handleOnclickMenu} data-id={item.id}
+                                                            <div onclick={handleOnclickMenu} data-id={item.id} class="forward-button"
                                                                 data-index={index} data-name="Execute">
                                                                 <img src={googleIcons.forward} width="15" height="15">
                                                             </div>
@@ -111,7 +114,7 @@
                                                                     </li>
                                                                 </template>
                                                                 <template lwc:if={item.showMenuPlanned}>
-                                                                   
+                                                                 <template if:true={isDailylog}>
                                                                     <li onclick={handleOnclickMenu}
                                                                         data-name="Reshedule" data-id={item.id}
                                                                         data-index={index}>
@@ -124,6 +127,7 @@
                                                                         </i>
                                                                         Missed Visit
                                                                     </li>
+                                                                </template>
                                                                 </template>
                                                                 <template lwc:if={item.showMenu}>
                                                                 <template lwc:if={item.showMenuCompleted}>

@@ -1,0 +1,90 @@
+<aura:component controller="Utility" implements="force:appHostable,flexipage:availableForAllPageTypes,force:lightningQuickActionwithoutHeader,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction,lightning:isUrlAddressable" access="global" >
+    <aura:attribute name="spinner" type="boolean" default="false" />
+       <aura:attribute name="showpopup" type="boolean" default="false" />
+    <aura:attribute name="recordId" type="string"/>
+       <aura:attribute name="objectName" type="string" default=""/>
+       <aura:attribute name="profileName" type="string" default=""/>
+    <aura:attribute name="formFactor" type="string"/>
+        <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+       
+    <aura:html tag="style">
+        .slds-modal__container{ 
+        max-width: 80rem !important;
+        width:80% !important;
+        } 
+        
+        .cuf-content {
+        padding: 0 0rem !important;
+        }
+        .slds-p-around--medium {
+        padding: 0rem !important;
+        }
+        
+        .closeIcon{
+        display:none;
+        }
+        .slds-col{
+        margin-left:5px;
+        }
+    </aura:html >
+    <!-- Modal -->
+        <lightning:recordEditForm  objectApiName="Visit__c"   aura:id="visit" onsubmit="{!c.handleSubmit}" onsuccess="{!c.handleSuccess}" onerror="{!c.handleError}"> 
+            <div data-id="editDialog" aura:id="model" role="dialog" tabindex="-1" aria-labelledby="header43" class="slds-modal  slds-fade-in-open slds-modal_full slds-modal_medium  " >     
+                <div class="slds-modal__container">
+                    <aura:if isTrue="{!v.formFactor == 'DESKTOP'}">
+                    <lightning:buttonIcon iconName="utility:close"  onclick="{!c.closeModal}"  alternativeText="close"  variant=""  class="slds-modal__close"/>
+                    </aura:if>
+                        <!-- Modal/Popup Box Header Starts here-->
+                    <header class="slds-modal__header">
+                        
+                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate"> New Visit</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                        <lightning:messages />
+                        <div style="text-align:right;"> <abbr class="slds-required" title="required" >*											
+                            </abbr>= Required Information</div>
+                         <div class="slds-section slds-is-open">
+                            <h3 class="slds-section__title slds-theme_shade slds-section__title slds-theme--shade primaryPaletteBorder test-id__section-header-container">
+                                <span class="slds-truncate slds-p-horizontal_small" title="Section Title">Visit Information</span>
+                            </h3>
+                            <br/>
+                            <div class="slds-grid slds-gutters slds-wrap slds-p-horizontal_xx-small">
+                                
+                                <div class="slds-size_1-of-2 slds-max-small-size_1-of-1 slds-p-horizontal_small">
+                                    <lightning:inputField fieldName="Planned_Start_Time__c" required="true"/>
+                                </div>
+                                 <div class="slds-size_1-of-2 slds-max-small-size_1-of-1 slds-p-horizontal_small">
+                                    <lightning:inputField fieldName="Visit_Purpose__c" required="true"/>
+                                </div>
+                                 <div class="slds-size_1-of-2 slds-max-small-size_1-of-1 slds-p-horizontal_small">
+                                    <lightning:inputField fieldName="Visit_Type__c" required="true"/>
+                                </div>
+                                  <aura:if isTrue="{!v.objectName =='Lead'}">
+                                <div class="slds-size_1-of-2 slds-max-small-size_1-of-1 slds-p-horizontal_small">
+                                    <lightning:inputField fieldName="Lead__c" required="true" value="{!v.recordId}"/>
+                                </div>
+                                </aura:if>
+                                 <aura:if isTrue="{!v.objectName =='Account'}">
+                                <div class="slds-size_1-of-2 slds-max-small-size_1-of-1 slds-p-horizontal_small">
+                                    <lightning:inputField fieldName="Account__c" required="true" value="{!v.recordId}"/>
+                                </div>
+                                </aura:if>
+                                   <aura:if isTrue="{!v.profileName !='Sales Engineer'}">
+                                 <div class="slds-size_1-of-2 slds-max-small-size_1-of-1 slds-p-horizontal_small">
+                                    <lightning:inputField fieldName="Assign_To__c" required="false"/>
+                                </div>
+                                </aura:if>
+                             </div>
+                        </div>
+                    </div>
+                     <div class="slds-modal__footer ">
+                        <lightning:button label="Cancel" onclick="{!c.closeModal}" />
+                        <button class="slds-button slds-button_brand btnsubmit"  type="submit" > Save </button>
+                        
+                    </div>  
+                </div>
+                   
+            </div>
+</lightning:recordEditForm>
+
+</aura:component>

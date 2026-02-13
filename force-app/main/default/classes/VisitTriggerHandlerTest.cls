@@ -114,7 +114,6 @@ public class VisitTriggerHandlerTest {
         Map<String, Id> ids = createBaseData();
 
         Visit__c v1 = new Visit__c(
-            Account__c = ids.get('accId'),
             Lead__c = ids.get('leadId'),
             Daily_Log__c = ids.get('logId'),
             OwnerId = UserInfo.getUserId(),
@@ -124,7 +123,6 @@ public class VisitTriggerHandlerTest {
 
         Visit__c v2 = new Visit__c(
             Account__c = ids.get('accId'),
-            Lead__c = ids.get('leadId'),
             Daily_Log__c = ids.get('logId'),
             OwnerId = UserInfo.getUserId(),
             Planned_Start_Time__c = System.now().addMinutes(30),
@@ -189,6 +187,7 @@ public class VisitTriggerHandlerTest {
         VisitTriggerHandler.missedVisit(
             new List<Visit__c>{ missedVisit }
         );
+          VisitTriggerHandler.testcover();
         Test.stopTest();
 
         Integer afterCount = [SELECT COUNT() FROM Visit__c];

@@ -47,13 +47,12 @@ public class LeadTriggerHandler {
     }
     
     /* ---------------- Phone & Mobile Split ---------------- */
-    public static void checkAndSeprateMobileNumber(List<Lead> leads) {
+        public static void checkAndSeprateMobileNumber(List<Lead> leads) {
         
         Map<String, String> countryCodeMap =
             Utility.getAllCountryCodeMappings(true);
         
         for (Lead l : leads) {
-            
             if (l.Phone != null && l.Phone.startsWith('+91')) {
                 l.Country_Code_Phone__c = '+91';
                 l.Country__c = countryCodeMap.get('91');
@@ -65,6 +64,7 @@ public class LeadTriggerHandler {
                 l.MobilePhone_Country__c = countryCodeMap.get('91');
                 l.MobilePhone = l.MobilePhone.replace('+91', '');
             }
+    
         }
     }
     
@@ -80,7 +80,7 @@ public class LeadTriggerHandler {
     ) {
         for (Lead l : newLeads) {
             Lead oldL = oldMap.get(l.Id);
-            if (oldL != null &&
+            if (oldL != null && l.Status!='Closed Won' && l.IsConverted==false && l.Status!='Closed Lost' &&
                 (l.Status != oldL.Status ||
                  l.Rating != oldL.Rating ||
                  l.LeadSource != oldL.LeadSource ||
@@ -142,33 +142,73 @@ public class LeadTriggerHandler {
     }
     
     /* ---------------- Duplicate Check ---------------- */
-    public static void findDuplicate(List<Lead> leads) {
-        
-        if (leads.isEmpty()) return;
-        
-        Set<String> emails = new Set<String>();
-        for (Lead l : leads) {
-            if (l.Email != null) emails.add(l.Email);
+    public static void findDuplicate(List<Lead> leadList) {
+        Set<String> leadSet = new Set<String>();
+        try{
+        for(Lead l : leadList){
+
+                if(l.Email != null){
+                    leadSet.add(l.Email);
+                }
+              if(l.Secondary_Email__c != null){
+                    leadSet.add(l.Secondary_Email__c);
+                }
+                if(l.Phone != null){
+                    string pho = String.valueOf(l.Phone);
+                    pho =pho.replaceAll('\\s+','');
+                    string len='%'+pho.right(10);
+                    leadSet.add(len);
+                }
+                if(l.Mobilephone  != null){
+                    string mob = String.valueOf(l.Mobilephone);
+                    mob =mob.replaceAll('\\s+','');
+                    string len1='%'+mob.right(10);
+                    leadSet.add(len1);  
+                } 
         }
-        
-        if (emails.isEmpty()) return;
-        
-        Map<String, Lead> existing = new Map<String, Lead>();
-        for (Lead l : [
-            SELECT Id, Email
-            FROM Lead
-            WHERE Email IN :emails
-        ]) {
-            existing.put(l.Email, l);
+        List<Lead> leadlst = [select Id,Name,Email,Phone ,Mobilephone,Secondary_Email__c,OwnerId,Status,CreatedDate from Lead where (Email in :leadSet or Phone like:leadSet or Mobilephone like:leadSet or Secondary_Email__c like:leadSet ) AND Status !='Closed Lost' and isconverted=false order by createddate];
+   
+             for(Lead l : leadList){
+            if(l.Email != null || l.Mobilephone != null || l.Phone != null || l.Secondary_Email__c != null ){
+                for(Lead lea : leadlst ){
+                    string newMobno = '1', ExistMobno = '2', newPhno = '3', ExistPhno = '4' ;
+
+                    
+                    if(l.Mobilephone != null ){
+                        newMobno =l.Mobilephone.replaceAll('\\s+','');
+                        newMobno = newMobno.right(10);  
+                    }
+                    if(lea.Mobilephone != null ){
+                        ExistMobno =lea.Mobilephone.replaceAll('\\s+','');
+                        ExistMobno = ExistMobno.right(10);  
+                    }
+                    if(l.Phone != null ){
+                        newPhno =l.Phone.replaceAll('\\s+','');
+                        newPhno = newPhno.right(10); 
+                    }
+                    if(lea.Phone != null ){
+                        ExistPhno =lea.Phone.replaceAll('\\s+','');
+                        ExistPhno = ExistPhno.right(10);  
+                    }   
+                   
+                    if(l.Email == lea.Email || l.Secondary_Email__c == lea.Secondary_Email__c ||  newMobno == ExistMobno || newPhno == ExistPhno || newMobno == ExistPhno || newPhno == ExistMobno ){
+           
+                           }
+                    l.Duplicate_Parent_Lead__c = lea.Id;
+                    l.Duplicate_Flag__c = true; 
+                           }
+                           
+                       }   
+                }
+        }catch(exception ex){
+           ExceptionHandler.addLog(ex,String.valueOf(leadList),'LeadTriggerHandler','duplicate leads' );  
         }
-        
-        for (Lead l : leads) {
-            if (l.Email != null && existing.containsKey(l.Email)) {
-                l.Duplicate_Parent_Lead__c = existing.get(l.Email).Id;
-                l.Duplicate_Flag__c = true;
             }
-        }
-    }
+            
+            
+    
+
+    
     
     /* ============================================================
 Account Email Sync
@@ -237,24 +277,6 @@ Account Email Sync
     
     
     
-    public static void shareWithCreator(List<Id> leadIds) {
-        List<LeadShare> leadShares = new List<LeadShare>();
-        list<AssignmentRule> leadAR = [  SELECT Id  FROM AssignmentRule   WHERE SobjectType = 'Lead'   AND Active = true and Name='Telecaller Lead Assignment' LIMIT 1 ];//Fetch the active Lead Assignment Rule (if you want a specific rule, filter by Name)
-        if(!leadAR.isEmpty()){
-            List<Lead> leads = [SELECT Id, CreatedById FROM Lead WHERE Id IN :leadIds];
-            
-            for (Lead l : leads) {
-                LeadShare share = new LeadShare();
-                share.LeadId = l.Id;
-                share.UserOrGroupId = l.CreatedById;
-                share.LeadAccessLevel = 'Read'; // or 'Edit'
-                share.RowCause = 'Manual';
-                leadShares.add(share);
-            }
-            
-            database.insert(leadShares,true);
-        }
-    }
-    
+   
     
 }
