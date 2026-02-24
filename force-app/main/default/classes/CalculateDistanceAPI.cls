@@ -34,6 +34,7 @@ public class CalculateDistanceAPI {
                         dis =distanceCalculationinKM( d.Clock_In_Location__Latitude__s, d.Clock_In_Location__Longitude__s,visit.Check_In_Location__Latitude__s ,visit.Check_In_Location__Longitude__s);
                         visit.Distance__c =dis.distance;
                         visit.Distance_Calculated_by_Google_API__c =true;
+                        visit.Address__c=dis.addressData;
                         logs.add(dis.log);
                         visitsToUpdate.add(visit);
                     }
@@ -51,6 +52,7 @@ public class CalculateDistanceAPI {
                         if(visits[i-1].Check_In_Location__Latitude__s !=null && visits[i-1].Check_In_Location__Longitude__s !=null && visits[i].Check_In_Location__Latitude__s !=null && visits[i].Check_In_Location__Longitude__s !=null){
                             dis =distanceCalculationinKM(visits[i-1].Check_In_Location__Latitude__s ,visits[i-1].Check_In_Location__Longitude__s,visits[i].Check_In_Location__Latitude__s ,visits[i].Check_In_Location__Longitude__s );
                             visits[i].Distance__c =dis.distance;
+                              visits[i].Address__c=dis.addressData;
                             visits[i].Distance_Calculated_by_Google_API__c =true;
                             logs.add(dis.log);
                             visitsToUpdate.add(visits[i]);
@@ -70,8 +72,7 @@ public class CalculateDistanceAPI {
                     if(visit.Check_In_Location__Latitude__s !=null && visit.Check_In_Location__Longitude__s !=null){
                         dis =distanceCalculationinKM( visit.Check_In_Location__Latitude__s ,visit.Check_In_Location__Longitude__s,d.Clock_Out_Location__Latitude__s ,d.Clock_Out_Location__Longitude__s );
                         d.Distance_Calculated_by_Google_API__c =true;  
-                     //   visit.Distance__c =dis.distance;
-                       // visit.Distance_Calculated_by_Google_API__c =true;
+                        d.Last_Visit_Address__c= dis.addressData;
                         d.Last_visit_distance__c =dis.distance;
                         dailylogsToUpdate.add(d);
                         logs.add(dis.log);  
@@ -123,6 +124,10 @@ public class CalculateDistanceAPI {
             if( ( dm.rows.size() > 0 )&& ( dm.rows[0].elements.size() > 0 )  ){
                 d.distance= dm.rows[0].elements[0].distance.value/1000; 
             }   
+             d.addressData =
+                (dm.destination_addresses != null && !dm.destination_addresses.isEmpty())
+                ? dm.destination_addresses[0]
+                : null;
         }
         log.Object__c='Distance Matrix';
         log.Status_Message__c='Success';
@@ -254,10 +259,14 @@ public static Decimal calculateDistanceTraveled(Decimal startReading, Decimal en
     
     public class distanceValue{  
         public decimal distance; 
+        public string addressData;
         public log__c log;
     }
     public class distancematrix{  
+         public List<String> destination_addresses;
+    public List<String> origin_addresses;
         public List<row> rows;   
+      
     } 
     public class row{ 
         public List<element> elements;

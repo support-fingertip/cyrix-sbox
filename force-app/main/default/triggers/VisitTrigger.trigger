@@ -26,6 +26,7 @@ trigger VisitTrigger on Visit__c (before insert,after insert, after update, befo
             Visit__c oldV = Trigger.oldMap.get(v.Id);
             if ( v.Status__c == 'Missed' && oldV.Status__c != v.Status__c && v.PostPoned_Start_Time__c != null) {
                 missedVisits.add(v);
+
             }
         }
         if (!missedVisits.isEmpty()) {

@@ -3,12 +3,15 @@
 ========================= */
 .slds-modal__close {
     z-index: 10;
+    pointer-events: auto;
+    touch-action: manipulation;
 }
 
 .slds-button__icon {
     display: flex;
     align-items: center;
     justify-content: center;
+    pointer-events: auto;
 }
 
 /* =========================
@@ -223,13 +226,16 @@ lightning-textarea {
     gap: 0.75rem;
     padding: 0.75rem 1rem;
     border-top: 1px solid #ddd;
+    pointer-events: auto;
 }
 
-/* =========================
-   BUTTONS
-========================= */
+/* BUTTONS */
 lightning-button {
     --sds-c-button-radius-border: 6px;
+    pointer-events: auto;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .slds-button_brand {
@@ -258,15 +264,24 @@ lightning-button {
     .slds-modal__container {
         width: 100%;
         max-width: 100%;
+        pointer-events: auto;
+        touch-action: manipulation;
     }
 
     .customHeight,
     .CompleteHeight {
         max-height: 100vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    section[role="dialog"] {
+        pointer-events: auto;
     }
 }
 .smooth-scroll {
     scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
 }
 /* ===============================
    SEARCH DROPDOWN ALIGNMENT FIX
@@ -323,10 +338,19 @@ lightning-button {
     border-radius: 8px;
     cursor: pointer;
     background: #f9fafb;
+    pointer-events: auto;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
 }
 
 .camera-btn:hover {
     background: #f3f6f9;
+}
+
+.camera-btn:active {
+    background: #e9ecef;
 }
 
 .icon-label {

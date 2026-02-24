@@ -269,6 +269,7 @@ export default class visitManager extends LightningElement {
 
 
     handleCustomEvent(event) {
+
         try{
         this.isShowBackButton = true;
         const msg = event.detail;
@@ -376,9 +377,9 @@ export default class visitManager extends LightningElement {
             this.screen = msg.screen;
             this.isCameraScreen = true;
             this.outletPage = true;
-        }
-
-        else if (msg.message == 'order' || msg.message == 'outstanding' || msg.message == 'sales' || msg.message == 'visit') {
+        }else if (msg.message == 'checkin') {
+this.executeScreenData.isInProgress = false;
+         } else if (msg.message == 'order' || msg.message == 'outstanding' || msg.message == 'sales' || msg.message == 'visit') {
             this.recordId = msg.recordID;
             this.screen = msg.screen;
             this.isBusinessSummaryScreen = true;

@@ -146,71 +146,199 @@ GetOrderDetailsData(){
 }
 /*Getting geoLocation*/
 handleGetLatLon(checkOutIn) {
-console.log('this.isMobilePublisher: ' + this.isMobilePublisher);
+    // Prevent double-clicks and show loading state
+    this.isLoading = true;
+    this.isDisabled = true;
 
-if(this.isMobilePublisher)
-{
-    //invoke Location Service native mobile capability feature
-    //to get current position
-    getLocationService().getCurrentPosition({
-    enableHighAccuracy: true
-        }).then((result) => {
+    let isResolved = false;
+    this.currentLocationRequestId = null;
 
-            var newEvent = new CustomEvent('locationPharmacySearch:getLatLonResponse',{detail:{}});
-            newEvent.detail.lat = result.coords.latitude;
-            newEvent.detail.lon = result.coords.longitude; 
-            newEvent.detail.latlonsource = 'nimbus';
-            newEvent.detail.status = 'success';
+    const requestId = Math.random().toString(36).substring(2);
+    this.currentLocationRequestId = requestId;
 
-            console.log('newEvent: ' + JSON.stringify(newEvent));
-            this.handleSaveVisitData(newEvent,checkOutIn);
+    // Timeout fallback (15 seconds)
+    const timeoutTimer = setTimeout(() => {
+        if (this.currentLocationRequestId !== requestId || isResolved) return;
 
-        }).catch((error) => {
-            console.log(JSON.stringify(error));
-            this.isPageLoaded = false;
-        });
-
-}
-else if(window.navigator && window.navigator.geolocation)
-{
-    //invoke browser native capability to get current position
-    window.navigator.geolocation.getCurrentPosition((r,err) => {
-        var newEvent = new CustomEvent('locationPharmacySearch:getLatLonResponse',{detail:{}});
-        if(r && r.coords)
-        {
-            
-            newEvent.detail.lat = r.coords.latitude;
-            newEvent.detail.lon = r.coords.longitude; 
-            newEvent.detail.latlonsource = 'browser';
-            newEvent.detail.status = 'success';
-            this.handleSaveVisitData(newEvent,checkOutIn);
-
-        }
-        else if(err)
-        {
-            console.log(JSON.stringify(err));
-            this.isPageLoaded = false;
-        }
-    },
-    (error) => {
-        // Add error callback for better error handling
-        console.log('Geolocation error: ' + JSON.stringify(error));
+        this.isLoading = false;
+        this.isDisabled = false;
+        this.currentLocationRequestId = null;
         this.isPageLoaded = false;
-    },
-    {
-        // Add options for better control
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000
-    });
 
-}
-else 
-{
-    console.log('Unable to get user location.');
+        // Show timeout error
+        this.genericDispatchToastEvent(
+            'Error',
+            'Unable to fetch location in time. Please try again.',
+            'error'
+        );
+        this.dispatchLocationFailureEvent(checkOutIn);
+    }, 15000);
+
+    // Options: fast (low accuracy) then accurate
+    const fastMobileOptions = { enableHighAccuracy: false };
+    const accurateMobileOptions = { enableHighAccuracy: true };
+
+    const fastBrowserOptions = { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 };
+    const accurateBrowserOptions = { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 };
+
+    // ------------------ MOBILE ------------------
+    if (this.isMobilePublisher) {
+        const locationService = getLocationService();
+
+        if (!locationService || !locationService.isAvailable()) {
+            if (this.currentLocationRequestId !== requestId || isResolved) return;
+            isResolved = true;
+            clearTimeout(timeoutTimer);
+
+            this.isLoading = false;
+            this.isDisabled = false;
+            this.currentLocationRequestId = null;
+            this.isPageLoaded = false;
+
+            this.genericDispatchToastEvent(
+                'Error',
+                'Location service is not available. Please enable location permissions.',
+                'error'
+            );
+            this.dispatchLocationFailureEvent(checkOutIn);
+            return;
+        }
+
+        // Fast attempt first
+        locationService
+            .getCurrentPosition(fastMobileOptions)
+            .then((result) => {
+                if (this.currentLocationRequestId !== requestId || isResolved) return;
+                isResolved = true;
+                clearTimeout(timeoutTimer);
+                this.currentLocationRequestId = null;
+
+                const newEvent = new CustomEvent('locationPharmacySearch:getLatLonResponse', {
+                    detail: {}
+                });
+                newEvent.detail.lat = result.coords.latitude;
+                newEvent.detail.lon = result.coords.longitude;
+                newEvent.detail.latlonsource = 'nimbus';
+                newEvent.detail.status = 'success';
+
+                this.handleSaveVisitData(newEvent, checkOutIn);
+            })
+            .catch(() => {
+                // Fallback to accurate
+                return locationService.getCurrentPosition(accurateMobileOptions);
+            })
+            .then((result) => {
+                if (!result) return; // in case the fallback was not executed
+                if (this.currentLocationRequestId !== requestId || isResolved) return;
+
+                isResolved = true;
+                clearTimeout(timeoutTimer);
+                this.currentLocationRequestId = null;
+
+                const newEvent = new CustomEvent('locationPharmacySearch:getLatLonResponse', {
+                    detail: {}
+                });
+                newEvent.detail.lat = result.coords.latitude;
+                newEvent.detail.lon = result.coords.longitude;
+                newEvent.detail.latlonsource = 'nimbus';
+                newEvent.detail.status = 'success';
+
+                this.handleSaveVisitData(newEvent, checkOutIn);
+            })
+            .catch((error) => {
+                if (this.currentLocationRequestId !== requestId || isResolved) return;
+                isResolved = true;
+                clearTimeout(timeoutTimer);
+                this.currentLocationRequestId = null;
+
+                console.error('Mobile location error:', error);
+                this.isLoading = false;
+                this.isDisabled = false;
+                this.isPageLoaded = false;
+
+                this.genericDispatchToastEvent(
+                    'Error',
+                    'Unable to fetch location. Please ensure location is enabled.',
+                    'error'
+                );
+                this.dispatchLocationFailureEvent(checkOutIn);
+            });
+
+        return;
+    }
+
+    // ------------------ BROWSER ------------------
+    if (window.navigator && window.navigator.geolocation) {
+        const getPos = (opts) =>
+            new Promise((resolve, reject) =>
+                window.navigator.geolocation.getCurrentPosition(resolve, reject, opts)
+            );
+
+        // Fast attempt → fallback to accurate
+        getPos(fastBrowserOptions)
+            .catch(() => getPos(accurateBrowserOptions))
+            .then((position) => {
+                if (this.currentLocationRequestId !== requestId || isResolved) return;
+                isResolved = true;
+                clearTimeout(timeoutTimer);
+                this.currentLocationRequestId = null;
+
+                const newEvent = new CustomEvent('locationPharmacySearch:getLatLonResponse', {
+                    detail: {}
+                });
+                newEvent.detail.lat = position.coords.latitude;
+                newEvent.detail.lon = position.coords.longitude;
+                newEvent.detail.latlonsource = 'browser';
+                newEvent.detail.status = 'success';
+
+                this.handleSaveVisitData(newEvent, checkOutIn);
+            })
+            .catch((err) => {
+                if (this.currentLocationRequestId !== requestId || isResolved) return;
+                isResolved = true;
+                clearTimeout(timeoutTimer);
+                this.currentLocationRequestId = null;
+
+                console.error('Browser location error:', err?.code, err?.message);
+                this.isLoading = false;
+                this.isDisabled = false;
+                this.isPageLoaded = false;
+
+                // User-friendly message based on error code
+                let errMsg = 'Unable to fetch location. Please ensure location is enabled.';
+                if (err?.code === 1) {
+                    errMsg = 'Location permission denied. Please allow location access.';
+                } else if (err?.code === 2) {
+                    errMsg = 'Location unavailable. Please try again.';
+                } else if (err?.code === 3) {
+                    errMsg = 'Location request timed out. Please try again.';
+                }
+
+                this.genericDispatchToastEvent('Error', errMsg, 'error');
+                this.dispatchLocationFailureEvent(checkOutIn);
+            });
+
+        return;
+    }
+
+    // ------------------ NOT SUPPORTED ------------------
+    if (this.currentLocationRequestId !== requestId || isResolved) return;
+    isResolved = true;
+    clearTimeout(timeoutTimer);
+    this.currentLocationRequestId = null;
+
+    this.isLoading = false;
+    this.isDisabled = false;
     this.isPageLoaded = false;
+
+    console.log('Geolocation not supported on this device.');
+    this.genericDispatchToastEvent(
+        'Error',
+        'Location service is not supported on this device.',
+        'error'
+    );
+    this.dispatchLocationFailureEvent(checkOutIn);
 }
-} 
 handleSaveVisitData(event,checkOutIn){
         if (!navigator.onLine) {
         this.genericDispatchToastEvent('Error', 'No internet connection. Please check your network and try again.', 'error');
@@ -237,48 +365,56 @@ const data = {
     this.saveUpdateRecord(recordInput,checkOutIn);
 }
 
-saveUpdateRecord(recordInput,checkOutIn){
-    updateRecord(recordInput)
-        .then((result) => {
-            this.completeVisit = false;
-            this.visitData = [result];
-            var msg = checkOutIn === 'checkout' ? 'Visit Ended successfully' : 'Visit Started successfully';
-            this.genericDispatchToastEvent('Success',msg,'success');
-            this.isPageLoaded = false;
-            
-            if(checkOutIn == 'checkout'){
-                this.isDesktopCheckoutPage = true;
-                const event = new CustomEvent('screen3', {
-                    detail: {message:'checkout'}
-                });
-                // if(checkOutIn == 'checkin'){
-                //     this.isPageLoaded = true;
-                //     this.GetOrderDetailsData();
-                // }
-                // Dispatching the event
-                this.dispatchEvent(event);
+    saveUpdateRecord(recordInput,checkOutIn){
+        updateRecord(recordInput)
+            .then((result) => {
+                this.completeVisit = false;
+                this.visitData = [result];
+                var msg = checkOutIn === 'checkout' ? 'Visit Ended successfully' : 'Visit Started successfully';
+                this.genericDispatchToastEvent('Success',msg,'success');
+                this.isPageLoaded = false;
                 
-            }
-            if(checkOutIn == 'checkin'){
-                this.isPageLoaded = true;
-                this.GetOrderDetailsData();
-            }
-            // this.setDataResult(result, toastMessage);                    
-        })
-        .catch((error) => {
-            // Handle error in record creation
-            this.isDailyLog = false;
-            this.isPageLoaded = false;
-            console.error('Error creating record:', error);
-            const child = this.template.querySelector('c-visit-form-popup');
-        if (child) child.setDisabled(false);
-        const errMsg = this.getLdsErrorMessage(error);
-
-        console.error('Error updating record:', JSON.stringify(error));
-        // show user the error
-        this.genericDispatchToastEvent('Error', errMsg, 'error');
-        });
-}
+                // Reset the child component button if it's visible
+                const child = this.template.querySelector('c-visit-form-popup');
+                if (child && child.resetButton) {
+                    child.resetButton();
+                }
+                
+                if(checkOutIn == 'checkout'){
+                    this.isDesktopCheckoutPage = true;
+                    const event = new CustomEvent('screen3', {
+                        detail: {message:'checkout'}
+                    });
+                    // Dispatching the event
+                    this.dispatchEvent(event);
+                }
+                if(checkOutIn == 'checkin'){
+                    this.isPageLoaded = true;
+                    this.GetOrderDetailsData();
+                }
+            })
+            .catch((error) => {
+                // Handle error in record creation
+                this.isDailyLog = false;
+                this.isPageLoaded = false;
+                console.error('Error updating record:', error);
+                
+                // Reset the child component button on error
+                const child = this.template.querySelector('c-visit-form-popup');
+                if (child) {
+                    if (child.resetButton) {
+                        child.resetButton();
+                    } else if (child.setDisabled) {
+                        child.setDisabled(false);
+                    }
+                }
+                
+                const errMsg = this.getLdsErrorMessage(error);
+                console.error('Error updating record:', JSON.stringify(error));
+                // show user the error
+                this.genericDispatchToastEvent('Error', errMsg, 'error');
+            });
+    }
 getLdsErrorMessage(error) {
     // Default fallback
     let msg =

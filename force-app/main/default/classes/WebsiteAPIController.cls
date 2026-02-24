@@ -42,7 +42,7 @@ global without sharing class WebsiteAPIController {
                 ld.LastName = leaddData.name;
                 ld.Phone = leaddData.phone;
                 ld.Email = leaddData.email;
-                ld.LeadSource='Web To Lead	';
+                ld.LeadSource='Website';
                 ld.Web_Form_Name__c =webFormName;
                 if(webFormName =='pay-now' ||webFormName =='medical-equipment-maintenance' || webFormName =='buyback' || webFormName =='medical-device-repair' || webFormName =='medical-equipment-calibration-services' || webFormName =='hospital-equipment-maintenance' || webFormName =='medical-equipment-servicing' || webFormName =='career'|| webFormName =='TradeIndia'){
                     ld.Address__c = leaddData.address;
@@ -148,7 +148,7 @@ global without sharing class WebsiteAPIController {
                     ld.Company='N/A';
                 }
 
-                list<AssignmentRule> leadAR = [  SELECT Id  FROM AssignmentRule   WHERE SobjectType = 'Lead'   AND Active = true and Name='Telecaller Lead Assignment' LIMIT 1 ];//Fetch the active Lead Assignment Rule (if you want a specific rule, filter by Name)
+              /*  list<AssignmentRule> leadAR = [  SELECT Id  FROM AssignmentRule   WHERE SobjectType = 'Lead'   AND Active = true and Name='Telecaller Lead Assignment' LIMIT 1 ];//Fetch the active Lead Assignment Rule (if you want a specific rule, filter by Name)
                 if(!leadAR.isEmpty()){
                     Database.DMLOptions dmlOpts = new Database.DMLOptions();
                     dmlOpts.assignmentRuleHeader.assignmentRuleId = leadAR[0].Id; // leadassignment ruleId
@@ -164,8 +164,13 @@ global without sharing class WebsiteAPIController {
                         database.insert(erro,false);  
                         insert ld;
                     }
-                }else{ insert ld;}    
-                
+                }else{ insert ld;} */   
+                list<user> users =[select id from user where Default_TeleCaller__c=true];
+                if(users.size() > 0){
+                   ld.OwnerId= users[0].Id;  
+                }
+               
+                insert ld;
                 if(webFormName =='career'){  
                     if (leaddData.file != null && !String.isBlank(leaddData.file.base64Data)) {
                         try {
@@ -201,6 +206,8 @@ global without sharing class WebsiteAPIController {
                    res.responseBody = Blob.valueOf(JSON.serialize(new Map<String, Object>{
                     'success'=>true , 'Salesforce LeadId' => ld.Id }));  
                  }
+                log.Data__c =string.valueof(ld);
+                log.Lead__c=ld.Id;
                 log.Status_Code__c ='200';
                 log.Status_Message__c='Success';
             } catch (Exception ex) {

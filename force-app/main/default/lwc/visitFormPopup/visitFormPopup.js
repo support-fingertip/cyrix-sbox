@@ -7,6 +7,7 @@ import getFiles from '@salesforce/apex/visitManager.getFiles';
 import FORM_FACTOR from '@salesforce/client/formFactor';
 import deleteFile from '@salesforce/apex/visitManager.deleteFile';
 import { NavigationMixin } from 'lightning/navigation';
+import { getLocationService } from 'lightning/mobileCapabilities';
 //fields
 import VISIT_OBJECT from '@salesforce/schema/Visit__c';
 import VISIT_FOR_FIELD from '@salesforce/schema/Visit__c.Visit_for__c';
@@ -60,6 +61,22 @@ showOtherReason=false;
 
     @api setDisabled(val) {
         this.isDisabled = val;
+    }
+
+    // Reset button after timeout - auto-recovery if parent doesn't respond
+    resetButtonAfterTimeout(timeoutMs = 8000) {
+        setTimeout(() => {
+            if (this.isDisabled) {
+                console.warn('Button still disabled after timeout. Re-enabling automatically...');
+                this.isDisabled = false;
+                this.genericDispatchEvent('Error', 'An error occurred while saving. Please try again.', 'error');
+            }
+        }, timeoutMs);
+    }
+
+    // Public method to reset button - called by parent component
+    @api resetButton() {
+        this.isDisabled = false;
     }
  get modalClass() {
       
@@ -255,15 +272,65 @@ handleEnable(e) {
             });
     }
 
-    closeVisit() {
-
-        const event = new CustomEvent('myvisitclick', {
+    closeVisit(event) {
+        // Prevent default to handle both click and touch events
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        const customEvent = new CustomEvent('myvisitclick', {
             detail: { message: 'Close' }
         });
-        // Dispatches the event.
-
-        this.dispatchEvent(event);
+        this.dispatchEvent(customEvent);
     }
+    
+    async isLocationServiceAvailable() {
+        const isMobilePublisher = window.navigator.userAgent.indexOf('CommunityHybridContainer') > 0;
+
+        // Mobile publisher: use the native location service availability if present
+        if (isMobilePublisher) {
+            try {
+                const locService = getLocationService();
+                if (!locService) return false;
+                // some implementations expose isAvailable()
+                if (typeof locService.isAvailable === 'function') {
+                    return !!locService.isAvailable();
+                }
+                // Fallback: assume available if object returned
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // Browser: prefer Permissions API to check geolocation permission state
+        try {
+            if (navigator.permissions && typeof navigator.permissions.query === 'function') {
+                const status = await navigator.permissions.query({ name: 'geolocation' });
+                // treat only 'granted' as enabled
+                return status.state === 'granted';
+            }
+        } catch (e) {
+            // ignore and fall through to fallback
+        }
+
+        // Fallback: attempt a quick getCurrentPosition with short timeout to determine availability
+        if (window.navigator && window.navigator.geolocation) {
+            return new Promise((resolve) => {
+                const onSuccess = () => resolve(true);
+                const onError = () => resolve(false);
+                const opts = { timeout: 5000 };
+                try {
+                    window.navigator.geolocation.getCurrentPosition(onSuccess, onError, opts);
+                } catch (e) {
+                    resolve(false);
+                }
+            });
+        }
+
+        return false;
+    }
+    
     genericDispatchEvent(title, message, variant) {
         this.dispatchEvent(
             new ShowToastEvent({
@@ -273,8 +340,20 @@ handleEnable(e) {
             })
         );
     }
-    saveVisit() {
+    async saveVisit(event) {
+        // Prevent default to handle both click and touch events
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
         if (this.completeVisit) {
+            // Check if location service is available (may be async)
+            const locAvailable = await this.isLocationServiceAvailable();
+            if (!locAvailable) {
+                const errorMsg = 'Location service is not enabled or available. Please enable location services and try again.';
+                this.genericDispatchEvent('Error', errorMsg, 'error');
+                return;
+            }
             if (this.visitData.Comments__c == '') {
                 const warningMsg = 'Please enter Comments';
                 this.genericDispatchEvent('Warning', warningMsg, 'warning');
@@ -302,12 +381,13 @@ handleEnable(e) {
             this.isDisabled = true;
             const message = new CustomEvent('myvisitclick', {
                 detail: {
-                    message: 'createNewVisit',
-                    Comment: this.visitData.Comments__c,
-                    feedback: this.visitData.Visit_Feedback__c,
-                     nextFollowupDate: this.visitData.Next_Follow_Up_Date__c
+                message: 'createNewVisit',
+                Comment: this.visitData.Comments__c,
+                feedback: this.visitData.Visit_Feedback__c,
+                nextFollowupDate: this.visitData.Next_Follow_Up_Date__c
                 }
             });
+            this.resetButtonAfterTimeout(8000);
             this.dispatchEvent(message);
         } else if (this.newVisitCreate) {
             
@@ -351,7 +431,7 @@ handleEnable(e) {
                 const warningMsg = 'Please enter missed reason';
                 this.genericDispatchEvent('Warning', warningMsg, 'warning');
                 return;
-            }else if(this.visitData.Missed_Visit_Reason__c == 'Other' && !this.visitData.Missed_Visit_Reason__c){
+            }else if(this.visitData.Missed_Visit_Reason__c == 'Other' && (!this.visitData.Missed_PostPone_Reason__c || this.visitData.Missed_PostPone_Reason__c == '')){
                  const warningMsg = 'Please enter missed reason description';
                 this.genericDispatchEvent('Warning', warningMsg, 'warning');
                 return; 
@@ -372,6 +452,7 @@ handleEnable(e) {
                      missedpicklist: this.visitData.Missed_Visit_Reason__c
                 }
             });
+            this.resetButtonAfterTimeout(8000);
             this.dispatchEvent(message);
         }
     }
@@ -570,7 +651,11 @@ handleEnable(e) {
         }
     }
     //camera addedd
-    openCamera() {
+    openCamera(event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
         this.showCameraModal = true;
     }
     handleCameraStopped() {

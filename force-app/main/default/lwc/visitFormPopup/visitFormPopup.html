@@ -238,10 +238,8 @@
             <!-- Footer for visit poup -->
             <template lwc:if={isDesktop}>
                 <div class="slds-modal__footer">
-                    <button class="slds-button slds-button_neutral" aria-label="Cancel and close" onclick={closeVisit}
-                        disabled={isDisabled}>Cancel</button>
-                    <button class="slds-button slds-button_brand" onclick={saveVisit}
-                        disabled={isDisabled}>Save</button>
+                    <lightning-button variant="neutral" label="Cancel" disabled={isDisabled} onclick={closeVisit}></lightning-button>
+                    <lightning-button variant="brand" label="Save" disabled={isDisabled} onclick={saveVisit}></lightning-button>
                 </div>
             </template>
         </div>

@@ -36,8 +36,9 @@ export default class CameraScreen extends LightningElement {
         if (video && video.srcObject) {
             video.srcObject.getTracks().forEach(track => track.stop());
             video.srcObject = null;
-            this.isCameraInitialized = false; // Reset flag
         }
+        this.isCameraInitialized = false; // Reset flag
+        this.onClickPhoto = true; // Reset photo flag for retake
     }
     genericToastEvent(title, message, variant) {
         const toastEvent = new ShowToastEvent({
@@ -50,40 +51,42 @@ export default class CameraScreen extends LightningElement {
 
      CheckCameraPermission(){
         this.showSaveButton = false;
+        this.hideImageElement(); // Clear previous image when retaking
         // First try to stop any existing stream
         this.stopExistingStream();
+        
+        // Show alert asking for camera permission
+        alert('Please allow camera access to continue');
+        
         navigator.mediaDevices.getUserMedia({ video: true })
         .then((stream) =>{
             stream.getTracks().forEach(track => track.stop());
             this.isCameraInitialized = true;
+            this.onClickPhoto = true;
             this.initCamera();
             this.isCameraPermission = false;
         })
         .catch((error)=>{
             // User has denied permission
             this.isCameraInitialized = false;
-          
+            this.onClickPhoto = false;
             this.isCameraPermission = true;
 
             if (error.name === 'NotReadableError' || error.name === 'AbortError') {
                 this.genericToastEvent('Error', 'Camera is already in use by another tab or app. Please close it and try again.', 'error');
                 alert('Camera is already in use by another tab or app. Please close it and try again.');
             } 
+            else if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError')
+            {
+                alert('Camera permission was denied. Please allow camera access in your settings and try again.');
+                this.genericToastEvent('Error','Camera permission was denied. Please allow camera access in your settings.','error');
+            }
             else
             {
-                alert('Please give camera permission for the salesforce app and restart the app');
-                this.genericToastEvent('Error','Please give camera permission for the salesforce app and restart the app','error');
+                alert('Please give camera permission for the salesforce app and try again');
+                this.genericToastEvent('Error','Please give camera permission for the salesforce app','error');
             }
-
-
-
-
-
         });
-        if(this.isCameraPermission){
-            this.genericToastEvent('Error', 'Camera is already in use by another tab or app. Please close it and try again.', 'error');
-            alert('Camera is already in use by another tab or app. Please close it and try again.');
-        }
     }
 
     async initCamera() {

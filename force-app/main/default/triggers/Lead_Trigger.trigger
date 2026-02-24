@@ -24,6 +24,7 @@ trigger Lead_Trigger on Lead (before insert,after insert,before update,after upd
                 LeadTriggerHandler.findDuplicate(trigger.new);  
               }
               if(trigger.isUpdate){
+                  l.IsNew__c=false;
                if (trigger.oldMap.get(l.Id).purchaseDate__c != l.purchaseDate__c ) {
                     l.PurchaseDate_Last_Updated__c = Date.today();
                 }

@@ -3,7 +3,7 @@ global class WhatsAppLeadCreator {
     
     @HttpPost
     global static void createLeadFromWhatsApp() {
-          Integer maxSize = 32000;
+       /*   Integer maxSize = 32000;
           Log__c log = new Log__c();
         try {
             RestRequest req = RestContext.request;
@@ -194,7 +194,7 @@ global class WhatsAppLeadCreator {
             return '+' + cleanedPhone;
         }
         
-        return phone;
+        return phone;*/
     }
     
     // Inner classes for JSON parsing
