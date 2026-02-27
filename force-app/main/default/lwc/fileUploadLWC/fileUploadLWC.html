@@ -1,0 +1,43 @@
+<template>
+    <div class={uploadClass} style="margin-top:10px">
+        <template lwc:if={isLoading}>
+            <c-on-loading-screen size="1"></c-on-loading-screen>
+        </template>
+        <template lwc:else>
+            <lightning-file-upload
+                label={label}
+                record-id={recordId}
+                required={isRequired}
+                multiple
+                onuploadfinished={handleUploadFinished}>
+            </lightning-file-upload>
+            <!--Uploaded Files-->
+            <template if:true={showFiles}>
+                <table class="slds-table slds-table_bordered slds-table_fixed-layout slds-m-top_small slds-m-bottom_small">
+                    <tbody>
+                        <template for:each={files} for:item="file">
+                            <tr key={file.Id}>
+                                <td class="slds-cell-wrap" width="80%">
+                                    <a href="javascript:void(0);" data-id={file.Id} onclick={previewFile}>
+                                        {file.Title}
+                                    </a>
+                                </td>
+                                <template if:false={showdelete}>
+                                    <td width="20%">
+                                        <lightning-button-icon
+                                            icon-name="utility:delete"
+                                            data-id={file.Id}
+                                            onclick={deleteFile}
+                                            alternative-text="Delete"
+                                            title="Delete"
+                                        ></lightning-button-icon>
+                                    </td>
+                                </template>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </template>
+         </template>
+    </div>
+</template>

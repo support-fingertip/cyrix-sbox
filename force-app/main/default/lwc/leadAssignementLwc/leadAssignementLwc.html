@@ -1,0 +1,139 @@
+<template>
+    <lightning-quick-action-panel header="Lead Assignment">
+        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+            <div class="slds-grid slds-wrap slds-grid_pull-padded-x-small slds-p-around_large">
+
+                <!-- Region Section -->
+                <template if:true={isregionRecord}>
+                    <div class="slds-card slds-m-bottom_medium slds-size_1-of-1">
+                        <div class="slds-card__header slds-grid">
+                            <div class="slds-media slds-media_center slds-has-flexi-truncate">
+                                <div class="slds-media__figure">
+                                    <lightning-icon icon-name="standard:location" alternative-text="Region" size="small"></lightning-icon>
+                                </div>
+                                <div class="slds-media__body">
+                                    <h2 class="slds-card__header-title">
+                                        <span class="slds-text-heading_small">Region</span>
+                                    </h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-card__body slds-p-around_medium">
+                            <p><strong>Name:</strong> {regionRecord.Name}</p>
+                        </div>
+                    </div>
+
+                    <!-- Sub Region Dropdown -->
+                    <div class="slds-size_1-of-1 slds-m-bottom_medium">
+                        <lightning-select
+                            label="Sub Region"
+                            value={subRegionVal}
+                            options={subRegionOptions}
+                            onchange={handleSubRegion}>
+                        </lightning-select>
+                    </div>
+
+                    <!-- Choose Dropdown -->
+                    <template if:true={isSubRegion}>
+                        <div class="slds-size_1-of-1 slds-m-bottom_medium">
+                            <lightning-select
+                                label="Choose"
+                                value={selectVal}
+                                options={selectOptions}
+                                onchange={handleChange}>
+                            </lightning-select>
+                        </div>
+                    </template>
+
+                    <!-- ASM Section -->
+                    <template if:true={isSelectedASM}>
+                        <template if:true={isManagerUser}>
+                            <div class="slds-card slds-m-bottom_medium slds-size_1-of-1">
+                                <div class="slds-card__header slds-grid">
+                                    <div class="slds-media slds-media_center slds-has-flexi-truncate">
+                                        <div class="slds-media__figure">
+                                            <lightning-icon icon-name="standard:user" alternative-text="ASM" size="small"></lightning-icon>
+                                        </div>
+                                        <div class="slds-media__body">
+                                            <h2 class="slds-card__header-title">
+                                                <span class="slds-text-heading_small">ASM</span>
+                                            </h2>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="slds-card__body slds-p-around_medium">
+                                    <p><strong>Name:</strong> {subRegionRecord.ASM__r.Name}</p>
+                                </div>
+                            </div>
+                        </template>
+                        <template if:false={isManagerUser}>
+                            <div class="slds-card slds-theme_warning slds-m-bottom_medium slds-size_1-of-1">
+                                <div class="slds-card__body slds-p-around_medium">
+                                    <lightning-icon icon-name="utility:warning" alternative-text="Warning" size="small" class="slds-m-right_small"></lightning-icon>
+                                    <span class="slds-text-heading_small">ASM not available</span>
+                                    <p class="slds-m-top_x-small">No ASM is assigned for this sub-region. Please contact your manager for assistance.</p>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+
+                    <!-- Sales Executive Section -->
+                    <template if:true={isSelectedSalesExe}>
+                        <template if:true={isSalesExe}>
+                            <div class="slds-card slds-m-bottom_medium slds-size_1-of-1">
+                                <div class="slds-card__header slds-grid">
+                                    <div class="slds-media slds-media_center slds-has-flexi-truncate">
+                                        <div class="slds-media__figure">
+                                            <lightning-icon icon-name="standard:employee" alternative-text="Sales Executive" size="small"></lightning-icon>
+                                        </div>
+                                        <div class="slds-media__body">
+                                            <h2 class="slds-card__header-title">
+                                                <span class="slds-text-heading_small">Sales Executive</span>
+                                            </h2>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="slds-card__body slds-p-around_medium">
+                                    <p><strong>Name:</strong> {subRegionRecord.Sales_Engineer__r.Name}</p>
+                                </div>
+                            </div>
+                        </template>
+                        <template if:false={isSalesExe}>
+                            <div class="slds-card slds-theme_warning slds-m-bottom_medium slds-size_1-of-1">
+                                <div class="slds-card__body slds-p-around_medium">
+                                    <lightning-icon icon-name="utility:warning" alternative-text="Warning" size="small" class="slds-m-right_small"></lightning-icon>
+                                    <span class="slds-text-heading_small">Sales Executive not available</span>
+                                    <p class="slds-m-top_x-small">No Sales Executive is assigned for this sub-region. Please verify your selection or reach out to support.</p>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+                </template>
+
+                <!-- Region Not Available -->
+                <template if:false={isregionRecord}>
+                    <div class="slds-card slds-theme_error slds-m-bottom_medium slds-size_1-of-1">
+                        <div class="slds-card__body slds-p-around_medium">
+                            <lightning-icon icon-name="utility:error" alternative-text="Error" size="small" class="slds-m-right_small"></lightning-icon>
+                            <span class="slds-text-heading_small">Region data is missing</span>
+                            <p class="slds-m-top_x-small">We couldn’t find the region record. Please check your selection or try again later.</p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Footer Buttons -->
+        <div slot="footer">
+            <lightning-button label="Cancel" onclick={closeModel}></lightning-button>
+            <lightning-button
+                variant="brand"
+                class="slds-m-left_x-small"
+                label="Transfer"
+                title="Transfer"
+                onclick={doSubmit}
+                disabled={isEnableSubmit}>
+            </lightning-button>
+        </div>
+    </lightning-quick-action-panel>
+</template>

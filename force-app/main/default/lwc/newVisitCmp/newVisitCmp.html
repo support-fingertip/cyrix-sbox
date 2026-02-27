@@ -1,0 +1,223 @@
+<template>
+    <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open">
+    <!-- <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open slds-modal_small"></section> -->
+        <div class={containerClass}>
+             
+            <template lwc:if={isDesktop}>
+                <button class="slds-button slds-button_icon slds-modal__close" disabled={isDisabled} onclick={closeVisit}>
+                    <lightning-icon
+                        icon-name="utility:close"
+                        size="small"
+                        alternative-text="Close"
+                        class="slds-button__icon"
+                    ></lightning-icon>
+                </button>
+            </template>
+            
+            <div class="slds-modal__header ">
+                <div class="slds-grid slds-gutters">
+                    <template if:false={isDesktop}>
+                        <div class="slds-col  slds-clearfix">
+                            <div class="slds-float_left">
+                                <lightning-button variant="base" label="Save" disabled={isDisabled}  onclick={saveVisit} class="slds-m-left_x-small"></lightning-button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <div class="slds-col slds-align_absolute-center">
+                        <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate" tabindex="-1">{headerVisit}</h1>
+                    </div>
+                    
+                    <template if:false={isDesktop}>
+                        <div class="slds-col  slds-clearfix">
+                            <div class="slds-float_right">
+                                <lightning-button variant="base" label="Cancel" disabled={isDisabled} onclick={closeVisit} class="slds-m-left_x-small"></lightning-button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Creating new visit -->
+            <template lwc:if={newVisitCreate}>
+                <div class="slds-modal__content slds-p-around_medium customHeight" id="modal-content-id-1">
+                    <lightning-combobox
+                        name="Visit_for__c"
+                        label="Today's visit"
+                        value={visitData.Visit_for__c}
+                        placeholder="Select Today's visit"
+                        options={pickData}
+                        onchange={handleChange} ></lightning-combobox>
+    
+                        <template lwc:if={isSearchValueSelected}>
+                            <div class="slds-m-right_xx-small slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-is-open">
+                                        <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
+                                            <lightning-input 
+                                                type="search"
+                                                required
+                                                label={searchLabel}
+                                                class="search-input" 
+                                                autocomplete="off" 
+                                                placeholder={searchPlaceHolder} 
+                                                value={searchValueName} 
+                                                onchange={handleSearch}
+                                                onblur={handleOnBlur}>
+                                            </lightning-input>  
+                                        </div>
+                                        <template lwc:if={isValueSearched}>
+                                            <div id="listbox-id-11" class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid" role="listbox" aria-label="Placeholder for Dropdown Items" tabindex="0" aria-busy="false">
+                                                <template for:each={objData.searchNameData} for:item="srch">
+                                                    <ul key={srch.Id} class="slds-listbox slds-listbox_vertical" role="presentation" >
+                                                        <li role="presentation" class="slds-listbox__item">
+                                                          <div class="slds-media slds-listbox__option slds-listbox__option_plain slds-media_small" role="option" onclick={selectObjName} data-id={srch.Id} data-name={srch.Name}>
+                                                            <lightning-icon 
+                                                                icon-name="utility:user" size="small">
+    
+                                                            </lightning-icon>
+                                                            <span class="slds-media__figure slds-listbox__option-icon"></span>
+                                                            
+                                                           <!-- <span class="slds-media__body">
+                                                              <span class="slds-truncate" title={srch.Name}>
+                                                                <span>{srch.Name}</span><br/>
+                                                                <span>{srch.Phone}</span>
+                                                              </span>
+                                                            </span> -->
+
+
+
+                                                        <span class="slds-media__body">
+                                                            <span class="slds-truncate" title={srch.Name}>
+                                                            <span>{srch.Name}</span><br/>
+                                                            <template if:true={isCustomer}>
+                                                                <span>{srch.Phone}</span>
+                                                            </template>
+                                                            <template if:false={isCustomer}>
+                                                              <b> Mob: </b> <span>{srch.MobilePhone}</span>
+                                                            </template>
+                                                            </span>
+                                                        </span>
+
+                                                          </div>
+                                                        </li>
+                                                    </ul>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+    
+                  <!--      <template lwc:if={isOthereVisit}>
+                            <lightning-input type="text" name="Other_Visit__c" label="Other Visit" value={visitData.Other_Visit__c} onchange={handleChange}></lightning-input>"
+                        </template>-->
+                        <lightning-input type="datetime" name="Visit_Date__c" label="Select a date/time for the visit :"
+                         value={visitData.Visit_Date__c} onchange={handleChange}></lightning-input>
+                         
+                        <lightning-combobox name="Visit_Type__c" required="true" label="Visit Type" value={visitData.Visit_Type__c}  placeholder="Select a Visit Type " options={pickData1} onchange={handleVisitType} ></lightning-combobox>
+                         <lightning-combobox name="Visit_Purpose__c" required="true" label="Visit Purpose" value={visitData.Visit_Purpose__c}  placeholder="Select Visit Purpose " options={pickDatapurpose} onchange={handleVisitPurpose} ></lightning-combobox>
+
+                </div> 
+            </template>
+
+            <!-- Complete visit -->
+            <template lwc:if={completeVisit}>
+                <div class="slds-modal__content slds-p-around_medium CompleteHeight" id="modal-content-id-2">
+                       <lightning-combobox name="Visit_Feedback__c" required="true" label="Visit Feedback" value={visitData.Visit_Feedback__c}  placeholder="Select a Visit Feedback " options={pickDataFeedback} onchange={handleVisitFeedback} ></lightning-combobox>
+                    <lightning-textarea name="Comments__c" label="Comment" value={visitData.Comments__c} placeholder="Enter comments..." onchange={onCommentChange} required></lightning-textarea>
+                 <!--   <c-camera-screen record-id={recordId} is-desktop={isDesktop} complete-visit={completeVisit} onmyvisitclick={handleOrderScreen}></c-camera-screen>
+              -->
+              
+
+
+                <template if:true={showCameraModal}>    
+                            <c-capture-image-lwc
+                                record-id={recordId}
+                                unique-id={uniqueId}
+                                open-camera-value={isCameraOpen}
+                                oncamerastopped={handleCameraStopped}
+                                lwc:ref="captureImageCmp">
+                            </c-capture-image-lwc>
+                        </template>
+                        <!--File Upload-->
+                        <template if:false={showCameraModal}>
+                            <div class="slds-text-align_center slds-box" style="margin-top:10px">
+                                <template if:true={isDesktop}>
+                                    <lightning-file-upload
+                                        label=""
+                                        record-id={recordId}
+                                        multiple
+                                        onuploadfinished={handleUploadFinished}>
+                                    </lightning-file-upload>
+                                </template>
+                                <template if:true={isPhone}>
+                                    <div class="icon-container" onclick={openCamera}>
+                                        <lightning-icon icon-name="action:add_photo_video" size="small" class="icon"></lightning-icon>
+                                        <div class="icon-label">Open Camera</div>
+                                    </div>
+                                </template>
+                                <!--Uploaded Files-->
+                                <template if:true={showUploadedFiles}>
+                                    <table class="slds-table slds-table_bordered slds-table_fixed-layout slds-m-top_small slds-m-bottom_small">
+                                        <tbody>
+                                            <template for:each={uploadedFiles} for:item="file">
+                                                <tr key={file.Id}>
+                                                    <td class="slds-cell-wrap" width="80%">
+                                                        <a href="javascript:void(0);" data-id={file.Id} onclick={previewFile}>
+                                                            {file.Title}
+                                                        </a>
+                                                    </td>
+                                                    <td width="20%">
+                                                        <lightning-button-icon
+                                                            icon-name="utility:delete"
+                                                            data-id={file.Id}
+                                                            onclick={deleteFile}
+                                                            alternative-text="Delete"
+                                                            title="Delete"
+                                                        ></lightning-button-icon>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </template>
+                            </div>
+                        </template>
+
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+              
+                </div>
+            </template>
+            
+            <!-- Missed visit -->
+             <template lwc:if={reshedule}>
+                <div class="slds-modal__content slds-p-around_medium customHeight" id="modal-content-id-3">
+                    <lightning-textarea required name="Missed_PostPone_Reason__c" label="Missed Reason" value={visitData.Missed_PostPone_Reason__c} onchange={onCommentChange}></lightning-textarea>
+                   <br/>
+                    <lightning-input required="true" type="datetime" name="PostPoned_Start_Time__c" label="Rescheduled Date" value={visitData.PostPoned_Start_Time__c} onchange={onCommentChange}></lightning-input>
+                </div>
+             </template>
+
+            <!-- Footer for visit poup -->
+             <template lwc:if={isDesktop}>
+                <div class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" aria-label="Cancel and close" onclick={closeVisit} disabled={isDisabled}>Cancel</button>
+                    <button class="slds-button slds-button_brand" onclick={saveVisit} disabled={isDisabled} >Save</button>
+                </div>
+             </template>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+</template>

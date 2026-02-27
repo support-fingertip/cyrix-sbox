@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Queue xmlns="http://soap.sforce.com/2006/04/metadata">
+    <doesSendEmailToMembers>false</doesSendEmailToMembers>
+    <name>Lead Telecaller</name>
+    <queueMembers>
+        <users>
+            <user>telecallerexe@cyrix.com.invalid</user>
+            <user>telecallerexe2@cyrix.com.invalid</user>
+        </users>
+    </queueMembers>
+    <queueSobject>
+        <sobjectType>Lead</sobjectType>
+    </queueSobject>
+</Queue>

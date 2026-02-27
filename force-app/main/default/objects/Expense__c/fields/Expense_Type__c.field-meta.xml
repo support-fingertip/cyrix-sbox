@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Expense_Type__c</fullName>
+    <description>Type of expenses being claimed.</description>
+    <externalId>false</externalId>
+    <label>Expense Type</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Travel</fullName>
+                <default>false</default>
+                <label>Travel</label>
+            </value>
+            <value>
+                <fullName>Accommodation</fullName>
+                <default>false</default>
+                <label>Accommodation</label>
+            </value>
+            <value>
+                <fullName>Daily Allowance</fullName>
+                <default>false</default>
+                <label>Daily Allowance</label>
+            </value>
+            <value>
+                <fullName>Food Allowance</fullName>
+                <default>false</default>
+                <label>Food Allowance</label>
+            </value>
+            <value>
+                <fullName>Printing charges</fullName>
+                <default>false</default>
+                <label>Printing charges</label>
+            </value>
+            <value>
+                <fullName>Stationary charges</fullName>
+                <default>false</default>
+                <label>Stationary charges</label>
+            </value>
+            <value>
+                <fullName>Courier chargers</fullName>
+                <default>false</default>
+                <label>Courier chargers</label>
+            </value>
+            <value>
+                <fullName>others</fullName>
+                <default>false</default>
+                <label>others</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

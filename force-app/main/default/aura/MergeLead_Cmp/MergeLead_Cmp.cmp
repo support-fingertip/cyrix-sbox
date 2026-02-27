@@ -1,0 +1,154 @@
+<aura:component  controller="LeadMergeController" implements="force:appHostable,flexipage:availableForAllPageTypes,force:lightningQuickActionwithoutHeader,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction,lightning:isUrlAddressable" access="global" >
+    <aura:attribute name="firstLead" type="object"/>
+    <aura:attribute name="secondLead" type="object"/>
+    <aura:attribute name="fields" type="List"/>
+    <aura:attribute name="selectAllLead1" type="Boolean" default="true" />
+    <aura:attribute name="selectAllLead2" type="Boolean" default="false" />
+    <aura:attribute name="selectedFields" type="Map" default="{}"/>
+    <aura:attribute name="selectedleadId"  access="global"  type="string"  description="lead Id from Lookup" default=""/>
+    <aura:attribute name="step"  access="global"  type="integer"  description="lead Id from Lookup" default="1"/> 
+    <!--spinner -->
+    <aura:attribute name="spinner" access="private" type="boolean" default="false" description="" />
+    <aura:html tag="style">
+        .slds-modal__container{ 
+        max-width: 80rem !important;
+        width:80% !important;
+        } 
+        
+        .cuf-content {
+        padding: 0 0rem !important;
+        }
+        .slds-p-around--medium {
+        padding: 0rem !important;
+        }
+        
+        .closeIcon{
+        display:none;
+        }
+        .slds-col{
+        margin-left:5px;
+        }
+    </aura:html >
+    <div role="dialog" tabindex="-1" aria-labelledby="header43" aura:id="Modalbox" class="slds-modal  slds-fade-in-open">
+        <div class="slds-modal__container">
+            <lightning:buttonIcon iconName="utility:close"  onclick="{!c.closeModal}"  alternativeText="close"  variant=""  class="slds-modal__close"/>
+            <header class="slds-modal__header">
+                <h1 id="modal-heading-01" class="title slds-text-heading_medium slds-hyphenate">Lead Merge </h1>
+            </header>
+            
+            
+            <div class="slds-modal__content   slds-p-around_large" id="modal-content-id-1"> 
+                <!-- step1-->
+                <aura:if isTrue="{!v.step == 1}">
+                    <div class=" listSections slds-p-around--large content slds-col">
+                        <div class="slds-form-element_horizontal">
+                            <div class="slds-text-body_regular  sectionTagline">
+                                To merge duplicates, choose lead
+                            </div>
+                            <div class="slds-form-element__control">
+                                <c:CustomLookup objectName="Lead" fieldName="Name" label="Lead" iconName="standard:lead" placeholder="Search Lead ..."  
+                                                filterCondition="{! ' AND Id !=\''+v.recordId+'\' '}" selectedRecordId="{!v.selectedleadId}"/>
+                            </div>
+                        </div>
+                    </div>
+                </aura:if>
+                
+                <!-- step2-->
+                <aura:if isTrue="{!v.step == 2}">
+                    <div  class="slds-text-heading_medium slds-text-align_center slds-p-bottom_small"> Compare leads</div>
+                    
+                    <div class="slds-text-body_regular  sectionTagline slds-text-align_center slds-p-bottom_medium">
+                        When you merge, the principal record is updated with the values you choose, and relationships to other items are shifted to the principal record.
+                    </div>                   
+                    <aura:if isTrue="{!not(empty(v.fields))}">
+                        <div class="slds-table_edit_container slds-is-relative">
+                            <table class="table fieldConflicts slds-table slds-table_header-hidden ">
+                                <thead class="slds-assistive-text">
+                                    <tr class="slds-line-height_reset">
+                                        <th  scope="col" ><div class="slds-truncate" >Field</div></th>
+                                        <th  scope="col"><div class="slds-truncate" >Lead 1</div></th>
+                                        <th  scope="col"><div class="slds-truncate" >Lead 2</div></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td></td><td><span  class="slds-text-heading_small">{!v.firstLead.Name}</span>
+                                        <br/><lightning:button variant="base" label="Select All" title="lead1" onclick="{! c.handleClickSelectAll }"/></td>
+                                        <td><span  class="slds-text-heading_small">{!v.secondLead.Name}</span><br/>
+                                            <lightning:button variant="base" label="Select All" title="lead2" onclick="{! c.handleClickSelectAll}"/></td></tr>
+                                    <aura:iteration items="{!v.fields}" var="f">
+                                        <tr>
+                                            <td>{!f.label}</td>
+                                            <td class="fieldValue">
+                                                <aura:if isTrue="{! and(f.label !='CREATED DATE',f.label !='LAST MODIFIED DATE')}">
+                                                    <lightning:input type="radio"
+                                                                     name="{!f.label}"
+                                                                     label="{!f.value1}"
+                                                                     value="lead1"
+                                                                     checked="{!v.selectAllLead1}"
+                                                                     onchange="{!c.handleSelection}" class="fieldConflicts"/>
+                                                    <aura:set attribute="else">
+                                                        {!f.value1}
+                                                    </aura:set>
+                                                </aura:if>
+                                            </td>
+                                            <td class="fieldValue">
+                                                <aura:if isTrue="{!and(f.label !='CREATED DATE',f.label !='LAST MODIFIED DATE')}">
+                                                    <lightning:input type="radio"
+                                                                     name="{!f.label}"
+                                                                     label="{!f.value2}"
+                                                                     value="lead2"
+                                                                     checked="{!v.selectAllLead2}"
+                                                                     onchange="{!c.handleSelection}"/>
+                                                    <aura:set attribute="else">
+                                                        {!f.value2}
+                                                    </aura:set>
+                                                </aura:if>
+                                            </td>
+                                        </tr>
+                                    </aura:iteration>
+                                </tbody>
+                            </table>
+                        </div>
+                    </aura:if>
+
+                </aura:if>
+                <aura:if isTrue="{!v.step == 3}">
+                    <div  class="slds-text-heading_medium slds-text-align_center slds-p-bottom_small">Confirm merge</div>
+                    <br/>
+                    <div class="slds-text-body_regular   slds-text-align_center">
+                        We’re ready to merge these records.
+                    </div>  
+                    <div class="slds-text-body_regular  sectionTagline slds-text-align_center slds-p-bottom_medium slds-p-top_large">
+                        You're about to merge these leads. You can't undo merging.
+                    </div>  
+                </aura:if>
+            </div>
+            <div class="modal-footer slds-modal__footer slds-modal__footer--directional">
+                <div class="setupFlowFooter onesetupSetupFlowFooter">
+                    <lightning:button label="Cancel" onclick="{!c.closeModel}" />
+                    <div class="slds-p-horizontal--xx-large progressBarContainer">
+                        <div class="slds-progress onesetupSetupFlowProgress">
+                            <lightning:progressIndicator currentStep="{!v.step}" type="base"  variant="base">
+                                <lightning:progressStep label="Select Duplicate" value="1"/>
+                                <lightning:progressStep label="Compare Records" value="2"/>
+                                <lightning:progressStep label="Confirm Merging" value="3"/>
+                            </lightning:progressIndicator>
+                        </div>
+                    </div>
+                </div>
+                <aura:if isTrue="{!v.step == 1}">
+                    <lightning:button variant="brand" label="Next" title="Brand action" disabled="{!empty(v.selectedleadId)}" onclick="{!c.loadLeads}" />
+                </aura:if>
+                     <aura:if isTrue="{!v.step == 2}">
+                    <lightning:button variant="brand" label="Next" onclick="{!c.doConfirm}" />
+                </aura:if>
+                <aura:if isTrue="{!v.step == 3}">
+                    <lightning:button variant="brand" label="Merge Leads" onclick="{!c.domergeLeads}" />
+                </aura:if>
+                
+                
+            </div>
+        </div>
+    </div>
+    
+</aura:component>
