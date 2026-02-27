@@ -78,6 +78,7 @@ trigger Lead_Trigger on Lead (before insert,after insert,before update,after upd
         Set<string> accountIds = new Set<string>();
         list<lead> closedConvertedIds = new list<lead>();
         list<lead> followupTask = new list<lead>();
+        list<lead> closedWonLeads = new list<lead>();
         
         for (Lead lead : trigger.New) {
             lead oldlead = trigger.oldMap.get(lead.Id);
@@ -90,6 +91,12 @@ trigger Lead_Trigger on Lead (before insert,after insert,before update,after upd
             if(lead.Next_Follow_up_Date__c != null && Trigger.oldMap.get(lead.Id).Next_Follow_up_Date__c !=lead.Next_Follow_up_Date__c){
                 followupTask.add(lead);
             }
+            
+            if(lead.Status == 'Closed Won' &&
+               oldlead.Status != 'Closed Won')
+            {
+                closedWonLeads.add(lead);
+            }
         }
         
         if(!followupTask.isEmpty()){
@@ -101,6 +108,9 @@ trigger Lead_Trigger on Lead (before insert,after insert,before update,after upd
         if(closedConvertedIds.size() >0){
             LeadTriggerHandler.sendLostConvertedManagerNotification(closedConvertedIds);
         }
+        if(closedWonLeads.size() > 0){
+    LeadTriggerHandler.sendClosedWonNotification(closedWonLeads);
+}
         
     }
   

@@ -133,8 +133,12 @@ public class VisitTriggerHandler {
             
             if (v.OwnerId == null) continue;
             
-            SendEmailCustomNotification.sendNotification( 'Visit - ' + v.Name + ' is assigned to you',
-                                                         'Visit Assigned',senderId, type.Id,v.Id,new Set<String>{ v.OwnerId } );
+            String title = 'Visit - ' + v.Name + ' is assigned to you';
+            String body  = 'Visit Assigned'
+                + '\n ' + (v.Visit_ID__c != null ? v.Visit_ID__c : '')
+                + '\nPlanned Visit Time: ' + (v.Planned_Start_Time__c != null ? String.valueOf(v.Planned_Start_Time__c) : '');
+            
+            SendEmailCustomNotification.sendNotification(title, body, senderId, type.Id, v.Id, new Set<String>{ v.OwnerId });
         }
     }
     private static void preventDuplicateVisitsBeforeInsert(List<Visit__c> newVisits) {

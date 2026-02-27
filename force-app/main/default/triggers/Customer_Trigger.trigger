@@ -1,11 +1,19 @@
-trigger Customer_Trigger on Account (before update) {
-    
+trigger Customer_Trigger on Account (before update, after insert) {
+    /* ---------------- BEFORE UPDATE ---------------- */
+    if(trigger.isBefore && trigger.isUpdate){
 
-    if(trigger.isUpdate && trigger.isBefore){
-        for(account cust : trigger.New){
-            if(cust.Status__c != trigger.oldMap.get(cust.Id).Status__c && trigger.oldMap.get(cust.Id).Status__c =='Inactive'){
-                cust.Approval_Status__c =null;
-            }
-        }
+        CustomerTriggerHandler.handleBeforeUpdate(
+            trigger.new,
+            trigger.oldMap
+        );
     }
+
+    /* ---------------- AFTER INSERT ---------------- */
+    if(trigger.isAfter && trigger.isInsert){
+
+        CustomerTriggerHandler.handleAfterInsert(
+            trigger.new
+        );
+    }
+
 }

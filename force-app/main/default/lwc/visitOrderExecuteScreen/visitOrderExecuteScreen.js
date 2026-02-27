@@ -339,6 +339,13 @@ handleGetLatLon(checkOutIn) {
     );
     this.dispatchLocationFailureEvent(checkOutIn);
 }
+dispatchLocationFailureEvent(checkOutIn) {
+    // Dispatch screen3 event with the appropriate checkOutIn message
+    const event = new CustomEvent('screen3', {
+        detail: { message: checkOutIn }
+    });
+    this.dispatchEvent(event);
+}
 handleSaveVisitData(event,checkOutIn){
         if (!navigator.onLine) {
         this.genericDispatchToastEvent('Error', 'No internet connection. Please check your network and try again.', 'error');

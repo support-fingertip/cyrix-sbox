@@ -1,5 +1,5 @@
 @RestResource(urlMapping='/indiamart/webhook/*')
-global with sharing class IndiaMartWebhookLeadApi {
+global without sharing class IndiaMartWebhookLeadApi {
 
     @HttpPost
     global static void handlePost() {
@@ -108,18 +108,41 @@ global with sharing class IndiaMartWebhookLeadApi {
             ld.put('Secondary_Email__c', altEmail);
             ld.put('India_Mart_Phone_No__c', phone);
             ld.put('India_Mart_MCAT_Name__c', mcat);
-      list<user> users =[select id from user where Default_TeleCaller__c=true];
-                if(users.size() > 0){
-                      ld.put('OwnerId', users[0].Id);
+
+            // ========= ASSIGN DEFAULT TELECALLER (only for new leads) =========
+            if (existing == null) {
+                List<User> users = [
+                    SELECT Id FROM User
+                    WHERE Default_TeleCaller__c = true
+                      AND IsActive = true
+                    LIMIT 1
+                ];
+                if (!users.isEmpty()) {
+                    string leadId =users[0].Id;
+                    ld.put('OwnerId', leadId);
                 }
+            }
+
             // ========= SAVE =========
             if (Schema.sObjectType.Lead.fields.IndiaMART_Query_ID__c.isExternalId()) {
-                
-                Database.upsert(ld, Lead.Fields.IndiaMART_Query_ID__c, false);
+                Database.UpsertResult ur = Database.upsert(ld, Lead.Fields.IndiaMART_Query_ID__c, false);
+                if (!ur.isSuccess()) {
+                    String errMsg = '';
+                    for (Database.Error err : ur.getErrors()) {
+                        errMsg += err.getStatusCode() + ': ' + err.getMessage() + '; ';
+                    }
+                    log.Response__c = 'DML Error: ' + errMsg;
+                    log.Status_Code__c = '500';
+                    log.Data__c = String.valueOf(ld);
+                    insert log;
+                    res.statusCode = 200;
+                    res.responseBody = Blob.valueOf('DML Error');
+                    return;
+                }
             } else {
                 upsert ld;
             }
-            log.Lead__c=ld.Id;
+            log.Lead__c = ld.Id;
             log.Status_Code__c = '200';
             log.Response__c = 'Success';
             log.Data__c = String.valueOf(ld);

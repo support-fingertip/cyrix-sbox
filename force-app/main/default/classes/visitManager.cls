@@ -62,7 +62,7 @@ public with sharing class visitManager {
             
             if ([SELECT Id FROM Account  WHERE Id = :ids LIMIT 1].size() > 0) {
                 allOrders.addAll([SELECT Id, TotalAmount FROM Order WHERE  AccountId= :ids]);
-            } else if ([SELECT Id FROM Lead WHERE Id = :ids LIMIT 1].size() > 0) {
+           // } else if ([SELECT Id FROM Lead WHERE Id = :ids LIMIT 1].size() > 0) {
                 //    allOrders.addAll([SELECT Id, TotalAmount FROM Order WHERE Lead__c = :ids]);
             }
         }
@@ -93,7 +93,7 @@ public with sharing class visitManager {
     public static data getVisitCreateData(){
         
         data db = new data();
-        db.lead = [SELECT Id,Name,phone,MobilePhone FROM LEAD where Status!='Qualified'  and isConverted=false];//WHERE  Lead_Status__c != 'Converted' and  Approval_Status__c != 'Submitted'
+        db.lead = [SELECT Id,Name,phone,MobilePhone,company FROM LEAD where Status!='Qualified'  and isConverted=false];//WHERE  Lead_Status__c != 'Converted' and  Approval_Status__c != 'Submitted'
         db.Customer = [SELECT Id,Name,Customer_Code__c,phone from account where Status__c != 'Inactive'];
   return db;
     }
@@ -105,10 +105,10 @@ public with sharing class visitManager {
         
         // Set the startDate and endDate based on dateValue
         List<Visit__c> vs = [SELECT id, Name, createdDate, Visit_End__c, Visit_Start__c,
-                             Visit_for__c,Visit_Type__c,Visit_Date__c, Account__c, Account__r.name , Daily_Log__r.Name, Daily_Log__c,Status__c,
-                             PostPoned_Start_Time__c, Missed_PostPone_Reason__c,  Lead__c, Lead__r.Name,Check_In_Location__Longitude__s, Check_In_Location__Latitude__s,
-                             Comments__c, Planned_Start_Time__c, Account__r.Customer_Code__c, Check_Out_Location__Longitude__s,Check_Out_Location__Latitude__s
-                             FROM Visit__c  WHERE OwnerId = :userinfo.getUserId() AND   Visit_Date__c =today   ORDER BY status__c asc, createddate desc  ];//  AND  Approval_StatusFor__c ='Approved'
+                     Visit_for__c,Visit_Type__c,Visit_Date__c, Account__c, Account__r.name , Daily_Log__r.Name, Daily_Log__c,Status__c,
+                     PostPoned_Start_Time__c, Missed_PostPone_Reason__c,  Lead__c, Lead__r.Name, Lead__r.Company, Check_In_Location__Longitude__s, Check_In_Location__Latitude__s,
+                     Comments__c, Planned_Start_Time__c, Account__r.Customer_Code__c, Check_Out_Location__Longitude__s,Check_Out_Location__Latitude__s
+                     FROM Visit__c  WHERE OwnerId = :userinfo.getUserId() AND   Visit_Date__c =today   ORDER BY status__c asc, createddate desc  ];//  AND  Approval_StatusFor__c ='Approved'
         
         
         for(Visit__c vis : vs){
@@ -136,6 +136,7 @@ public with sharing class visitManager {
             } else if(vis.Lead__c != null){
                 ad.accountName = vis.Lead__r.Name;
                 ad.acccountId=vis.Lead__c;
+                ad.company = vis.Lead__r.Company;
             }
             
             ad.appAccountId=vis.Account__r.Customer_Code__c;
@@ -261,7 +262,7 @@ public with sharing class visitManager {
                                  Missed_PostPone_Reason__c,  Visit_Date__c,
                                  Visit_for__c, Account__c,Daily_Log__r.Name, Daily_Log__c,
                                  Visit_Type__c,
-                                 Lead__c, Lead__r.Name, Check_In_Location__c,
+                                 Lead__c,Lead__r.company, Lead__r.Name, Check_In_Location__c,
                                  Check_Out_Location__c,Comments__c, Planned_Start_Time__c,
                                  Account__r.Customer_Code__c, Account__r.Name,Check_In_Location__Latitude__s,Check_In_Location__Longitude__s,
                                  Check_Out_Location__Latitude__s,Check_Out_Location__Longitude__s,Status__c
@@ -288,6 +289,9 @@ public with sharing class visitManager {
                 if(vis.Account__c != null){
                     ad.acccountId=vis.Account__c;
                     ad.accountName = vis.Account__r.Name;
+                }
+                if(vis.lead__c != null){
+                    ad.company = vis.Lead__r.company;
                 }
                 ad.appAccountId=vis.Account__r.Customer_Code__c;
                 ad.dailyLogName =vis.Daily_log__r.Name;
@@ -442,7 +446,7 @@ public with sharing class visitManager {
         @AuraEnabled public double ClockoutLongitude;
         @AuraEnabled public string visitTypes;
         @AuraEnabled public string approvalStatus;
-        
+          @AuraEnabled public string company;
         @AuraEnabled public Integer lastvisitorder;
         
     }

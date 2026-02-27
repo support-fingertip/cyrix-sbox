@@ -36,12 +36,13 @@ public class LeadTriggerHandler {
             
             
             String name = (l.Salutation != null ? l.Salutation + ' ' : '') + (l.FirstName != null ? l.FirstName + ' ' : '') + l.LastName;
+            String companyInfo = (l.Company != null ? '\nCompany: ' + l.Company : '');
             
             SendEmailCustomNotification.sendNotification( 'Lead - ' + name + ' is assigned to you',
-                                                         'Lead Assigned',senderId, type.Id,l.Id,new Set<String>{ l.OwnerId } );
+                                                         'Lead Assigned' + companyInfo,senderId, type.Id,l.Id,new Set<String>{ l.OwnerId } );
             if(l.ManagerId__c !=null && l.ManagerId__c !=''){
                 SendEmailCustomNotification.sendNotification( 'Lead - ' + name + ' is assigned to '+l.Lead_Owner_Name__c,
-                                                             'Lead Assigned',senderId, type.Id,l.Id,new Set<String>{ l.ManagerId__c } ); 
+                                                             'Lead Assigned' + companyInfo,senderId, type.Id,l.Id,new Set<String>{ l.ManagerId__c } ); 
             }
         }
     }
@@ -276,7 +277,98 @@ Account Email Sync
     }
     
     
-    
+    /* ---------------- Closed Won Notification ---------------- */
+public static void sendClosedWonNotification(List<Lead> leads) {
+
+    // Get Notification Type
+    CustomNotificationType type = [
+        SELECT Id
+        FROM CustomNotificationType
+        WHERE DeveloperName = 'Lead_Notification'
+        LIMIT 1
+    ];
+
+    String senderId = UserInfo.getUserId();
+
+    // Collect Owner Ids
+    Set<Id> ownerIds = new Set<Id>();
+    for (Lead l : leads) {
+        if (l.OwnerId != null) {
+            ownerIds.add(l.OwnerId);
+        }
+    }
+
+    // Get Owner -> Manager mapping
+    Map<Id, User> ownerMap = new Map<Id, User>(
+        [SELECT Id, ManagerId FROM User WHERE Id IN :ownerIds]
+    );
+
+    // Get Coordinator Role// Get Coordinator Role safely
+Set<String> coordinatorIds = new Set<String>();
+
+List<UserRole> roleList = [
+    SELECT Id
+    FROM UserRole
+    WHERE Name = 'Coordinator'
+    LIMIT 1
+];
+
+if(!roleList.isEmpty()){
+
+    UserRole coordinatorRole = roleList[0];
+
+    List<User> coordinatorUsers = [
+        SELECT Id
+        FROM User
+        WHERE UserRoleId = :coordinatorRole.Id
+        AND IsActive = true
+    ];
+
+    for(User u : coordinatorUsers){
+        coordinatorIds.add(u.Id);
+    }
+}
+
+    // Send notification
+    for (Lead l : leads) {
+
+            Set<String> recipients = new Set<String>();
+            
+            // Always add Lead Owner
+            if(l.OwnerId != null){
+                recipients.add(String.valueOf(l.OwnerId));
+            }
+            
+            // Always add Manager
+            if(ownerMap.containsKey(l.OwnerId)){
+                User owner = ownerMap.get(l.OwnerId);
+            
+                if(owner.ManagerId != null){
+                    recipients.add(String.valueOf(owner.ManagerId));
+                }
+            }
+            
+            // Always add Coordinator users
+            if(!coordinatorIds.isEmpty()){
+                recipients.addAll(coordinatorIds);
+            }
+
+        // Send notification
+      String leadName =
+    (l.Salutation != null ? l.Salutation + ' ' : '') +
+    (l.FirstName != null ? l.FirstName + ' ' : '') +
+    (l.LastName != null ? l.LastName : '');
+
+SendEmailCustomNotification.sendNotification(
+    'Lead "' + leadName + '" has been marked Closed Won',
+    'Lead Closed Won',
+    senderId,
+    type.Id,
+    l.Id,
+    recipients
+);
+    }
+}
    
     
 }

@@ -284,52 +284,7 @@ handleEnable(e) {
         this.dispatchEvent(customEvent);
     }
     
-    async isLocationServiceAvailable() {
-        const isMobilePublisher = window.navigator.userAgent.indexOf('CommunityHybridContainer') > 0;
-
-        // Mobile publisher: use the native location service availability if present
-        if (isMobilePublisher) {
-            try {
-                const locService = getLocationService();
-                if (!locService) return false;
-                // some implementations expose isAvailable()
-                if (typeof locService.isAvailable === 'function') {
-                    return !!locService.isAvailable();
-                }
-                // Fallback: assume available if object returned
-                return true;
-            } catch (e) {
-                return false;
-            }
-        }
-
-        // Browser: prefer Permissions API to check geolocation permission state
-        try {
-            if (navigator.permissions && typeof navigator.permissions.query === 'function') {
-                const status = await navigator.permissions.query({ name: 'geolocation' });
-                // treat only 'granted' as enabled
-                return status.state === 'granted';
-            }
-        } catch (e) {
-            // ignore and fall through to fallback
-        }
-
-        // Fallback: attempt a quick getCurrentPosition with short timeout to determine availability
-        if (window.navigator && window.navigator.geolocation) {
-            return new Promise((resolve) => {
-                const onSuccess = () => resolve(true);
-                const onError = () => resolve(false);
-                const opts = { timeout: 5000 };
-                try {
-                    window.navigator.geolocation.getCurrentPosition(onSuccess, onError, opts);
-                } catch (e) {
-                    resolve(false);
-                }
-            });
-        }
-
-        return false;
-    }
+    
     
     genericDispatchEvent(title, message, variant) {
         this.dispatchEvent(
@@ -348,12 +303,7 @@ handleEnable(e) {
         }
         if (this.completeVisit) {
             // Check if location service is available (may be async)
-            const locAvailable = await this.isLocationServiceAvailable();
-            if (!locAvailable) {
-                const errorMsg = 'Location service is not enabled or available. Please enable location services and try again.';
-                this.genericDispatchEvent('Error', errorMsg, 'error');
-                return;
-            }
+           
             if (this.visitData.Comments__c == '') {
                 const warningMsg = 'Please enter Comments';
                 this.genericDispatchEvent('Warning', warningMsg, 'warning');
