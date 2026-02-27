@@ -50,7 +50,10 @@
                                             </div>
                                             <div class="outlet-title">Visit for: {item.visitTypes}</div>
                                             <div class="outlet-title">Status: {item.status}</div>
-
+       <template if:false={isCustomer}>
+                                             <div class="outlet-title">Company: {item.company}
+                                            </div>
+                                            </template>
                                             <div class="outlet-title">Planned start Time: {item.formattedPlannedTime}
                                             </div>
                                         </div>

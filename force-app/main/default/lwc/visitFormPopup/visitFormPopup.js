@@ -98,12 +98,10 @@ get searchNameData() {
     })
     visitforPicklistValue({ error, data }) {
         if (data) {
-            this.pickData = [
-                ...data.values.map(plValue => ({
-                    label: plValue.label,
-                    value: plValue.value
-                }))
-            ];
+            this.pickData = data.values.map(plValue => ({
+                label: plValue.label,
+                value: plValue.value
+            }));
         } else if (error) {
             console.error('Error fetching Zone picklist values:', error);
         }
@@ -353,6 +351,8 @@ handleEnable(e) {
                 const warningMsg = 'Please select Customer';
                 this.genericDispatchEvent('Warning', warningMsg, 'warning');
                 return;
+            } else if (this.visitData.Visit_for__c == 'Office' || this.visitData.Visit_for__c == 'Warehouse') {
+                // No lookup needed for Office/Warehouse
             } else if (this.visitData.Visit_for__c == '' || this.visitData.Visit_for__c == undefined) {
                 const warningMsg = 'Please select visit for';
                 this.genericDispatchEvent('Warning', warningMsg, 'warning');
@@ -528,6 +528,9 @@ handleEnable(e) {
                 this.searchPlaceHolder = 'Search Customer....';
                 this.searchLabel = 'Customer';
             }
+            else if (event.detail.value == 'Office' || event.detail.value == 'Warehouse') {
+                this.isSearchValueSelected = false;
+            }
 
 
         }
@@ -570,13 +573,26 @@ handleEnable(e) {
     searchText() {
         let objData = this.objData.searchItems;
         let storeData = [];
+        const searchValue = (this.searchValueName || '').toLowerCase();
+
         for (let i = 0; i < objData.length; i++) {
             const objName = objData[i];
-            if ((objName.Name && objName.Name.toLowerCase().indexOf(this.searchValueName.toLowerCase()) !== -1)) {
-                storeData.push(objName);
+            if (this.isCustomer) {
+                // Customer: search by Name
+                if (objName.Name && objName.Name.toLowerCase().includes(searchValue)) {
+                    storeData.push(objName);
+                }
+            } else {
+                // Lead: search by Company or Name
+                const companyMatch = objName.Company && objName.Company.toLowerCase().includes(searchValue);
+                const nameMatch = objName.Name && objName.Name.toLowerCase().includes(searchValue);
+                if (companyMatch || nameMatch) {
+                    storeData.push(objName);
+                }
             }
         }
-        this.isValueSearched = storeData != 0 ? true : false;
+
+        this.isValueSearched = storeData.length > 0;
         this.objData.searchNameData = storeData;
         console.log('objData>>' + JSON.stringify(objData));
     }
