@@ -299,9 +299,10 @@ handleEnable(e) {
             event.preventDefault();
             event.stopPropagation();
         }
+           alert('test');
         if (this.completeVisit) {
-            // Check if location service is available (may be async)
-           
+         
+            // Restore original complete visit logic
             if (this.visitData.Comments__c == '') {
                 const warningMsg = 'Please enter Comments';
                 this.genericDispatchEvent('Warning', warningMsg, 'warning');
@@ -313,32 +314,28 @@ handleEnable(e) {
                 return;
             }
             if(this.visitData.Next_Follow_Up_Date__c){
-            const selectedDate = new Date(this.visitData.Next_Follow_Up_Date__c);
-            const today = new Date();
-            
-            selectedDate.setHours(0, 0, 0, 0);
-            today.setHours(0, 0, 0, 0);
-            
-            if (selectedDate <= today) {
-                 const warningMsg = 'Next Followup date should be greather than today';
-                this.genericDispatchEvent('Warning', warningMsg, 'warning');
-                return;
-            }
-               
+                const selectedDate = new Date(this.visitData.Next_Follow_Up_Date__c);
+                const today = new Date();
+                selectedDate.setHours(0, 0, 0, 0);
+                today.setHours(0, 0, 0, 0);
+                if (selectedDate <= today) {
+                    const warningMsg = 'Next Followup date should be greather than today';
+                    this.genericDispatchEvent('Warning', warningMsg, 'warning');
+                    return;
+                }
             }
             this.isDisabled = true;
             const message = new CustomEvent('myvisitclick', {
                 detail: {
-                message: 'createNewVisit',
-                Comment: this.visitData.Comments__c,
-                feedback: this.visitData.Visit_Feedback__c,
-                nextFollowupDate: this.visitData.Next_Follow_Up_Date__c
+                    message: 'createNewVisit',
+                    Comment: this.visitData.Comments__c,
+                    feedback: this.visitData.Visit_Feedback__c,
+                    nextFollowupDate: this.visitData.Next_Follow_Up_Date__c
                 }
             });
             this.resetButtonAfterTimeout(8000);
             this.dispatchEvent(message);
         } else if (this.newVisitCreate) {
-            
             if (this.visitData.Visit_for__c == '') {
                 const warningMsg = 'Please select visit for';
                 this.genericDispatchEvent('Warning', warningMsg, 'warning');
@@ -353,6 +350,24 @@ handleEnable(e) {
                 return;
             } else if (this.visitData.Visit_for__c == 'Office' || this.visitData.Visit_for__c == 'Warehouse') {
                 // No lookup needed for Office/Warehouse
+                // Ensure required fields for Warehouse/Office are set
+                if (this.visitData.Visit_Purpose__c == '' || this.visitData.Visit_Purpose__c == undefined) {
+                    const warningMsg = 'Please select visit Purpose';
+                    this.genericDispatchEvent('Warning', warningMsg, 'warning');
+                    return;
+                }
+                if (this.visitData.Visit_Type__c == '' || this.visitData.Visit_Type__c == undefined) {
+                    const warningMsg = 'Please select visit type';
+                    this.genericDispatchEvent('Warning', warningMsg, 'warning');
+                    return;
+                }
+                if (this.visitData.Visit_Date__c == null || this.visitData.Visit_Date__c == undefined) {
+                    const warningMsg = 'Please select a Visit date';
+                    this.genericDispatchEvent('Warning', warningMsg, 'warning');
+                    return;
+                }
+                // Proceed to create visit for Warehouse/Office
+                this.creatingNewVisit();
             } else if (this.visitData.Visit_for__c == '' || this.visitData.Visit_for__c == undefined) {
                 const warningMsg = 'Please select visit for';
                 this.genericDispatchEvent('Warning', warningMsg, 'warning');
@@ -374,7 +389,6 @@ handleEnable(e) {
             } else if (this.visitData.Visit_Date__c != null && this.visitData.Visit_Date__c != undefined) {
                 this.creatingNewVisit();
             }
-
         }
         else if (this.reshedule) {
             if (this.visitData.Missed_Visit_Reason__c == '' || this.visitData.Missed_Visit_Reason__c == undefined) {
