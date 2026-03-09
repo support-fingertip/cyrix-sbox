@@ -93,7 +93,7 @@ public class EmailParserUtility {
     }
 
     public static String validateRequiredFields(Map<String, String> leadData) {
-        List<String> required = new List<String>{ 'LastName', 'Email' };
+        List<String> required = new List<String>{ 'LastName' };
         List<String> missing  = new List<String>();
 
         for (String field : required) {

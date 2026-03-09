@@ -52,12 +52,46 @@ global class LeadEmailHandler implements Messaging.InboundEmailHandler {
 
         try {
             Map<String, String> leadData = EmailParserUtility.parseLeadEmail(emailBody);
+
+            // If parsing returned nothing but a sender display name is available, start with an empty map
+            if (leadData == null && String.isNotBlank(email.fromName)) {
+                leadData = new Map<String, String>();
+            }
+
             if (leadData == null) {
                 log.Response__c = 'Could not parse lead data.';
                 database.insert(log, false);
                 result.success = false;
                 result.message = 'Could not parse lead data.';
                 return result;
+            }
+
+            // Fallback: use sender display name if name fields are missing
+            String displayName = email.fromName;
+            if (String.isNotBlank(displayName)) {
+                Boolean missingFirst = String.isBlank(leadData.get('FirstName'));
+                Boolean missingLast  = String.isBlank(leadData.get('LastName'));
+                if (missingFirst || missingLast) {
+                    displayName = displayName.trim();
+                    Integer lastSpace = displayName.lastIndexOf(' ');
+                    if (lastSpace > 0) {
+                        if (missingFirst) {
+                            leadData.put('FirstName', displayName.substring(0, lastSpace));
+                        }
+                        if (missingLast) {
+                            leadData.put('LastName', displayName.substring(lastSpace + 1));
+                        }
+                    } else {
+                        if (missingLast) {
+                            leadData.put('LastName', displayName);
+                        }
+                    }
+                }
+            }
+
+            // Fallback: use sender email address if Email field is missing
+            if (String.isBlank(leadData.get('Email')) && String.isNotBlank(email.fromAddress)) {
+                leadData.put('Email', email.fromAddress);
             }
 
             String validationError = EmailParserUtility.validateRequiredFields(leadData);
