@@ -21,6 +21,16 @@
                 <default>false</default>
                 <label>Lead</label>
             </value>
+            <value>
+                <fullName>Office</fullName>
+                <default>false</default>
+                <label>Office</label>
+            </value>
+            <value>
+                <fullName>Warehouse</fullName>
+                <default>false</default>
+                <label>Warehouse</label>
+            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>

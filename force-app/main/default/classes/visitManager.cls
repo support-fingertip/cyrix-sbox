@@ -137,6 +137,8 @@ public with sharing class visitManager {
                 ad.accountName = vis.Lead__r.Name;
                 ad.acccountId=vis.Lead__c;
                 ad.company = vis.Lead__r.Company;
+            }else{
+                 ad.accountName = vis.Visit_for__c;
             }
             
             ad.appAccountId=vis.Account__r.Customer_Code__c;

@@ -63,6 +63,21 @@
                 <label>Payment Follow Ups</label>
             </value>
             <value>
+                <fullName>Stock Return</fullName>
+                <default>false</default>
+                <label>Stock Return</label>
+            </value>
+            <value>
+                <fullName>Stock Pick Up</fullName>
+                <default>false</default>
+                <label>Stock Pick Up</label>
+            </value>
+            <value>
+                <fullName>Stock Audit</fullName>
+                <default>false</default>
+                <label>Stock Audit</label>
+            </value>
+            <value>
                 <fullName>Product  Promotion</fullName>
                 <default>false</default>
                 <isActive>false</isActive>
