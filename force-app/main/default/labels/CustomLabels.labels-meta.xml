@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>Lead_Email_Valid_Keywords</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Lead Email Valid Keywords</shortDescription>
+        <value>New Lead,Requirement,Quote,Job,Resume,Inquiry for x ray films,Tradeindia Inquiry,MRI Machine,CT Scanner,Cathlab,X ray,Job Application,Ct scan machine,Inquiry,Enquiry,Contact,Website,Lead Form,Cyrix</value>
+    </labels>
+</CustomLabels>

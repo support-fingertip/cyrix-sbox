@@ -314,7 +314,6 @@ private class LeadEmailHandlerTest {
 
         System.assertNotEquals(null, error);
         System.assert(error.contains('LastName'), 'Error should mention LastName');
-        System.assert(error.contains('Email'),    'Error should mention Email');
     }
 
     @IsTest
@@ -325,5 +324,114 @@ private class LeadEmailHandlerTest {
         Test.stopTest();
 
         System.assertNotEquals(null, error);
+    }
+
+    @IsTest
+    static void testTradeIndiaEmailCreatesLead() {
+        String body =
+            '* Sender Name: Sharmeela\n' +
+            '* Product Details: Used CT Scan Machine\n' +
+            '* Buyer Details: Name - Sharmeela\n' +
+            'Email - noreply@noreply.tradeindia.com\n' +
+            'Mobile - +919486167715\n' +
+            'city - Chennai\n' +
+            'state - Tamil Nadu\n' +
+            'country - IN';
+
+        LeadEmailHandler handler = new LeadEmailHandler();
+
+        Test.startTest();
+        Messaging.InboundEmailResult result = handler.handleInboundEmail(
+            buildEmail('Tradeindia Inquiry - CT Scan Machine', body),
+            buildEnvelope()
+        );
+        Test.stopTest();
+
+        System.assertEquals(true, result.success, 'Expected success for TradeIndia email');
+        List<Lead> leads = [SELECT Id, LastName, Phone FROM Lead WHERE LastName = 'Sharmeela'];
+        System.assertEquals(1, leads.size(), 'Expected one Lead record');
+    }
+
+    @IsTest
+    static void testParseTradeIndiaEmailDirectly() {
+        String body =
+            '* Sender Name: Sharmeela\n' +
+            '* Product Details: Used CT Scan Machine\n' +
+            '* Buyer Details: Name - Sharmeela\n' +
+            'Email - noreply@noreply.tradeindia.com\n' +
+            'Mobile - +919486167715\n' +
+            'city - Chennai';
+
+        Test.startTest();
+        Map<String, String> result = EmailParserUtility.parseTradeIndiaEmail(body);
+        Test.stopTest();
+
+        System.assertNotEquals(null, result);
+        System.assertEquals('Sharmeela', result.get('LastName'));
+        System.assertEquals('+919486167715', result.get('Phone'));
+        System.assert(!result.containsKey('Email') || !result.get('Email').contains('noreply'), 'Should skip noreply email');
+    }
+
+    @IsTest
+    static void testParseTradeIndiaEmailNullReturnsNull() {
+        Test.startTest();
+        Map<String, String> result = EmailParserUtility.parseTradeIndiaEmail(null);
+        Test.stopTest();
+
+        System.assertEquals(null, result);
+    }
+
+    @IsTest
+    static void testParseTradeIndiaEmailNoMatchingKeys() {
+        String body = 'Just random text with no tradeindia formatting at all.';
+
+        Test.startTest();
+        Map<String, String> result = EmailParserUtility.parseTradeIndiaEmail(body);
+        Test.stopTest();
+
+        System.assertEquals(null, result);
+    }
+
+    @IsTest
+    static void testValidatorPassesWithPhoneOnly() {
+        Map<String, String> data = new Map<String, String>{
+            'LastName' => 'Sharmeela',
+            'Phone'    => '+919486167715'
+        };
+
+        Test.startTest();
+        String error = EmailParserUtility.validateRequiredFields(data);
+        Test.stopTest();
+
+        System.assertEquals(null, error, 'Validator should pass when LastName and Phone are present');
+    }
+
+    @IsTest
+    static void testValidatorFailsWhenNoEmailAndNoPhone() {
+        Map<String, String> data = new Map<String, String>{
+            'LastName' => 'Doe'
+        };
+
+        Test.startTest();
+        String error = EmailParserUtility.validateRequiredFields(data);
+        Test.stopTest();
+
+        System.assertNotEquals(null, error);
+        System.assert(error.containsIgnoreCase('Email') || error.containsIgnoreCase('Phone'), 'Error should mention Email or Phone');
+    }
+
+    @IsTest
+    static void testExtractPatternFromTradeIndiaBody() {
+        String body =
+            'Some text before\n' +
+            'Company Name: ABC Healthcare Pvt Ltd\n' +
+            'Mobile: +919876543210\n' +
+            'Some text after';
+
+        Test.startTest();
+        Map<String, String> result = EmailParserUtility.parseTradeIndiaEmail(body);
+        Test.stopTest();
+
+        System.assertNotEquals(null, result);
     }
 }

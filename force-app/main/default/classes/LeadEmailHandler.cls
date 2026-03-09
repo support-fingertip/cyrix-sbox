@@ -1,12 +1,14 @@
 global class LeadEmailHandler implements Messaging.InboundEmailHandler {
 
-    private static final Set<String> VALID_KEYWORDS = new Set<String>{
-        'New Lead', 'Requirement', 'Quote', 'Job', 'Resume',
-        'Inquiry for x ray films', 'Tradeindia Inquiry', 'MRI Machine',
-        'CT Scanner', 'Cathlab', 'X ray', 'Job Application',
-        'Ct scan machine', 'Inquiry', 'Enquiry', 'Contact',
-        'Website', 'Lead Form', 'Cyrix'
-    };
+    @TestVisible
+    private static Set<String> getValidKeywords() {
+        Set<String> keywords = new Set<String>();
+        String labelValue = System.Label.Lead_Email_Valid_Keywords;
+        for (String kw : labelValue.split(',')) {
+            keywords.add(kw.trim());
+        }
+        return keywords;
+    }
 
     global Messaging.InboundEmailResult handleInboundEmail(
         Messaging.InboundEmail email,
@@ -21,13 +23,15 @@ global class LeadEmailHandler implements Messaging.InboundEmailHandler {
         // Validate subject line
         String subject = email.subject != null ? email.subject : '';
         Boolean isValidSubject = false;
-        for (String kw : VALID_KEYWORDS) {
+        for (String kw : getValidKeywords()) {
             if (subject.containsIgnoreCase(kw)) {
                 isValidSubject = true;
                 break;
             }
         }
         if (!isValidSubject) {
+            log.Response__c = 'Invalid subject line.';
+            database.insert(log, false);
             result.success = false;
             result.message = 'Invalid subject line.';
             return result;
