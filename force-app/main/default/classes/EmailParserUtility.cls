@@ -4,24 +4,28 @@ public class EmailParserUtility {
     private static final String LEAD_END_DELIMITER   = '--- END LEAD ---';
 
     private static final Map<String, String> FIELD_NAME_MAP = new Map<String, String>{
-        'name'          => 'FirstName',
-        'first name'    => 'FirstName',
-        'firstname'     => 'FirstName',
-        'last name'     => 'LastName',
-        'lastname'      => 'LastName',
-        'surname'       => 'LastName',
-        'email'         => 'Email',
-        'email address' => 'Email',
-        'phone'         => 'Phone',
-        'mobile'        => 'Phone',
-        'contact'       => 'Phone',
-        'company'       => 'Company',
-        'organization'  => 'Company',
-        'organisation'  => 'Company',
-        'message'       => 'Message',
-        'comments'      => 'Message',
-        'comment'       => 'Message',
-        'requirement'   => 'Message'
+        'name'               => 'FirstName',
+        'first name'         => 'FirstName',
+        'firstname'          => 'FirstName',
+        'last name'          => 'LastName',
+        'lastname'           => 'LastName',
+        'surname'            => 'LastName',
+        'sender name'        => 'LastName',
+        'email'              => 'Email',
+        'email address'      => 'Email',
+        'phone'              => 'Phone',
+        'mobile'             => 'Phone',
+        'contact'            => 'Phone',
+        'company'            => 'Company',
+        'organization'       => 'Company',
+        'organisation'       => 'Company',
+        'company name'       => 'Company',
+        'message'            => 'Message',
+        'comments'           => 'Message',
+        'comment'            => 'Message',
+        'requirement'        => 'Message',
+        'product details'    => 'Message',
+        'requirement details'=> 'Message'
     };
 
     public static Map<String, String> parseLeadEmail(String body) {
@@ -38,6 +42,13 @@ public class EmailParserUtility {
                 endIdx
             ).trim();
             return parseKeyValuePairs(leadSection);
+        }
+
+        if (body.containsIgnoreCase('tradeindia') || body.contains('Buyer Details')) {
+            Map<String, String> tiResult = parseTradeIndiaEmail(body);
+            if (tiResult != null) {
+                return tiResult;
+            }
         }
 
         return parseFallback(body);
@@ -92,18 +103,95 @@ public class EmailParserUtility {
         return result.isEmpty() ? null : result;
     }
 
-    public static String validateRequiredFields(Map<String, String> leadData) {
-        List<String> required = new List<String>{ 'LastName', 'Email' };
-        List<String> missing  = new List<String>();
+    public static Map<String, String> parseTradeIndiaEmail(String body) {
+        if (body == null) {
+            return null;
+        }
 
-        for (String field : required) {
-            if (leadData == null || !leadData.containsKey(field) || String.isBlank(leadData.get(field))) {
-                missing.add(field);
+        Map<String, String> result = new Map<String, String>();
+        List<String> lines = body.split('\n');
+
+        for (String line : lines) {
+            line = line.trim();
+            // Strip leading bullet marker
+            if (line.startsWith('*')) {
+                line = line.substring(1).trim();
+            }
+
+            String rawKey = null;
+            String value = null;
+
+            // Try colon separator first
+            Integer colonIdx = line.indexOf(':');
+            if (colonIdx > 0) {
+                rawKey = line.substring(0, colonIdx).trim().toLowerCase();
+                value  = line.substring(colonIdx + 1).trim();
+            } else {
+                // Try dash separator
+                Integer dashIdx = line.indexOf(' - ');
+                if (dashIdx > 0) {
+                    rawKey = line.substring(0, dashIdx).trim().toLowerCase();
+                    value  = line.substring(dashIdx + 3).trim();
+                }
+            }
+
+            if (String.isBlank(rawKey) || String.isBlank(value)) {
+                continue;
+            }
+
+            // Skip noreply email values
+            if (rawKey == 'email' && value.containsIgnoreCase('noreply')) {
+                continue;
+            }
+
+            String mappedKey = FIELD_NAME_MAP.get(rawKey);
+            if (mappedKey != null && !result.containsKey(mappedKey)) {
+                result.put(mappedKey, value);
             }
         }
 
-        if (!missing.isEmpty()) {
-            return 'Missing required fields: ' + String.join(missing, ', ');
+        // Extract Mobile via regex if not already found
+        if (!result.containsKey('Phone')) {
+            String phone = extractPattern(body, 'Mobile:\\s*([+\\d]+)');
+            if (phone == null) {
+                phone = extractPattern(body, 'Mobile -\\s*([+\\d]+)');
+            }
+            if (phone != null) {
+                result.put('Phone', phone);
+            }
+        }
+
+        // Extract Company Name via regex if not already found
+        if (!result.containsKey('Company')) {
+            String company = extractPattern(body, 'Company Name:\\s*([^\\n]+)');
+            if (company == null) {
+                company = extractPattern(body, 'Company Name -\\s*([^\\n]+)');
+            }
+            if (company != null) {
+                result.put('Company', company.trim());
+            }
+        }
+
+        return result.isEmpty() ? null : result;
+    }
+
+    private static String extractPattern(String text, String regex) {
+        Pattern p = Pattern.compile(regex);
+        Matcher m = p.matcher(text);
+        if (m.find()) {
+            return m.group(1);
+        }
+        return null;
+    }
+
+    public static String validateRequiredFields(Map<String, String> leadData) {
+        if (leadData == null || !leadData.containsKey('LastName') || String.isBlank(leadData.get('LastName'))) {
+            return 'Missing required fields: LastName';
+        }
+        Boolean hasEmail = leadData.containsKey('Email') && String.isNotBlank(leadData.get('Email'));
+        Boolean hasPhone = leadData.containsKey('Phone') && String.isNotBlank(leadData.get('Phone'));
+        if (!hasEmail && !hasPhone) {
+            return 'Missing required fields: Email or Phone';
         }
         return null;
     }
