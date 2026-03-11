@@ -199,12 +199,19 @@ get searchNameData() {
         Missed_PostPone_Reason__c: '',
         // Approval_Status__c : 'Approved',
         Visit_Date__c: this.getDateValues(),
-        Planned_Start_Time__c: this.getDateValues()
+        Planned_Start_Time__c: this.getDateValues(),
+        With_Companion__c: 'No',
+        Companion__c: ''
     };
 
+    withCompanionList = [
+        { label: 'Yes', value: 'Yes' },
+        { label: 'No', value: 'No' }
+    ];
 
-
-
+    get isWithCompanionYes() {
+        return this.visitData.With_Companion__c === 'Yes';
+    }
 
     connectedCallback() {
 
@@ -522,6 +529,15 @@ handleEnable(e) {
     }
     handleVisitFeedback(event) {
         this.visitData.Visit_Feedback__c = event.detail.value;
+    }
+    handleWithCompanionChange(event) {
+        this.visitData.With_Companion__c = event.detail.value;
+        if (event.detail.value !== 'Yes') {
+            this.visitData.Companion__c = '';
+        }
+    }
+    handleCompanionChange(event) {
+        this.visitData.Companion__c = event.detail.value;
     }
 
     handleChange(event) {

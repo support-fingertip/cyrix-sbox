@@ -115,6 +115,16 @@
                         value={visitData.Visit_Purpose__c} placeholder="Select Visit Purpose " options={pickDatapurpose}
                         onchange={handleVisitPurpose}></lightning-combobox>
 
+                    <lightning-combobox name="With_Companion__c" label="With Companion"
+                        value={visitData.With_Companion__c} options={withCompanionList}
+                        onchange={handleWithCompanionChange}></lightning-combobox>
+
+                    <template lwc:if={isWithCompanionYes}>
+                        <lightning-input type="text" name="Companion__c" label="Companion"
+                            value={visitData.Companion__c}
+                            onchange={handleCompanionChange}></lightning-input>
+                    </template>
+
                 </div>
             </template>
 
