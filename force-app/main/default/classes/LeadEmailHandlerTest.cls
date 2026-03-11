@@ -41,10 +41,11 @@ private class LeadEmailHandlerTest {
         Test.stopTest();
 
         System.assertEquals(true, result.success, 'Expected success for valid lead with delimiters');
-        List<Lead> leads = [SELECT Id, LastName, LeadSource FROM Lead WHERE Email = 'john.doe@example.com'];
+        List<Lead> leads = [SELECT Id, LastName, LeadSource, Description FROM Lead WHERE Email = 'john.doe@example.com'];
         System.assertEquals(1, leads.size(), 'Expected one Lead record to be created');
         System.assertEquals('Doe', leads[0].LastName);
         System.assertEquals('Email', leads[0].LeadSource);
+        System.assertEquals(body, leads[0].Description, 'Expected Description to contain the raw email body');
     }
 
     @IsTest

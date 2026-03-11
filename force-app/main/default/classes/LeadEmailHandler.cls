@@ -75,7 +75,9 @@ global class LeadEmailHandler implements Messaging.InboundEmailHandler {
             newLead.Email      = leadData.get('Email');
             newLead.Phone      = leadData.get('Phone');
             newLead.Company    = String.isNotBlank(leadData.get('Company')) ? leadData.get('Company') : 'Unknown';
-            newLead.Description = leadData.get('Message');
+            newLead.Description = emailBody != null && emailBody.length() > 32000
+                ? emailBody.substring(0, 32000)
+                : emailBody;
             newLead.LeadSource = 'Email';
 
             List<User> teleCaller = [SELECT Id FROM User WHERE Default_TeleCaller__c = true LIMIT 1];
