@@ -111,7 +111,7 @@ private class LeadEmailHandlerTest {
     }
 
     @IsTest
-    static void testUnstructuredBodyRejectsEmail() {
+    static void testUnstructuredBodyWithDisplayNameCreatesLead() {
         LeadEmailHandler handler = new LeadEmailHandler();
 
         Test.startTest();
@@ -121,11 +121,29 @@ private class LeadEmailHandlerTest {
         );
         Test.stopTest();
 
-        System.assertEquals(false, result.success, 'Expected failure for unstructured body');
+        // fromName='Test Sender' is used as fallback, so a lead should be created
+        System.assertEquals(true, result.success, 'Expected success when body is unstructured but sender display name is available');
     }
 
     @IsTest
-    static void testMissingRequiredFieldsRejectsEmail() {
+    static void testUnstructuredBodyWithNoSenderNameRejectsEmail() {
+        Messaging.InboundEmail email = new Messaging.InboundEmail();
+        email.subject       = 'New Lead';
+        email.plainTextBody = 'Just some random text with absolutely no structure here.';
+        email.fromAddress   = 'sender@example.com';
+        // fromName intentionally left null
+
+        LeadEmailHandler handler = new LeadEmailHandler();
+
+        Test.startTest();
+        Messaging.InboundEmailResult result = handler.handleInboundEmail(email, buildEnvelope());
+        Test.stopTest();
+
+        System.assertEquals(false, result.success, 'Expected failure for unstructured body with no sender display name');
+    }
+
+    @IsTest
+    static void testMissingRequiredFieldsUsesDisplayNameFallback() {
         String body =
             '--- CYRIX HEALTHCARE LEAD ---\n' +
             'FirstName: John\n' +
@@ -141,7 +159,8 @@ private class LeadEmailHandlerTest {
         );
         Test.stopTest();
 
-        System.assertEquals(false, result.success, 'Expected failure when LastName and Email are missing');
+        // fromName='Test Sender' supplies the missing LastName; fromAddress supplies Email
+        System.assertEquals(true, result.success, 'Expected success when LastName is missing but sender display name is available');
     }
 
     @IsTest
@@ -293,7 +312,7 @@ private class LeadEmailHandlerTest {
     }
 
     @IsTest
-    static void testValidatorFailsWhenEmailMissing() {
+    static void testValidatorPassesWithOnlyLastName() {
         Map<String, String> data = new Map<String, String>{
             'LastName' => 'Doe'
         };
@@ -302,8 +321,7 @@ private class LeadEmailHandlerTest {
         String error = EmailParserUtility.validateRequiredFields(data);
         Test.stopTest();
 
-        System.assertNotEquals(null, error);
-        System.assert(error.contains('Email'), 'Error should mention Email');
+        System.assertEquals(null, error, 'Validator should pass when LastName is present (Email is optional)');
     }
 
     @IsTest
@@ -314,7 +332,6 @@ private class LeadEmailHandlerTest {
 
         System.assertNotEquals(null, error);
         System.assert(error.contains('LastName'), 'Error should mention LastName');
-        System.assert(error.contains('Email'),    'Error should mention Email');
     }
 
     @IsTest
