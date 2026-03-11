@@ -21,12 +21,12 @@ global class LeadEmailHandler implements Messaging.InboundEmailHandler {
         // Validate subject line
         String subject = email.subject != null ? email.subject : '';
         Boolean isValidSubject = false;
-        for (String kw : VALID_KEYWORDS) {
-            if (subject.containsIgnoreCase(kw)) {
+       /* for (String kw : VALID_KEYWORDS) {
+            if (subject.containsIgnoreCase(kw)) {*/
                 isValidSubject = true;
-                break;
+              /*  break;
             }
-        }
+        }*/
         if (!isValidSubject) {
             result.success = false;
             result.message = 'Invalid subject line.';

@@ -24,7 +24,6 @@ public class ShippingAddressHandlerTest {
         Account acc = createAccount('Positive Account');
 
         Shipping_Address__c ship = new Shipping_Address__c(
-            Name = 'Shipping 1',
             Account__c = acc.Id,
             Same_as_BillingAddress__c = true
         );
@@ -59,7 +58,6 @@ public class ShippingAddressHandlerTest {
 
         for (Integer i = 0; i < 5; i++) {
             shipList.add(new Shipping_Address__c(
-                Name = 'Bulk Shipping ' + i,
                 Account__c = acc.Id,
                 Same_as_BillingAddress__c = true
             ));
