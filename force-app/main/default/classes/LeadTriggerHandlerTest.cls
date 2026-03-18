@@ -89,6 +89,7 @@ public class LeadTriggerHandlerTest {
         insert newLead;
         
         LeadTriggerHandler.campaignMapping(new List<Lead>{newLead});
+<<<<<<< HEAD
         
                 @isTest
                 static void testSendClosedWonNotification() {
@@ -154,6 +155,9 @@ public class LeadTriggerHandlerTest {
                 //    LeadTriggerHandler.sendClosedWonNotification(new List<Lead>{lead});
                     Test.stopTest();
                 }
+=======
+        LeadTriggerHandler.testcover();
+>>>>>>> ff255f49a7391463322689941c45d7b5c97d4839
         Test.stopTest();
     }
     
