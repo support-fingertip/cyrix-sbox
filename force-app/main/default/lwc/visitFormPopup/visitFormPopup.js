@@ -306,7 +306,7 @@ handleEnable(e) {
             event.preventDefault();
             event.stopPropagation();
         }
-           alert('test');
+         
         if (this.completeVisit) {
          
             // Restore original complete visit logic
@@ -353,6 +353,10 @@ handleEnable(e) {
                 return;
             } else if (this.visitData.Visit_for__c == 'Customer' && !this.visitData.Account__c) {
                 const warningMsg = 'Please select Customer';
+                this.genericDispatchEvent('Warning', warningMsg, 'warning');
+                return;
+            } else if (this.visitData.With_Companion__c === 'Yes' && (!this.visitData.Companion__c || this.visitData.Companion__c.trim() === '')) {
+                const warningMsg = 'Companion is mandatory ';
                 this.genericDispatchEvent('Warning', warningMsg, 'warning');
                 return;
             } else if (this.visitData.Visit_for__c == 'Office' || this.visitData.Visit_for__c == 'Warehouse') {

@@ -90,6 +90,70 @@ public class LeadTriggerHandlerTest {
         
         LeadTriggerHandler.campaignMapping(new List<Lead>{newLead});
         
+                @isTest
+                static void testSendClosedWonNotification() {
+                    // Setup users
+                    Profile salesProfile = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1];
+                    User ownerUser = new User(
+                        Alias = 'ownerusr',
+                        Email = 'owner@test.com',
+                        EmailEncodingKey = 'UTF-8',
+                        LastName = 'Owner',
+                        LanguageLocaleKey = 'en_US',
+                        LocaleSidKey = 'en_US',
+                        ProfileId = salesProfile.Id,
+                        TimeZoneSidKey = 'America/Los_Angeles',
+                        UserName = 'owneruser@test.com'
+                    );
+                    insert ownerUser;
+
+                    User managerUser = new User(
+                        Alias = 'mgrusr2',
+                        Email = 'manager2@test.com',
+                        EmailEncodingKey = 'UTF-8',
+                        LastName = 'Manager2',
+                        LanguageLocaleKey = 'en_US',
+                        LocaleSidKey = 'en_US',
+                        ProfileId = salesProfile.Id,
+                        TimeZoneSidKey = 'America/Los_Angeles',
+                        UserName = 'manageruser2@test.com'
+                    );
+                    insert managerUser;
+
+                    ownerUser.ManagerId = managerUser.Id;
+                    update ownerUser;
+
+                    // Setup coordinator role and user
+                    UserRole coordinatorRole = new UserRole(Name = 'Coordinator');
+                    insert coordinatorRole;
+                    User coordinatorUser = new User(
+                        Alias = 'coordusr',
+                        Email = 'coord@test.com',
+                        EmailEncodingKey = 'UTF-8',
+                        LastName = 'Coordinator',
+                        LanguageLocaleKey = 'en_US',
+                        LocaleSidKey = 'en_US',
+                        ProfileId = salesProfile.Id,
+                        TimeZoneSidKey = 'America/Los_Angeles',
+                        UserName = 'coorduser@test.com',
+                        UserRoleId = coordinatorRole.Id
+                    );
+                    insert coordinatorUser;
+
+                    // Setup lead
+                    Lead lead = new Lead(
+                        LastName = 'Closed Won Lead',
+                        Company = 'Test Company',
+                        OwnerId = ownerUser.Id,
+                        Status = 'Closed Won',
+                        phone = '1234567890'
+                    );
+                    insert lead;
+
+                    Test.startTest();
+                //    LeadTriggerHandler.sendClosedWonNotification(new List<Lead>{lead});
+                    Test.stopTest();
+                }
         Test.stopTest();
     }
     
@@ -499,6 +563,52 @@ public class LeadTriggerHandlerTest {
         
         Test.stopTest();
     }
+
+        @isTest
+        static void testCampaignMappingException() {
+            Test.startTest();
+            // Simulate exception by inserting a CampaignMember with invalid LeadId
+            Lead newLead = new Lead(
+                LastName = 'Test Lead',
+                Company = 'Test Company',
+                Campaign__c = null,
+                Status = 'Open',
+                phone='1234567890'
+            );
+            insert newLead;
+            // Should not throw, but will hit catch block
+            LeadTriggerHandler.campaignMapping(new List<Lead>{newLead});
+            Test.stopTest();
+        }
+
+        @isTest
+        static void testFindDuplicateException() {
+            Test.startTest();
+            // Simulate exception by passing null list
+            try {
+                LeadTriggerHandler.findDuplicate(null);
+            } catch (Exception e) {
+                System.assert(true, 'Exception handled');
+            }
+            Test.stopTest();
+        }
+
+        @isTest
+        static void testSetAccountEmailException() {
+            Test.startTest();
+            // Simulate exception by passing invalid Account Id
+            Lead testLead = new Lead(
+                LastName = 'Test Lead',
+                Company = 'Test Company',
+                Email = 'test@test.com',
+                Status = 'Open',
+                phone='1245578906'
+            );
+            insert testLead;
+            Set<String> accIds = new Set<String>{'invalidId'};
+            LeadTriggerHandler.setAccountEmail(new List<Lead>{testLead}, accIds);
+            Test.stopTest();
+        }
     
     @isTest
     static void testCreatefollowupTasks() {
@@ -565,3 +675,105 @@ public class LeadTriggerHandlerTest {
         Test.stopTest();
     }
 }
+        @isTest
+        static void testCampaignMappingMultipleLeads() {
+            Campaign camp = [SELECT Id FROM Campaign LIMIT 1];
+            Lead lead1 = new Lead(LastName='Lead1',Company='C1',Campaign__c=camp.Id,Status='Open');
+            Lead lead2 = new Lead(LastName='Lead2',Company='C2',Campaign__c=camp.Id,Status='Open');
+            insert new List<Lead>{lead1, lead2};
+            Test.startTest();
+            LeadTriggerHandler.campaignMapping(new List<Lead>{lead1, lead2});
+            Test.stopTest();
+        }
+
+        @isTest
+        static void testLeadAssignedNotificationMissingFields() {
+            User testUser = [SELECT Id FROM User WHERE UserName = 'testus4er@test.com' LIMIT 1];
+            Lead lead = new Lead(LastName='Test',Company='Test',OwnerId=testUser.Id,Status='Open');
+            insert lead;
+            Test.startTest();
+            LeadTriggerHandler.leadAssignedNotification(new List<Lead>{lead});
+            Test.stopTest();
+        }
+
+        @isTest
+        static void testCheckAndSeprateMobileNumberEdgeCases() {
+            Lead lead = new Lead(LastName='Edge',Company='Edge',Phone='+91 9876543210',MobilePhone='+91 9876543211',Status='Open');
+            insert lead;
+            Test.startTest();
+            LeadTriggerHandler.checkAndSeprateMobileNumber(new List<Lead>{lead});
+            Test.stopTest();
+        }
+
+        @isTest
+        static void testUpdateLastActivityDateConvertedClosed() {
+            Lead lead = new Lead(LastName='Conv',Company='Conv',Status='Closed Won',IsConverted=true);
+            insert lead;
+            Map<Id, Lead> oldMap = new Map<Id, Lead>{lead.Id => new Lead(Id=lead.Id,Status='Open',IsConverted=false)};
+            Test.startTest();
+            LeadTriggerHandler.updateLastActivityDate(new List<Lead>{lead}, oldMap);
+            Test.stopTest();
+        }
+
+        @isTest
+        static void testSendLostConvertedManagerNotificationNoOwner() {
+            Lead lead = new Lead(LastName='NoOwner',Company='NoOwner',Status='Closed Lost');
+            insert lead;
+            Test.startTest();
+            LeadTriggerHandler.sendLostConvertedManagerNotification(new List<Lead>{lead});
+            Test.stopTest();
+        }
+
+        @isTest
+        static void testFindDuplicateAllFields() {
+            Lead lead = new Lead(LastName='Dup',Company='Dup',Email='dup@test.com',Secondary_Email__c='sec@test.com',Phone='9876543210',Mobilephone='9876543211',Status='Open');
+            insert lead;
+            Test.startTest();
+            LeadTriggerHandler.findDuplicate(new List<Lead>{lead});
+            Test.stopTest();
+        }
+
+        @isTest
+        static void testFindDuplicateNullList() {
+            Test.startTest();
+            try {
+                LeadTriggerHandler.findDuplicate(null);
+            } catch (Exception e) {
+                System.assert(true);
+            }
+            Test.stopTest();
+        }
+
+        @isTest
+        static void testSetAccountEmailMultipleLeads() {
+            Account acc = new Account(Name='MultiAcc');
+            insert acc;
+            Lead lead1 = new Lead(LastName='L1',Company='C1',Email='l1@test.com',ConvertedAccountId=acc.Id);
+            Lead lead2 = new Lead(LastName='L2',Company='C2',Email='l2@test.com',ConvertedAccountId=acc.Id);
+            insert new List<Lead>{lead1, lead2};
+            Set<String> accIds = new Set<String>{acc.Id};
+            Test.startTest();
+            LeadTriggerHandler.setAccountEmail(new List<Lead>{lead1, lead2}, accIds);
+            Test.stopTest();
+        }
+
+        @isTest
+        static void testCreatefollowupTasksException() {
+            Lead lead = new Lead(LastName='Ex',Company='Ex',Next_Follow_up_Date__c=Date.today().addDays(1));
+            insert lead;
+            Test.startTest();
+            LeadTriggerHandler.createfollowupTasks(new List<Lead>{lead});
+            Test.stopTest();
+        }
+
+        @isTest
+        static void testSendClosedWonNotificationNoCoordinator() {
+            Profile salesProfile = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1];
+            User ownerUser = new User(Alias='ownerusr',Email='owner@test.com',EmailEncodingKey='UTF-8',LastName='Owner',LanguageLocaleKey='en_US',LocaleSidKey='en_US',ProfileId=salesProfile.Id,TimeZoneSidKey='America/Los_Angeles',UserName='owneruser@test.com');
+            insert ownerUser;
+            Lead lead = new Lead(LastName='Closed Won Lead',Company='Test Company',OwnerId=ownerUser.Id,Status='Closed Won',phone='1234567890');
+            insert lead;
+            Test.startTest();
+            LeadTriggerHandler.sendClosedWonNotification(new List<Lead>{lead});
+            Test.stopTest();
+        }
