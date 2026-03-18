@@ -1,0 +1,282 @@
+<template>
+    <div class="account360-container">
+
+        <!-- Loading -->
+        <template lwc:if={isPageLoaded}>
+            <c-on-loading-screen></c-on-loading-screen>
+        </template>
+
+        <!-- Error -->
+        <template lwc:if={hasError}>
+            <div class="error-banner">
+                <lightning-icon icon-name="utility:error" size="small" alternative-text="Error"></lightning-icon>
+                &nbsp; {errorMessage}
+            </div>
+        </template>
+
+        <!-- Content -->
+        <template lwc:if={accountData}>
+
+            <!-- Header -->
+            <div class="account-header">
+                <div class="header-left">
+                    <img src={googleIcons.account} width="24" height="24" alt="Account" />
+                    <div class="header-info">
+                        <h1 class="account-name">{accountName}</h1>
+                        <span class="account-code">{accountCode}</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <lightning-button-icon
+                        icon-name="utility:refresh"
+                        alternative-text="Refresh"
+                        onclick={handleRefresh}
+                        variant="border-filled"
+                        size="medium">
+                    </lightning-button-icon>
+                </div>
+            </div>
+
+            <!-- Account Details Section -->
+            <div class="section">
+                <div class="section-header" onclick={toggleDetails}>
+                    <div class="section-header-left">
+                        <lightning-icon icon-name={detailsChevron} size="x-small" alternative-text="Toggle"></lightning-icon>
+                        <img src={googleIcons.overallSummery} width="15" height="15" alt="Details" />
+                        <h4 class="section-title">Account Details</h4>
+                    </div>
+                </div>
+                <template lwc:if={isSectionDetailsOpen}>
+                    <div class="section-body">
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Customer Type</span>
+                                <span class="detail-value">{accountType}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Status</span>
+                                <span class="detail-value">{accountStatus}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Phone</span>
+                                <span class="detail-value">{accountPhone}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">City</span>
+                                <span class="detail-value">{accountCity}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">State</span>
+                                <span class="detail-value">{accountState}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Preference</span>
+                                <span class="detail-value">{accountPreference}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Industry</span>
+                                <span class="detail-value">{accountIndustry}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Website</span>
+                                <span class="detail-value">{accountWebsite}</span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Key Metrics Section -->
+            <div class="section">
+                <div class="section-header" onclick={toggleMetrics}>
+                    <div class="section-header-left">
+                        <lightning-icon icon-name={metricsChevron} size="x-small" alternative-text="Toggle"></lightning-icon>
+                        <img src={googleIcons.Productivity} width="15" height="15" alt="Metrics" />
+                        <h4 class="section-title">Key Metrics</h4>
+                    </div>
+                </div>
+                <template lwc:if={isSectionMetricsOpen}>
+                    <div class="section-body">
+                        <div class="metrics-grid">
+                            <div class="metric-card metric-blue">
+                                <div class="metric-value">{totalVisits}</div>
+                                <div class="metric-label">Total Visits</div>
+                            </div>
+                            <div class="metric-card metric-green">
+                                <div class="metric-value">{completedVisits}</div>
+                                <div class="metric-label">Completed</div>
+                            </div>
+                            <div class="metric-card metric-orange">
+                                <div class="metric-value">{inProgressVisits}</div>
+                                <div class="metric-label">In Progress</div>
+                            </div>
+                            <div class="metric-card metric-red">
+                                <div class="metric-value">{missedVisits}</div>
+                                <div class="metric-label">Missed</div>
+                            </div>
+                            <div class="metric-card metric-purple">
+                                <div class="metric-value">{completionRate}</div>
+                                <div class="metric-label">Completion Rate</div>
+                            </div>
+                            <div class="metric-card metric-teal">
+                                <div class="metric-value">{totalOrders}</div>
+                                <div class="metric-label">Total Orders</div>
+                            </div>
+                            <div class="metric-card metric-indigo">
+                                <div class="metric-value">{formattedTotalOrderAmount}</div>
+                                <div class="metric-label">Order Value</div>
+                            </div>
+                            <div class="metric-card metric-gray">
+                                <div class="metric-value">{attachmentCount}</div>
+                                <div class="metric-label">Attachments</div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Visit History Section -->
+            <div class="section">
+                <div class="section-header" onclick={toggleVisits}>
+                    <div class="section-header-left">
+                        <lightning-icon icon-name={visitsChevron} size="x-small" alternative-text="Toggle"></lightning-icon>
+                        <img src={googleIcons.visit} width="15" height="15" alt="Visits" />
+                        <h4 class="section-title">Visit History ({totalVisits})</h4>
+                    </div>
+                </div>
+                <template lwc:if={isSectionVisitsOpen}>
+                    <div class="section-body">
+                        <template lwc:if={hasVisits}>
+                            <div class="visit-list">
+                                <template for:each={visits} for:item="visit">
+                                    <div class="visit-card" key={visit.Id} data-id={visit.Id} onclick={navigateToVisit}>
+                                        <div class="visit-row">
+                                            <div class="visit-name">{visit.Name}</div>
+                                            <div class="visit-status">
+                                                <span class={visit.statusClass}>{visit.Status__c}</span>
+                                            </div>
+                                        </div>
+                                        <div class="visit-row visit-meta">
+                                            <span>{visit.formattedVisitDate}</span>
+                                            <span>{visit.Visit_Type__c}</span>
+                                            <span>{visit.ownerName}</span>
+                                        </div>
+                                        <template lwc:if={visit.Comments__c}>
+                                            <div class="visit-comments">{visit.Comments__c}</div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        <template lwc:else>
+                            <div class="empty-state">No visits found for this account.</div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Orders Section -->
+            <div class="section">
+                <div class="section-header" onclick={toggleOrders}>
+                    <div class="section-header-left">
+                        <lightning-icon icon-name={ordersChevron} size="x-small" alternative-text="Toggle"></lightning-icon>
+                        <img src={googleIcons.expense} width="15" height="15" alt="Orders" />
+                        <h4 class="section-title">Orders ({totalOrders})</h4>
+                    </div>
+                </div>
+                <template lwc:if={isSectionOrdersOpen}>
+                    <div class="section-body">
+                        <template lwc:if={hasOrders}>
+                            <div class="visit-list">
+                                <template for:each={orders} for:item="order">
+                                    <div class="visit-card" key={order.Id} data-id={order.Id} onclick={navigateToOrder}>
+                                        <div class="visit-row">
+                                            <div class="visit-name">{order.OrderNumber}</div>
+                                            <div class="visit-status">{order.Status}</div>
+                                        </div>
+                                        <div class="visit-row visit-meta">
+                                            <span>{order.formattedDate}</span>
+                                            <span class="order-amount">{order.TotalAmount}</span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        <template lwc:else>
+                            <div class="empty-state">No orders found for this account.</div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Contacts Section -->
+            <div class="section">
+                <div class="section-header" onclick={toggleContacts}>
+                    <div class="section-header-left">
+                        <lightning-icon icon-name={contactsChevron} size="x-small" alternative-text="Toggle"></lightning-icon>
+                        <lightning-icon icon-name="standard:contact" size="x-small" alternative-text="Contacts"></lightning-icon>
+                        <h4 class="section-title">Contacts ({contacts.length})</h4>
+                    </div>
+                </div>
+                <template lwc:if={isSectionContactsOpen}>
+                    <div class="section-body">
+                        <template lwc:if={hasContacts}>
+                            <div class="visit-list">
+                                <template for:each={contacts} for:item="contact">
+                                    <div class="visit-card" key={contact.Id} data-id={contact.Id} onclick={navigateToContact}>
+                                        <div class="visit-row">
+                                            <div class="visit-name">{contact.Name}</div>
+                                            <div class="visit-status">{contact.Title}</div>
+                                        </div>
+                                        <div class="visit-row visit-meta">
+                                            <span>{contact.Email}</span>
+                                            <span>{contact.Phone}</span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        <template lwc:else>
+                            <div class="empty-state">No contacts found for this account.</div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Open Tasks Section -->
+            <div class="section">
+                <div class="section-header" onclick={toggleTasks}>
+                    <div class="section-header-left">
+                        <lightning-icon icon-name={tasksChevron} size="x-small" alternative-text="Toggle"></lightning-icon>
+                        <lightning-icon icon-name="standard:task" size="x-small" alternative-text="Tasks"></lightning-icon>
+                        <h4 class="section-title">Open Tasks ({openTasks.length})</h4>
+                    </div>
+                </div>
+                <template lwc:if={isSectionTasksOpen}>
+                    <div class="section-body">
+                        <template lwc:if={hasTasks}>
+                            <div class="visit-list">
+                                <template for:each={openTasks} for:item="task">
+                                    <div class="visit-card" key={task.Id}>
+                                        <div class="visit-row">
+                                            <div class="visit-name">{task.Subject}</div>
+                                            <div class="visit-status">{task.Priority}</div>
+                                        </div>
+                                        <div class="visit-row visit-meta">
+                                            <span>{task.Status}</span>
+                                            <span>{task.ActivityDate}</span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        <template lwc:else>
+                            <div class="empty-state">No open tasks for this account.</div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+
+        </template>
+    </div>
+</template>

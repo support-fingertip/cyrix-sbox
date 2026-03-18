@@ -1,0 +1,221 @@
+.account360-container {
+    padding: 10px;
+    background-color: rgb(199, 232, 241);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header */
+.account-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #2f5597;
+    color: #fff;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.header-info {
+    display: flex;
+    flex-direction: column;
+}
+.account-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+}
+.account-code {
+    font-size: 12px;
+    color: #d0d8e8;
+}
+
+/* Sections */
+.section {
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+.section-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f6f8fa;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+.section-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.section-title {
+    font-size: 14px;
+    font-weight: 550;
+    color: #545454;
+    margin: 0;
+}
+.section-body {
+    padding: 15px;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; max-height: 0; }
+    to { opacity: 1; max-height: 2000px; }
+}
+
+/* Details Grid */
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+@media screen and (max-width: 480px) {
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+.detail-label {
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+.detail-value {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+}
+
+/* Metrics Grid */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+@media screen and (max-width: 767px) {
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media screen and (max-width: 480px) {
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+.metric-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 8px;
+    border-radius: 8px;
+    text-align: center;
+}
+.metric-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+}
+.metric-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.85);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.metric-blue { background-color: #2f5597; }
+.metric-green { background-color: #27ae60; }
+.metric-orange { background-color: #f39c12; }
+.metric-red { background-color: #e74c3c; }
+.metric-purple { background-color: #8e44ad; }
+.metric-teal { background-color: #16a085; }
+.metric-indigo { background-color: #2c3e50; }
+.metric-gray { background-color: #7f8c8d; }
+
+/* Visit/Order/Contact Cards */
+.visit-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.visit-card {
+    border: 1px solid #e8e8e8;
+    border-radius: 6px;
+    padding: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.visit-card:hover {
+    background-color: #f5f7fa;
+}
+.visit-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+.visit-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2f5597;
+}
+.visit-status {
+    font-size: 12px;
+    color: #666;
+}
+.visit-meta {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #888;
+    gap: 12px;
+}
+.visit-comments {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #666;
+    font-style: italic;
+}
+.order-amount {
+    font-weight: 600;
+    color: #2f5597;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    color: #888;
+    padding: 20px;
+    font-size: 14px;
+}
+
+/* Error Banner */
+.error-banner {
+    display: flex;
+    align-items: center;
+    background-color: #fdecea;
+    color: #c0392b;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
