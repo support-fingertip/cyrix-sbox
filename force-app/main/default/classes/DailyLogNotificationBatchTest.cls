@@ -27,7 +27,7 @@ public class DailyLogNotificationBatchTest
         database.executeBatch(contactsBatch);
         
         DailyLogNotificationBatchScheduler scheduler = new DailyLogNotificationBatchScheduler();
-        String jobId = System.schedule('DailyLogNotificationBatchJob', '0 0 0 * * ?', scheduler);
+        String jobId = System.schedule('DailyLogNotificationBatchJob_Test_' + System.now().getTime(), '0 0 0 * * ?', scheduler);
 
         
         test.stopTest();

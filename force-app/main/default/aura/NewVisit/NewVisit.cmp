@@ -5,6 +5,7 @@
        <aura:attribute name="objectName" type="string" default=""/>
        <aura:attribute name="profileName" type="string" default=""/>
     <aura:attribute name="formFactor" type="string"/>
+            <aura:attribute name="withCompanion" type="string"/>
         <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
        
     <aura:html tag="style">
@@ -67,6 +68,14 @@
                                  <aura:if isTrue="{!v.objectName =='Account'}">
                                 <div class="slds-size_1-of-2 slds-max-small-size_1-of-1 slds-p-horizontal_small">
                                     <lightning:inputField fieldName="Account__c" required="true" value="{!v.recordId}"/>
+                                </div>
+                                </aura:if>
+                                  <div class="slds-size_1-of-2 slds-max-small-size_1-of-1 slds-p-horizontal_small">
+                                    <lightning:inputField fieldName="With_Companion__c" value="{!v.withCompanion}" required="true"/>
+                                </div>
+                                 <aura:if isTrue="{!v.withCompanion !='Yes'}">
+                                 <div class="slds-size_1-of-2 slds-max-small-size_1-of-1 slds-p-horizontal_small">
+                                    <lightning:inputField fieldName="Companion__c" required="true"/>
                                 </div>
                                 </aura:if>
                                    <aura:if isTrue="{!v.profileName !='Sales Engineer'}">
