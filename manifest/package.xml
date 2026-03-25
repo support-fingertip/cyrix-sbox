@@ -32,5 +32,13 @@
         <members>*</members>
         <name>StaticResource</name>
     </types>
+    <types>
+    <members>FolderName</members>
+    <members>FolderName/ReportName</members>
+    <name>Report</name>
+</types>
+<types>
+    <members>DashboardFolderName</members>
+    <name>Dashboard</name>
     <version>65.0</version>
 </Package>
