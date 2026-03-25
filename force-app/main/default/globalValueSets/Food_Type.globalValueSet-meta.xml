@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Provided by Company</fullName>
+        <default>false</default>
+        <label>Provided by Company</label>
+    </customValue>
+    <customValue>
+        <fullName>Partially Provided</fullName>
+        <default>false</default>
+        <label>Partially Provided</label>
+    </customValue>
+    <customValue>
+        <fullName>Not Provided</fullName>
+        <default>false</default>
+        <label>Not Provided</label>
+    </customValue>
+    <masterLabel>Food Type</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

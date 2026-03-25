@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Total_Distance_Calculated_by_ODM_Reading__c</fullName>
+    <description>Odometer Difference</description>
+    <externalId>false</externalId>
+    <formula>IF( 
+    AND(
+        Odometer_Ending_Kms__c &gt; 0, 
+        Odometer_Starting_Kms__c &gt;= 0,
+        Odometer_Ending_Kms__c &gt;= Odometer_Starting_Kms__c
+    ), 
+    Odometer_Ending_Kms__c - Odometer_Starting_Kms__c, 
+    0
+)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Total Distance Calculated by ODM Reading</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

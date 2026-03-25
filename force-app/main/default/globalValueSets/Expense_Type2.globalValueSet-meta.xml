@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>DA</fullName>
+        <default>false</default>
+        <label>DA</label>
+    </customValue>
+    <customValue>
+        <fullName>TA</fullName>
+        <default>false</default>
+        <label>TA</label>
+    </customValue>
+    <customValue>
+        <fullName>Accommodation</fullName>
+        <default>false</default>
+        <label>Accommodation</label>
+    </customValue>
+    <customValue>
+        <fullName>Food Allowance</fullName>
+        <default>false</default>
+        <label>Food Allowance</label>
+    </customValue>
+    <customValue>
+        <fullName>Printing Charges</fullName>
+        <default>false</default>
+        <label>Printing Charges</label>
+    </customValue>
+    <customValue>
+        <fullName>Stationary Charges</fullName>
+        <default>false</default>
+        <label>Stationary Charges</label>
+    </customValue>
+    <customValue>
+        <fullName>Courier Charges</fullName>
+        <default>false</default>
+        <label>Courier Charges</label>
+    </customValue>
+    <customValue>
+        <fullName>Other/MISC</fullName>
+        <default>false</default>
+        <label>Other/MISC</label>
+    </customValue>
+    <customValue>
+        <fullName>Travel</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Travel</label>
+    </customValue>
+    <customValue>
+        <fullName>Transport Conveyance</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Transport Conveyance</label>
+    </customValue>
+    <customValue>
+        <fullName>Mobile Charges</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Mobile Charges</label>
+    </customValue>
+    <customValue>
+        <fullName>Local Conveyance</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Local Conveyance</label>
+    </customValue>
+    <customValue>
+        <fullName>Lodging</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Lodging</label>
+    </customValue>
+    <customValue>
+        <fullName>Daily Allowance</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Daily Allowance</label>
+    </customValue>
+    <customValue>
+        <fullName>Food</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Food</label>
+    </customValue>
+    <customValue>
+        <fullName>Other</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Other</label>
+    </customValue>
+    <masterLabel>Expense Type</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

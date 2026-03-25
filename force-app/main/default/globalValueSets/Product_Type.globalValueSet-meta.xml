@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Spare</fullName>
+        <default>false</default>
+        <label>Spare</label>
+    </customValue>
+    <customValue>
+        <fullName>Accessories</fullName>
+        <default>false</default>
+        <label>Accessories</label>
+    </customValue>
+    <customValue>
+        <fullName>Consumables</fullName>
+        <default>false</default>
+        <label>Consumables</label>
+    </customValue>
+    <customValue>
+        <fullName>Equipment</fullName>
+        <default>false</default>
+        <label>Equipment</label>
+    </customValue>
+    <masterLabel>Product Type</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

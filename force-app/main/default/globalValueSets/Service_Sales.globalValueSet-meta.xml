@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Care360 Services</fullName>
+        <default>false</default>
+        <label>Care360 Services</label>
+    </customValue>
+    <customValue>
+        <fullName>AMCs</fullName>
+        <default>false</default>
+        <label>AMCs</label>
+    </customValue>
+    <customValue>
+        <fullName>CMCs</fullName>
+        <default>false</default>
+        <label>CMCs</label>
+    </customValue>
+    <customValue>
+        <fullName>Spares</fullName>
+        <default>false</default>
+        <label>Spares</label>
+    </customValue>
+    <customValue>
+        <fullName>Calibrations</fullName>
+        <default>false</default>
+        <label>Calibrations</label>
+    </customValue>
+    <customValue>
+        <fullName>Revive Lab</fullName>
+        <default>false</default>
+        <label>Revive Lab</label>
+    </customValue>
+    <customValue>
+        <fullName>QA/QC, MEDFACS</fullName>
+        <default>false</default>
+        <label>QA/QC, MEDFACS</label>
+    </customValue>
+    <masterLabel>Service Sales</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

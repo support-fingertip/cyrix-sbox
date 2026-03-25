@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AssignmentRules xmlns="http://soap.sforce.com/2006/04/metadata">
+    <assignmentRule>
+        <fullName>Telecaller Lead Assignment</fullName>
+        <active>true</active>
+        <ruleEntry>
+            <assignedTo>telecallerexe@cyrix.com.invalid</assignedTo>
+            <assignedToType>User</assignedToType>
+            <criteriaItems>
+                <field>Lead.Status</field>
+                <operation>equals</operation>
+                <value>New</value>
+            </criteriaItems>
+            <criteriaItems>
+                <field>Lead.LeadSource</field>
+                <operation>notEqual</operation>
+                <value>Referral Sales</value>
+            </criteriaItems>
+            <criteriaItems>
+                <field>User.ProfileId</field>
+                <operation>notEqual</operation>
+                <value>Sales Engineer</value>
+            </criteriaItems>
+        </ruleEntry>
+        <ruleEntry>
+            <criteriaItems>
+                <field>Lead.Lead_Owner_Profile__c</field>
+                <operation>equals</operation>
+                <value>Sales Engineer</value>
+            </criteriaItems>
+        </ruleEntry>
+    </assignmentRule>
+</AssignmentRules>
