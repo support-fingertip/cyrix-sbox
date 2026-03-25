@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Closed_Lost_Reason__c</fullName>
+    <label>Closed Lost Reason</label>
+    <type>Picklist</type>
+    <required>false</required>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Our price very high &amp; could not match</fullName>
+                <default>false</default>
+                <label>Our price very high &amp; could not match</label>
+            </value>
+            <value>
+                <fullName>Features / Product not matching/missing</fullName>
+                <default>false</default>
+                <label>Features / Product not matching/missing</label>
+            </value>
+            <value>
+                <fullName>Customer did not have funds/funding</fullName>
+                <default>false</default>
+                <label>Customer did not have funds/funding</label>
+            </value>
+            <value>
+                <fullName>Our response was delayed</fullName>
+                <default>false</default>
+                <label>Our response was delayed</label>
+            </value>
+            <value>
+                <fullName>Demo was a failure</fullName>
+                <default>false</default>
+                <label>Demo was a failure</label>
+            </value>
+            <value>
+                <fullName>Competitor IB &amp; strong relationship</fullName>
+                <default>false</default>
+                <label>Competitor IB &amp; strong relationship</label>
+            </value>
+            <value>
+                <fullName>Multi-product deal and we could not compile full portfolio</fullName>
+                <default>false</default>
+                <label>Multi-product deal and we could not compile full portfolio</label>
+            </value>
+            <value>
+                <fullName>Customer past experience was poor - service/sales</fullName>
+                <default>false</default>
+                <label>Customer past experience was poor - service/sales</label>
+            </value>
+            <value>
+                <fullName>Order not lost - delayed (Site readiness, funding etc.)</fullName>
+                <default>false</default>
+                <label>Order not lost - delayed (Site readiness, funding etc.)</label>
+            </value>
+            <value>
+                <fullName>Open Order, No Money Given</fullName>
+                <default>false</default>
+                <label>Open Order, No Money Given</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
