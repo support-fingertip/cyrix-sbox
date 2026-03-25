@@ -52,9 +52,13 @@ public class OpportunityTriggerHandler {
     ──────────────────────────────────────────── */
     public static void setOpportunityName(List<Opportunity> opps) {
         Set<Id> accountIds = new Set<Id>();
+        Set<Id> productIds = new Set<Id>();
         for (Opportunity opp : opps) {
             if (opp.AccountId != null) {
                 accountIds.add(opp.AccountId);
+            }
+            if (opp.Product__c != null) {
+                productIds.add(opp.Product__c);
             }
         }
 
@@ -64,13 +68,21 @@ public class OpportunityTriggerHandler {
             [SELECT Id, Name FROM Account WHERE Id IN :accountIds]
         );
 
+        Map<Id, Product2> productMap = new Map<Id, Product2>();
+        if (!productIds.isEmpty()) {
+            productMap = new Map<Id, Product2>(
+                [SELECT Id, Name FROM Product2 WHERE Id IN :productIds]
+            );
+        }
+
         for (Opportunity opp : opps) {
             if (opp.AccountId != null && accountMap.containsKey(opp.AccountId)) {
                 String accName = accountMap.get(opp.AccountId).Name;
-                // Only auto-set if Name doesn't already start with the company name
-                if (opp.Name == null || opp.Name == '') {
-                    opp.Name = accName;
+                String prodName = '';
+                if (opp.Product__c != null && productMap.containsKey(opp.Product__c)) {
+                    prodName = productMap.get(opp.Product__c).Name;
                 }
+                opp.Name = accName + (String.isNotBlank(prodName) ? ' ' + prodName : '');
             }
         }
     }
