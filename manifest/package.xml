@@ -69,10 +69,6 @@
         <members>*</members>
         <name>WebLink</name>
     </types>
-    <types>
-        <members>*</members>
-        <name>RelationshipLabel</name>
-    </types>
 
     <types>
         <members>*</members>
