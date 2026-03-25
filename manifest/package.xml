@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
         <members>*</members>
@@ -6,43 +6,7 @@
     </types>
     <types>
         <members>*</members>
-        <name>ApexTrigger</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>LightningComponentBundle</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>AuraDefinitionBundle</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>CustomObject</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>Layout</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>Flow</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>PermissionSet</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>Profile</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>StaticResource</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>CustomTab</name>
+        <name>ApexComponent</name>
     </types>
     <types>
         <members>*</members>
@@ -50,23 +14,23 @@
     </types>
     <types>
         <members>*</members>
-        <name>ApexComponent</name>
+        <name>ApexTestSuite</name>
     </types>
     <types>
         <members>*</members>
-        <name>EmailTemplate</name>
+        <name>ApexTrigger</name>
     </types>
     <types>
         <members>*</members>
-        <name>Queue</name>
+        <name>AuraDefinitionBundle</name>
     </types>
     <types>
         <members>*</members>
-        <name>Report</name>
+        <name>LightningComponentBundle</name>
     </types>
-    <types>
+     <types>
         <members>*</members>
-        <name>Dashboard</name>
+        <name>CustomObject</name>
     </types>
     <types>
         <members>*</members>
@@ -74,7 +38,49 @@
     </types>
     <types>
         <members>*</members>
+        <name>CustomTab</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>Layout</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>CompactLayout</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>RecordType</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>ListView</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>FieldSet</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>Index</name>
+    </types>
+    
+    <types>
+        <members>*</members>
+        <name>WebLink</name>
+    </types>
+
+    <types>
+        <members>*</members>
+        <name>StaticResource</name>
+    </types>
+       <types>
+        <members>*</members>
         <name>ValidationRule</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>Workflow</name>
     </types>
     <types>
         <members>*</members>
@@ -82,7 +88,177 @@
     </types>
     <types>
         <members>*</members>
+        <name>WorkflowAlert</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>WorkflowFieldUpdate</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>WorkflowTask</name>
+    </types>
+
+     <types>
+        <members>*</members>
+        <name>Flow</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>FlowDefinition</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>WorkflowOutboundMessage</name>
+    </types>
+  <types>
+        <members>*</members>
+        <name>Profile</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>PermissionSet</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>PermissionSetGroup</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>MutingPermissionSet</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>Role</name>
+    </types>
+     <types>
+        <members>unfiled$public</members>
+        <name>EmailTemplate</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>EmailServicesFunction</name>
+    </types>
+<types>
+        <members>*</members>
         <name>CustomMetadata</name>
     </types>
-    <version>59.0</version>
+    <types>
+        <members>*</members>
+        <name>CustomLabel</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>CustomLabels</name>
+    </types>
+     <types>
+        <members>*</members>
+        <name>StaticResource</name>
+    </types>
+     <types>
+        <members>*</members>
+        <name>AssignmentRule</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>AssignmentRules</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>AutoResponseRule</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>AutoResponseRules</name>
+    </types>
+
+    <!-- ═══════════════════════════════════════════
+         SHARING & SECURITY
+    ═══════════════════════════════════════════ -->
+    <types>
+        <members>*</members>
+        <name>SharingRules</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>SharingCriteriaRule</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>SharingOwnerRule</name>
+    </types>
+
+    <!-- ═══════════════════════════════════════════
+         APP & UI CONFIGURATION
+    ═══════════════════════════════════════════ -->
+    <types>
+        <members>*</members>
+        <name>AppMenu</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>CustomApplication</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>CustomNotificationType</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>FlexiPage</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>GlobalValueSet</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>StandardValueSet</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>PathAssistant</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>QuickAction</name>
+    </types>
+
+    <!-- ═══════════════════════════════════════════
+         INTEGRATION & CONNECTED APPS
+    ═══════════════════════════════════════════ -->
+    <types>
+        <members>*</members>
+        <name>ConnectedApp</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>NamedCredential</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>RemoteSiteSetting</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>ExternalDataSource</name>
+    </types>
+
+    <!-- ═══════════════════════════════════════════
+         ORG-WIDE SETTINGS
+    ═══════════════════════════════════════════ -->
+    <types>
+        <members>*</members>
+        <name>Settings</name>
+    </types>
+    <types>
+        <members>FolderName</members>
+        <members>FolderName/ReportName</members>
+        <name>Report</name>
+    </types>
+    <types>
+        <members>DashboardFolderName</members>
+        <name>Dashboard</name>
+    </types>
+    <version>65.0</version>
 </Package>
