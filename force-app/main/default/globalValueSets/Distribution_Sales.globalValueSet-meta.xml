@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Radiology</fullName>
+        <default>false</default>
+        <label>Radiology</label>
+    </customValue>
+    <customValue>
+        <fullName>Women &amp; Child</fullName>
+        <default>false</default>
+        <label>Women &amp; Child</label>
+    </customValue>
+    <customValue>
+        <fullName>Cardiology</fullName>
+        <default>false</default>
+        <label>Cardiology</label>
+    </customValue>
+    <customValue>
+        <fullName>Critical &amp; Emergency Care</fullName>
+        <default>false</default>
+        <label>Critical &amp; Emergency Care</label>
+    </customValue>
+    <customValue>
+        <fullName>Surgical &amp; Therapy</fullName>
+        <default>false</default>
+        <label>Surgical &amp; Therapy</label>
+    </customValue>
+    <customValue>
+        <fullName>NEW</fullName>
+        <default>false</default>
+        <label>NEW</label>
+    </customValue>
+    <customValue>
+        <fullName>Consumables</fullName>
+        <default>false</default>
+        <label>Consumables</label>
+    </customValue>
+    <customValue>
+        <fullName>Critical Care</fullName>
+        <default>false</default>
+        <label>Critical Care</label>
+    </customValue>
+    <customValue>
+        <fullName>Others</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Others</label>
+    </customValue>
+    <customValue>
+        <fullName>Involution</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Involution</label>
+    </customValue>
+    <customValue>
+        <fullName>Siemens</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Siemens</label>
+    </customValue>
+    <customValue>
+        <fullName>Mindray</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Mindray</label>
+    </customValue>
+    <masterLabel>Distribution/ Sales</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

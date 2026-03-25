@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Visit_Purpose__c</fullName>
+    <description>Type of Visit that helps categorize the purpose of the visit</description>
+    <label>Visit Purpose</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Courtesy Visit</fullName>
+                <default>false</default>
+                <label>Courtesy Visit</label>
+            </value>
+            <value>
+                <fullName>New Customer Visit</fullName>
+                <default>false</default>
+                <label>New Customer Visit</label>
+            </value>
+            <value>
+                <fullName>Product Promotion</fullName>
+                <default>false</default>
+                <label>Product Promotion</label>
+            </value>
+            <value>
+                <fullName>Product Demo</fullName>
+                <default>false</default>
+                <label>Product Demo</label>
+            </value>
+            <value>
+                <fullName>Follow Up Call</fullName>
+                <default>false</default>
+                <label>Follow Up Call</label>
+            </value>
+            <value>
+                <fullName>Quotation Submission</fullName>
+                <default>false</default>
+                <label>Quotation Submission</label>
+            </value>
+            <value>
+                <fullName>Payment Collection</fullName>
+                <default>false</default>
+                <label>Payment Collection</label>
+            </value>
+            <value>
+                <fullName>Negotiation</fullName>
+                <default>false</default>
+                <label>Negotiation</label>
+            </value>
+            <value>
+                <fullName>Feedback/ Testimonial</fullName>
+                <default>false</default>
+                <label>Feedback/ Testimonial</label>
+            </value>
+            <value>
+                <fullName>Payment Follow Ups</fullName>
+                <default>false</default>
+                <label>Payment Follow Ups</label>
+            </value>
+            <value>
+                <fullName>Stock Return</fullName>
+                <default>false</default>
+                <label>Stock Return</label>
+            </value>
+            <value>
+                <fullName>Stock Pick Up</fullName>
+                <default>false</default>
+                <label>Stock Pick Up</label>
+            </value>
+            <value>
+                <fullName>Stock Audit</fullName>
+                <default>false</default>
+                <label>Stock Audit</label>
+            </value>
+            <value>
+                <fullName>Product  Promotion</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Product  Promotion</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

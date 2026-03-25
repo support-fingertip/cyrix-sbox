@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Total_KM_Bike__c</fullName>
+    <label>Total KM : Bike</label>
+    <summarizedField>Expenses_Line_Item__c.Total_KM__c</summarizedField>
+    <summaryFilterItems>
+        <field>Expenses_Line_Item__c.Travel_Mode__c</field>
+        <operation>equals</operation>
+        <value>Bike</value>
+    </summaryFilterItems>
+    <summaryForeignKey>Expenses_Line_Item__c.Expense__c</summaryForeignKey>
+    <summaryOperation>sum</summaryOperation>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Summary</type>
+</CustomField>

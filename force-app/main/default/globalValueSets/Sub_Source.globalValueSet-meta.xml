@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Cyrix Healthcare Website</fullName>
+        <default>false</default>
+        <label>Cyrix Healthcare Website</label>
+    </customValue>
+    <customValue>
+        <fullName>Job Board (LinkedIn, Naukri, Monster, Indeed)</fullName>
+        <default>false</default>
+        <label>Job Board (LinkedIn, Naukri, Monster, Indeed)</label>
+    </customValue>
+    <customValue>
+        <fullName>Cyrix Healthcare Employee/Student</fullName>
+        <default>false</default>
+        <label>Cyrix Healthcare Employee/Student</label>
+    </customValue>
+    <customValue>
+        <fullName>Social Media (LinkedIn, Instagram, Instagram, X)</fullName>
+        <default>false</default>
+        <label>Social Media (LinkedIn, Instagram, Instagram, X)</label>
+    </customValue>
+    <customValue>
+        <fullName>University/College (Campus recruitment, Campus Posting, Job Fair)</fullName>
+        <default>false</default>
+        <label>University/College (Campus recruitment, Campus Posting, Job Fair)</label>
+    </customValue>
+    <masterLabel>Sub Source</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

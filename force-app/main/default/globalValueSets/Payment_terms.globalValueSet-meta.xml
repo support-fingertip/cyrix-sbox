@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>100% Advance</fullName>
+        <default>false</default>
+        <label>100% Advance</label>
+    </customValue>
+    <customValue>
+        <fullName>50% Advance - 50% After Installation</fullName>
+        <default>false</default>
+        <label>50% Advance - 50% After Installation</label>
+    </customValue>
+    <customValue>
+        <fullName>30% Advance - 70% After Installation</fullName>
+        <default>false</default>
+        <label>30% Advance - 70% After Installation</label>
+    </customValue>
+    <customValue>
+        <fullName>Others</fullName>
+        <default>false</default>
+        <label>Others</label>
+    </customValue>
+    <masterLabel>Payment terms</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>
