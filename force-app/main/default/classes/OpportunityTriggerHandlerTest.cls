@@ -70,7 +70,30 @@ public class OpportunityTriggerHandlerTest {
         Test.stopTest();
 
         Opportunity result = [SELECT Name FROM Opportunity WHERE Id = :opp.Id];
-        System.assertEquals(acc.Name, result.Name, 'Opportunity name should default to Account name');
+        System.assertEquals(acc.Name, result.Name, 'Opportunity name should default to Account name when no product');
+    }
+
+    /* ────── Opportunity Name = Account + Product ────── */
+    @isTest
+    static void testOpportunityNameWithProduct() {
+        Account acc = [SELECT Id, Name FROM Account LIMIT 1];
+
+        Product2 prod = new Product2(Name = 'X-Ray Machine', IsActive = true);
+        insert prod;
+
+        Opportunity opp = new Opportunity(
+            AccountId = acc.Id,
+            StageName = 'Qualified',
+            CloseDate = Date.today().addDays(30),
+            Product__c = prod.Id
+        );
+
+        Test.startTest();
+        insert opp;
+        Test.stopTest();
+
+        Opportunity result = [SELECT Name FROM Opportunity WHERE Id = :opp.Id];
+        System.assertEquals(acc.Name + ' ' + prod.Name, result.Name, 'Opportunity name should be Account + Product');
     }
 
     /* ────── Stage Change ────── */
