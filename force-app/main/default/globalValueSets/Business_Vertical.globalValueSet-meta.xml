@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Academy</fullName>
+        <default>false</default>
+        <label>Academy</label>
+    </customValue>
+    <customValue>
+        <fullName>Accounts</fullName>
+        <default>false</default>
+        <label>Accounts</label>
+    </customValue>
+    <customValue>
+        <fullName>Asset Management</fullName>
+        <default>false</default>
+        <label>Asset Management</label>
+    </customValue>
+    <customValue>
+        <fullName>Aurum</fullName>
+        <default>false</default>
+        <label>Aurum</label>
+    </customValue>
+    <customValue>
+        <fullName>Care 360 CMC</fullName>
+        <default>false</default>
+        <label>Care 360 CMC</label>
+    </customValue>
+    <customValue>
+        <fullName>Ciyan</fullName>
+        <default>false</default>
+        <label>Ciyan</label>
+    </customValue>
+    <customValue>
+        <fullName>Distributed Sales</fullName>
+        <default>false</default>
+        <label>Distributed Sales</label>
+    </customValue>
+    <customValue>
+        <fullName>Distribution/ Sales</fullName>
+        <default>false</default>
+        <label>Distribution/ Sales</label>
+    </customValue>
+    <customValue>
+        <fullName>Finance</fullName>
+        <default>false</default>
+        <label>Finance</label>
+    </customValue>
+    <customValue>
+        <fullName>Govt Business</fullName>
+        <default>false</default>
+        <label>Govt Business</label>
+    </customValue>
+    <customValue>
+        <fullName>Marketing</fullName>
+        <default>false</default>
+        <label>Marketing</label>
+    </customValue>
+    <customValue>
+        <fullName>Procurement</fullName>
+        <default>false</default>
+        <label>Procurement</label>
+    </customValue>
+    <customValue>
+        <fullName>Product Sales</fullName>
+        <default>false</default>
+        <label>Product Sales</label>
+    </customValue>
+    <customValue>
+        <fullName>QA/ Caibration</fullName>
+        <default>false</default>
+        <label>QA/ Caibration</label>
+    </customValue>
+    <customValue>
+        <fullName>Rental</fullName>
+        <default>false</default>
+        <label>Rental</label>
+    </customValue>
+    <customValue>
+        <fullName>Revive Lab</fullName>
+        <default>false</default>
+        <label>Revive Lab</label>
+    </customValue>
+    <customValue>
+        <fullName>Sales</fullName>
+        <default>false</default>
+        <label>Sales</label>
+    </customValue>
+    <customValue>
+        <fullName>Service Sales</fullName>
+        <default>false</default>
+        <label>Service Sales</label>
+    </customValue>
+    <customValue>
+        <fullName>Spares</fullName>
+        <default>false</default>
+        <label>Spares</label>
+    </customValue>
+    <customValue>
+        <fullName>Warehouse</fullName>
+        <default>false</default>
+        <label>Warehouse</label>
+    </customValue>
+    <masterLabel>Business Vertical</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

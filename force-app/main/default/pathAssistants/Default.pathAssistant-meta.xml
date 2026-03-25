@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PathAssistant xmlns="http://soap.sforce.com/2006/04/metadata">
+    <active>true</active>
+    <entityName>Lead</entityName>
+    <fieldName>Status</fieldName>
+    <masterLabel>Default</masterLabel>
+    <pathAssistantSteps>
+        <fieldNames>Lost_Reason__c</fieldNames>
+        <picklistValueName>Closed Lost</picklistValueName>
+    </pathAssistantSteps>
+    <pathAssistantSteps>
+        <fieldNames>purchaseDate__c</fieldNames>
+        <fieldNames>Converted_Comments__c</fieldNames>
+        <picklistValueName>Closed Won</picklistValueName>
+    </pathAssistantSteps>
+    <pathAssistantSteps>
+        <fieldNames>Contacted_Date_Time__c</fieldNames>
+        <fieldNames>Contacted_Comments__c</fieldNames>
+        <picklistValueName>Contacted</picklistValueName>
+    </pathAssistantSteps>
+    <pathAssistantSteps>
+        <fieldNames>Demo_Feedback__c</fieldNames>
+        <picklistValueName>Demo</picklistValueName>
+    </pathAssistantSteps>
+    <pathAssistantSteps>
+        <fieldNames>Last_Follow_up_Date__c</fieldNames>
+        <fieldNames>Next_Follow_up_Date__c</fieldNames>
+        <fieldNames>Follow_up_Feedack__c</fieldNames>
+        <picklistValueName>Follow-Up</picklistValueName>
+    </pathAssistantSteps>
+    <pathAssistantSteps>
+        <picklistValueName>New</picklistValueName>
+    </pathAssistantSteps>
+    <pathAssistantSteps>
+        <fieldNames>Requirement_Details__c</fieldNames>
+        <fieldNames>purchaseDate__c</fieldNames>
+        <fieldNames>No_of_units__c</fieldNames>
+        <fieldNames>Site_Readiness__c</fieldNames>
+        <fieldNames>Budget_Funding__c</fieldNames>
+        <picklistValueName>Qualified</picklistValueName>
+    </pathAssistantSteps>
+    <pathAssistantSteps>
+        <fieldNames>Quote_Date__c</fieldNames>
+        <fieldNames>Quote_Value__c</fieldNames>
+        <picklistValueName>Quotation</picklistValueName>
+    </pathAssistantSteps>
+    <pathAssistantSteps>
+        <fieldNames>Unqualified_Reason__c</fieldNames>
+        <picklistValueName>Unqualified</picklistValueName>
+    </pathAssistantSteps>
+    <recordTypeName>__MASTER__</recordTypeName>
+</PathAssistant>

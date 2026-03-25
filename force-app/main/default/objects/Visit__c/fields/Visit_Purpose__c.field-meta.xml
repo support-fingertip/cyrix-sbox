@@ -2,7 +2,6 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Visit_Purpose__c</fullName>
     <description>Type of Visit that helps categorize the purpose of the visit</description>
-    <externalId>false</externalId>
     <label>Visit Purpose</label>
     <required>false</required>
     <trackHistory>true</trackHistory>

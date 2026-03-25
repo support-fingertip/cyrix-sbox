@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>CIYAN</fullName>
+        <default>false</default>
+        <label>CIYAN</label>
+    </customValue>
+    <customValue>
+        <fullName>Sales Distribution</fullName>
+        <default>false</default>
+        <label>Sales Distribution</label>
+    </customValue>
+    <customValue>
+        <fullName>Service Sales</fullName>
+        <default>false</default>
+        <label>Service Sales</label>
+    </customValue>
+    <customValue>
+        <fullName>Academy</fullName>
+        <default>false</default>
+        <label>Academy</label>
+    </customValue>
+    <customValue>
+        <fullName>AURUM</fullName>
+        <default>false</default>
+        <label>AURUM</label>
+    </customValue>
+    <masterLabel>Sales Vertical</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

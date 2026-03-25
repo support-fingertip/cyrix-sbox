@@ -2,7 +2,6 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Distance_Calculated_by_SF__c</fullName>
     <defaultValue>false</defaultValue>
-    <externalId>false</externalId>
     <label>Distance Calculated by SF</label>
     <trackHistory>false</trackHistory>
     <trackTrending>false</trackTrending>

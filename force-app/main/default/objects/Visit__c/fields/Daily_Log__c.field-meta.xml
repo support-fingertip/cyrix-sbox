@@ -2,7 +2,6 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Daily_Log__c</fullName>
     <deleteConstraint>Restrict</deleteConstraint>
-    <externalId>false</externalId>
     <label>Daily Log</label>
     <referenceTo>Daily_Log__c</referenceTo>
     <relationshipLabel>Visits</relationshipLabel>

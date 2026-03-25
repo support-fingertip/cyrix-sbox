@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Multi Specialty</fullName>
+        <default>false</default>
+        <label>Multi Specialty</label>
+    </customValue>
+    <customValue>
+        <fullName>Eye Specialty</fullName>
+        <default>false</default>
+        <label>Eye Specialty</label>
+    </customValue>
+    <customValue>
+        <fullName>Diagnostic Centre</fullName>
+        <default>false</default>
+        <label>Diagnostic Centre</label>
+    </customValue>
+    <masterLabel>Speciality</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

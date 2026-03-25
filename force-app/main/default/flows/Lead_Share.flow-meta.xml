@@ -15,8 +15,10 @@
             </value>
         </inputParameters>
         <nameSegment>LeadShareClass</nameSegment>
+        <offset>0</offset>
     </actionCalls>
     <apiVersion>65.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
     <environments>Default</environments>
     <interviewLabel>Lead Share {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Lead Share</label>

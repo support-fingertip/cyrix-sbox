@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Calibration</fullName>
+        <default>false</default>
+        <label>Calibration</label>
+    </customValue>
+    <customValue>
+        <fullName>Cardiology</fullName>
+        <default>false</default>
+        <label>Cardiology</label>
+    </customValue>
+    <customValue>
+        <fullName>Care360</fullName>
+        <default>false</default>
+        <label>Care360</label>
+    </customValue>
+    <customValue>
+        <fullName>Consumables</fullName>
+        <default>false</default>
+        <label>Consumables</label>
+    </customValue>
+    <customValue>
+        <fullName>Critical &amp; Emergency Care</fullName>
+        <default>false</default>
+        <label>Critical &amp; Emergency Care</label>
+    </customValue>
+    <customValue>
+        <fullName>Critical Care</fullName>
+        <default>false</default>
+        <label>Critical Care</label>
+    </customValue>
+    <customValue>
+        <fullName>NEW</fullName>
+        <default>false</default>
+        <label>NEW</label>
+    </customValue>
+    <customValue>
+        <fullName>QA/QC,MEDFACS</fullName>
+        <default>false</default>
+        <label>QA/QC,MEDFACS</label>
+    </customValue>
+    <customValue>
+        <fullName>Radiology</fullName>
+        <default>false</default>
+        <label>Radiology</label>
+    </customValue>
+    <customValue>
+        <fullName>ReviveLab</fullName>
+        <default>false</default>
+        <label>ReviveLab</label>
+    </customValue>
+    <customValue>
+        <fullName>Spares</fullName>
+        <default>false</default>
+        <label>Spares</label>
+    </customValue>
+    <customValue>
+        <fullName>Surgical &amp; Therapy</fullName>
+        <default>false</default>
+        <label>Surgical &amp; Therapy</label>
+    </customValue>
+    <customValue>
+        <fullName>Women &amp; Child</fullName>
+        <default>false</default>
+        <label>Women &amp; Child</label>
+    </customValue>
+    <customValue>
+        <fullName>MEDFACS</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>MEDFACS</label>
+    </customValue>
+    <masterLabel>Category</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

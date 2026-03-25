@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>ASM</fullName>
+        <default>false</default>
+        <label>ASM</label>
+    </customValue>
+    <customValue>
+        <fullName>AVP</fullName>
+        <default>false</default>
+        <label>AVP</label>
+    </customValue>
+    <customValue>
+        <fullName>Sales Engineer</fullName>
+        <default>false</default>
+        <label>Sales Engineer</label>
+    </customValue>
+    <customValue>
+        <fullName>Specialist</fullName>
+        <default>false</default>
+        <label>Specialist</label>
+    </customValue>
+    <customValue>
+        <fullName>System Administrator</fullName>
+        <default>false</default>
+        <label>System Administrator</label>
+    </customValue>
+    <customValue>
+        <fullName>TSM</fullName>
+        <default>false</default>
+        <label>TSM</label>
+    </customValue>
+    <customValue>
+        <fullName>VP</fullName>
+        <default>false</default>
+        <label>VP</label>
+    </customValue>
+    <customValue>
+        <fullName>Sales Executive</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Sales Executive</label>
+    </customValue>
+    <customValue>
+        <fullName>PT1</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>PT1</label>
+    </customValue>
+    <customValue>
+        <fullName>HR</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>HR</label>
+    </customValue>
+    <customValue>
+        <fullName>Finance Department</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Finance Department</label>
+    </customValue>
+    <masterLabel>Profile</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

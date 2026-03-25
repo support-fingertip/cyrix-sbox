@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Conveyance_Allowance_per_KM_Own_Car__c</fullName>
-    <externalId>false</externalId>
     <label>TA Per KM Charges :  Car</label>
     <precision>18</precision>
     <required>false</required>
