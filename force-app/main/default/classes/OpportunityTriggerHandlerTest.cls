@@ -393,4 +393,65 @@ public class OpportunityTriggerHandlerTest {
         Opportunity result = [SELECT Primary_Contact_Person__c FROM Opportunity WHERE Id = :opp.Id];
         System.assertEquals(con.Id, result.Primary_Contact_Person__c);
     }
+
+    /* ────── Campaign Mapping on Insert ────── */
+    @isTest
+    static void testCampaignMappingOnInsert() {
+        Account acc = [SELECT Id FROM Account LIMIT 1];
+        Contact con = [SELECT Id FROM Contact LIMIT 1];
+
+        Campaign camp = new Campaign(Name = 'Test Campaign', IsActive = true);
+        insert camp;
+
+        Opportunity opp = new Opportunity(
+            Name = 'Test Campaign Opp',
+            AccountId = acc.Id,
+            StageName = 'Qualified',
+            CloseDate = Date.today().addDays(30),
+            Campaign__c = camp.Id,
+            Primary_Contact_Person__c = con.Id
+        );
+
+        Test.startTest();
+        insert opp;
+        Test.stopTest();
+
+        List<CampaignMember> members = [
+            SELECT Id, ContactId, CampaignId
+            FROM CampaignMember
+            WHERE CampaignId = :camp.Id AND ContactId = :con.Id
+        ];
+        System.assertEquals(1, members.size(), 'Contact should be added as Campaign Member');
+    }
+
+    /* ────── Campaign Mapping on Update ────── */
+    @isTest
+    static void testCampaignMappingOnUpdate() {
+        Account acc = [SELECT Id FROM Account LIMIT 1];
+        Contact con = [SELECT Id FROM Contact LIMIT 1];
+
+        Campaign camp = new Campaign(Name = 'Test Campaign Update', IsActive = true);
+        insert camp;
+
+        Opportunity opp = new Opportunity(
+            Name = 'Test Campaign Update Opp',
+            AccountId = acc.Id,
+            StageName = 'Qualified',
+            CloseDate = Date.today().addDays(30),
+            Primary_Contact_Person__c = con.Id
+        );
+        insert opp;
+
+        Test.startTest();
+        opp.Campaign__c = camp.Id;
+        update opp;
+        Test.stopTest();
+
+        List<CampaignMember> members = [
+            SELECT Id, ContactId, CampaignId
+            FROM CampaignMember
+            WHERE CampaignId = :camp.Id AND ContactId = :con.Id
+        ];
+        System.assertEquals(1, members.size(), 'Contact should be added as Campaign Member on update');
+    }
 }

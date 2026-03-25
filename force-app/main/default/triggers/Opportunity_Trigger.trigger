@@ -27,11 +27,19 @@ trigger Opportunity_Trigger on Opportunity (before insert, after insert, before 
     // ───────────── AFTER INSERT ─────────────
     if (Trigger.operationType == TriggerOperation.AFTER_INSERT) {
         List<Opportunity> assignmentList = new List<Opportunity>();
+        List<Opportunity> campaignList = new List<Opportunity>();
+
         for (Opportunity opp : Trigger.new) {
             assignmentList.add(opp);
+            if (opp.Campaign__c != null) {
+                campaignList.add(opp);
+            }
         }
         if (!assignmentList.isEmpty()) {
             OpportunityTriggerHandler.sendAssignmentNotification(assignmentList);
+        }
+        if (!campaignList.isEmpty()) {
+            OpportunityTriggerHandler.campaignMapping(campaignList);
         }
     }
 
@@ -41,6 +49,7 @@ trigger Opportunity_Trigger on Opportunity (before insert, after insert, before 
         List<Opportunity> reassignedList = new List<Opportunity>();
         List<Opportunity> closedWonList = new List<Opportunity>();
         List<Opportunity> closedLostList = new List<Opportunity>();
+        List<Opportunity> campaignList = new List<Opportunity>();
 
         for (Opportunity opp : Trigger.new) {
             Opportunity oldOpp = Trigger.oldMap.get(opp.Id);
@@ -61,6 +70,11 @@ trigger Opportunity_Trigger on Opportunity (before insert, after insert, before 
             if (opp.OwnerId != oldOpp.OwnerId) {
                 reassignedList.add(opp);
             }
+
+            // Campaign changed or newly set
+            if (opp.Campaign__c != null && opp.Campaign__c != oldOpp.Campaign__c) {
+                campaignList.add(opp);
+            }
         }
 
         if (!stageChangedList.isEmpty()) {
@@ -74,6 +88,9 @@ trigger Opportunity_Trigger on Opportunity (before insert, after insert, before 
         }
         if (!closedLostList.isEmpty()) {
             OpportunityTriggerHandler.sendClosedLostNotification(closedLostList);
+        }
+        if (!campaignList.isEmpty()) {
+            OpportunityTriggerHandler.campaignMapping(campaignList);
         }
     }
 }
