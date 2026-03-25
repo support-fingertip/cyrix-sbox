@@ -141,10 +141,6 @@
     </types>
 <types>
         <members>*</members>
-        <name>CustomSetting</name>
-    </types>
-    <types>
-        <members>*</members>
         <name>CustomMetadata</name>
     </types>
     <types>
