@@ -31,16 +31,16 @@ trigger Opportunity_Trigger on Opportunity (before insert, after insert, before 
 
         for (Opportunity opp : Trigger.new) {
             assignmentList.add(opp);
-            if (opp.Campaign__c != null) {
+          /*  if (opp.Campaign__c != null) {
                 campaignList.add(opp);
-            }
+            }*/
         }
         if (!assignmentList.isEmpty()) {
             OpportunityTriggerHandler.sendAssignmentNotification(assignmentList);
         }
-        if (!campaignList.isEmpty()) {
+        /*if (!campaignList.isEmpty()) {
             OpportunityTriggerHandler.campaignMapping(campaignList);
-        }
+        }*/
     }
 
     // ───────────── AFTER UPDATE ─────────────
@@ -72,9 +72,9 @@ trigger Opportunity_Trigger on Opportunity (before insert, after insert, before 
             }
 
             // Campaign changed or newly set
-            if (opp.Campaign__c != null && opp.Campaign__c != oldOpp.Campaign__c) {
-                campaignList.add(opp);
-            }
+           // if (opp.Campaign__c != null && opp.Campaign__c != oldOpp.Campaign__c) {
+             //   campaignList.add(opp);
+            //}
         }
 
         if (!stageChangedList.isEmpty()) {
@@ -90,7 +90,7 @@ trigger Opportunity_Trigger on Opportunity (before insert, after insert, before 
             OpportunityTriggerHandler.sendClosedLostNotification(closedLostList);
         }
         if (!campaignList.isEmpty()) {
-            OpportunityTriggerHandler.campaignMapping(campaignList);
+          //  OpportunityTriggerHandler.campaignMapping(campaignList);
         }
     }
 }

@@ -394,7 +394,7 @@ public class OpportunityTriggerHandlerTest {
         System.assertEquals(con.Id, result.Primary_Contact_Person__c);
     }
 
-    /* ────── Campaign Mapping on Insert ────── */
+    /* ────── Campaign Mapping on Insert ────── 
     @isTest
     static void testCampaignMappingOnInsert() {
         Account acc = [SELECT Id FROM Account LIMIT 1];
@@ -423,8 +423,8 @@ public class OpportunityTriggerHandlerTest {
         ];
         System.assertEquals(1, members.size(), 'Contact should be added as Campaign Member');
     }
-
-    /* ────── Campaign Mapping on Update ────── */
+*/
+    /* ────── Campaign Mapping on Update ────── 
     @isTest
     static void testCampaignMappingOnUpdate() {
         Account acc = [SELECT Id FROM Account LIMIT 1];
@@ -453,5 +453,5 @@ public class OpportunityTriggerHandlerTest {
             WHERE CampaignId = :camp.Id AND ContactId = :con.Id
         ];
         System.assertEquals(1, members.size(), 'Contact should be added as Campaign Member on update');
-    }
+    }*/
 }

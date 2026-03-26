@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <?xml version="1.0" encoding="UTF-8"?>
 <LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>65.0</apiVersion>
@@ -15,22 +14,4 @@
             </objects>
         </targetConfig>
     </targetConfigs>
-=======
-<?xml version="1.0" encoding="UTF-8"?>
-<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
-    <apiVersion>65.0</apiVersion>
-    <isExposed>true</isExposed>
-    <targets>
-        <target>lightning__RecordPage</target>
-        <target>lightning__AppPage</target>
-        <target>lightning__HomePage</target>
-    </targets>
-    <targetConfigs>
-        <targetConfig targets="lightning__RecordPage">
-            <objects>
-                <object>Account</object>
-            </objects>
-        </targetConfig>
-    </targetConfigs>
->>>>>>> c43a986f5230c7fd929f316660d9e2e33c0dc9f6
 </LightningComponentBundle>
