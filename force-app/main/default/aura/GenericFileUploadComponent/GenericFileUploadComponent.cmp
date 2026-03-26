@@ -1,0 +1,91 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global" controller="FileUploadController">
+    <aura:attribute name="recordId" type="string" access="global"/> 
+     <aura:attribute name="documentName" type="string" access="global" default=""/> 
+    <aura:attribute name="selectedDocumentName" type="string" access="global" default=""/> 
+    <aura:attribute name="contentDocIds" type="List" access="global"/>
+    <aura:attribute name="togglePreview" type="boolean" access="global" default="false"/>
+    <aura:attribute name="displaySelectedDocs" type="boolean" access="global" default="false"/>
+    <aura:attribute name="fileName" type="List" access="global"/>
+    <aura:attribute name="picklistValues" type="String" access="global"/>
+    <aura:attribute name="docStringList" type="String" access="global"/>
+    <aura:attribute name="uploadedFiles" type="List" access="global"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <lightning:spinner aura:id="mySpinner" title="Uploading..." varient="brand" class="slds-hide"/>
+    <div class="demo-only">
+        <article class="slds-box slds-tile">
+            <h3 class="slds-setup-assistant__step-summary-title slds-text-heading_small">{!v.documentName}</h3>
+            <lightning:combobox 
+                                name="picklist"
+                                label="Select a document type"
+                                value="{!v.selectedDocumentName}" 
+                                options="{!v.picklistValues}"
+                                onchange="{!c.handleChange}" />
+            <div class="slds-grid slds-gutters slds-text-align_center">
+                <aura:if isTrue="{!v.selectedDocumentName != ''}">
+                    <div class="slds-col">
+                        <lightning:input type="file" 
+                                         aura:id="fileUpload"
+                                         label="File Upload" 
+                                         name="file" 
+                                         multiple="true" 
+                                         onchange="{!c.filesChangeHandler}"/>
+                        <aura:if isTrue="{!v.fileName.length > 0}">
+                            <aura:iteration items="{!v.fileName}" var="val">
+                                <div class="slds-text-color_success">
+                                    {!val}<br/>
+                                </div>
+                            </aura:iteration>
+                            <aura:set attribute="else">
+                                <div class="slds-text-color_error">
+                                    No Files Selected...
+                                </div>
+                            </aura:set>
+                        </aura:if>
+                        <lightning:button name="Upload File" label="Upload File" variant="brand" onclick="{!c.uploadFiles}"/>
+                    </div>
+                </aura:if>
+            </div>
+            <br/>
+            <div>
+                <span>
+                    <lightning:input type="toggle" label="Preview" name="input1"  class="small-toggle" checked="{!v.togglePreview}"/>
+                </span>
+            </div>
+            <div class="slds-grid slds-gutters slds-scrollable_x">
+                <aura:if isTrue="{!AND(v.contentDocIds.length > 0,v.togglePreview)}">
+                    <aura:iteration items="{!v.contentDocIds}" var="val">
+                        <div class="slds-col">
+                            <lightning:fileCard fileId="{!val.fileId}"/>
+                        </div>
+                    </aura:iteration>
+                </aura:if>
+            </div>
+            <div class="slds-box slds-theme_default">
+                <aura:if isTrue="{!AND(v.contentDocIds.length > 0,!v.togglePreview)}">
+                    <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_edit slds-table_fixed-layout slds-table_resizable-cols">
+                        <thead>
+                            <tr class="slds-line-height_reset">
+                                <th width="10%">Preview</th>
+                                <th width="30%">File Name</th>
+                                <th width="10%">Download</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <aura:iteration items="{!v.contentDocIds}" var="file">
+                                <tr>
+                                    <td>
+                                        <img src="{!file.previewUrl}" alt="{!file.title}" style="width:50px; height:50px;"/>
+                                    </td>
+                                    <td>{!file.title}</td>
+                                    <td>
+                                        <a href="{!file.downloadUrl}" target="_blank" class="slds-button slds-button_icon">Download</a>
+                                    </td>
+                                </tr>
+                            </aura:iteration>
+                        </tbody>
+                    </table>
+                </aura:if>
+            </div>
+        </article>
+    </div>
+</aura:component>

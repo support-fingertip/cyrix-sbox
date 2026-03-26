@@ -1,0 +1,5 @@
+.THIS .small-toggle {
+    transform: scale(0.8);
+    transform-origin: left;
+    margin-top: -5px;
+}
