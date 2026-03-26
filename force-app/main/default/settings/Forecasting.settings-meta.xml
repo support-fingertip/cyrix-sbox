@@ -276,8 +276,16 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tAAT</field>
+            <label>Cash Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA7F</field>
+            <label>Cheque Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
@@ -298,6 +306,10 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA8r</field>
+            <label>DD Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy60</field>
@@ -368,6 +380,10 @@
             <label>PO/WO/Signed Quotation</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t76A</field>
+            <label>PO Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
@@ -406,6 +422,14 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t8lO</field>
+            <label>UPI Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA5d</field>
+            <label>WO Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
@@ -475,12 +499,15 @@
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
+            <field>00NC4000002tAAT</field>
             <field>00NC4000002US0w</field>
+            <field>00NC4000002tA7F</field>
             <field>00NC4000002S9s2</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
+            <field>00NC4000002tA8r</field>
             <field>00NWd000005sy60</field>
             <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
@@ -498,6 +525,7 @@
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
             <field>00NC4000002sNRg</field>
+            <field>00NC4000002t76A</field>
             <field>00NC4000002S9X3</field>
             <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
@@ -508,6 +536,8 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC4000002t8lO</field>
+            <field>00NC4000002tA5d</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -704,8 +734,16 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tAAT</field>
+            <label>Cash Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA7F</field>
+            <label>Cheque Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
@@ -726,6 +764,10 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA8r</field>
+            <label>DD Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy60</field>
@@ -796,6 +838,10 @@
             <label>PO/WO/Signed Quotation</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t76A</field>
+            <label>PO Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
@@ -834,6 +880,14 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t8lO</field>
+            <label>UPI Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA5d</field>
+            <label>WO Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
@@ -903,12 +957,15 @@
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
+            <field>00NC4000002tAAT</field>
             <field>00NC4000002US0w</field>
+            <field>00NC4000002tA7F</field>
             <field>00NC4000002S9s2</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
+            <field>00NC4000002tA8r</field>
             <field>00NWd000005sy60</field>
             <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
@@ -926,6 +983,7 @@
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
             <field>00NC4000002sNRg</field>
+            <field>00NC4000002t76A</field>
             <field>00NC4000002S9X3</field>
             <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
@@ -936,6 +994,8 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC4000002t8lO</field>
+            <field>00NC4000002tA5d</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -1136,8 +1196,16 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tAAT</field>
+            <label>Cash Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA7F</field>
+            <label>Cheque Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
@@ -1158,6 +1226,10 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA8r</field>
+            <label>DD Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy60</field>
@@ -1228,6 +1300,10 @@
             <label>PO/WO/Signed Quotation</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t76A</field>
+            <label>PO Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
@@ -1266,6 +1342,14 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t8lO</field>
+            <label>UPI Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA5d</field>
+            <label>WO Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
@@ -1336,12 +1420,15 @@
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
+            <field>00NC4000002tAAT</field>
             <field>00NC4000002US0w</field>
+            <field>00NC4000002tA7F</field>
             <field>00NC4000002S9s2</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
+            <field>00NC4000002tA8r</field>
             <field>00NWd000005sy60</field>
             <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
@@ -1359,6 +1446,7 @@
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
             <field>00NC4000002sNRg</field>
+            <field>00NC4000002t76A</field>
             <field>00NC4000002S9X3</field>
             <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
@@ -1369,6 +1457,8 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC4000002t8lO</field>
+            <field>00NC4000002tA5d</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -1565,8 +1655,16 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tAAT</field>
+            <label>Cash Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA7F</field>
+            <label>Cheque Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
@@ -1587,6 +1685,10 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA8r</field>
+            <label>DD Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy60</field>
@@ -1657,6 +1759,10 @@
             <label>PO/WO/Signed Quotation</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t76A</field>
+            <label>PO Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
@@ -1695,6 +1801,14 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t8lO</field>
+            <label>UPI Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA5d</field>
+            <label>WO Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
@@ -1764,12 +1878,15 @@
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
+            <field>00NC4000002tAAT</field>
             <field>00NC4000002US0w</field>
+            <field>00NC4000002tA7F</field>
             <field>00NC4000002S9s2</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
+            <field>00NC4000002tA8r</field>
             <field>00NWd000005sy60</field>
             <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
@@ -1787,6 +1904,7 @@
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
             <field>00NC4000002sNRg</field>
+            <field>00NC4000002t76A</field>
             <field>00NC4000002S9X3</field>
             <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
@@ -1797,6 +1915,8 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC4000002t8lO</field>
+            <field>00NC4000002tA5d</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -1997,8 +2117,16 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tAAT</field>
+            <label>Cash Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA7F</field>
+            <label>Cheque Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
@@ -2019,6 +2147,10 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA8r</field>
+            <label>DD Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy60</field>
@@ -2089,6 +2221,10 @@
             <label>PO/WO/Signed Quotation</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t76A</field>
+            <label>PO Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
@@ -2127,6 +2263,14 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t8lO</field>
+            <label>UPI Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA5d</field>
+            <label>WO Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
@@ -2197,12 +2341,15 @@
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
+            <field>00NC4000002tAAT</field>
             <field>00NC4000002US0w</field>
+            <field>00NC4000002tA7F</field>
             <field>00NC4000002S9s2</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
+            <field>00NC4000002tA8r</field>
             <field>00NWd000005sy60</field>
             <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
@@ -2220,6 +2367,7 @@
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
             <field>00NC4000002sNRg</field>
+            <field>00NC4000002t76A</field>
             <field>00NC4000002S9X3</field>
             <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
@@ -2230,6 +2378,8 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC4000002t8lO</field>
+            <field>00NC4000002tA5d</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -2426,8 +2576,16 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tAAT</field>
+            <label>Cash Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA7F</field>
+            <label>Cheque Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
@@ -2448,6 +2606,10 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA8r</field>
+            <label>DD Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy60</field>
@@ -2518,6 +2680,10 @@
             <label>PO/WO/Signed Quotation</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t76A</field>
+            <label>PO Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
@@ -2556,6 +2722,14 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t8lO</field>
+            <label>UPI Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA5d</field>
+            <label>WO Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
@@ -2625,12 +2799,15 @@
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
+            <field>00NC4000002tAAT</field>
             <field>00NC4000002US0w</field>
+            <field>00NC4000002tA7F</field>
             <field>00NC4000002S9s2</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
+            <field>00NC4000002tA8r</field>
             <field>00NWd000005sy60</field>
             <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
@@ -2648,6 +2825,7 @@
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
             <field>00NC4000002sNRg</field>
+            <field>00NC4000002t76A</field>
             <field>00NC4000002S9X3</field>
             <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
@@ -2658,6 +2836,8 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC4000002t8lO</field>
+            <field>00NC4000002tA5d</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -2858,8 +3038,16 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tAAT</field>
+            <label>Cash Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA7F</field>
+            <label>Cheque Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
@@ -2880,6 +3068,10 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA8r</field>
+            <label>DD Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy60</field>
@@ -2950,6 +3142,10 @@
             <label>PO/WO/Signed Quotation</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t76A</field>
+            <label>PO Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
@@ -2988,6 +3184,14 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t8lO</field>
+            <label>UPI Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA5d</field>
+            <label>WO Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
@@ -3058,12 +3262,15 @@
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
+            <field>00NC4000002tAAT</field>
             <field>00NC4000002US0w</field>
+            <field>00NC4000002tA7F</field>
             <field>00NC4000002S9s2</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
+            <field>00NC4000002tA8r</field>
             <field>00NWd000005sy60</field>
             <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
@@ -3081,6 +3288,7 @@
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
             <field>00NC4000002sNRg</field>
+            <field>00NC4000002t76A</field>
             <field>00NC4000002S9X3</field>
             <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
@@ -3091,6 +3299,8 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC4000002t8lO</field>
+            <field>00NC4000002tA5d</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -3287,8 +3497,16 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tAAT</field>
+            <label>Cash Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA7F</field>
+            <label>Cheque Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
@@ -3309,6 +3527,10 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA8r</field>
+            <label>DD Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy60</field>
@@ -3379,6 +3601,10 @@
             <label>PO/WO/Signed Quotation</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t76A</field>
+            <label>PO Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
@@ -3417,6 +3643,14 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t8lO</field>
+            <label>UPI Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA5d</field>
+            <label>WO Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
@@ -3486,12 +3720,15 @@
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
+            <field>00NC4000002tAAT</field>
             <field>00NC4000002US0w</field>
+            <field>00NC4000002tA7F</field>
             <field>00NC4000002S9s2</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
+            <field>00NC4000002tA8r</field>
             <field>00NWd000005sy60</field>
             <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
@@ -3509,6 +3746,7 @@
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
             <field>00NC4000002sNRg</field>
+            <field>00NC4000002t76A</field>
             <field>00NC4000002S9X3</field>
             <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
@@ -3519,6 +3757,8 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC4000002t8lO</field>
+            <field>00NC4000002tA5d</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -3719,8 +3959,16 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tAAT</field>
+            <label>Cash Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA7F</field>
+            <label>Cheque Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
@@ -3741,6 +3989,10 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA8r</field>
+            <label>DD Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy60</field>
@@ -3811,6 +4063,10 @@
             <label>PO/WO/Signed Quotation</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t76A</field>
+            <label>PO Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
@@ -3849,6 +4105,14 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t8lO</field>
+            <label>UPI Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA5d</field>
+            <label>WO Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
@@ -3919,12 +4183,15 @@
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
+            <field>00NC4000002tAAT</field>
             <field>00NC4000002US0w</field>
+            <field>00NC4000002tA7F</field>
             <field>00NC4000002S9s2</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
+            <field>00NC4000002tA8r</field>
             <field>00NWd000005sy60</field>
             <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
@@ -3942,6 +4209,7 @@
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
             <field>00NC4000002sNRg</field>
+            <field>00NC4000002t76A</field>
             <field>00NC4000002S9X3</field>
             <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
@@ -3952,6 +4220,8 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC4000002t8lO</field>
+            <field>00NC4000002tA5d</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -4148,8 +4418,16 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tAAT</field>
+            <label>Cash Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA7F</field>
+            <label>Cheque Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
@@ -4170,6 +4448,10 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA8r</field>
+            <label>DD Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy60</field>
@@ -4240,6 +4522,10 @@
             <label>PO/WO/Signed Quotation</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t76A</field>
+            <label>PO Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
@@ -4278,6 +4564,14 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t8lO</field>
+            <label>UPI Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA5d</field>
+            <label>WO Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
@@ -4347,12 +4641,15 @@
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
+            <field>00NC4000002tAAT</field>
             <field>00NC4000002US0w</field>
+            <field>00NC4000002tA7F</field>
             <field>00NC4000002S9s2</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
+            <field>00NC4000002tA8r</field>
             <field>00NWd000005sy60</field>
             <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
@@ -4370,6 +4667,7 @@
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
             <field>00NC4000002sNRg</field>
+            <field>00NC4000002t76A</field>
             <field>00NC4000002S9X3</field>
             <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
@@ -4380,6 +4678,8 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC4000002t8lO</field>
+            <field>00NC4000002tA5d</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -4580,8 +4880,16 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tAAT</field>
+            <label>Cash Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA7F</field>
+            <label>Cheque Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
@@ -4602,6 +4910,10 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA8r</field>
+            <label>DD Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy60</field>
@@ -4672,6 +4984,10 @@
             <label>PO/WO/Signed Quotation</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t76A</field>
+            <label>PO Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
@@ -4710,6 +5026,14 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t8lO</field>
+            <label>UPI Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA5d</field>
+            <label>WO Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
@@ -4780,12 +5104,15 @@
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
+            <field>00NC4000002tAAT</field>
             <field>00NC4000002US0w</field>
+            <field>00NC4000002tA7F</field>
             <field>00NC4000002S9s2</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
+            <field>00NC4000002tA8r</field>
             <field>00NWd000005sy60</field>
             <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
@@ -4803,6 +5130,7 @@
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
             <field>00NC4000002sNRg</field>
+            <field>00NC4000002t76A</field>
             <field>00NC4000002S9X3</field>
             <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
@@ -4813,6 +5141,8 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC4000002t8lO</field>
+            <field>00NC4000002tA5d</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -5009,8 +5339,16 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tAAT</field>
+            <label>Cash Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA7F</field>
+            <label>Cheque Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
@@ -5031,6 +5369,10 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA8r</field>
+            <label>DD Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy60</field>
@@ -5101,6 +5443,10 @@
             <label>PO/WO/Signed Quotation</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t76A</field>
+            <label>PO Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
@@ -5139,6 +5485,14 @@
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t8lO</field>
+            <label>UPI Uploaded</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002tA5d</field>
+            <label>WO Uploaded</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
@@ -5208,12 +5562,15 @@
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
+            <field>00NC4000002tAAT</field>
             <field>00NC4000002US0w</field>
+            <field>00NC4000002tA7F</field>
             <field>00NC4000002S9s2</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
+            <field>00NC4000002tA8r</field>
             <field>00NWd000005sy60</field>
             <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
@@ -5231,6 +5588,7 @@
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
             <field>00NC4000002sNRg</field>
+            <field>00NC4000002t76A</field>
             <field>00NC4000002S9X3</field>
             <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
@@ -5241,6 +5599,8 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC4000002t8lO</field>
+            <field>00NC4000002tA5d</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>

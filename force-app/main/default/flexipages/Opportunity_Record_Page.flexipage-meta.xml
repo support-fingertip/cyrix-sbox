@@ -254,6 +254,12 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
+                <componentName>opportunityFileupload</componentName>
+                <identifier>c_opportunityFileupload</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
                 <componentInstanceProperties>
                     <name>label</name>
                     <value>Tabs</value>

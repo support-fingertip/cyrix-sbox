@@ -275,6 +275,10 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>FileUploadController</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>ForgotPasswordController</apexClass>
         <enabled>false</enabled>
     </classAccesses>
@@ -727,11 +731,6 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Competitor__c.Model__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Competitor__c.Opportunity__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -1961,6 +1960,16 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>Opportunity.Cash_Uploaded__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Cheque_Uploaded__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>Opportunity.Closed_Lost_Reason__c</field>
         <readable>false</readable>
     </fieldPermissions>
@@ -1987,6 +1996,11 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Opportunity.Customer_Type__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.DD_Uploaded__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -2061,6 +2075,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>Opportunity.PO_Uploaded__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>Opportunity.PO_WO_Signed_Quotation__c</field>
         <readable>false</readable>
     </fieldPermissions>
@@ -2117,6 +2136,16 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Opportunity.Secondary_Email__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.UPI_Uploaded__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.WO_Uploaded__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
