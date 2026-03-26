@@ -23,7 +23,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280pj</field>
-            <label>Region</label>
+            <label>District</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PROBABILITY</field>
@@ -32,6 +32,10 @@
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.ALIAS</field>
             <label>Opportunity Owner Alias</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027GLR</field>
@@ -126,10 +130,6 @@
             <label>Synced Quote</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
         </forecastingObjectListLabelMappings>
@@ -170,12 +170,16 @@
             <label>Next Step / Action</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
+            <field>00NC4000002sNRf</field>
+            <label>Opportunity ID</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.TYPE</field>
             <label>Type</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.CREATED_DATE</field>
@@ -202,8 +206,8 @@
             <label>Opportunity Currency</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
@@ -234,16 +238,32 @@
             <label>Owner Full Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC4000002S92P</field>
-            <label>Opportunity ID</label>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002UICr</field>
             <label>High Value Opportunity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280T7</field>
@@ -255,15 +275,11 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.QUANTITY</field>
             <label>Quantity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002S7dM</field>
@@ -284,6 +300,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_YEAR</field>
             <label>Fiscal Year</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.FIRST_NAME</field>
@@ -338,37 +358,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -405,7 +430,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280pj</field>
-            <label>Region</label>
+            <label>District</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PROBABILITY</field>
@@ -414,6 +439,10 @@
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.ALIAS</field>
             <label>Opportunity Owner Alias</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027GLR</field>
@@ -508,10 +537,6 @@
             <label>Synced Quote</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
         </forecastingObjectListLabelMappings>
@@ -552,12 +577,16 @@
             <label>Next Step / Action</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
+            <field>00NC4000002sNRf</field>
+            <label>Opportunity ID</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.TYPE</field>
             <label>Type</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.CREATED_DATE</field>
@@ -584,8 +613,8 @@
             <label>Opportunity Currency</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
@@ -616,16 +645,32 @@
             <label>Owner Full Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC4000002S92P</field>
-            <label>Opportunity ID</label>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002UICr</field>
             <label>High Value Opportunity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280T7</field>
@@ -637,15 +682,11 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.QUANTITY</field>
             <label>Quantity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002S7dM</field>
@@ -666,6 +707,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_YEAR</field>
             <label>Fiscal Year</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.FIRST_NAME</field>
@@ -720,37 +765,42 @@
             <field>OPPORTUNITY.LAST_ACTIVITY</field>
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -787,7 +837,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280pj</field>
-            <label>Region</label>
+            <label>District</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PROBABILITY</field>
@@ -796,6 +846,10 @@
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.ALIAS</field>
             <label>Opportunity Owner Alias</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027GLR</field>
@@ -890,10 +944,6 @@
             <label>Synced Quote</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
         </forecastingObjectListLabelMappings>
@@ -934,12 +984,16 @@
             <label>Next Step / Action</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
+            <field>00NC4000002sNRf</field>
+            <label>Opportunity ID</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.TYPE</field>
             <label>Type</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.CREATED_DATE</field>
@@ -966,8 +1020,8 @@
             <label>Opportunity Currency</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
@@ -998,16 +1052,32 @@
             <label>Owner Full Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC4000002S92P</field>
-            <label>Opportunity ID</label>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002UICr</field>
             <label>High Value Opportunity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280T7</field>
@@ -1019,15 +1089,11 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.QUANTITY</field>
             <label>Quantity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002S7dM</field>
@@ -1048,6 +1114,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_YEAR</field>
             <label>Fiscal Year</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.FIRST_NAME</field>
@@ -1102,37 +1172,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -1169,7 +1244,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280pj</field>
-            <label>Region</label>
+            <label>District</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PROBABILITY</field>
@@ -1178,6 +1253,10 @@
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.ALIAS</field>
             <label>Opportunity Owner Alias</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027GLR</field>
@@ -1276,10 +1355,6 @@
             <label>Synced Quote</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
         </forecastingObjectListLabelMappings>
@@ -1320,12 +1395,16 @@
             <label>Next Step / Action</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
+            <field>00NC4000002sNRf</field>
+            <label>Opportunity ID</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.TYPE</field>
             <label>Type</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.CREATED_DATE</field>
@@ -1352,8 +1431,8 @@
             <label>Opportunity Currency</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
@@ -1384,16 +1463,32 @@
             <label>Owner Full Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC4000002S92P</field>
-            <label>Opportunity ID</label>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002UICr</field>
             <label>High Value Opportunity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280T7</field>
@@ -1405,15 +1500,11 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.QUANTITY</field>
             <label>Quantity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002S7dM</field>
@@ -1434,6 +1525,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_YEAR</field>
             <label>Fiscal Year</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.FIRST_NAME</field>
@@ -1489,37 +1584,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -1556,7 +1656,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280pj</field>
-            <label>Region</label>
+            <label>District</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PROBABILITY</field>
@@ -1565,6 +1665,10 @@
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.ALIAS</field>
             <label>Opportunity Owner Alias</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027GLR</field>
@@ -1659,10 +1763,6 @@
             <label>Synced Quote</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
         </forecastingObjectListLabelMappings>
@@ -1703,12 +1803,16 @@
             <label>Next Step / Action</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
+            <field>00NC4000002sNRf</field>
+            <label>Opportunity ID</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.TYPE</field>
             <label>Type</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.CREATED_DATE</field>
@@ -1735,8 +1839,8 @@
             <label>Opportunity Currency</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
@@ -1767,16 +1871,32 @@
             <label>Owner Full Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC4000002S92P</field>
-            <label>Opportunity ID</label>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002UICr</field>
             <label>High Value Opportunity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280T7</field>
@@ -1788,15 +1908,11 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.QUANTITY</field>
             <label>Quantity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002S7dM</field>
@@ -1817,6 +1933,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_YEAR</field>
             <label>Fiscal Year</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.FIRST_NAME</field>
@@ -1871,37 +1991,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -1938,7 +2063,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280pj</field>
-            <label>Region</label>
+            <label>District</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PROBABILITY</field>
@@ -1947,6 +2072,10 @@
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.ALIAS</field>
             <label>Opportunity Owner Alias</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027GLR</field>
@@ -2045,10 +2174,6 @@
             <label>Synced Quote</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
         </forecastingObjectListLabelMappings>
@@ -2089,12 +2214,16 @@
             <label>Next Step / Action</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
+            <field>00NC4000002sNRf</field>
+            <label>Opportunity ID</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.TYPE</field>
             <label>Type</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.CREATED_DATE</field>
@@ -2121,8 +2250,8 @@
             <label>Opportunity Currency</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
@@ -2153,16 +2282,32 @@
             <label>Owner Full Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC4000002S92P</field>
-            <label>Opportunity ID</label>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002UICr</field>
             <label>High Value Opportunity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280T7</field>
@@ -2174,15 +2319,11 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.QUANTITY</field>
             <label>Quantity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002S7dM</field>
@@ -2203,6 +2344,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_YEAR</field>
             <label>Fiscal Year</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.FIRST_NAME</field>
@@ -2258,37 +2403,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -2325,7 +2475,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280pj</field>
-            <label>Region</label>
+            <label>District</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PROBABILITY</field>
@@ -2334,6 +2484,10 @@
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.ALIAS</field>
             <label>Opportunity Owner Alias</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027GLR</field>
@@ -2428,10 +2582,6 @@
             <label>Synced Quote</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
         </forecastingObjectListLabelMappings>
@@ -2472,12 +2622,16 @@
             <label>Next Step / Action</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
+            <field>00NC4000002sNRf</field>
+            <label>Opportunity ID</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.TYPE</field>
             <label>Type</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.CREATED_DATE</field>
@@ -2504,8 +2658,8 @@
             <label>Opportunity Currency</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
@@ -2536,16 +2690,32 @@
             <label>Owner Full Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC4000002S92P</field>
-            <label>Opportunity ID</label>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002UICr</field>
             <label>High Value Opportunity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280T7</field>
@@ -2557,15 +2727,11 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.QUANTITY</field>
             <label>Quantity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002S7dM</field>
@@ -2586,6 +2752,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_YEAR</field>
             <label>Fiscal Year</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.FIRST_NAME</field>
@@ -2640,37 +2810,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -2707,7 +2882,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280pj</field>
-            <label>Region</label>
+            <label>District</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PROBABILITY</field>
@@ -2716,6 +2891,10 @@
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.ALIAS</field>
             <label>Opportunity Owner Alias</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027GLR</field>
@@ -2814,10 +2993,6 @@
             <label>Synced Quote</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
         </forecastingObjectListLabelMappings>
@@ -2858,12 +3033,16 @@
             <label>Next Step / Action</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
+            <field>00NC4000002sNRf</field>
+            <label>Opportunity ID</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.TYPE</field>
             <label>Type</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.CREATED_DATE</field>
@@ -2890,8 +3069,8 @@
             <label>Opportunity Currency</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
@@ -2922,16 +3101,32 @@
             <label>Owner Full Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC4000002S92P</field>
-            <label>Opportunity ID</label>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002UICr</field>
             <label>High Value Opportunity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280T7</field>
@@ -2943,15 +3138,11 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.QUANTITY</field>
             <label>Quantity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002S7dM</field>
@@ -2972,6 +3163,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_YEAR</field>
             <label>Fiscal Year</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.FIRST_NAME</field>
@@ -3027,37 +3222,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -3094,7 +3294,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280pj</field>
-            <label>Region</label>
+            <label>District</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PROBABILITY</field>
@@ -3103,6 +3303,10 @@
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.ALIAS</field>
             <label>Opportunity Owner Alias</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027GLR</field>
@@ -3197,10 +3401,6 @@
             <label>Synced Quote</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
         </forecastingObjectListLabelMappings>
@@ -3241,12 +3441,16 @@
             <label>Next Step / Action</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
+            <field>00NC4000002sNRf</field>
+            <label>Opportunity ID</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.TYPE</field>
             <label>Type</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.CREATED_DATE</field>
@@ -3273,8 +3477,8 @@
             <label>Opportunity Currency</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
@@ -3305,16 +3509,32 @@
             <label>Owner Full Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC4000002S92P</field>
-            <label>Opportunity ID</label>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002UICr</field>
             <label>High Value Opportunity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280T7</field>
@@ -3326,15 +3546,11 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.QUANTITY</field>
             <label>Quantity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002S7dM</field>
@@ -3355,6 +3571,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_YEAR</field>
             <label>Fiscal Year</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.FIRST_NAME</field>
@@ -3409,37 +3629,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -3476,7 +3701,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280pj</field>
-            <label>Region</label>
+            <label>District</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PROBABILITY</field>
@@ -3485,6 +3710,10 @@
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.ALIAS</field>
             <label>Opportunity Owner Alias</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027GLR</field>
@@ -3583,10 +3812,6 @@
             <label>Synced Quote</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
         </forecastingObjectListLabelMappings>
@@ -3627,12 +3852,16 @@
             <label>Next Step / Action</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
+            <field>00NC4000002sNRf</field>
+            <label>Opportunity ID</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.TYPE</field>
             <label>Type</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.CREATED_DATE</field>
@@ -3659,8 +3888,8 @@
             <label>Opportunity Currency</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
@@ -3691,16 +3920,32 @@
             <label>Owner Full Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC4000002S92P</field>
-            <label>Opportunity ID</label>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002UICr</field>
             <label>High Value Opportunity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280T7</field>
@@ -3712,15 +3957,11 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.QUANTITY</field>
             <label>Quantity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002S7dM</field>
@@ -3741,6 +3982,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_YEAR</field>
             <label>Fiscal Year</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.FIRST_NAME</field>
@@ -3796,37 +4041,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -3863,7 +4113,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280pj</field>
-            <label>Region</label>
+            <label>District</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PROBABILITY</field>
@@ -3872,6 +4122,10 @@
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.ALIAS</field>
             <label>Opportunity Owner Alias</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027GLR</field>
@@ -3966,10 +4220,6 @@
             <label>Synced Quote</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
         </forecastingObjectListLabelMappings>
@@ -4010,12 +4260,16 @@
             <label>Next Step / Action</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
+            <field>00NC4000002sNRf</field>
+            <label>Opportunity ID</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.TYPE</field>
             <label>Type</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.CREATED_DATE</field>
@@ -4042,8 +4296,8 @@
             <label>Opportunity Currency</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
@@ -4074,16 +4328,32 @@
             <label>Owner Full Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC4000002S92P</field>
-            <label>Opportunity ID</label>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002UICr</field>
             <label>High Value Opportunity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280T7</field>
@@ -4095,15 +4365,11 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.QUANTITY</field>
             <label>Quantity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002S7dM</field>
@@ -4124,6 +4390,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_YEAR</field>
             <label>Fiscal Year</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.FIRST_NAME</field>
@@ -4178,37 +4448,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -4245,7 +4520,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280pj</field>
-            <label>Region</label>
+            <label>District</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PROBABILITY</field>
@@ -4254,6 +4529,10 @@
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.ALIAS</field>
             <label>Opportunity Owner Alias</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027GLR</field>
@@ -4352,10 +4631,6 @@
             <label>Synced Quote</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
         </forecastingObjectListLabelMappings>
@@ -4396,12 +4671,16 @@
             <label>Next Step / Action</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
+            <field>00NC4000002sNRf</field>
+            <label>Opportunity ID</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.TYPE</field>
             <label>Type</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.CREATED_DATE</field>
@@ -4428,8 +4707,8 @@
             <label>Opportunity Currency</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
@@ -4460,16 +4739,32 @@
             <label>Owner Full Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC4000002S92P</field>
-            <label>Opportunity ID</label>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002UICr</field>
             <label>High Value Opportunity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280T7</field>
@@ -4481,15 +4776,11 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.QUANTITY</field>
             <label>Quantity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002S7dM</field>
@@ -4510,6 +4801,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_YEAR</field>
             <label>Fiscal Year</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.FIRST_NAME</field>
@@ -4565,37 +4860,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -4632,7 +4932,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280pj</field>
-            <label>Region</label>
+            <label>District</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PROBABILITY</field>
@@ -4641,6 +4941,10 @@
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.ALIAS</field>
             <label>Opportunity Owner Alias</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027GLR</field>
@@ -4735,10 +5039,6 @@
             <label>Synced Quote</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
             <field>00NC4000002AqQn</field>
             <label>Customer Type</label>
         </forecastingObjectListLabelMappings>
@@ -4779,12 +5079,16 @@
             <label>Next Step / Action</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
+            <field>00NC4000002sNRf</field>
+            <label>Opportunity ID</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.TYPE</field>
             <label>Type</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.CREATED_DATE</field>
@@ -4811,8 +5115,8 @@
             <label>Opportunity Currency</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
@@ -4843,16 +5147,32 @@
             <label>Owner Full Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
-            <field>00NC4000002S92P</field>
-            <label>Opportunity ID</label>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002UICr</field>
             <label>High Value Opportunity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC400000280T7</field>
@@ -4864,15 +5184,11 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.QUANTITY</field>
             <label>Quantity</label>
-        </forecastingObjectListLabelMappings>
-        <forecastingObjectListLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC4000002S7dM</field>
@@ -4893,6 +5209,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_YEAR</field>
             <label>Fiscal Year</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CORE.USERS.FIRST_NAME</field>
@@ -4947,37 +5267,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>

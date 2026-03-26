@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Layout xmlns="http://soap.sforce.com/2006/04/metadata">
+    <excludeButtons>OpenSlackRecordChannel</excludeButtons>
     <layoutSections>
         <customLabel>false</customLabel>
         <detailHeading>false</detailHeading>
@@ -9,6 +10,10 @@
             <layoutItems>
                 <behavior>Required</behavior>
                 <field>Name</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Required</behavior>
+                <field>Opportunity_Type__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
@@ -24,99 +29,11 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Budget_Confirmed__c</field>
+                <field>Product__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Discovery_Completed__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>ROI_Analysis_Completed__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Private_Customer__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Customer_Category__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Hospital_Type__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Brand__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Buisness_Vertical__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Customer_Code_Mobile__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Region__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Hospital_Size_Bed__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Customer_Type__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Readonly</behavior>
-                <field>Opportunity_ID__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Customer_Progressed_from_lead__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Required</behavior>
-                <field>Primary_Contact_Person__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Required</behavior>
-                <field>Opportunity_Type__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Required</behavior>
-                <field>Next_Step_Action__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Required</behavior>
-                <field>Closed_Lost_Reason__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Required</behavior>
-                <field>Approval_Status__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Required</behavior>
-                <field>Campaign__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>High_Value_Opportunity__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Manager_Approver__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Sales_Head_Approval__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>CFO_Approval__c</field>
+                <field>LeadSource</field>
             </layoutItems>
         </layoutColumns>
         <layoutColumns>
@@ -138,31 +55,71 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
+                <field>CurrencyIsoCode</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Region__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Required</behavior>
                 <field>Amount</field>
             </layoutItems>
+        </layoutColumns>
+        <style>TwoColumnsTopToBottom</style>
+    </layoutSections>
+    <layoutSections>
+        <customLabel>true</customLabel>
+        <detailHeading>true</detailHeading>
+        <editHeading>true</editHeading>
+        <label>Business Information</label>
+        <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Loss_Reason__c</field>
+                <field>Brand__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Email__c</field>
+                <field>Customer_Type__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Customer_Category__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
                 <field>No_of_Units__c</field>
             </layoutItems>
+        </layoutColumns>
+        <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Public_Customer__c</field>
+                <field>Buisness_Vertical__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>purchaseDate__c</field>
+                <field>Hospital_Type__c</field>
             </layoutItems>
             <layoutItems>
-                <behavior>Required</behavior>
-                <field>CurrencyIsoCode</field>
+                <behavior>Edit</behavior>
+                <field>Hospital_Size_Bed__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Purchase_Date__c</field>
+            </layoutItems>
+        </layoutColumns>
+        <style>TwoColumnsLeftToRight</style>
+    </layoutSections>
+    <layoutSections>
+        <customLabel>true</customLabel>
+        <detailHeading>true</detailHeading>
+        <editHeading>true</editHeading>
+        <label>Contact Information</label>
+        <layoutColumns>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Email__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
@@ -170,22 +127,42 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Phone__c</field>
+                <field>Country_Code_Phone__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>GST_Number__c</field>
+                <field>Phone__c</field>
+            </layoutItems>
+        </layoutColumns>
+        <layoutColumns>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Primary_Contact_Person__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Customer_Code_Mobile__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
                 <field>MobilePhone__c</field>
             </layoutItems>
+        </layoutColumns>
+        <style>TwoColumnsLeftToRight</style>
+    </layoutSections>
+    <layoutSections>
+        <customLabel>true</customLabel>
+        <detailHeading>true</detailHeading>
+        <editHeading>true</editHeading>
+        <label>Closed Lost Section</label>
+        <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Country_Code_Phone__c</field>
+                <field>Closed_Lost_Reason__c</field>
             </layoutItems>
         </layoutColumns>
-        <style>TwoColumnsTopToBottom</style>
+        <layoutColumns/>
+        <style>TwoColumnsLeftToRight</style>
     </layoutSections>
     <layoutSections>
         <customLabel>false</customLabel>
@@ -194,18 +171,37 @@
         <label>Additional Information</label>
         <layoutColumns>
             <layoutItems>
-                <behavior>Edit</behavior>
-                <field>NextStep</field>
+                <behavior>Required</behavior>
+                <field>Next_Step_Action__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Description</field>
+                <field>NextStep</field>
             </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>LeadSource</field>
+                <field>Description</field>
+            </layoutItems>
+        </layoutColumns>
+        <style>TwoColumnsLeftToRight</style>
+    </layoutSections>
+    <layoutSections>
+        <customLabel>true</customLabel>
+        <detailHeading>true</detailHeading>
+        <editHeading>true</editHeading>
+        <label>Quote Informtion</label>
+        <layoutColumns>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Quote_Date__c</field>
+            </layoutItems>
+        </layoutColumns>
+        <layoutColumns>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Quote_Amount__c</field>
             </layoutItems>
         </layoutColumns>
         <style>TwoColumnsLeftToRight</style>
@@ -218,7 +214,7 @@
         <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Competitors_Prices_Models_Makes__c</field>
+                <field>Requirement_Details__c</field>
             </layoutItems>
         </layoutColumns>
         <style>OneColumn</style>
@@ -341,6 +337,14 @@
         </quickActionListItems>
     </quickActionList>
     <relatedLists>
+        <fields>NAME</fields>
+        <fields>CREATED_DATE</fields>
+        <fields>Remarks__c</fields>
+        <fields>Model__c</fields>
+        <fields>Make__c</fields>
+        <relatedList>Competitor__c.Opportunity__c</relatedList>
+    </relatedLists>
+    <relatedLists>
         <fields>ContactName</fields>
         <fields>Role</fields>
         <fields>ContactTitle</fields>
@@ -376,12 +380,6 @@
         <fields>CONTRACT.CONTRACT_NUMBER</fields>
         <fields>ORDERS.TOTAL_AMOUNT</fields>
         <relatedList>RelatedOrderList</relatedList>
-    </relatedLists>
-    <relatedLists>
-        <fields>ACCOUNT.NAME</fields>
-        <fields>PARTNER.ROLE</fields>
-        <fields>PARTNER.PRIMARY</fields>
-        <relatedList>RelatedPartnerList</relatedList>
     </relatedLists>
     <relatedLists>
         <relatedList>RelatedCompetitorList</relatedList>

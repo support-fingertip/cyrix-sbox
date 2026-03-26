@@ -347,6 +347,14 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>OpportunityTriggerHandler</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>OpportunityTriggerHandlerTest</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>SendEmailCustomNotification</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -700,6 +708,36 @@
         <editable>true</editable>
         <field>Campaign.Reason_for_Cancellation__c</field>
         <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Competitor__c.Competitor_Price__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Competitor__c.Discount_Details__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Competitor__c.Make__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Competitor__c.Model__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Competitor__c.Opportunity__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Competitor__c.Remarks__c</field>
+        <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
@@ -1882,6 +1920,21 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Advance_Payment_Mode__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Advance_Realized__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Advance_Received__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>Opportunity.Approval_Status__c</field>
         <readable>true</readable>
@@ -1908,17 +1961,7 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Opportunity.Campaign__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
         <field>Opportunity.Closed_Lost_Reason__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Opportunity.Competitors_Prices_Models_Makes__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -1978,11 +2021,6 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Opportunity.Loss_Reason__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
         <field>Opportunity.Manager_Approver__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -1990,6 +2028,16 @@
         <editable>true</editable>
         <field>Opportunity.MobilePhone__c</field>
         <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Mobile_Phone__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Next_Payment_Date__c</field>
+        <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
@@ -2003,13 +2051,18 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
-        <field>Opportunity.Opportunity_ID__c</field>
-        <readable>true</readable>
+        <field>Opportunity.Opportunity_Auto_Number__c</field>
+        <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
         <field>Opportunity.Opportunity_Type__c</field>
         <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.PO_WO_Signed_Quotation__c</field>
+        <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
@@ -2023,12 +2076,22 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Opportunity.Private_Customer__c</field>
+        <field>Opportunity.Product__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Opportunity.Public_Customer__c</field>
+        <field>Opportunity.Purchase_Date__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Opportunity.Quote_Amount__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Opportunity.Quote_Date__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -2043,17 +2106,17 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Opportunity.Requirement_Details__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Opportunity.Sales_Head_Approval__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
         <field>Opportunity.Secondary_Email__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Opportunity.purchaseDate__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -2844,6 +2907,9 @@
         <layout>CollaborationGroup-Group Layout</layout>
     </layoutAssignments>
     <layoutAssignments>
+        <layout>Competitor__c-Competitor Layout</layout>
+    </layoutAssignments>
+    <layoutAssignments>
         <layout>Contact-Contact Layout</layout>
     </layoutAssignments>
     <layoutAssignments>
@@ -3227,10 +3293,6 @@
     </tabVisibilities>
     <tabVisibilities>
         <tab>Order</tab>
-        <visibility>DefaultOn</visibility>
-    </tabVisibilities>
-    <tabVisibilities>
-        <tab>Quote</tab>
         <visibility>DefaultOn</visibility>
     </tabVisibilities>
     <tabVisibilities>

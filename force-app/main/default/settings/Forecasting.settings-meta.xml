@@ -248,6 +248,18 @@
             <label>Manager Judgment</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S7dM</field>
             <label>Approval Status</label>
         </opportunityListFieldsLabelMappings>
@@ -264,20 +276,12 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
             <label>Closed Lost Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280xl</field>
@@ -300,6 +304,10 @@
             <label>Discovery Completed</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC400000280pj</field>
+            <label>District</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC400000280T7</field>
             <label>Email</label>
         </opportunityListFieldsLabelMappings>
@@ -320,16 +328,20 @@
             <label>Hospital Type</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002UPvv</field>
             <label>Manager Approver</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280cn</field>
             <label>MobilePhone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9qQ</field>
@@ -340,7 +352,7 @@
             <label>No of Units</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <label>Opportunity ID</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
@@ -352,24 +364,32 @@
             <label>Phone</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC400000280pj</field>
-            <label>Region</label>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy61</field>
@@ -448,37 +468,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -651,6 +676,18 @@
             <label>Manager Judgment</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S7dM</field>
             <label>Approval Status</label>
         </opportunityListFieldsLabelMappings>
@@ -667,20 +704,12 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
             <label>Closed Lost Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280xl</field>
@@ -703,6 +732,10 @@
             <label>Discovery Completed</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC400000280pj</field>
+            <label>District</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC400000280T7</field>
             <label>Email</label>
         </opportunityListFieldsLabelMappings>
@@ -723,16 +756,20 @@
             <label>Hospital Type</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002UPvv</field>
             <label>Manager Approver</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280cn</field>
             <label>MobilePhone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9qQ</field>
@@ -743,7 +780,7 @@
             <label>No of Units</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <label>Opportunity ID</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
@@ -755,24 +792,32 @@
             <label>Phone</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC400000280pj</field>
-            <label>Region</label>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy61</field>
@@ -851,37 +896,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -1058,6 +1108,18 @@
             <label>Manager Judgment</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S7dM</field>
             <label>Approval Status</label>
         </opportunityListFieldsLabelMappings>
@@ -1074,20 +1136,12 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
             <label>Closed Lost Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280xl</field>
@@ -1110,6 +1164,10 @@
             <label>Discovery Completed</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC400000280pj</field>
+            <label>District</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC400000280T7</field>
             <label>Email</label>
         </opportunityListFieldsLabelMappings>
@@ -1130,16 +1188,20 @@
             <label>Hospital Type</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002UPvv</field>
             <label>Manager Approver</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280cn</field>
             <label>MobilePhone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9qQ</field>
@@ -1150,7 +1212,7 @@
             <label>No of Units</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <label>Opportunity ID</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
@@ -1162,24 +1224,32 @@
             <label>Phone</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC400000280pj</field>
-            <label>Region</label>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy61</field>
@@ -1259,37 +1329,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -1462,6 +1537,18 @@
             <label>Manager Judgment</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S7dM</field>
             <label>Approval Status</label>
         </opportunityListFieldsLabelMappings>
@@ -1478,20 +1565,12 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
             <label>Closed Lost Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280xl</field>
@@ -1514,6 +1593,10 @@
             <label>Discovery Completed</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC400000280pj</field>
+            <label>District</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC400000280T7</field>
             <label>Email</label>
         </opportunityListFieldsLabelMappings>
@@ -1534,16 +1617,20 @@
             <label>Hospital Type</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002UPvv</field>
             <label>Manager Approver</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280cn</field>
             <label>MobilePhone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9qQ</field>
@@ -1554,7 +1641,7 @@
             <label>No of Units</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <label>Opportunity ID</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
@@ -1566,24 +1653,32 @@
             <label>Phone</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC400000280pj</field>
-            <label>Region</label>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy61</field>
@@ -1662,37 +1757,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -1869,6 +1969,18 @@
             <label>Manager Judgment</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S7dM</field>
             <label>Approval Status</label>
         </opportunityListFieldsLabelMappings>
@@ -1885,20 +1997,12 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
             <label>Closed Lost Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280xl</field>
@@ -1921,6 +2025,10 @@
             <label>Discovery Completed</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC400000280pj</field>
+            <label>District</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC400000280T7</field>
             <label>Email</label>
         </opportunityListFieldsLabelMappings>
@@ -1941,16 +2049,20 @@
             <label>Hospital Type</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002UPvv</field>
             <label>Manager Approver</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280cn</field>
             <label>MobilePhone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9qQ</field>
@@ -1961,7 +2073,7 @@
             <label>No of Units</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <label>Opportunity ID</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
@@ -1973,24 +2085,32 @@
             <label>Phone</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC400000280pj</field>
-            <label>Region</label>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy61</field>
@@ -2070,37 +2190,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -2273,6 +2398,18 @@
             <label>Manager Judgment</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S7dM</field>
             <label>Approval Status</label>
         </opportunityListFieldsLabelMappings>
@@ -2289,20 +2426,12 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
             <label>Closed Lost Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280xl</field>
@@ -2325,6 +2454,10 @@
             <label>Discovery Completed</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC400000280pj</field>
+            <label>District</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC400000280T7</field>
             <label>Email</label>
         </opportunityListFieldsLabelMappings>
@@ -2345,16 +2478,20 @@
             <label>Hospital Type</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002UPvv</field>
             <label>Manager Approver</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280cn</field>
             <label>MobilePhone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9qQ</field>
@@ -2365,7 +2502,7 @@
             <label>No of Units</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <label>Opportunity ID</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
@@ -2377,24 +2514,32 @@
             <label>Phone</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC400000280pj</field>
-            <label>Region</label>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy61</field>
@@ -2473,37 +2618,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -2680,6 +2830,18 @@
             <label>Manager Judgment</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S7dM</field>
             <label>Approval Status</label>
         </opportunityListFieldsLabelMappings>
@@ -2696,20 +2858,12 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
             <label>Closed Lost Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280xl</field>
@@ -2732,6 +2886,10 @@
             <label>Discovery Completed</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC400000280pj</field>
+            <label>District</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC400000280T7</field>
             <label>Email</label>
         </opportunityListFieldsLabelMappings>
@@ -2752,16 +2910,20 @@
             <label>Hospital Type</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002UPvv</field>
             <label>Manager Approver</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280cn</field>
             <label>MobilePhone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9qQ</field>
@@ -2772,7 +2934,7 @@
             <label>No of Units</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <label>Opportunity ID</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
@@ -2784,24 +2946,32 @@
             <label>Phone</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC400000280pj</field>
-            <label>Region</label>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy61</field>
@@ -2881,37 +3051,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -3084,6 +3259,18 @@
             <label>Manager Judgment</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S7dM</field>
             <label>Approval Status</label>
         </opportunityListFieldsLabelMappings>
@@ -3100,20 +3287,12 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
             <label>Closed Lost Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280xl</field>
@@ -3136,6 +3315,10 @@
             <label>Discovery Completed</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC400000280pj</field>
+            <label>District</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC400000280T7</field>
             <label>Email</label>
         </opportunityListFieldsLabelMappings>
@@ -3156,16 +3339,20 @@
             <label>Hospital Type</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002UPvv</field>
             <label>Manager Approver</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280cn</field>
             <label>MobilePhone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9qQ</field>
@@ -3176,7 +3363,7 @@
             <label>No of Units</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <label>Opportunity ID</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
@@ -3188,24 +3375,32 @@
             <label>Phone</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC400000280pj</field>
-            <label>Region</label>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy61</field>
@@ -3284,37 +3479,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -3491,6 +3691,18 @@
             <label>Manager Judgment</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S7dM</field>
             <label>Approval Status</label>
         </opportunityListFieldsLabelMappings>
@@ -3507,20 +3719,12 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
             <label>Closed Lost Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280xl</field>
@@ -3543,6 +3747,10 @@
             <label>Discovery Completed</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC400000280pj</field>
+            <label>District</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC400000280T7</field>
             <label>Email</label>
         </opportunityListFieldsLabelMappings>
@@ -3563,16 +3771,20 @@
             <label>Hospital Type</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002UPvv</field>
             <label>Manager Approver</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280cn</field>
             <label>MobilePhone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9qQ</field>
@@ -3583,7 +3795,7 @@
             <label>No of Units</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <label>Opportunity ID</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
@@ -3595,24 +3807,32 @@
             <label>Phone</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC400000280pj</field>
-            <label>Region</label>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy61</field>
@@ -3692,37 +3912,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -3895,6 +4120,18 @@
             <label>Manager Judgment</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S7dM</field>
             <label>Approval Status</label>
         </opportunityListFieldsLabelMappings>
@@ -3911,20 +4148,12 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
             <label>Closed Lost Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280xl</field>
@@ -3947,6 +4176,10 @@
             <label>Discovery Completed</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC400000280pj</field>
+            <label>District</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC400000280T7</field>
             <label>Email</label>
         </opportunityListFieldsLabelMappings>
@@ -3967,16 +4200,20 @@
             <label>Hospital Type</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002UPvv</field>
             <label>Manager Approver</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280cn</field>
             <label>MobilePhone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9qQ</field>
@@ -3987,7 +4224,7 @@
             <label>No of Units</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <label>Opportunity ID</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
@@ -3999,24 +4236,32 @@
             <label>Phone</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC400000280pj</field>
-            <label>Region</label>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy61</field>
@@ -4095,37 +4340,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -4302,6 +4552,18 @@
             <label>Manager Judgment</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S7dM</field>
             <label>Approval Status</label>
         </opportunityListFieldsLabelMappings>
@@ -4318,20 +4580,12 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
             <label>Closed Lost Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280xl</field>
@@ -4354,6 +4608,10 @@
             <label>Discovery Completed</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC400000280pj</field>
+            <label>District</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC400000280T7</field>
             <label>Email</label>
         </opportunityListFieldsLabelMappings>
@@ -4374,16 +4632,20 @@
             <label>Hospital Type</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002UPvv</field>
             <label>Manager Approver</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280cn</field>
             <label>MobilePhone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9qQ</field>
@@ -4394,7 +4656,7 @@
             <label>No of Units</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <label>Opportunity ID</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
@@ -4406,24 +4668,32 @@
             <label>Phone</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC400000280pj</field>
-            <label>Region</label>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy61</field>
@@ -4503,37 +4773,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
@@ -4706,6 +4981,18 @@
             <label>Manager Judgment</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRb</field>
+            <label>Advance Payment Mode</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRc</field>
+            <label>Advance Realized</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRd</field>
+            <label>Advance Received</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S7dM</field>
             <label>Approval Status</label>
         </opportunityListFieldsLabelMappings>
@@ -4722,20 +5009,12 @@
             <label>Buisness Vertical</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SAGD</field>
-            <label>Campaign</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002US0w</field>
             <label>CFO Approval</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9s2</field>
             <label>Closed Lost Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC4000002SA1h</field>
-            <label>Competitors &amp; Prices / Models / Makes</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280xl</field>
@@ -4758,6 +5037,10 @@
             <label>Discovery Completed</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC400000280pj</field>
+            <label>District</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC400000280T7</field>
             <label>Email</label>
         </opportunityListFieldsLabelMappings>
@@ -4778,16 +5061,20 @@
             <label>Hospital Type</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NWd000005sy62</field>
-            <label>Loss Reason</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
             <field>00NC4000002UPvv</field>
             <label>Manager Approver</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC400000280cn</field>
             <label>MobilePhone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3s9</field>
+            <label>Mobile Phone</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRe</field>
+            <label>Next Payment Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9qQ</field>
@@ -4798,7 +5085,7 @@
             <label>No of Units</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <label>Opportunity ID</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
@@ -4810,24 +5097,32 @@
             <label>Phone</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sNRg</field>
+            <label>PO/WO/Signed Quotation</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
             <field>00NC4000002S9X3</field>
             <label>Primary Contact Person</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G25</field>
-            <label>Private Customer</label>
-        </opportunityListFieldsLabelMappings>
-        <opportunityListFieldsLabelMappings>
-            <field>00NC40000027G0T</field>
-            <label>Public Customer</label>
+            <field>00NC4000002sNsv</field>
+            <label>Product</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NC40000027Gy9</field>
-            <label>purchaseDate</label>
+            <label>Purchase Date</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
-            <field>00NC400000280pj</field>
-            <label>Region</label>
+            <field>00NC4000002sza1</field>
+            <label>Quote Amount (Excl.GST)</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002sx8F</field>
+            <label>Quote Date</label>
+        </opportunityListFieldsLabelMappings>
+        <opportunityListFieldsLabelMappings>
+            <field>00NC4000002t3Yn</field>
+            <label>Requirement Details</label>
         </opportunityListFieldsLabelMappings>
         <opportunityListFieldsLabelMappings>
             <field>00NWd000005sy61</field>
@@ -4906,37 +5201,42 @@
             <field>OPPORTUNITY.CREATED_DATE</field>
             <field>OPPORTUNITY.LAST_UPDATE</field>
             <field>FORECASTEDMFJVALUE</field>
+            <field>00NC4000002sNRb</field>
+            <field>00NC4000002sNRc</field>
+            <field>00NC4000002sNRd</field>
             <field>00NC4000002S7dM</field>
             <field>00NC40000027KDl</field>
             <field>00NWd000005sy5z</field>
             <field>00NC40000027If1</field>
-            <field>00NC4000002SAGD</field>
             <field>00NC4000002US0w</field>
             <field>00NC4000002S9s2</field>
-            <field>00NC4000002SA1h</field>
             <field>00NC400000280xl</field>
             <field>00NC40000027Jsp</field>
             <field>00NC4000002S9Tp</field>
             <field>00NC4000002AqQn</field>
             <field>00NWd000005sy60</field>
+            <field>00NC400000280pj</field>
             <field>00NC400000280T7</field>
             <field>00NC400000280GD</field>
             <field>00NC4000002UICr</field>
             <field>00NC4000002AqAf</field>
             <field>00NC40000027KAX</field>
-            <field>00NWd000005sy62</field>
             <field>00NC4000002UPvv</field>
             <field>00NC400000280cn</field>
+            <field>00NC4000002t3s9</field>
+            <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
-            <field>00NC4000002S92P</field>
+            <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
+            <field>00NC4000002sNRg</field>
             <field>00NC4000002S9X3</field>
-            <field>00NC40000027G25</field>
-            <field>00NC40000027G0T</field>
+            <field>00NC4000002sNsv</field>
             <field>00NC40000027Gy9</field>
-            <field>00NC400000280pj</field>
+            <field>00NC4000002sza1</field>
+            <field>00NC4000002sx8F</field>
+            <field>00NC4000002t3Yn</field>
             <field>00NWd000005sy61</field>
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>

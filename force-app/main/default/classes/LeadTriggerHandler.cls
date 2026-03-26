@@ -369,6 +369,28 @@ SendEmailCustomNotification.sendNotification(
 );
     }
 }
+    /* ---------------- Map Phone/Mobile to Opportunity on Conversion ---------------- */
+    public static void mapPhoneToOpportunity(List<Lead> leads) {
+        List<Opportunity> oppsToUpdate = new List<Opportunity>();
+
+        for (Lead l : leads) {
+            if (l.ConvertedOpportunityId != null && (l.Phone != null || l.MobilePhone != null)) {
+                Opportunity opp = new Opportunity(Id = l.ConvertedOpportunityId);
+                opp.Phone__c = l.Phone;
+                opp.Mobile_Phone__c = l.MobilePhone;
+                oppsToUpdate.add(opp);
+            }
+        }
+
+        if (!oppsToUpdate.isEmpty()) {
+            try {
+                update oppsToUpdate;
+            } catch (Exception ex) {
+                ExceptionHandler.addLog(ex, String.valueOf(oppsToUpdate), 'LeadTriggerHandler', 'mapPhoneToOpportunity');
+            }
+        }
+    }
+
     public static void testcover(){
         integer i=0;
         i++;

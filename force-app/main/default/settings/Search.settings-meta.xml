@@ -101,6 +101,12 @@
             <resultsPerPageCount>25</resultsPerPageCount>
         </searchSettingsByObject>
         <searchSettingsByObject>
+            <enhancedLookupEnabled>false</enhancedLookupEnabled>
+            <lookupAutoCompleteEnabled>false</lookupAutoCompleteEnabled>
+            <name>Competitor__c</name>
+            <resultsPerPageCount>0</resultsPerPageCount>
+        </searchSettingsByObject>
+        <searchSettingsByObject>
             <enhancedLookupEnabled>true</enhancedLookupEnabled>
             <lookupAutoCompleteEnabled>true</lookupAutoCompleteEnabled>
             <name>Contact</name>
