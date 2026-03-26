@@ -1,4 +1,4 @@
-public with sharing class OpportunityDocUploadController {
+public with sharing class FileUploadController {
 
     private static final Map<String, String> DOC_TYPE_TO_FIELD = new Map<String, String>{
         'WO'     => 'WO_Uploaded__c',
@@ -22,7 +22,7 @@ public with sharing class OpportunityDocUploadController {
         try {
             update opp;
         } catch (Exception ex) {
-            ExceptionHandler.addLog(ex, opportunityId, 'OpportunityDocUploadController', 'handleDocumentUpload');
+            ExceptionHandler.addLog(ex, opportunityId, 'FileUploadController', 'handleDocumentUpload');
             throw new AuraHandledException('Failed to update document checkbox: ' + ex.getMessage());
         }
     }
@@ -57,7 +57,7 @@ public with sharing class OpportunityDocUploadController {
         try {
             update cv;
         } catch (Exception ex) {
-            ExceptionHandler.addLog(ex, opportunityId, 'OpportunityDocUploadController', 'renameUploadedFile');
+            ExceptionHandler.addLog(ex, opportunityId, 'FileUploadController', 'renameUploadedFile');
         }
     }
 

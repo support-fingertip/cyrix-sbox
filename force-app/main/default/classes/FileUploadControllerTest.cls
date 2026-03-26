@@ -1,5 +1,5 @@
 @isTest
-public class OpportunityDocUploadControllerTest {
+public class FileUploadControllerTest {
 
     @TestSetup
     static void setupTestData() {
@@ -20,7 +20,7 @@ public class OpportunityDocUploadControllerTest {
         Opportunity opp = [SELECT Id FROM Opportunity LIMIT 1];
 
         Test.startTest();
-        OpportunityDocUploadController.handleDocumentUpload(opp.Id, 'WO');
+        FileUploadController.handleDocumentUpload(opp.Id, 'WO');
         Test.stopTest();
 
         Opportunity result = [SELECT WO_Uploaded__c FROM Opportunity WHERE Id = :opp.Id];
@@ -32,11 +32,11 @@ public class OpportunityDocUploadControllerTest {
         Opportunity opp = [SELECT Id FROM Opportunity LIMIT 1];
 
         Test.startTest();
-        OpportunityDocUploadController.handleDocumentUpload(opp.Id, 'PO');
-        OpportunityDocUploadController.handleDocumentUpload(opp.Id, 'Cheque');
-        OpportunityDocUploadController.handleDocumentUpload(opp.Id, 'DD');
-        OpportunityDocUploadController.handleDocumentUpload(opp.Id, 'Cash');
-        OpportunityDocUploadController.handleDocumentUpload(opp.Id, 'UPI');
+        FileUploadController.handleDocumentUpload(opp.Id, 'PO');
+        FileUploadController.handleDocumentUpload(opp.Id, 'Cheque');
+        FileUploadController.handleDocumentUpload(opp.Id, 'DD');
+        FileUploadController.handleDocumentUpload(opp.Id, 'Cash');
+        FileUploadController.handleDocumentUpload(opp.Id, 'UPI');
         Test.stopTest();
 
         Opportunity result = [
@@ -56,7 +56,7 @@ public class OpportunityDocUploadControllerTest {
         Opportunity opp = [SELECT Id FROM Opportunity LIMIT 1];
 
         Test.startTest();
-        OpportunityDocUploadController.handleDocumentUpload(opp.Id, 'InvalidType');
+        FileUploadController.handleDocumentUpload(opp.Id, 'InvalidType');
         Test.stopTest();
 
         Opportunity result = [
@@ -70,8 +70,8 @@ public class OpportunityDocUploadControllerTest {
     @isTest
     static void testHandleDocumentUpload_BlankInputs() {
         Test.startTest();
-        OpportunityDocUploadController.handleDocumentUpload(null, 'WO');
-        OpportunityDocUploadController.handleDocumentUpload('', 'WO');
+        FileUploadController.handleDocumentUpload(null, 'WO');
+        FileUploadController.handleDocumentUpload('', 'WO');
         Test.stopTest();
     }
 
@@ -83,7 +83,7 @@ public class OpportunityDocUploadControllerTest {
         update opp;
 
         Test.startTest();
-        Map<String, Boolean> status = OpportunityDocUploadController.getDocumentStatus(opp.Id);
+        Map<String, Boolean> status = FileUploadController.getDocumentStatus(opp.Id);
         Test.stopTest();
 
         System.assertEquals(true, status.get('WO'));
@@ -96,7 +96,6 @@ public class OpportunityDocUploadControllerTest {
     static void testRenameUploadedFile() {
         Opportunity opp = [SELECT Id FROM Opportunity LIMIT 1];
 
-        // Create a test file linked to the opportunity
         ContentVersion cv = new ContentVersion(
             Title = 'OriginalFile',
             PathOnClient = 'OriginalFile.pdf',
@@ -113,7 +112,7 @@ public class OpportunityDocUploadControllerTest {
         insert cdl;
 
         Test.startTest();
-        OpportunityDocUploadController.renameUploadedFile(opp.Id, 'WO');
+        FileUploadController.renameUploadedFile(opp.Id, 'WO');
         Test.stopTest();
 
         ContentVersion renamed = [
