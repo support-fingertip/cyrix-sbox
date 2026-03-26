@@ -80,4 +80,36 @@ public with sharing class OpportunityDocUploadController {
             'UPI'    => opp.UPI_Uploaded__c
         };
     }
+
+    @AuraEnabled
+    public static List<ContentDocument> getFilesForDocType(String opportunityId, String documentType) {
+        if (String.isBlank(opportunityId) || String.isBlank(documentType)) {
+            return new List<ContentDocument>();
+        }
+
+        Set<Id> docIds = new Set<Id>();
+        for (ContentDocumentLink cdl : [
+            SELECT ContentDocumentId
+            FROM ContentDocumentLink
+            WHERE LinkedEntityId = :opportunityId
+        ]) {
+            docIds.add(cdl.ContentDocumentId);
+        }
+
+        if (docIds.isEmpty()) return new List<ContentDocument>();
+
+        String titlePrefix = documentType + '_';
+        return [
+            SELECT Id, Title, FileType
+            FROM ContentDocument
+            WHERE Id IN :docIds
+            AND Title LIKE :titlePrefix + '%'
+        ];
+    }
+
+    @AuraEnabled
+    public static void deleteUploadedFile(String contentDocumentId) {
+        if (String.isBlank(contentDocumentId)) return;
+        delete [SELECT Id FROM ContentDocument WHERE Id = :contentDocumentId];
+    }
 }
