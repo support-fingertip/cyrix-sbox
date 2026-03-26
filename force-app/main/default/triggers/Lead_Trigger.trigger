@@ -79,11 +79,15 @@ trigger Lead_Trigger on Lead (before insert,after insert,before update,after upd
         list<lead> closedConvertedIds = new list<lead>();
         list<lead> followupTask = new list<lead>();
         list<lead> closedWonLeads = new list<lead>();
-        
+        list<lead> convertedWithOpp = new list<lead>();
+
         for (Lead lead : trigger.New) {
             lead oldlead = trigger.oldMap.get(lead.Id);
             if (lead.IsConverted  && lead.ConvertedAccountId != null) {
                 accountIds.add(lead.ConvertedAccountId);
+            }
+            if (lead.IsConverted && lead.ConvertedOpportunityId != null) {
+                convertedWithOpp.add(lead);
             }
             if((lead.Status == 'Closed Lost' && lead.Status != 'Closed Lost')|| lead.isConverted) {
                 closedConvertedIds.add(lead);
@@ -111,7 +115,10 @@ trigger Lead_Trigger on Lead (before insert,after insert,before update,after upd
         if(closedWonLeads.size() > 0){
     LeadTriggerHandler.sendClosedWonNotification(closedWonLeads);
 }
-        
+        if(!convertedWithOpp.isEmpty()){
+            LeadTriggerHandler.mapPhoneToOpportunity(convertedWithOpp);
+        }
+
     }
   
 
