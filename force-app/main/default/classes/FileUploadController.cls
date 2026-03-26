@@ -33,8 +33,12 @@ public with sharing class FileUploadController {
                 LIMIT 1
             ];
 
+            // Append current date to the file title (e.g., WO-2026-03-26)
+            String todayDate = String.valueOf(Date.today());
+            String fileTitle = documentName + '-' + todayDate;
+
             ContentVersion fileVersion = new ContentVersion();
-            fileVersion.Title = documentName;
+            fileVersion.Title = fileTitle;
             fileVersion.PathOnClient = name;
             fileVersion.VersionData = EncodingUtil.base64Decode(fileData);
 
@@ -180,14 +184,20 @@ fileVersion.ContentDocumentId = existingDocs[0].Id;
         // Build the query filter based on documentNamesSet
         String queryFilter = 'WHERE LinkedEntityId = :recordId';
 
-        // If fileName is provided, add it to the filter
+        // If fileName is provided, use LIKE to match titles with date suffix (e.g., WO-2026-03-26)
+        String fileNameFilter;
         if (!String.isEmpty(fileName)) {
-            queryFilter += ' AND ContentDocument.Title = :fileName';
+            fileNameFilter = fileName.trim() + '%';
+            queryFilter += ' AND ContentDocument.Title LIKE :fileNameFilter';
         }
 
-        //If documentList is provided, add it to the filter
+        //If documentList is provided, build LIKE conditions for each document name
         if (!documentNamesSet.isEmpty() && String.isEmpty(fileName)) {
-            queryFilter += ' AND ContentDocument.Title IN :documentNamesSet';
+            List<String> likeClauses = new List<String>();
+            for (String docName : documentNamesSet) {
+                likeClauses.add('ContentDocument.Title LIKE \'' + String.escapeSingleQuotes(docName.trim()) + '%\'');
+            }
+            queryFilter += ' AND (' + String.join(likeClauses, ' OR ') + ')';
         }
 
         // Query for the documents with the dynamic filter
