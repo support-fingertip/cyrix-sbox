@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Cheque_Document__c</fullName>
-    <label>Cheque Uploaded</label>
+    <fullName>DD_Uploaded__c</fullName>
+    <label>DD Uploaded</label>
     <type>Checkbox</type>
     <defaultValue>false</defaultValue>
 </CustomField>
