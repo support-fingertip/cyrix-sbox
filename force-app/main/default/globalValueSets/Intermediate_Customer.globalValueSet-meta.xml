@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Architects</fullName>
+        <default>false</default>
+        <label>Architects</label>
+    </customValue>
+    <customValue>
+        <fullName>Consultants</fullName>
+        <default>false</default>
+        <label>Consultants</label>
+    </customValue>
+    <customValue>
+        <fullName>Dealer</fullName>
+        <default>false</default>
+        <label>Dealer</label>
+    </customValue>
+    <customValue>
+        <fullName>Distributors</fullName>
+        <default>false</default>
+        <label>Distributors</label>
+    </customValue>
+    <customValue>
+        <fullName>Internal Export</fullName>
+        <default>false</default>
+        <label>Internal Export</label>
+    </customValue>
+    <customValue>
+        <fullName>Tender</fullName>
+        <default>false</default>
+        <label>Tender</label>
+    </customValue>
+    <customValue>
+        <fullName>Third parties</fullName>
+        <default>false</default>
+        <label>Third parties</label>
+    </customValue>
+    <customValue>
+        <fullName>Other</fullName>
+        <default>false</default>
+        <label>Other</label>
+    </customValue>
+    <masterLabel>Intermediate Customer</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

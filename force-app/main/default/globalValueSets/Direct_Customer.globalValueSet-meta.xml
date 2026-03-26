@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>CHAI Hospital</fullName>
+        <default>false</default>
+        <label>CHAI Hospital</label>
+    </customValue>
+    <customValue>
+        <fullName>Charitable Hospital</fullName>
+        <default>false</default>
+        <label>Charitable Hospital</label>
+    </customValue>
+    <customValue>
+        <fullName>Consultants</fullName>
+        <default>false</default>
+        <label>Consultants</label>
+    </customValue>
+    <customValue>
+        <fullName>Corporate Hospital</fullName>
+        <default>false</default>
+        <label>Corporate Hospital</label>
+    </customValue>
+    <customValue>
+        <fullName>Diagnostic. Imaging Centers</fullName>
+        <default>false</default>
+        <label>Diagnostic. Imaging Centers</label>
+    </customValue>
+    <customValue>
+        <fullName>Government Hospitals</fullName>
+        <default>false</default>
+        <label>Government Hospitals</label>
+    </customValue>
+    <customValue>
+        <fullName>IVF Centre</fullName>
+        <default>false</default>
+        <label>IVF Centre</label>
+    </customValue>
+    <customValue>
+        <fullName>Nursing Home / Maternity Hospital</fullName>
+        <default>false</default>
+        <label>Nursing Home / Maternity Hospital</label>
+    </customValue>
+    <customValue>
+        <fullName>Nursing Homes</fullName>
+        <default>false</default>
+        <label>Nursing Homes</label>
+    </customValue>
+    <customValue>
+        <fullName>Poly Clinic</fullName>
+        <default>false</default>
+        <label>Poly Clinic</label>
+    </customValue>
+    <customValue>
+        <fullName>Poly Clinics</fullName>
+        <default>false</default>
+        <label>Poly Clinics</label>
+    </customValue>
+    <customValue>
+        <fullName>Private Hospital</fullName>
+        <default>false</default>
+        <label>Private Hospital</label>
+    </customValue>
+    <customValue>
+        <fullName>Private Hospital, 100 Beds</fullName>
+        <default>false</default>
+        <label>Private Hospital, 100 Beds</label>
+    </customValue>
+    <customValue>
+        <fullName>Private Hospital, 200 Beds</fullName>
+        <default>false</default>
+        <label>Private Hospital, 200 Beds</label>
+    </customValue>
+    <customValue>
+        <fullName>Private Hospital, 300 Beds</fullName>
+        <default>false</default>
+        <label>Private Hospital, 300 Beds</label>
+    </customValue>
+    <customValue>
+        <fullName>Private Hospital  50 Beds</fullName>
+        <default>false</default>
+        <label>Private Hospital  50 Beds</label>
+    </customValue>
+    <customValue>
+        <fullName>Single Specialty Centre</fullName>
+        <default>false</default>
+        <label>Single Specialty Centre</label>
+    </customValue>
+    <customValue>
+        <fullName>Specific Departments</fullName>
+        <default>false</default>
+        <label>Specific Departments</label>
+    </customValue>
+    <customValue>
+        <fullName>Super Specialty</fullName>
+        <default>false</default>
+        <label>Super Specialty</label>
+    </customValue>
+    <customValue>
+        <fullName>Pvt Hospitals</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Pvt Hospitals</label>
+    </customValue>
+    <masterLabel>Direct Customer</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

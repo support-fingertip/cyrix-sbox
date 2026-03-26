@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Travel_Type__c</fullName>
+    <label>Travel Type</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Field - Other District</fullName>
+                <default>false</default>
+                <label>Field - Other District</label>
+            </value>
+            <value>
+                <fullName>Field - Home District</fullName>
+                <default>false</default>
+                <label>Field - Home District</label>
+            </value>
+            <value>
+                <fullName>In Office</fullName>
+                <default>false</default>
+                <label>In Office</label>
+            </value>
+            <value>
+                <fullName>Field - Other State</fullName>
+                <default>false</default>
+                <label>Field - Other State</label>
+            </value>
+            <value>
+                <fullName>Headquarters</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Headquarters</label>
+            </value>
+            <value>
+                <fullName>Person attend</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Person attend</label>
+            </value>
+            <value>
+                <fullName>Up country</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Up country</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

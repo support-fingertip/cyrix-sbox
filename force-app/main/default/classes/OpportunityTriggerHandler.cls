@@ -91,15 +91,14 @@ public class OpportunityTriggerHandler {
        Campaign Mapping
        BRD: When Campaign__c is filled, add the
        Primary Contact Person as a CampaignMember
-    ──────────────────────────────────────────── */
+    ──────────────────────────────────────────── 
     public static void campaignMapping(List<Opportunity> opps) {
         List<CampaignMember> cms = new List<CampaignMember>();
 
         for (Opportunity opp : opps) {
-            if (opp.Campaign__c != null && opp.Primary_Contact_Person__c != null) {
+            if (opp.Campaign__c != null) {
                 cms.add(new CampaignMember(
                     CampaignId = opp.Campaign__c,
-                    ContactId = opp.Primary_Contact_Person__c,
                     Status = 'Sent'
                 ));
             }
@@ -112,7 +111,7 @@ public class OpportunityTriggerHandler {
                 ExceptionHandler.addLog(ex, String.valueOf(cms), 'OpportunityTriggerHandler', 'campaignMapping');
             }
         }
-    }
+    }*/
 
     /* ────────────────────────────────────────────
        Assignment Notification

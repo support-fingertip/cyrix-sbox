@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Approval_Status__c</fullName>
+    <label>Approval Status</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Not Submitted</fullName>
+                <default>false</default>
+                <label>Not Submitted</label>
+            </value>
+            <value>
+                <fullName>Draft</fullName>
+                <default>false</default>
+                <label>Draft</label>
+            </value>
+            <value>
+                <fullName>Pending</fullName>
+                <default>false</default>
+                <label>Pending</label>
+            </value>
+            <value>
+                <fullName>Level 1 Approved</fullName>
+                <default>false</default>
+                <label>Level 1 Approved</label>
+            </value>
+            <value>
+                <fullName>Level 1 Rejected</fullName>
+                <default>false</default>
+                <label>Level 1 Rejected</label>
+            </value>
+            <value>
+                <fullName>Finance Dept. Approved</fullName>
+                <default>false</default>
+                <label>Finance Dept. Approved</label>
+            </value>
+            <value>
+                <fullName>Finance Dept. Rejected</fullName>
+                <default>false</default>
+                <label>Finance Dept. Rejected</label>
+            </value>
+            <value>
+                <fullName>HR Approved</fullName>
+                <default>false</default>
+                <label>HR Approved</label>
+            </value>
+            <value>
+                <fullName>HR Rejected</fullName>
+                <default>false</default>
+                <label>HR Rejected</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

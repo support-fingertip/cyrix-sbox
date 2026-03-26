@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>API_Key</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>API Key</shortDescription>
+        <value>96ca585abb297b995fab61679e0516fb</value>
+    </labels>
+    <labels>
+        <fullName>ActivateGMapAPI</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>ActivateGMapAPI</shortDescription>
+        <value>TRUE</value>
+    </labels>
+    <labels>
+        <fullName>DistanceMatrixApi_Key</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DistanceMatrixApi_Key</shortDescription>
+        <value>111</value>
+    </labels>
+    <labels>
+        <fullName>Enable_WebToLeadAPI</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Enable WebToLeadAPI</shortDescription>
+        <value>TRUE</value>
+    </labels>
+    <labels>
+        <fullName>GOOGLE_MAPS_API_KEY</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>GOOGLE_MAPS_API_KEY</shortDescription>
+        <value>AIzaSyDf8EvImP5ufb5QJaJpJ85hjn5vNi8VY6w</value>
+    </labels>
+    <labels>
+        <fullName>India_Mart</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>India Mart</shortDescription>
+        <value>96ca585abb297b995fab61679e0516fb</value>
+    </labels>
+    <labels>
+        <fullName>Sales_Engineer_profile_id</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Sales Engineer profile id</shortDescription>
+        <value>2F00eC4000001FzU1</value>
+    </labels>
+</CustomLabels>

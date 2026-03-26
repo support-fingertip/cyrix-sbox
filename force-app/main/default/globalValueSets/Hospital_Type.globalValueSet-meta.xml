@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>Diagnostic Centers</fullName>
+        <default>false</default>
+        <label>Diagnostic Centers</label>
+    </customValue>
+    <customValue>
+        <fullName>Direct Customer</fullName>
+        <default>false</default>
+        <label>Direct Customer</label>
+    </customValue>
+    <customValue>
+        <fullName>Private Hospital</fullName>
+        <default>false</default>
+        <label>Private Hospital</label>
+    </customValue>
+    <customValue>
+        <fullName>Corporate Hospital</fullName>
+        <default>false</default>
+        <label>Corporate Hospital</label>
+    </customValue>
+    <customValue>
+        <fullName>Diagnostic Centre</fullName>
+        <default>false</default>
+        <label>Diagnostic Centre</label>
+    </customValue>
+    <customValue>
+        <fullName>Poly Clinic</fullName>
+        <default>false</default>
+        <label>Poly Clinic</label>
+    </customValue>
+    <customValue>
+        <fullName>Nursing Home / Maternity Hospital</fullName>
+        <default>false</default>
+        <label>Nursing Home / Maternity Hospital</label>
+    </customValue>
+    <customValue>
+        <fullName>Govt. Hospital</fullName>
+        <default>false</default>
+        <label>Govt. Hospital</label>
+    </customValue>
+    <customValue>
+        <fullName>CHAI Hospital</fullName>
+        <default>false</default>
+        <label>CHAI Hospital</label>
+    </customValue>
+    <customValue>
+        <fullName>Charitable Hospital</fullName>
+        <default>false</default>
+        <label>Charitable Hospital</label>
+    </customValue>
+    <customValue>
+        <fullName>Single Specialty Centre</fullName>
+        <default>false</default>
+        <label>Single Specialty Centre</label>
+    </customValue>
+    <customValue>
+        <fullName>IVF Centre</fullName>
+        <default>false</default>
+        <label>IVF Centre</label>
+    </customValue>
+    <customValue>
+        <fullName>Dealer</fullName>
+        <default>false</default>
+        <label>Dealer</label>
+    </customValue>
+    <customValue>
+        <fullName>Distributor</fullName>
+        <default>false</default>
+        <label>Distributor</label>
+    </customValue>
+    <customValue>
+        <fullName>Student</fullName>
+        <default>false</default>
+        <label>Student</label>
+    </customValue>
+    <customValue>
+        <fullName>College</fullName>
+        <default>false</default>
+        <label>College</label>
+    </customValue>
+    <customValue>
+        <fullName>Institution</fullName>
+        <default>false</default>
+        <label>Institution</label>
+    </customValue>
+    <customValue>
+        <fullName>Private Hospital, 300 Beds</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Private Hospital, 300 Beds</label>
+    </customValue>
+    <customValue>
+        <fullName>Private Hospital, 200 Beds</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Private Hospital, 200 Beds</label>
+    </customValue>
+    <customValue>
+        <fullName>Private Hospital, 100 Beds</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Private Hospital, 100 Beds</label>
+    </customValue>
+    <customValue>
+        <fullName>Private Hospital  50 Beds</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Private Hospital  50 Beds</label>
+    </customValue>
+    <masterLabel>Hospital Type</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>
