@@ -2,12 +2,21 @@ public with sharing class FileUploadController {
 
     private static final String ISSUE_UPLOADING_FILE = 'There is a problem in uploading the file';
 
- 
+    // Mapping of document names to their corresponding Opportunity checkbox fields
+    private static final Map<String, String> DOCUMENT_FIELD_MAP = new Map<String, String>{
+        'WO' => 'WO_Uploaded__c',
+        'PO' => 'PO_Uploaded__c',
+        'Cheque' => 'Cheque_Uploaded__c',
+        'DD' => 'DD_Uploaded__c',
+        'Cash' => 'Cash_Uploaded__c',
+        'UPI' => 'UPI_Uploaded__c'
+    };
+
     @AuraEnabled
     public static String fileUpload(String parentId, String name, String fileType, String fileData, String documentName) {
         list < ContentDocumentLink > conLinks = new list < ContentDocumentLink > ();
 
-      
+
         try {
             System.debug('**Uploading File: ' + documentName + '**');
 
@@ -49,8 +58,8 @@ fileVersion.ContentDocumentId = existingDocs[0].Id;
             String newDocId = newDoc.Id;
             Id reordId = parentId;
             String sObjName = reordId.getSObjectType().getDescribe().getName();
-           
-       
+
+
             // Step 2: Always link the document to the parent record
 
             ContentDocumentLink newLink = new ContentDocumentLink();
@@ -62,6 +71,12 @@ fileVersion.ContentDocumentId = existingDocs[0].Id;
             //  System.debug('**ContentDocumentLink Created: ' + newLink.Id + '**');
             database.insert(conLinks, false);
             System.debug('**File Successfully Uploaded and Linked**');
+
+            // Step 3: Update the corresponding Opportunity checkbox field
+            if (sObjName == 'Opportunity' && String.isNotEmpty(documentName)) {
+                updateOpportunityUploadField(parentId, documentName.trim());
+            }
+
             return newDocId;
 
         } catch (Exception ex) {
@@ -228,6 +243,20 @@ fileVersion.ContentDocumentId = existingDocs[0].Id;
             throw new AuraHandledException('Error deleting file: ' + e.getMessage());
         }
     }
+    /**
+     * Updates the corresponding upload checkbox field on the Opportunity
+     * when a document of type WO, PO, Cheque, DD, Cash, or UPI is uploaded.
+     */
+    private static void updateOpportunityUploadField(String opportunityId, String documentName) {
+        String fieldName = DOCUMENT_FIELD_MAP.get(documentName);
+        if (fieldName != null) {
+            Opportunity opp = new Opportunity(Id = opportunityId);
+            opp.put(fieldName, true);
+            update opp;
+            System.debug('**Opportunity field ' + fieldName + ' set to true**');
+        }
+    }
+
 @AuraEnabled(cacheable=true)
 public static Map<ID, String> getRelatedFilesByRecordId(String recordId, String fileName, String documentList) {
     // Initialize map to store filtered file IDs and titles
