@@ -11,8 +11,13 @@
         <valueSetDefinition>
             <sorted>false</sorted>
             <value>
-                <fullName>Each</fullName>
+                <fullName>Nos</fullName>
                 <default>true</default>
+                <label>Nos</label>
+            </value>
+            <value>
+                <fullName>Each</fullName>
+                <default>false</default>
                 <label>Each</label>
             </value>
             <value>
@@ -34,6 +39,26 @@
                 <fullName>Roll</fullName>
                 <default>false</default>
                 <label>Roll</label>
+            </value>
+            <value>
+                <fullName>Piece</fullName>
+                <default>false</default>
+                <label>Piece</label>
+            </value>
+            <value>
+                <fullName>Mtr</fullName>
+                <default>false</default>
+                <label>Mtr</label>
+            </value>
+            <value>
+                <fullName>Ltr</fullName>
+                <default>false</default>
+                <label>Ltr</label>
+            </value>
+            <value>
+                <fullName>Bed</fullName>
+                <default>false</default>
+                <label>Bed</label>
             </value>
         </valueSetDefinition>
     </valueSet>
