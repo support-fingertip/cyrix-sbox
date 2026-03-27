@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Advance_Paid_Mandatory_Fields</fullName>
+    <active>true</active>
+    <description>Advance Received and Advance Payment Mode are mandatory at Advance Paid stage.</description>
+    <errorConditionFormula>AND(
+    ISPICKVAL(StageName, 'Advance Paid'),
+    OR(
+        ISPICKVAL(Advance_Received__c, ''),
+        ISPICKVAL(Advance_Payment_Mode__c, '')
+    )
+)</errorConditionFormula>
+    <errorMessage>Advance Received and Advance Payment Mode are required when the stage is Advance Paid.</errorMessage>
+</ValidationRule>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Prevent_Reopen_Closed</fullName>
+    <active>true</active>
+    <description>Prevents reopening a Closed Won or Closed Lost opportunity unless System Administrator.</description>
+    <errorConditionFormula>AND(
+    ISCHANGED(StageName),
+    NOT($Profile.Name = 'System Administrator'),
+    OR(
+        ISPICKVAL(PRIORVALUE(StageName), 'Closed Won'),
+        ISPICKVAL(PRIORVALUE(StageName), 'Closed Lost')
+    )
+)</errorConditionFormula>
+    <errorDisplayField>StageName</errorDisplayField>
+    <errorMessage>Closed Opportunities cannot be reopened. Please contact your System Administrator.</errorMessage>
+</ValidationRule>

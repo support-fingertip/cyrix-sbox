@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Negotiation_Mandatory_Fields</fullName>
+    <active>true</active>
+    <description>Business Vertical and No of Units are mandatory from Negotiation stage onwards.</description>
+    <errorConditionFormula>AND(
+    OR(
+        ISPICKVAL(StageName, 'Negotiation'),
+        ISPICKVAL(StageName, 'Quote Acceptance'),
+        ISPICKVAL(StageName, 'Funds (Negotiation)'),
+        ISPICKVAL(StageName, 'Advance Paid'),
+        ISPICKVAL(StageName, 'Closed Won')
+    ),
+    OR(
+        ISPICKVAL(Buisness_Vertical__c, ''),
+        ISBLANK(No_of_Units__c)
+    )
+)</errorConditionFormula>
+    <errorMessage>Business Vertical and No of Units are required from the Negotiation stage onwards.</errorMessage>
+</ValidationRule>
