@@ -49,8 +49,23 @@ jobs:
           if [ -z "$CHANGED_FILES" ]; then
             echo "No Salesforce metadata changes found. Skipping deploy."
           else
-            sf project deploy start \
-              --source-dir $CHANGED_FILES \
-              --target-org deployment-org \
-              --wait 30
+            # Build --source-dir arguments with proper quoting for filenames with spaces
+            SOURCE_ARGS=""
+            while IFS= read -r file; do
+              [ -z "$file" ] && continue
+              if [ -f "$file" ]; then
+                SOURCE_ARGS="$SOURCE_ARGS --source-dir \"$file\""
+              else
+                echo "Skipping missing file: $file"
+              fi
+            done <<< "$CHANGED_FILES"
+
+            if [ -n "$SOURCE_ARGS" ]; then
+              eval sf project deploy start \
+                $SOURCE_ARGS \
+                --target-org deployment-org \
+                --wait 30
+            else
+              echo "No valid files to deploy."
+            fi
           fi
