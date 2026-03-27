@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Prevent_Stage_Skip_Forward</fullName>
+    <active>true</active>
+    <description>Prevents skipping stages in the Opportunity pipeline. Stages must progress sequentially: Qualified→Proposal→Demo→Negotiation→Quote Acceptance→Funds (Negotiation)→Advance Paid→Closed Won. Closed Lost is allowed from any stage.</description>
+    <errorConditionFormula>AND(
+    ISCHANGED(StageName),
+    NOT(ISPICKVAL(StageName, 'Closed Lost')),
+    NOT($Profile.Name = 'System Administrator'),
+    OR(
+        AND(ISPICKVAL(PRIORVALUE(StageName), 'Qualified'),
+            NOT(ISPICKVAL(StageName, 'Proposal'))),
+        AND(ISPICKVAL(PRIORVALUE(StageName), 'Proposal'),
+            NOT(ISPICKVAL(StageName, 'Demo'))),
+        AND(ISPICKVAL(PRIORVALUE(StageName), 'Demo'),
+            NOT(ISPICKVAL(StageName, 'Negotiation'))),
+        AND(ISPICKVAL(PRIORVALUE(StageName), 'Negotiation'),
+            NOT(ISPICKVAL(StageName, 'Quote Acceptance'))),
+        AND(ISPICKVAL(PRIORVALUE(StageName), 'Quote Acceptance'),
+            NOT(ISPICKVAL(StageName, 'Funds (Negotiation)'))),
+        AND(ISPICKVAL(PRIORVALUE(StageName), 'Funds (Negotiation)'),
+            NOT(ISPICKVAL(StageName, 'Advance Paid'))),
+        AND(ISPICKVAL(PRIORVALUE(StageName), 'Advance Paid'),
+            NOT(ISPICKVAL(StageName, 'Closed Won')))
+    )
+)</errorConditionFormula>
+    <errorDisplayField>StageName</errorDisplayField>
+    <errorMessage>Stages must progress sequentially: Qualified → Proposal → Demo → Negotiation → Quote Acceptance → Funds (Negotiation) → Advance Paid → Closed Won. You cannot skip stages.</errorMessage>
+</ValidationRule>
