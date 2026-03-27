@@ -32,6 +32,10 @@
                 <behavior>Edit</behavior>
                 <field>Product_V__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Product_Group__c</field>
+            </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>
