@@ -7,8 +7,7 @@ public with sharing class QuoteCreatorController {
     public static OpportunityWrapper getOpportunityDetails(Id opportunityId) {
         Opportunity opp = [
             SELECT Id, Name, AccountId, Account.Name, Pricebook2Id,
-                   CurrencyIsoCode, Buisness_Vertical__c,
-                   Billing_Address__c, Shipping_Address__c
+                   CurrencyIsoCode, Buisness_Vertical__c
             FROM Opportunity
             WHERE Id = :opportunityId
             LIMIT 1
@@ -22,8 +21,6 @@ public with sharing class QuoteCreatorController {
         wrapper.pricebookId = opp.Pricebook2Id;
         wrapper.currencyCode = opp.CurrencyIsoCode;
         wrapper.vertical = opp.Buisness_Vertical__c;
-        wrapper.billingAddress = opp.Billing_Address__c;
-        wrapper.shippingAddress = opp.Shipping_Address__c;
         return wrapper;
     }
 
@@ -83,17 +80,15 @@ public with sharing class QuoteCreatorController {
         }
 
         for (PricebookEntry pbe : [
-            SELECT Id, Product2Id, Product2.Name, Product2.ProductCode, Product2.Item_Code__c,
+            SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
                    Product2.Description, Product2.Make__c, Product2.Model__c,
-                   Product2.HSN_Code__c, Product2.UOM__c, Product2.Tax__c,
-                   Product2.Standard_Price__c, Product2.Standard_Price_with_Tax__c,
+                   Product2.Standard_Price__c,
                    UnitPrice, CurrencyIsoCode
             FROM PricebookEntry
             WHERE Pricebook2Id = :pbId
             AND Product2.IsActive = true
             AND (Product2.Name LIKE :searchKey
                  OR Product2.ProductCode LIKE :searchKey
-                 OR Product2.Item_Code__c LIKE :searchKey
                  OR Product2.Make__c LIKE :searchKey
                  OR Product2.Model__c LIKE :searchKey)
             ORDER BY Product2.Name ASC
@@ -104,12 +99,8 @@ public with sharing class QuoteCreatorController {
             pw.productId = pbe.Product2Id;
             pw.productName = pbe.Product2.Name;
             pw.productCode = pbe.Product2.ProductCode;
-            pw.itemCode = pbe.Product2.Item_Code__c;
             pw.make = pbe.Product2.Make__c;
             pw.model = pbe.Product2.Model__c;
-            pw.hsnCode = pbe.Product2.HSN_Code__c;
-            pw.uom = pbe.Product2.UOM__c;
-            pw.tax = pbe.Product2.Tax__c;
             pw.unitPrice = pbe.UnitPrice;
             pw.standardPrice = pbe.Product2.Standard_Price__c;
             pw.description = pbe.Product2.Description;
@@ -181,8 +172,8 @@ public with sharing class QuoteCreatorController {
 
         List<LineItemWrapper> items = new List<LineItemWrapper>();
         for (QuoteLineItem qli : [
-            SELECT Id, Product2Id, Product2.Name, Product2.ProductCode, Product2.Item_Code__c,
-                   Product2.Make__c, Product2.Model__c, Product2.HSN_Code__c, Product2.UOM__c,
+            SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
+                   Product2.Make__c, Product2.Model__c,
                    PricebookEntryId, Quantity, UnitPrice, TotalPrice, Discount, ListPrice,
                    Price_Status__c, Tax_Type__c,
                    Product_Line_Description__c, Product_Detailed_Description__c
@@ -195,11 +186,8 @@ public with sharing class QuoteCreatorController {
             liw.productId = qli.Product2Id;
             liw.productName = qli.Product2 != null ? qli.Product2.Name : '';
             liw.productCode = qli.Product2 != null ? qli.Product2.ProductCode : '';
-            liw.itemCode = qli.Product2 != null ? qli.Product2.Item_Code__c : '';
             liw.make = qli.Product2 != null ? qli.Product2.Make__c : '';
             liw.model = qli.Product2 != null ? qli.Product2.Model__c : '';
-            liw.hsnCode = qli.Product2 != null ? qli.Product2.HSN_Code__c : '';
-            liw.uom = qli.Product2 != null ? qli.Product2.UOM__c : '';
             liw.pricebookEntryId = qli.PricebookEntryId;
             liw.quantity = qli.Quantity;
             liw.unitPrice = qli.UnitPrice;
@@ -290,8 +278,6 @@ public with sharing class QuoteCreatorController {
         @AuraEnabled public Id pricebookId;
         @AuraEnabled public String currencyCode;
         @AuraEnabled public String vertical;
-        @AuraEnabled public String billingAddress;
-        @AuraEnabled public String shippingAddress;
     }
 
     public class QuoteListWrapper {
@@ -316,12 +302,8 @@ public with sharing class QuoteCreatorController {
         @AuraEnabled public Id productId;
         @AuraEnabled public String productName;
         @AuraEnabled public String productCode;
-        @AuraEnabled public String itemCode;
         @AuraEnabled public String make;
         @AuraEnabled public String model;
-        @AuraEnabled public String hsnCode;
-        @AuraEnabled public String uom;
-        @AuraEnabled public Decimal tax;
         @AuraEnabled public Decimal unitPrice;
         @AuraEnabled public Decimal standardPrice;
         @AuraEnabled public String description;
@@ -337,11 +319,8 @@ public with sharing class QuoteCreatorController {
         @AuraEnabled public Id productId;
         @AuraEnabled public String productName;
         @AuraEnabled public String productCode;
-        @AuraEnabled public String itemCode;
         @AuraEnabled public String make;
         @AuraEnabled public String model;
-        @AuraEnabled public String hsnCode;
-        @AuraEnabled public String uom;
         @AuraEnabled public Id pricebookEntryId;
         @AuraEnabled public Decimal quantity;
         @AuraEnabled public Decimal unitPrice;

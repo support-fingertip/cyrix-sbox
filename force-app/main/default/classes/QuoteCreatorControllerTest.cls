@@ -24,12 +24,8 @@ private class QuoteCreatorControllerTest {
         Product2 prod = new Product2(
             Name = 'Test Product',
             ProductCode = 'TP-001',
-            Item_Code__c = 'ITEM001',
             Make__c = 'TestMake',
             Model__c = 'TestModel',
-            HSN_Code__c = '9018',
-            UOM__c = 'Nos',
-            Tax__c = 18,
             IsActive = true
         );
         insert prod;
@@ -221,11 +217,11 @@ private class QuoteCreatorControllerTest {
     }
 
     @isTest
-    static void testSearchProductsByItemCode() {
+    static void testSearchProductsByModel() {
         Test.startTest();
-        List<QuoteCreatorController.ProductWrapper> results = QuoteCreatorController.searchProducts('ITEM001', Test.getStandardPricebookId());
+        List<QuoteCreatorController.ProductWrapper> results = QuoteCreatorController.searchProducts('TestModel', Test.getStandardPricebookId());
         Test.stopTest();
 
-        System.assert(results.size() > 0, 'Should find products by item code');
+        System.assert(results.size() > 0, 'Should find products by model');
     }
 }

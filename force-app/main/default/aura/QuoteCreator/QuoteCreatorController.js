@@ -8,8 +8,8 @@
         var oppDetails = component.get('v.oppDetails');
         component.set('v.quoteName', oppDetails.opportunityName + ' - Quote');
         component.set('v.quoteDate', new Date().toISOString().split('T')[0]);
-        component.set('v.billingAddress', oppDetails.billingAddress || '');
-        component.set('v.shippingAddress', oppDetails.shippingAddress || '');
+        component.set('v.billingAddress', '');
+        component.set('v.shippingAddress', '');
         component.set('v.vertical', oppDetails.vertical || '');
         component.set('v.selectedProducts', []);
         component.set('v.searchResults', []);
@@ -74,8 +74,6 @@
             pricebookEntryId: product.pricebookEntryId,
             productName: product.productName,
             productCode: product.productCode,
-            hsnCode: product.hsnCode,
-            uom: product.uom,
             unitPrice: product.unitPrice,
             quantity: 1,
             discount: 0,

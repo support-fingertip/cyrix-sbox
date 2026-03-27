@@ -216,8 +216,6 @@
                                             <th scope="col"><div class="slds-truncate">#</div></th>
                                             <th scope="col"><div class="slds-truncate">Product</div></th>
                                             <th scope="col"><div class="slds-truncate">Code</div></th>
-                                            <th scope="col"><div class="slds-truncate">HSN</div></th>
-                                            <th scope="col"><div class="slds-truncate">UOM</div></th>
                                             <th scope="col"><div class="slds-truncate">Qty</div></th>
                                             <th scope="col"><div class="slds-truncate">Unit Price</div></th>
                                             <th scope="col"><div class="slds-truncate">Discount %</div></th>
@@ -233,8 +231,6 @@
                                                 <td><div class="slds-truncate">{!idx + 1}</div></td>
                                                 <td><div class="slds-truncate" title="{!li.productName}">{!li.productName}</div></td>
                                                 <td><div class="slds-truncate">{!li.productCode}</div></td>
-                                                <td><div class="slds-truncate">{!li.hsnCode}</div></td>
-                                                <td><div class="slds-truncate">{!li.uom}</div></td>
                                                 <td><div class="slds-truncate">{!li.quantity}</div></td>
                                                 <td><div class="slds-truncate">
                                                     <lightning:formattedNumber value="{!li.unitPrice}" style="currency" currencyCode="INR" />
@@ -359,8 +355,6 @@
                                                     <th scope="col"><div class="slds-truncate">Product</div></th>
                                                     <th scope="col"><div class="slds-truncate">Code</div></th>
                                                     <th scope="col"><div class="slds-truncate">Make</div></th>
-                                                    <th scope="col"><div class="slds-truncate">HSN</div></th>
-                                                    <th scope="col"><div class="slds-truncate">UOM</div></th>
                                                     <th scope="col"><div class="slds-truncate">Unit Price</div></th>
                                                 </tr>
                                             </thead>
@@ -373,8 +367,6 @@
                                                         <td><div class="slds-truncate" title="{!p.productName}">{!p.productName}</div></td>
                                                         <td><div class="slds-truncate">{!p.productCode}</div></td>
                                                         <td><div class="slds-truncate">{!p.make}</div></td>
-                                                        <td><div class="slds-truncate">{!p.hsnCode}</div></td>
-                                                        <td><div class="slds-truncate">{!p.uom}</div></td>
                                                         <td><div class="slds-truncate">
                                                             <lightning:formattedNumber value="{!p.unitPrice}" style="currency" currencyCode="INR" />
                                                         </div></td>
@@ -492,7 +484,6 @@
                                             <th scope="col"><div class="slds-truncate">Product</div></th>
                                             <th scope="col"><div class="slds-truncate">Code</div></th>
                                             <th scope="col"><div class="slds-truncate">Make</div></th>
-                                            <th scope="col"><div class="slds-truncate">HSN</div></th>
                                             <th scope="col"><div class="slds-truncate">Unit Price</div></th>
                                         </tr>
                                     </thead>
@@ -503,7 +494,6 @@
                                                 <td><div class="slds-truncate">{!p.productName}</div></td>
                                                 <td><div class="slds-truncate">{!p.productCode}</div></td>
                                                 <td><div class="slds-truncate">{!p.make}</div></td>
-                                                <td><div class="slds-truncate">{!p.hsnCode}</div></td>
                                                 <td><div class="slds-truncate">
                                                     <lightning:formattedNumber value="{!p.unitPrice}" style="currency" currencyCode="INR" />
                                                 </div></td>
