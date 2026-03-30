@@ -1,4 +1,4 @@
-// Cyrix Product Quote API Controller - Updated for Product Master Module 7
+// Product Quote API Controller - Updated for Product Master Module 7
 /****************************************************************
 * Class Name   : ProductQuoteAPIController
 * Company      : Fingertipplus

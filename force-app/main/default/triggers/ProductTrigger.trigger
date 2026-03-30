@@ -1,4 +1,4 @@
-// Cyrix Product Master Trigger - Module 7
+// Product Master Trigger - Module 7
 /****************************************************************
 * Trigger Name : ProductTrigger
 * Company      : Fingertipplus

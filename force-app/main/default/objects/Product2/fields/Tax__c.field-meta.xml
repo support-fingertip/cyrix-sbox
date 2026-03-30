@@ -3,7 +3,7 @@
     <fullName>Tax__c</fullName>
     <externalId>false</externalId>
     <label>Tax (%)</label>
-    <description>Tax (%).</description>
+    <description>Tax (%)</description>
     <precision>5</precision>
     <required>false</required>
     <scale>2</scale>
