@@ -121,9 +121,12 @@ global without sharing class ProductQuoteAPIController {
             ? Integer.valueOf(req.params.get('limit')) : 200;
 
         String query = 'SELECT Id, Name, ProductCode, Item_Code__c, SAP_Item_No__c, ' +
-            'Product_Category__c, Product_Type__c, Product_V__c, Make__c, Model__c, ' +
-            'Equipment_Name__c, Standard_Price__c, Tax__c, Standard_Price_with_Tax__c, ' +
-            'UOM__c, HSN_Code__c, Source__c, Description, IsActive, ' +
+            'Product_Category__c, Sub_Category__c, Product_Type__c, Product_V__c, ' +
+            'Brand__c, Make__c, Model__c, Equipment_Name__c, Line_Description__c, ' +
+            'Standard_Price__c, Tax__c, Standard_Price_with_Tax__c, ' +
+            'UOM__c, HSN_Code__c, HSN_Code_International__c, Source__c, Description, IsActive, ' +
+            'Default_Warranty_Months__c, Is_Installation_Required__c, Is_Training_Required__c, ' +
+            'Product_Status__c, ERP_Sync_Status__c, Last_ERP_Sync_Date__c, ' +
             'Product_Group__r.Name, Product_Group__r.Group_Code__c ' +
             'FROM Product2 WHERE IsActive = true';
 
@@ -151,11 +154,15 @@ global without sharing class ProductQuoteAPIController {
         }
 
         String query = 'SELECT Id, Name, ProductCode, Item_Code__c, SAP_Item_No__c, SAP_Item_New_Code__c, ' +
-            'Product_Category__c, Product_Type__c, Product_V__c, Category__c, ' +
-            'Make__c, Model__c, Equipment_Name__c, OEM_Part_Number__c, Source__c, ' +
-            'Standard_Price__c, Tax__c, Standard_Price_with_Tax__c, UOM__c, HSN_Code__c, ' +
+            'Product_Category__c, Sub_Category__c, Product_Type__c, Product_V__c, Category__c, ' +
+            'Brand__c, Make__c, Model__c, Equipment_Name__c, OEM_Part_Number__c, Source__c, ' +
+            'Line_Description__c, Standard_Price__c, Tax__c, Standard_Price_with_Tax__c, ' +
+            'UOM__c, HSN_Code__c, HSN_Code_International__c, ' +
             'Quantity_Pack_Size__c, Specification__c, Description, Detailed_Description__c, ' +
             'Compatibility__c, Remarks__c, Any_Other_Levies__c, IsActive, ' +
+            'Default_Warranty_Months__c, Warranty_Terms_Description__c, ' +
+            'Installation_Terms__c, Is_Installation_Required__c, Is_Training_Required__c, ' +
+            'Product_Status__c, ERP_Sync_Status__c, Last_ERP_Sync_Date__c, ' +
             'Manager_Discount_Up_to__c, VP_Sales_Discount_Up_to__c, CEO_Sales_Discount_Up_to__c, ' +
             'Shipping_Charges_Percent__c, Packing_Charges_Percent__c, Installation_Cost_Percent__c, ' +
             'Training_Cost_Percent__c, Promotional_Cost_Percent__c, Insurance_Cost_Percent__c, ' +
@@ -263,6 +270,18 @@ global without sharing class ProductQuoteAPIController {
         product.Compatibility__c = pw.compatibility;
         product.Remarks__c = pw.remarks;
         product.IsActive = pw.isActive != null ? pw.isActive : true;
+        product.Brand__c = pw.brand;
+        product.Sub_Category__c = pw.subCategory;
+        product.Line_Description__c = pw.lineDescription;
+        product.HSN_Code_International__c = pw.hsnCodeInternational;
+        product.Default_Warranty_Months__c = pw.defaultWarrantyMonths;
+        product.Warranty_Terms_Description__c = pw.warrantyTerms;
+        product.Installation_Terms__c = pw.installationTerms;
+        product.Is_Installation_Required__c = pw.isInstallationRequired;
+        product.Is_Training_Required__c = pw.isTrainingRequired;
+        product.Product_Status__c = pw.productStatus;
+        product.ERP_Sync_Status__c = 'Synced';
+        product.Last_ERP_Sync_Date__c = Datetime.now();
 
         if (String.isNotBlank(pw.itemCode)) {
             upsert product Item_Code__c;
@@ -335,6 +354,8 @@ global without sharing class ProductQuoteAPIController {
         public String productType;
         public String vertical;
         public String subCategory;
+        public String brand;
+        public String lineDescription;
         public String make;
         public String model;
         public String equipmentName;
@@ -344,6 +365,7 @@ global without sharing class ProductQuoteAPIController {
         public Decimal taxPercent;
         public String uom;
         public String hsnCode;
+        public String hsnCodeInternational;
         public Decimal quantityPackSize;
         public String specification;
         public String shortDescription;
@@ -351,6 +373,12 @@ global without sharing class ProductQuoteAPIController {
         public String compatibility;
         public String remarks;
         public Boolean isActive;
+        public Decimal defaultWarrantyMonths;
+        public String warrantyTerms;
+        public String installationTerms;
+        public String isInstallationRequired;
+        public String isTrainingRequired;
+        public String productStatus;
     }
 
     global class QuoteWrapper {
