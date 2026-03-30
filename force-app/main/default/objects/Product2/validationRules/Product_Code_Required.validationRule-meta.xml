@@ -2,7 +2,7 @@
 <ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Product_Code_Required</fullName>
     <active>true</active>
-    <description>Product Code (Item Code) is mandatory for all products as per BRD Module 7.</description>
+    <description>Product Code (Item Code) is mandatory for all products as per BRD Module 7</description>
     <errorConditionFormula>ISBLANK(Item_Code__c)</errorConditionFormula>
     <errorDisplayField>Item_Code__c</errorDisplayField>
     <errorMessage>Product Code (Item Code) is required. Every product must have a unique Product Code from ERP.</errorMessage>

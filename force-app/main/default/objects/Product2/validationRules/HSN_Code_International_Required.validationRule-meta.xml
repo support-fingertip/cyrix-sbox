@@ -2,7 +2,7 @@
 <ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>HSN_Code_International_Required</fullName>
     <active>true</active>
-    <description>HSN Code (International) is mandatory for all products as per BRD Module 7.</description>
+    <description>HSN Code (International) is mandatory for all products as per BRD Module 7</description>
     <errorConditionFormula>ISBLANK(HSN_Code_International__c)</errorConditionFormula>
     <errorDisplayField>HSN_Code_International__c</errorDisplayField>
     <errorMessage>HSN Code (International) is required for all products.</errorMessage>

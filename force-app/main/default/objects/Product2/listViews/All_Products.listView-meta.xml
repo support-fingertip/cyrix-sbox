@@ -13,4 +13,5 @@
     <columns>ERP_Sync_Status__c</columns>
     <filterScope>Everything</filterScope>
     <label>All Products</label>
+    <language>en_US</language>
 </ListView>
