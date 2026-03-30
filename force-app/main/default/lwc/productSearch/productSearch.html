@@ -92,6 +92,15 @@
                             </h3>
                         </div>
                     </div>
+                    <!-- Product Image -->
+                    <template if:true={selectedProduct.Product_Image_URL__c}>
+                        <div class="slds-m-bottom_small">
+                            <img src={selectedProduct.Product_Image_URL__c}
+                                 alt={selectedProduct.Name}
+                                 class="product-image"
+                                 onerror={handleImageError} />
+                        </div>
+                    </template>
                     <div class="slds-grid slds-gutters slds-wrap">
                         <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
                             <span class="slds-text-body_small slds-text-color_weak">Item Code: </span>
