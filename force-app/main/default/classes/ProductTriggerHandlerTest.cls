@@ -1,4 +1,4 @@
-//  Test class for ProductTriggerHandler
+//  Test class for ProductTriggerHandler.
 /****************************************************************
 * Class Name   : ProductTriggerHandlerTest
 * Company      : Fingertipplus

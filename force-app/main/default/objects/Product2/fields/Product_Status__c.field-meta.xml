@@ -3,7 +3,7 @@
     <fullName>Product_Status__c</fullName>
     <externalId>false</externalId>
     <label>Product Status</label>
-    <description>Product Status.</description>
+    <description>Product Status</description>
     <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>
