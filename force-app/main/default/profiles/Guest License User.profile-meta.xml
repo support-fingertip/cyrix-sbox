@@ -354,6 +354,14 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>QuoteCreatorController</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>QuoteCreatorControllerTest</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>SendEmailCustomNotification</apexClass>
         <enabled>false</enabled>
     </classAccesses>
@@ -2061,6 +2069,11 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Opportunity.Opportunity_Auto_Number__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.Opportunity_Date__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>

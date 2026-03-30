@@ -242,6 +242,10 @@
             <label>Push Count</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC4000002tfsc</field>
+            <label>Opportunity Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_PERIOD</field>
             <label>Fiscal Period</label>
         </forecastingObjectListLabelMappings>
@@ -411,6 +415,7 @@
             <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
+            <field>00NC4000002tfsc</field>
             <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
@@ -679,6 +684,10 @@
             <label>Push Count</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC4000002tfsc</field>
+            <label>Opportunity Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_PERIOD</field>
             <label>Fiscal Period</label>
         </forecastingObjectListLabelMappings>
@@ -848,6 +857,7 @@
             <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
+            <field>00NC4000002tfsc</field>
             <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
@@ -1116,6 +1126,10 @@
             <label>Push Count</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC4000002tfsc</field>
+            <label>Opportunity Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_PERIOD</field>
             <label>Fiscal Period</label>
         </forecastingObjectListLabelMappings>
@@ -1285,6 +1299,7 @@
             <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
+            <field>00NC4000002tfsc</field>
             <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
@@ -1557,6 +1572,10 @@
             <label>Push Count</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC4000002tfsc</field>
+            <label>Opportunity Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_PERIOD</field>
             <label>Fiscal Period</label>
         </forecastingObjectListLabelMappings>
@@ -1727,6 +1746,7 @@
             <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
+            <field>00NC4000002tfsc</field>
             <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
@@ -1995,6 +2015,10 @@
             <label>Push Count</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC4000002tfsc</field>
+            <label>Opportunity Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_PERIOD</field>
             <label>Fiscal Period</label>
         </forecastingObjectListLabelMappings>
@@ -2164,6 +2188,7 @@
             <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
+            <field>00NC4000002tfsc</field>
             <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
@@ -2436,6 +2461,10 @@
             <label>Push Count</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC4000002tfsc</field>
+            <label>Opportunity Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_PERIOD</field>
             <label>Fiscal Period</label>
         </forecastingObjectListLabelMappings>
@@ -2606,6 +2635,7 @@
             <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
+            <field>00NC4000002tfsc</field>
             <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
@@ -2874,6 +2904,10 @@
             <label>Push Count</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC4000002tfsc</field>
+            <label>Opportunity Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_PERIOD</field>
             <label>Fiscal Period</label>
         </forecastingObjectListLabelMappings>
@@ -3043,6 +3077,7 @@
             <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
+            <field>00NC4000002tfsc</field>
             <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
@@ -3315,6 +3350,10 @@
             <label>Push Count</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC4000002tfsc</field>
+            <label>Opportunity Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_PERIOD</field>
             <label>Fiscal Period</label>
         </forecastingObjectListLabelMappings>
@@ -3485,6 +3524,7 @@
             <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
+            <field>00NC4000002tfsc</field>
             <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
@@ -3753,6 +3793,10 @@
             <label>Push Count</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC4000002tfsc</field>
+            <label>Opportunity Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_PERIOD</field>
             <label>Fiscal Period</label>
         </forecastingObjectListLabelMappings>
@@ -3922,6 +3966,7 @@
             <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
+            <field>00NC4000002tfsc</field>
             <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
@@ -4194,6 +4239,10 @@
             <label>Push Count</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC4000002tfsc</field>
+            <label>Opportunity Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_PERIOD</field>
             <label>Fiscal Period</label>
         </forecastingObjectListLabelMappings>
@@ -4364,6 +4413,7 @@
             <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
+            <field>00NC4000002tfsc</field>
             <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
@@ -4632,6 +4682,10 @@
             <label>Push Count</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC4000002tfsc</field>
+            <label>Opportunity Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_PERIOD</field>
             <label>Fiscal Period</label>
         </forecastingObjectListLabelMappings>
@@ -4801,6 +4855,7 @@
             <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
+            <field>00NC4000002tfsc</field>
             <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
@@ -5073,6 +5128,10 @@
             <label>Push Count</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC4000002tfsc</field>
+            <label>Opportunity Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_PERIOD</field>
             <label>Fiscal Period</label>
         </forecastingObjectListLabelMappings>
@@ -5243,6 +5302,7 @@
             <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
+            <field>00NC4000002tfsc</field>
             <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>
@@ -5511,6 +5571,10 @@
             <label>Push Count</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC4000002tfsc</field>
+            <label>Opportunity Date</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.FISCAL_PERIOD</field>
             <label>Fiscal Period</label>
         </forecastingObjectListLabelMappings>
@@ -5680,6 +5744,7 @@
             <field>00NC4000002sNRe</field>
             <field>00NC4000002S9qQ</field>
             <field>00NC40000027GLR</field>
+            <field>00NC4000002tfsc</field>
             <field>00NC4000002sNRf</field>
             <field>00NC4000002S9s1</field>
             <field>00NC400000280Xx</field>

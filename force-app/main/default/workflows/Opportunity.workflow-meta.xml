@@ -1,33 +1,3 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fieldUpdates>
-        <fullName>Opportunity_Lock_On_Submit</fullName>
-        <description>Sets Approval Status to Pending Approval when submitted for approval.</description>
-        <field>Approval_Status__c</field>
-        <literalValue>Pending Approval</literalValue>
-        <name>Opportunity Lock On Submit</name>
-        <notifyAssignee>false</notifyAssignee>
-        <operation>Literal</operation>
-        <protected>false</protected>
-    </fieldUpdates>
-    <fieldUpdates>
-        <fullName>Opportunity_Approved_Field_Update</fullName>
-        <description>Sets Approval Status to Approved when the approval process is completed.</description>
-        <field>Approval_Status__c</field>
-        <literalValue>Approved</literalValue>
-        <name>Opportunity Approved Field Update</name>
-        <notifyAssignee>false</notifyAssignee>
-        <operation>Literal</operation>
-        <protected>false</protected>
-    </fieldUpdates>
-    <fieldUpdates>
-        <fullName>Opportunity_Rejected_Stage_Revert</fullName>
-        <description>Reverts the stage to Advance Paid and sets Approval Status to Rejected when the approval is rejected.</description>
-        <field>Approval_Status__c</field>
-        <literalValue>Rejected</literalValue>
-        <name>Opportunity Rejected Stage Revert</name>
-        <notifyAssignee>false</notifyAssignee>
-        <operation>Literal</operation>
-        <protected>false</protected>
-    </fieldUpdates>
-</Workflow>
+<Workflow xmlns="http://soap.sforce.com/2006/04/metadata"/>
+
