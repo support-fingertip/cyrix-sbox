@@ -21,4 +21,7 @@
     </filters>
     <label>Active Products</label>
     <language>en_US</language>
+    <sharedTo>
+        <allInternalUsers></allInternalUsers>
+    </sharedTo>
 </ListView>

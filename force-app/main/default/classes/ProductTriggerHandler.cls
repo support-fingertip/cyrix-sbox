@@ -1,4 +1,4 @@
-// Cyrix Product Master Trigger Handler - Module 7
+// Product Master Trigger Handler - Module 7
 /****************************************************************
 * Class Name   : ProductTriggerHandler
 * Company      : Fingertipplus
