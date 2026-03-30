@@ -3,6 +3,7 @@
     <fullName>Installation_Cost_Percent__c</fullName>
     <externalId>false</externalId>
     <label>Installation Cost %</label>
+    <description>Installation Cost %</description>
     <precision>5</precision>
     <required>false</required>
     <scale>2</scale>

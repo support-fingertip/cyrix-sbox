@@ -3,6 +3,7 @@
     <fullName>OEM_Part_Number__c</fullName>
     <externalId>false</externalId>
     <label>OEM Part Number</label>
+    <description>OEM Part Number</description>
     <length>100</length>
     <required>false</required>
     <trackTrending>false</trackTrending>

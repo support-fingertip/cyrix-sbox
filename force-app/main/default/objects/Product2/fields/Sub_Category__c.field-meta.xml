@@ -3,6 +3,7 @@
     <fullName>Sub_Category__c</fullName>
     <externalId>false</externalId>
     <label>Sub Category</label>
+    <description>Sub Category</description>
     <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>

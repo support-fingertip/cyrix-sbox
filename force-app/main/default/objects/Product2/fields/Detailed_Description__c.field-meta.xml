@@ -3,6 +3,7 @@
     <fullName>Detailed_Description__c</fullName>
     <externalId>false</externalId>
     <label>Detailed Description</label>
+    <description>Detailed Description</description>
     <length>32768</length>
     <trackTrending>false</trackTrending>
     <type>LongTextArea</type>

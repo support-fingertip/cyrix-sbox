@@ -3,6 +3,7 @@
     <fullName>Packing_Charges_Percent__c</fullName>
     <externalId>false</externalId>
     <label>Packing Charges %</label>
+    <description>Packing Charges %</description>
     <precision>5</precision>
     <required>false</required>
     <scale>2</scale>

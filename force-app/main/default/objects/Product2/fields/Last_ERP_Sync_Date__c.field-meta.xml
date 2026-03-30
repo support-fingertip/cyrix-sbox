@@ -3,6 +3,7 @@
     <fullName>Last_ERP_Sync_Date__c</fullName>
     <externalId>false</externalId>
     <label>Last ERP Sync Date</label>
+    <description>Last ERP Sync Date</description>
     <required>false</required>
     <trackTrending>false</trackTrending>
     <type>DateTime</type>

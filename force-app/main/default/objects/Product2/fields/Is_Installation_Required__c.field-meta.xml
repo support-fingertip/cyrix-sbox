@@ -3,6 +3,7 @@
     <fullName>Is_Installation_Required__c</fullName>
     <externalId>false</externalId>
     <label>Is Installation Required</label>
+    <description>Is Installation Required</description>
     <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>

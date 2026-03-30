@@ -3,6 +3,7 @@
     <fullName>ERP_Sync_Status__c</fullName>
     <externalId>false</externalId>
     <label>ERP Sync Status</label>
+    <description>ERP Sync Status</description>
     <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>

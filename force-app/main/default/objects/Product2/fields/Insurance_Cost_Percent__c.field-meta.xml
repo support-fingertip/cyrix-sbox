@@ -3,6 +3,7 @@
     <fullName>Insurance_Cost_Percent__c</fullName>
     <externalId>false</externalId>
     <label>Insurance Cost %</label>
+    <description>Insurance Cost %</description>
     <precision>5</precision>
     <required>false</required>
     <scale>2</scale>

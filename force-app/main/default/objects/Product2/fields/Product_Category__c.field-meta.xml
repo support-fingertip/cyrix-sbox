@@ -3,6 +3,7 @@
     <fullName>Product_Category__c</fullName>
     <externalId>false</externalId>
     <label>Product Category</label>
+    <description>Product Category</description>
     <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>

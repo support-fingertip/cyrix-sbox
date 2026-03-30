@@ -3,6 +3,7 @@
     <fullName>Line_Description__c</fullName>
     <externalId>false</externalId>
     <label>Line Description</label>
+    <description>Line Description</description>
     <length>255</length>
     <required>false</required>
     <trackTrending>false</trackTrending>
