@@ -121,7 +121,7 @@ global without sharing class ProductQuoteAPIController {
         Integer limitVal = req.params.get('limit') != null
             ? Integer.valueOf(req.params.get('limit')) : 200;
 
-        String query = 'SELECT Id, Name, ProductCode, Item_Code__c, SAP_Item_No__c, ' +
+        String query = 'SELECT Id, Name, ProductCode, Item_Code__c, SAP_Item_Code__c, ' +
             'Product_Category__c, Sub_Category__c, Product_Type__c, Product_V__c, ' +
             'Brand__c, Make__c, Model__c, Equipment_Name__c, Line_Description__c, ' +
             'Standard_Price__c, Tax__c, Standard_Price_with_Tax__c, ' +
@@ -154,8 +154,8 @@ global without sharing class ProductQuoteAPIController {
             return new ApiResponse(false, 'productId or itemCode is required', null);
         }
 
-        String query = 'SELECT Id, Name, ProductCode, Item_Code__c, SAP_Item_No__c, SAP_Item_New_Code__c, ' +
-            'Product_Category__c, Sub_Category__c, Product_Type__c, Product_V__c, Category__c, ' +
+        String query = 'SELECT Id, Name, ProductCode, Item_Code__c, SAP_Item_Code__c, SAP_Item_New_Code__c, ' +
+            'Product_Category__c, Sub_Category__c, Product_Type__c, Product_V__c, ' +
             'Brand__c, Make__c, Model__c, Equipment_Name__c, OEM_Part_Number__c, Source__c, ' +
             'Line_Description__c, Standard_Price__c, Tax__c, Standard_Price_with_Tax__c, ' +
             'UOM__c, HSN_Code__c, HSN_Code_International__c, ' +
@@ -250,12 +250,12 @@ global without sharing class ProductQuoteAPIController {
         }
         product.Name = pw.name;
         product.ProductCode = pw.productCode;
-        product.SAP_Item_No__c = pw.sapItemCode;
+       product.SAP_Item_Code__c = pw.sapItemCode;
         product.SAP_Item_New_Code__c = pw.sapItemNewCode;
         product.Product_Category__c = pw.category;
         product.Product_Type__c = pw.productType;
-        product.Product_V__c = pw.vertical;
-        product.Category__c = pw.subCategory;
+      //  product.Product_V__c = pw.vertical;
+        product.Sub_Category__c = pw.subCategory;
         product.Make__c = pw.make;
         product.Model__c = pw.model;
         product.Equipment_Name__c = pw.equipmentName;

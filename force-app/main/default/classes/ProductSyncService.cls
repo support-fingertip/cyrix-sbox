@@ -88,11 +88,11 @@ public with sharing class ProductSyncService {
         p.Item_Code__c = pw.itemCode;
         p.Name = pw.productName;
         p.ProductCode = pw.productCode;
-        p.SAP_Item_No__c = pw.sapItemCode;
+     p.SAP_Item_Code__c = pw.sapItemCode;
         p.Line_Description__c = pw.lineDescription;
         p.Description = pw.shortDescription;
         p.Detailed_Description__c = pw.detailedDescription;
-        p.Product_V__c = pw.vertical;
+     //   p.Product_V__c = pw.vertical;
         p.Product_Category__c = pw.category;
         p.Sub_Category__c = pw.subCategory;
         p.Brand__c = pw.brand;
@@ -161,7 +161,7 @@ public with sharing class ProductSyncService {
      * Only active products from ERP are visible in Salesforce per BRD.
      */
     public static List<Product2> getActiveProducts(String category, String productType, String vertical, Integer limitVal) {
-        String query = 'SELECT Id, Name, ProductCode, Item_Code__c, SAP_Item_No__c, ' +
+        String query = 'SELECT Id, Name, ProductCode, Item_Code__c, SAP_Item_Code__c, ' +
             'Product_Category__c, Sub_Category__c, Product_Type__c, Product_V__c, ' +
             'Brand__c, Make__c, Model__c, Equipment_Name__c, Line_Description__c, ' +
             'Standard_Price__c, Tax__c, Standard_Price_with_Tax__c, ' +
