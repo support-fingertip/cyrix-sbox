@@ -3,7 +3,7 @@
     <fullName>Default_Warranty_Months__c</fullName>
     <externalId>false</externalId>
     <label>Default Warranty (Months)</label>
-    <description>Default Warranty (Months)</description>
+    <description>Default Warranty (Months).</description>
     <precision>4</precision>
     <required>false</required>
     <scale>0</scale>

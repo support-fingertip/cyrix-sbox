@@ -3,7 +3,7 @@
     <fullName>Product_Image_URL__c</fullName>
     <externalId>false</externalId>
     <label>Product Image URL</label>
-    <description>Product Image URL</description>
+    <description>Product Image URL.</description>
     <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Url</type>

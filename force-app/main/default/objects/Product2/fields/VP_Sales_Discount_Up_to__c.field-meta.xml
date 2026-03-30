@@ -3,7 +3,7 @@
     <fullName>VP_Sales_Discount_Up_to__c</fullName>
     <externalId>false</externalId>
     <label>VP Sales Discount Up to</label>
-    <description>VP Sales Discount Up to</description>
+    <description>VP Sales Discount Up to.</description>
     <precision>5</precision>
     <required>false</required>
     <scale>2</scale>

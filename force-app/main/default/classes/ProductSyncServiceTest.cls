@@ -46,7 +46,6 @@ private class ProductSyncServiceTest {
         pw.taxPercent = 18;
         pw.hsnCodeDomestic = '4811';
         pw.hsnCodeInternational = '481100';
-        pw.uom = 'Nos';
         pw.quantityPackSize = 1;
         pw.defaultWarrantyMonths = 0;
         pw.isInstallationRequired = 'No';
@@ -87,7 +86,6 @@ private class ProductSyncServiceTest {
         pw.hsnCodeInternational = '901819';
         pw.standardPrice = 600000;
         pw.productStatus = 'Active';
-        pw.uom = 'Nos';
         pw.category = 'Equipment';
 
         Test.startTest();
@@ -130,7 +128,6 @@ private class ProductSyncServiceTest {
         pw.hsnCodeDomestic = '9018';
         pw.hsnCodeInternational = '901819';
         pw.productStatus = 'Inactive';
-        pw.uom = 'Nos';
 
         Test.startTest();
         List<ProductSyncService.SyncResult> results = ProductSyncService.syncProductsFromERP(

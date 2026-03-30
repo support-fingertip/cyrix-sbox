@@ -3,7 +3,7 @@
     <fullName>SAP_Item_New_Code__c</fullName>
     <externalId>false</externalId>
     <label>SAP Item New Code</label>
-    <description>SAP Item New Code</description>
+    <description>SAP Item New Code.</description>
     <length>100</length>
     <required>false</required>
     <trackTrending>false</trackTrending>
