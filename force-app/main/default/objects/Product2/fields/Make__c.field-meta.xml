@@ -3,7 +3,6 @@
     <fullName>Make__c</fullName>
     <externalId>false</externalId>
     <label>Make</label>
-    <description>Make</description>
     <length>255</length>
     <required>false</required>
     <trackTrending>false</trackTrending>

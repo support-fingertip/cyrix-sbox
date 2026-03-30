@@ -1,3 +1,4 @@
+// Product Master Search Controller - Module 7
 /****************************************************************
 * Class Name   : ProductSearchController
 * Company      : Fingertipplus

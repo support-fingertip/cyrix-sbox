@@ -21,4 +21,5 @@
         <value>1</value>
     </filters>
     <label>Active Products</label>
+    <language>en_US</language>
 </ListView>

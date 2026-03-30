@@ -1,3 +1,4 @@
+// Product Master Trigger - Module 7
 /****************************************************************
 * Trigger Name : ProductTrigger
 * Company      : Fingertipplus
