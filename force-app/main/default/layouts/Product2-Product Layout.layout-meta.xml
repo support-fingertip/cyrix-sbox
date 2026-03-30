@@ -75,10 +75,6 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>UOM__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
                 <field>Quantity_Pack_Size__c</field>
             </layoutItems>
             <layoutItems>
@@ -109,6 +105,10 @@
             <layoutItems>
                 <behavior>Edit</behavior>
                 <field>Sub_Category__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Make__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>

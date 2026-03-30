@@ -3,7 +3,7 @@
     <fullName>Standard_Price__c</fullName>
     <externalId>false</externalId>
     <label>Standard Price</label>
-    <description>Standard Price.</description>
+    <description>Standard Price</description>
     <precision>18</precision>
     <required>false</required>
     <scale>2</scale>

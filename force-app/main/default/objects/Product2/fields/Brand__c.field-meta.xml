@@ -3,7 +3,7 @@
     <fullName>Brand__c</fullName>
     <externalId>false</externalId>
     <label>Brand</label>
-    <description>Brand.</description>
+    <description>Brand</description>
     <length>255</length>
     <required>false</required>
     <trackTrending>false</trackTrending>
