@@ -3,7 +3,7 @@
     <fullName>Model__c</fullName>
     <externalId>false</externalId>
     <label>Model</label>
-    <description>Model</description>
+    <description>Model.</description>
     <length>255</length>
     <required>false</required>
     <trackTrending>false</trackTrending>

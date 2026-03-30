@@ -1,4 +1,4 @@
-// Test class for ProductSearchController
+// Cyrix Test class for ProductSearchController
 /****************************************************************
 * Class Name   : ProductSearchControllerTest
 * Company      : Fingertipplus

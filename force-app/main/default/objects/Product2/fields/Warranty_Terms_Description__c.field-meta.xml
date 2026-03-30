@@ -3,7 +3,7 @@
     <fullName>Warranty_Terms_Description__c</fullName>
     <externalId>false</externalId>
     <label>Warranty Terms Description</label>
-    <description>Warranty Terms Description</description>
+    <description>Warranty Terms Description.</description>
     <length>32768</length>
     <trackTrending>false</trackTrending>
     <type>LongTextArea</type>

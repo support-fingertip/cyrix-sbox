@@ -1,4 +1,4 @@
-// Test class for ProductTriggerHandler
+// Cyrix Test class for ProductTriggerHandler
 /****************************************************************
 * Class Name   : ProductTriggerHandlerTest
 * Company      : Fingertipplus

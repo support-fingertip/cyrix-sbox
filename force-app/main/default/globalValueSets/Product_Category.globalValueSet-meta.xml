@@ -315,6 +315,7 @@
         <default>false</default>
         <label>General</label>
     </customValue>
+    <description>Cyrix Product Category values</description>
     <masterLabel>Product Category</masterLabel>
     <sorted>false</sorted>
 </GlobalValueSet>
