@@ -103,7 +103,7 @@ public with sharing class ProductSearchController {
 
     /**
      * Gets distinct vertical values for filter picklist.
-     */
+    
     @AuraEnabled(cacheable=true)
     public static List<String> getProductVerticals() {
         List<String> verticals = new List<String>();
@@ -117,5 +117,5 @@ public with sharing class ProductSearchController {
             verticals.add((String) ar.get('vert'));
         }
         return verticals;
-    }
+    }*/
 }
