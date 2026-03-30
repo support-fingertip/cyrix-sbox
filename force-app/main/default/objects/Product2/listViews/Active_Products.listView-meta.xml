@@ -13,10 +13,9 @@
     <columns>UOM__c</columns>
     <columns>HSN_Code__c</columns>
     <columns>Product_Status__c</columns>
-    <columns>ACTIVE</columns>
     <filterScope>Everything</filterScope>
     <filters>
-        <field>ACTIVE</field>
+        <field>PRODUCT2.ACTIVE</field>
         <operation>equals</operation>
         <value>1</value>
     </filters>

@@ -9,7 +9,6 @@
     <columns>Product_V__c</columns>
     <columns>Standard_Price__c</columns>
     <columns>Product_Status__c</columns>
-    <columns>ACTIVE</columns>
     <columns>ERP_Sync_Status__c</columns>
     <filterScope>Everything</filterScope>
     <label>All Products</label>
