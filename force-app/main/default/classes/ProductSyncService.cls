@@ -1,4 +1,4 @@
-// Product Master ERP Sync Service - Module 7
+// Cyrix Product Master ERP Sync Service - Module 7
 /****************************************************************
 * Class Name   : ProductSyncService
 * Company      : Fingertipplus

@@ -3,7 +3,7 @@
     <fullName>Compatibility__c</fullName>
     <externalId>false</externalId>
     <label>Compatibility / Alternative Names</label>
-    <description>Compatibility / Alternative Names</description>
+    <description>Compatibility / Alternative Names.</description>
     <length>32768</length>
     <trackTrending>false</trackTrending>
     <type>LongTextArea</type>
