@@ -3,6 +3,7 @@
     <fullName>Equipment_Name__c</fullName>
     <externalId>false</externalId>
     <label>Equipment Name</label>
+    <description>Equipment Name</description>
     <length>255</length>
     <required>false</required>
     <trackTrending>false</trackTrending>

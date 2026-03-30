@@ -3,6 +3,7 @@
     <fullName>Product_V__c</fullName>
     <externalId>false</externalId>
     <label>Product Vertical</label>
+    <description>Product Vertical</description>
     <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>

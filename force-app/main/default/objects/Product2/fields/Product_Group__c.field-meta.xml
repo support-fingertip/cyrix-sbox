@@ -4,6 +4,7 @@
     <deleteConstraint>SetNull</deleteConstraint>
     <externalId>false</externalId>
     <label>Product Group</label>
+    <description>Product Group</description>
     <referenceTo>Product_Group__c</referenceTo>
     <relationshipLabel>Products</relationshipLabel>
     <relationshipName>Products</relationshipName>

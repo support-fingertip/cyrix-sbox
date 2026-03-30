@@ -3,6 +3,7 @@
     <fullName>Quantity_Pack_Size__c</fullName>
     <externalId>false</externalId>
     <label>Quantity (Pack Size)</label>
+    <description>Quantity (Pack Size)</description>
     <precision>10</precision>
     <required>false</required>
     <scale>0</scale>

@@ -5,6 +5,7 @@
     <formula>Standard_Price__c * (1 + Tax__c / 100)</formula>
     <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
     <label>Standard Price with Tax</label>
+    <description>Standard Price with Tax</description>
     <precision>18</precision>
     <required>false</required>
     <scale>2</scale>

@@ -3,6 +3,7 @@
     <fullName>Internal_Transport_Cost_Percent__c</fullName>
     <externalId>false</externalId>
     <label>Internal Transport Cost %</label>
+    <description>Internal Transport Cost %</description>
     <precision>5</precision>
     <required>false</required>
     <scale>2</scale>
