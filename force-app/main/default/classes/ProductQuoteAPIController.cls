@@ -167,6 +167,7 @@ global without sharing class ProductQuoteAPIController {
             'Shipping_Charges_Percent__c, Packing_Charges_Percent__c, Installation_Cost_Percent__c, ' +
             'Training_Cost_Percent__c, Promotional_Cost_Percent__c, Insurance_Cost_Percent__c, ' +
             'Internal_Transport_Cost_Percent__c, Warranty_Cost_Percent__c, ' +
+            'Product_Image_URL__c, Product_Image_URL_2__c, Product_Image_URL_3__c, ' +
             'Product_Group__r.Name, Product_Group__r.Group_Code__c, ' +
             'Parent_Equipment__r.Name ' +
             'FROM Product2 WHERE ';
@@ -280,6 +281,9 @@ global without sharing class ProductQuoteAPIController {
         product.Is_Installation_Required__c = pw.isInstallationRequired;
         product.Is_Training_Required__c = pw.isTrainingRequired;
         product.Product_Status__c = pw.productStatus;
+        product.Product_Image_URL__c = pw.imageUrl1;
+        product.Product_Image_URL_2__c = pw.imageUrl2;
+        product.Product_Image_URL_3__c = pw.imageUrl3;
         product.ERP_Sync_Status__c = 'Synced';
         product.Last_ERP_Sync_Date__c = Datetime.now();
 
@@ -379,6 +383,9 @@ global without sharing class ProductQuoteAPIController {
         public String isInstallationRequired;
         public String isTrainingRequired;
         public String productStatus;
+        public String imageUrl1;
+        public String imageUrl2;
+        public String imageUrl3;
     }
 
     global class QuoteWrapper {

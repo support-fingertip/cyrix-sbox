@@ -21,6 +21,11 @@
                 <label>OEM Refurbished</label>
             </value>
             <value>
+                <fullName>OEM Refurb</fullName>
+                <default>false</default>
+                <label>OEM Refurb</label>
+            </value>
+            <value>
                 <fullName>Third Party</fullName>
                 <default>false</default>
                 <label>Third Party</label>

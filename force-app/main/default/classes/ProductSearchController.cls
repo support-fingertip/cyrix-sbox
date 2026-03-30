@@ -74,7 +74,8 @@ public with sharing class ProductSearchController {
                    Is_Installation_Required__c, Installation_Terms__c,
                    Is_Training_Required__c, Specification__c, Description,
                    Detailed_Description__c, Compatibility__c, Remarks__c,
-                   Product_Status__c, ERP_Sync_Status__c, Last_ERP_Sync_Date__c
+                   Product_Status__c, ERP_Sync_Status__c, Last_ERP_Sync_Date__c,
+                   Product_Image_URL__c, Product_Image_URL_2__c, Product_Image_URL_3__c
             FROM Product2
             WHERE Id = :productId
             LIMIT 1

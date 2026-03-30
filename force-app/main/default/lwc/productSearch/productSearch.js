@@ -137,6 +137,10 @@ export default class ProductSearch extends LightningElement {
             });
     }
 
+    handleImageError(event) {
+        event.target.style.display = 'none';
+    }
+
     handleClearSelection() {
         this.selectedProduct = null;
         this.dispatchEvent(new CustomEvent('productclear'));

@@ -115,6 +115,9 @@ public with sharing class ProductSyncService {
         p.Standard_Price__c = pw.standardPrice;
         p.Product_Status__c = pw.productStatus;
         p.IsActive = pw.productStatus == 'Active';
+        p.Product_Image_URL__c = pw.imageUrl1;
+        p.Product_Image_URL_2__c = pw.imageUrl2;
+        p.Product_Image_URL_3__c = pw.imageUrl3;
         p.ERP_Sync_Status__c = 'Synced';
         p.Last_ERP_Sync_Date__c = Datetime.now();
 
@@ -236,6 +239,9 @@ public with sharing class ProductSyncService {
         public String isTrainingRequired;
         public Decimal standardPrice;
         public String productStatus;
+        public String imageUrl1;
+        public String imageUrl2;
+        public String imageUrl3;
         public Decimal managerDiscount;
         public Decimal vpSalesDiscount;
         public Decimal ceoSalesDiscount;
