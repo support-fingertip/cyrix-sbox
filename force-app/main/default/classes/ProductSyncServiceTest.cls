@@ -20,8 +20,7 @@ private class ProductSyncServiceTest {
             Product_Status__c = 'Active',
             IsActive = true,
             Standard_Price__c = 500000,
-            Tax__c = 18,
-            UOM__c = 'Nos'
+            Tax__c = 18
         );
         insert existingProduct;
     }

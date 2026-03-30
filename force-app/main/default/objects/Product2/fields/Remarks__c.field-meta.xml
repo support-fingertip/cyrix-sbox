@@ -3,7 +3,7 @@
     <fullName>Remarks__c</fullName>
     <externalId>false</externalId>
     <label>Remarks</label>
-    <description>Remarks.</description>
+    <description>Remarks</description>
     <length>32768</length>
     <trackTrending>false</trackTrending>
     <type>LongTextArea</type>

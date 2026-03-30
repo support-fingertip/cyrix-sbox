@@ -33,12 +33,12 @@ public with sharing class ProductSearchController {
         }
 
         String query = 'SELECT Id, Name, ProductCode, Item_Code__c, ' +
-            'Product_Category__c, Sub_Category__c, Product_Type__c, Product_V__c, ' +
+            'Product_Category__c, Sub_Category__c, Product_Type__c, Product_Vertical__c, ' +
             'Brand__c, Model__c, Equipment_Name__c, Line_Description__c, ' +
             'Standard_Price__c, Tax__c, Standard_Price_with_Tax__c, ' +
-            'UOM__c, HSN_Code__c, HSN_Code_International__c, ' +
+            'HSN_Code__c, HSN_Code_International__c, ' +
             'Default_Warranty_Months__c, Is_Installation_Required__c, Is_Training_Required__c, ' +
-            'Specification__c, Detailed_Description__c, Source__c, Product_Status__c ' +
+            'Specification__c, Detailed_Description__c, Source__c, Product_Status__c, Make__c ' +
             'FROM Product2 WHERE IsActive = true';
 
         if (String.isNotBlank(searchKey) && searchKey.length() >= 2) {
@@ -51,7 +51,7 @@ public with sharing class ProductSearchController {
             query += ' AND Product_Category__c = :category';
         }
         if (String.isNotBlank(vertical)) {
-            query += ' AND Product_V__c = :vertical';
+            query += ' AND Product_Vertical__c = :vertical';
         }
 
         query += ' ORDER BY Name ASC LIMIT :limitVal';
@@ -67,10 +67,10 @@ public with sharing class ProductSearchController {
     public static Product2 getProductDetails(Id productId) {
         return [
             SELECT Id, Name, ProductCode, Item_Code__c, SAP_Item_Code__c,
-                   Product_Category__c, Sub_Category__c, Product_Type__c, Product_V__c,
-                   Brand__c, Model__c, Equipment_Name__c, Line_Description__c,
+                   Product_Category__c, Sub_Category__c, Product_Type__c, Product_Vertical__c,
+                   Brand__c, Make__c, Model__c, Equipment_Name__c, Line_Description__c,
                    Standard_Price__c, Tax__c, Standard_Price_with_Tax__c,
-                   UOM__c, HSN_Code__c, HSN_Code_International__c, Source__c,
+                   HSN_Code__c, HSN_Code_International__c, Source__c,
                    Default_Warranty_Months__c, Warranty_Terms_Description__c,
                    Is_Installation_Required__c, Installation_Terms__c,
                    Is_Training_Required__c, Specification__c, Description,
@@ -103,19 +103,19 @@ public with sharing class ProductSearchController {
 
     /**
      * Gets distinct vertical values for filter picklist.
-    
+     */
     @AuraEnabled(cacheable=true)
     public static List<String> getProductVerticals() {
         List<String> verticals = new List<String>();
         for (AggregateResult ar : [
-            SELECT Product_V__c vert
+            SELECT Product_Vertical__c vert
             FROM Product2
-            WHERE IsActive = true AND Product_V__c != null
-            GROUP BY Product_V__c
-            ORDER BY Product_V__c
+            WHERE IsActive = true AND Product_Vertical__c != null
+            GROUP BY Product_Vertical__c
+            ORDER BY Product_Vertical__c
         ]) {
             verticals.add((String) ar.get('vert'));
         }
         return verticals;
-    }*/
+    }
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Make__c</fullName>
+    <description>Product manufacturer/make - Product Master Module 7</description>
     <externalId>false</externalId>
     <label>Make</label>
     <length>255</length>

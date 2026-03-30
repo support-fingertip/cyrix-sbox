@@ -122,10 +122,10 @@ global without sharing class ProductQuoteAPIController {
             ? Integer.valueOf(req.params.get('limit')) : 200;
 
         String query = 'SELECT Id, Name, ProductCode, Item_Code__c, SAP_Item_Code__c, ' +
-            'Product_Category__c, Sub_Category__c, Product_Type__c, Product_V__c, ' +
-            'Brand__c, Model__c, Equipment_Name__c, Line_Description__c, ' +
+            'Product_Category__c, Sub_Category__c, Product_Type__c, Product_Vertical__c, ' +
+            'Brand__c, Make__c, Model__c, Equipment_Name__c, Line_Description__c, ' +
             'Standard_Price__c, Tax__c, Standard_Price_with_Tax__c, ' +
-            'UOM__c, HSN_Code__c, HSN_Code_International__c, Source__c, Description, IsActive, ' +
+            'HSN_Code__c, HSN_Code_International__c, Source__c, Description, IsActive, ' +
             'Default_Warranty_Months__c, Is_Installation_Required__c, Is_Training_Required__c, ' +
             'Product_Status__c, ERP_Sync_Status__c, Last_ERP_Sync_Date__c, ' +
             'Product_Group__r.Name, Product_Group__r.Group_Code__c ' +
@@ -138,7 +138,7 @@ global without sharing class ProductQuoteAPIController {
             query += ' AND Product_Type__c = :productType';
         }
         if (String.isNotBlank(vertical)) {
-            query += ' AND Product_V__c = :vertical';
+            query += ' AND Product_Vertical__c = :vertical';
         }
         query += ' ORDER BY Name ASC LIMIT :limitVal';
 
@@ -155,10 +155,10 @@ global without sharing class ProductQuoteAPIController {
         }
 
         String query = 'SELECT Id, Name, ProductCode, Item_Code__c, SAP_Item_Code__c, SAP_Item_New_Code__c, ' +
-            'Product_Category__c, Sub_Category__c, Product_Type__c, Product_V__c, Category__c, ' +
-            'Brand__c, Model__c, Equipment_Name__c, OEM_Part_Number__c, Source__c, ' +
+            'Product_Category__c, Sub_Category__c, Product_Type__c, Product_Vertical__c, Category__c, ' +
+            'Brand__c, Make__c, Model__c, Equipment_Name__c, OEM_Part_Number__c, Source__c, ' +
             'Line_Description__c, Standard_Price__c, Tax__c, Standard_Price_with_Tax__c, ' +
-            'UOM__c, HSN_Code__c, HSN_Code_International__c, ' +
+            'HSN_Code__c, HSN_Code_International__c, ' +
             'Quantity_Pack_Size__c, Specification__c, Description, Detailed_Description__c, ' +
             'Compatibility__c, Remarks__c, Any_Other_Levies__c, IsActive, ' +
             'Default_Warranty_Months__c, Warranty_Terms_Description__c, ' +
@@ -254,15 +254,15 @@ global without sharing class ProductQuoteAPIController {
         product.SAP_Item_New_Code__c = pw.sapItemNewCode;
         product.Product_Category__c = pw.category;
         product.Product_Type__c = pw.productType;
-        product.Product_V__c = pw.vertical;
+        product.Product_Vertical__c = pw.vertical;
         product.Sub_Category__c = pw.subCategory;
+        product.Make__c = pw.make;
         product.Model__c = pw.model;
         product.Equipment_Name__c = pw.equipmentName;
         product.OEM_Part_Number__c = pw.oemPartNumber;
         product.Source__c = pw.source;
         product.Standard_Price__c = pw.standardPrice;
         product.Tax__c = pw.taxPercent;
-        product.UOM__c = pw.uom;
         product.HSN_Code__c = pw.hsnCode;
         product.Quantity_Pack_Size__c = pw.quantityPackSize;
         product.Specification__c = pw.specification;
@@ -359,6 +359,7 @@ global without sharing class ProductQuoteAPIController {
         public String vertical;
         public String subCategory;
         public String brand;
+        public String make;
         public String lineDescription;
         public String model;
         public String equipmentName;
@@ -366,7 +367,6 @@ global without sharing class ProductQuoteAPIController {
         public String source;
         public Decimal standardPrice;
         public Decimal taxPercent;
-        public String uom;
         public String hsnCode;
         public String hsnCodeInternational;
         public Decimal quantityPackSize;

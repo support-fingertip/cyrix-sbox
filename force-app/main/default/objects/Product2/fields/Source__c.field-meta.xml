@@ -3,7 +3,7 @@
     <fullName>Source__c</fullName>
     <externalId>false</externalId>
     <label>Source</label>
-    <description>Source.</description>
+    <description>Source</description>
     <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>

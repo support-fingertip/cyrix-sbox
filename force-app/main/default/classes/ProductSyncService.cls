@@ -92,8 +92,9 @@ public with sharing class ProductSyncService {
         p.Line_Description__c = pw.lineDescription;
         p.Description = pw.shortDescription;
         p.Detailed_Description__c = pw.detailedDescription;
-     //   p.Product_V__c = pw.vertical;
+        p.Product_Vertical__c = pw.vertical;
         p.Product_Category__c = pw.category;
+        p.Make__c = pw.make;
         p.Sub_Category__c = pw.subCategory;
         p.Brand__c = pw.brand;
         p.Model__c = pw.model;
@@ -103,7 +104,6 @@ public with sharing class ProductSyncService {
         p.Tax__c = pw.taxPercent;
         p.HSN_Code__c = pw.hsnCodeDomestic;
         p.HSN_Code_International__c = pw.hsnCodeInternational;
-        p.UOM__c = pw.uom;
         p.Quantity_Pack_Size__c = pw.quantityPackSize;
         p.Specification__c = pw.specification;
         p.Compatibility__c = pw.compatibility;
@@ -161,10 +161,10 @@ public with sharing class ProductSyncService {
      */
     public static List<Product2> getActiveProducts(String category, String productType, String vertical, Integer limitVal) {
         String query = 'SELECT Id, Name, ProductCode, Item_Code__c, SAP_Item_Code__c, ' +
-            'Product_Category__c, Sub_Category__c, Product_Type__c, Product_V__c, ' +
+            'Product_Category__c, Sub_Category__c, Product_Type__c, Product_Vertical__c, ' +
             'Brand__c, Model__c, Equipment_Name__c, Line_Description__c, ' +
             'Standard_Price__c, Tax__c, Standard_Price_with_Tax__c, ' +
-            'UOM__c, HSN_Code__c, HSN_Code_International__c, Source__c, ' +
+            'HSN_Code__c, HSN_Code_International__c, Source__c, ' +
             'Default_Warranty_Months__c, Is_Installation_Required__c, Is_Training_Required__c, ' +
             'Product_Status__c, ERP_Sync_Status__c, IsActive ' +
             'FROM Product2 WHERE IsActive = true';
@@ -176,7 +176,7 @@ public with sharing class ProductSyncService {
             query += ' AND Product_Type__c = :productType';
         }
         if (String.isNotBlank(vertical)) {
-            query += ' AND Product_V__c = :vertical';
+            query += ' AND Product_Vertical__c = :vertical';
         }
         if (limitVal == null || limitVal <= 0) {
             limitVal = 200;
@@ -220,6 +220,7 @@ public with sharing class ProductSyncService {
         public String category;
         public String subCategory;
         public String brand;
+        public String make;
         public String model;
         public String equipmentName;
         public String oemPartNumber;
@@ -227,7 +228,6 @@ public with sharing class ProductSyncService {
         public Decimal taxPercent;
         public String hsnCodeDomestic;
         public String hsnCodeInternational;
-        public String uom;
         public Decimal quantityPackSize;
         public String specification;
         public String compatibility;
