@@ -3,7 +3,7 @@
     <fullName>Installation_Terms__c</fullName>
     <externalId>false</externalId>
     <label>Installation Terms</label>
-    <description>Installation Terms</description>
+    <description>Installation Terms.</description>
     <length>32768</length>
     <trackTrending>false</trackTrending>
     <type>LongTextArea</type>

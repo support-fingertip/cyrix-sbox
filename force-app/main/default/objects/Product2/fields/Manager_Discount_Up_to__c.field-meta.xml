@@ -3,7 +3,7 @@
     <fullName>Manager_Discount_Up_to__c</fullName>
     <externalId>false</externalId>
     <label>Manager Discount Up to</label>
-    <description>Manager Discount Up to</description>
+    <description>Manager Discount Up to.</description>
     <precision>5</precision>
     <required>false</required>
     <scale>2</scale>

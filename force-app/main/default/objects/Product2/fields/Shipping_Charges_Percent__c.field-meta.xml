@@ -3,7 +3,7 @@
     <fullName>Shipping_Charges_Percent__c</fullName>
     <externalId>false</externalId>
     <label>Shipping Charges %</label>
-    <description>Shipping Charges %</description>
+    <description>Shipping Charges %.</description>
     <precision>5</precision>
     <required>false</required>
     <scale>2</scale>

@@ -3,7 +3,7 @@
     <fullName>Warranty_Cost_Percent__c</fullName>
     <externalId>false</externalId>
     <label>Warranty Cost %</label>
-    <description>Warranty Cost %</description>
+    <description>Warranty Cost %.</description>
     <precision>5</precision>
     <required>false</required>
     <scale>2</scale>
