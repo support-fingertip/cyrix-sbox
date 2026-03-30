@@ -1,4 +1,4 @@
-// Test class for ProductSyncService
+// Cyrix Test class for ProductSyncService
 /****************************************************************
 * Class Name   : ProductSyncServiceTest
 * Company      : Fingertipplus

@@ -3,7 +3,7 @@
     <fullName>HSN_Code__c</fullName>
     <externalId>false</externalId>
     <label>HSN Code</label>
-    <description>HSN Code</description>
+    <description>HSN Code.</description>
     <length>20</length>
     <required>false</required>
     <trackTrending>false</trackTrending>
