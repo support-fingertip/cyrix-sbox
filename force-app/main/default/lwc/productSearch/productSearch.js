@@ -31,7 +31,6 @@ export default class ProductSearch extends LightningElement {
         { label: 'Item Code', fieldName: 'Item_Code__c', type: 'text', sortable: true },
         { label: 'Category', fieldName: 'Product_Category__c', type: 'text' },
         { label: 'Brand', fieldName: 'Brand__c', type: 'text' },
-        { label: 'Make', fieldName: 'Make__c', type: 'text' },
         { label: 'Model', fieldName: 'Model__c', type: 'text' },
         { label: 'Price', fieldName: 'Standard_Price__c', type: 'currency' },
         { label: 'Tax %', fieldName: 'Tax__c', type: 'percent',

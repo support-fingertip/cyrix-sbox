@@ -96,7 +96,6 @@ public with sharing class ProductSyncService {
         p.Product_Category__c = pw.category;
         p.Sub_Category__c = pw.subCategory;
         p.Brand__c = pw.brand;
-        p.Make__c = pw.make;
         p.Model__c = pw.model;
         p.Equipment_Name__c = pw.equipmentName;
         p.OEM_Part_Number__c = pw.oemPartNumber;
@@ -163,7 +162,7 @@ public with sharing class ProductSyncService {
     public static List<Product2> getActiveProducts(String category, String productType, String vertical, Integer limitVal) {
         String query = 'SELECT Id, Name, ProductCode, Item_Code__c, SAP_Item_Code__c, ' +
             'Product_Category__c, Sub_Category__c, Product_Type__c, Product_V__c, ' +
-            'Brand__c, Make__c, Model__c, Equipment_Name__c, Line_Description__c, ' +
+            'Brand__c, Model__c, Equipment_Name__c, Line_Description__c, ' +
             'Standard_Price__c, Tax__c, Standard_Price_with_Tax__c, ' +
             'UOM__c, HSN_Code__c, HSN_Code_International__c, Source__c, ' +
             'Default_Warranty_Months__c, Is_Installation_Required__c, Is_Training_Required__c, ' +
@@ -221,7 +220,6 @@ public with sharing class ProductSyncService {
         public String category;
         public String subCategory;
         public String brand;
-        public String make;
         public String model;
         public String equipmentName;
         public String oemPartNumber;

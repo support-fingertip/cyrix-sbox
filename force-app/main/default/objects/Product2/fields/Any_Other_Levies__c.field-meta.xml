@@ -3,7 +3,7 @@
     <fullName>Any_Other_Levies__c</fullName>
     <externalId>false</externalId>
     <label>Any Other Levies</label>
-    <description>Any Other Levies</description>
+    <description>Any Other Levies.</description>
     <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>

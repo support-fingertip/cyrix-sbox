@@ -19,7 +19,7 @@ public with sharing class ProductSearchController {
 
     /**
      * Searches active products by keyword across Name, Item Code, Product Code,
-     * Make, Model, Equipment Name, and Description fields.
+     * Model, Equipment Name, and Description fields.
      * @param searchKey Search keyword (minimum 2 characters)
      * @param category Optional category filter
      * @param vertical Optional vertical filter
@@ -34,7 +34,7 @@ public with sharing class ProductSearchController {
 
         String query = 'SELECT Id, Name, ProductCode, Item_Code__c, ' +
             'Product_Category__c, Sub_Category__c, Product_Type__c, Product_V__c, ' +
-            'Brand__c, Make__c, Model__c, Equipment_Name__c, Line_Description__c, ' +
+            'Brand__c, Model__c, Equipment_Name__c, Line_Description__c, ' +
             'Standard_Price__c, Tax__c, Standard_Price_with_Tax__c, ' +
             'UOM__c, HSN_Code__c, HSN_Code_International__c, ' +
             'Default_Warranty_Months__c, Is_Installation_Required__c, Is_Training_Required__c, ' +
@@ -44,7 +44,7 @@ public with sharing class ProductSearchController {
         if (String.isNotBlank(searchKey) && searchKey.length() >= 2) {
             String key = '%' + String.escapeSingleQuotes(searchKey) + '%';
             query += ' AND (Name LIKE :key OR Item_Code__c LIKE :key OR ProductCode LIKE :key ' +
-                'OR Make__c LIKE :key OR Model__c LIKE :key OR Equipment_Name__c LIKE :key ' +
+                'OR Model__c LIKE :key OR Equipment_Name__c LIKE :key ' +
                 'OR Brand__c LIKE :key OR Line_Description__c LIKE :key)';
         }
         if (String.isNotBlank(category)) {
@@ -66,9 +66,9 @@ public with sharing class ProductSearchController {
     @AuraEnabled(cacheable=true)
     public static Product2 getProductDetails(Id productId) {
         return [
-            SELECT Id, Name, ProductCode, SAP_Item_Code__c,
-                   Product_Category__c, Sub_Category__c, Product_Type__c,
-                   Brand__c, Make__c, Model__c, Equipment_Name__c, Line_Description__c,
+            SELECT Id, Name, ProductCode, Item_Code__c, SAP_Item_Code__c,
+                   Product_Category__c, Sub_Category__c, Product_Type__c, Product_V__c,
+                   Brand__c, Model__c, Equipment_Name__c, Line_Description__c,
                    Standard_Price__c, Tax__c, Standard_Price_with_Tax__c,
                    UOM__c, HSN_Code__c, HSN_Code_International__c, Source__c,
                    Default_Warranty_Months__c, Warranty_Terms_Description__c,
