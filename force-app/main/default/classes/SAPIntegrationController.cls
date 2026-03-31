@@ -18,19 +18,6 @@ global without sharing class SAPIntegrationController {
 * -----------------------------------------------------------------------------
 **************************************************************/
 
-    // SAP JSON field key constants
-    private static final String KEY_COMPANY_ID = 'Company_Id__c';
-    private static final String KEY_PRODUCT_CODE = 'Product_Code__c';
-    private static final String KEY_SKU = 'SKU__c';
-    private static final String KEY_ITEM_DESC = 'Item_Description__c';
-    private static final String KEY_NAME = 'Name';
-    private static final String KEY_BRAND = 'Brand__c';
-    private static final String KEY_SALES_TAX = 'Sales_Tax__c';
-    private static final String KEY_PURCHASE_TAX = 'Purchase_Tax__c';
-    private static final String KEY_HSN_CODE = 'HSN_Code__c';
-    private static final String KEY_GST = 'GST__c';
-    private static final String KEY_FIXED_PRICE = 'Fixed_Price_Item__c';
-
     /**
      * POST /services/apexrest/api?key=xxx&value=productMaster
      * Accepts: {"data":[{"Company_Id__c":"Dev","Product_Code__c":"F01706",...}]}
@@ -96,35 +83,35 @@ global without sharing class SAPIntegrationController {
                 Map<String, Object> sp = (Map<String, Object>) item;
                 Product2 p = new Product2();
 
-                String productCode = getStr(sp, KEY_PRODUCT_CODE);
+                String productCode = getStr(sp, 'Product_Code__c');
                 p.Item_Code__c = productCode;
-                p.ProductCode = getStr(sp, KEY_SKU);
-                p.Name = getStr(sp, KEY_NAME);
-                p.Brand__c = getStr(sp, KEY_BRAND);
-                p.HSN_Code__c = getStr(sp, KEY_HSN_CODE);
+                p.ProductCode = getStr(sp, 'SKU__c');
+                p.Name = getStr(sp, 'Name');
+                p.Brand__c = getStr(sp, 'Brand__c');
+                p.HSN_Code__c = getStr(sp, 'HSN_Code__c');
                 p.IsActive = true;
                 p.ERP_Sync_Status__c = 'Synced';
                 p.Last_ERP_Sync_Date__c = Datetime.now();
 
-                String salesTax = getStr(sp, KEY_SALES_TAX);
-                String gst = getStr(sp, KEY_GST);
+                String salesTax = getStr(sp, 'Sales_Tax__c');
+                String gst = getStr(sp, 'GST__c');
                 if (String.isNotBlank(gst)) {
                     p.Tax__c = Decimal.valueOf(gst);
                 } else if (String.isNotBlank(salesTax)) {
                     p.Tax__c = Decimal.valueOf(salesTax);
                 }
 
-                String itemDesc = getStr(sp, KEY_ITEM_DESC);
+                String itemDesc = getStr(sp, 'Item_Description__c');
                 if (String.isNotBlank(itemDesc)) {
                     p.Line_Description__c = itemDesc;
                 }
 
-                String companyId = getStr(sp, KEY_COMPANY_ID);
+                String companyId = getStr(sp, 'Company_Id__c');
                 if (String.isNotBlank(companyId)) {
                     p.Source__c = companyId;
                 }
 
-                String fixedPrice = getStr(sp, KEY_FIXED_PRICE);
+                String fixedPrice = getStr(sp, 'Fixed_Price_Item__c');
                 if (String.isNotBlank(fixedPrice)) {
                     p.Remarks__c = 'Fixed Price: ' + fixedPrice;
                 }
@@ -236,17 +223,17 @@ global without sharing class SAPIntegrationController {
             List<Map<String, String>> sapProducts = new List<Map<String, String>>();
             for (Product2 p : products) {
                 Map<String, String> sp = new Map<String, String>();
-                sp.put(KEY_COMPANY_ID, p.Source__c != null ? p.Source__c : '');
-                sp.put(KEY_PRODUCT_CODE, p.Item_Code__c != null ? p.Item_Code__c : '');
-                sp.put(KEY_SKU, p.ProductCode != null ? p.ProductCode : '');
-                sp.put(KEY_NAME, p.Name != null ? p.Name : '');
-                sp.put(KEY_ITEM_DESC, p.Line_Description__c != null ? p.Line_Description__c : '');
-                sp.put(KEY_BRAND, p.Brand__c != null ? p.Brand__c : '');
-                sp.put(KEY_SALES_TAX, p.Tax__c != null ? String.valueOf(p.Tax__c) : '');
-                sp.put(KEY_PURCHASE_TAX, p.Tax__c != null ? String.valueOf(p.Tax__c) : '');
-                sp.put(KEY_HSN_CODE, p.HSN_Code__c != null ? p.HSN_Code__c : '');
-                sp.put(KEY_GST, p.Tax__c != null ? String.valueOf(p.Tax__c) : '');
-                sp.put(KEY_FIXED_PRICE, 'N');
+                sp.put('Company_Id__c', p.Source__c != null ? p.Source__c : '');
+                sp.put('Product_Code__c', p.Item_Code__c != null ? p.Item_Code__c : '');
+                sp.put('SKU__c', p.ProductCode != null ? p.ProductCode : '');
+                sp.put('Name', p.Name != null ? p.Name : '');
+                sp.put('Item_Description__c', p.Line_Description__c != null ? p.Line_Description__c : '');
+                sp.put('Brand__c', p.Brand__c != null ? p.Brand__c : '');
+                sp.put('Sales_Tax__c', p.Tax__c != null ? String.valueOf(p.Tax__c) : '');
+                sp.put('Purchase_Tax__c', p.Tax__c != null ? String.valueOf(p.Tax__c) : '');
+                sp.put('HSN_Code__c', p.HSN_Code__c != null ? p.HSN_Code__c : '');
+                sp.put('GST__c', p.Tax__c != null ? String.valueOf(p.Tax__c) : '');
+                sp.put('Fixed_Price_Item__c', 'N');
                 sapProducts.add(sp);
             }
 
