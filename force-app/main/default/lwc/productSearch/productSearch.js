@@ -1,4 +1,4 @@
-// Product Master Search Component - Module 7.
+// Product Master Search Component - Module 7
 /**
  * @description LWC component for searching and selecting products from the ERP-synced
  *              Product Master. Per BRD Module 7, users can only search & select products

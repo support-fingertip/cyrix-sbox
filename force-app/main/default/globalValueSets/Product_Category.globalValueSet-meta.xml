@@ -315,7 +315,7 @@
         <default>false</default>
         <label>General</label>
     </customValue>
-    <description>Product Category values.</description>
+    <description>Product Category values</description>
     <masterLabel>Product Category</masterLabel>
     <sorted>false</sorted>
 </GlobalValueSet>
