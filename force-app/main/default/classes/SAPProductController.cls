@@ -1,4 +1,4 @@
-// Cyrix SAP Product API Controller - Module 7
+// Cyrix SAP Product API Controller - Module 7.
 /****************************************************************
 * Class Name   : SAPProductController
 * Company      : Fingertipplus
@@ -16,6 +16,19 @@
 **************************************************************/
 @RestResource(urlMapping='/SAPProduct/*')
 global without sharing class SAPProductController {
+
+    // SAP JSON field key constants
+    private static final String KEY_COMPANY_ID = 'Company_Id__c';
+    private static final String KEY_PRODUCT_CODE = 'Product_Code__c';
+    private static final String KEY_SKU = 'SKU__c';
+    private static final String KEY_ITEM_DESC = 'Item_Description__c';
+    private static final String KEY_NAME = 'Name';
+    private static final String KEY_BRAND = 'Brand__c';
+    private static final String KEY_SALES_TAX = 'Sales_Tax__c';
+    private static final String KEY_PURCHASE_TAX = 'Purchase_Tax__c';
+    private static final String KEY_HSN_CODE = 'HSN_Code__c';
+    private static final String KEY_GST = 'GST__c';
+    private static final String KEY_FIXED_PRICE = 'Fixed_Price_Item__c';
 
     /**
      * POST /services/apexrest/SAPProduct
@@ -37,9 +50,10 @@ global without sharing class SAPProductController {
             ? requestBody.substring(0, 32000) : requestBody;
 
         try {
-            SAPRequestWrapper wrapper = (SAPRequestWrapper) JSON.deserialize(requestBody, SAPRequestWrapper.class);
+            Map<String, Object> parsed = (Map<String, Object>) JSON.deserializeUntyped(requestBody);
+            List<Object> dataList = (List<Object>) parsed.get('data');
 
-            if (wrapper.data == null || wrapper.data.isEmpty()) {
+            if (dataList == null || dataList.isEmpty()) {
                 res.statusCode = 400;
                 res.responseBody = Blob.valueOf(JSON.serialize(
                     new ApiResponse(false, 'No data provided', null)
@@ -51,39 +65,40 @@ global without sharing class SAPProductController {
 
             List<Product2> productsToUpsert = new List<Product2>();
 
-            for (SAPProductWrapper sp : wrapper.data) {
+            for (Object item : dataList) {
+                Map<String, Object> sp = (Map<String, Object>) item;
                 Product2 p = new Product2();
-                p.Item_Code__c = sp.Product_Code__c;
-                p.ProductCode = sp.SKU__c;
-                p.Name = sp.Name;
-                p.Brand__c = sp.Brand__c;
-                p.HSN_Code__c = sp.HSN_Code__c;
+
+                p.Item_Code__c = getStr(sp, KEY_PRODUCT_CODE);
+                p.ProductCode = getStr(sp, KEY_SKU);
+                p.Name = getStr(sp, KEY_NAME);
+                p.Brand__c = getStr(sp, KEY_BRAND);
+                p.HSN_Code__c = getStr(sp, KEY_HSN_CODE);
                 p.IsActive = true;
                 p.ERP_Sync_Status__c = 'Synced';
                 p.Last_ERP_Sync_Date__c = Datetime.now();
 
-                if (String.isNotBlank(sp.Sales_Tax__c)) {
-                    p.Tax__c = Decimal.valueOf(sp.Sales_Tax__c);
+                String salesTax = getStr(sp, KEY_SALES_TAX);
+                String gst = getStr(sp, KEY_GST);
+                if (String.isNotBlank(gst)) {
+                    p.Tax__c = Decimal.valueOf(gst);
+                } else if (String.isNotBlank(salesTax)) {
+                    p.Tax__c = Decimal.valueOf(salesTax);
                 }
 
-                if (String.isNotBlank(sp.Item_Description__c)) {
-                    p.Line_Description__c = sp.Item_Description__c;
+                String itemDesc = getStr(sp, KEY_ITEM_DESC);
+                if (String.isNotBlank(itemDesc)) {
+                    p.Line_Description__c = itemDesc;
                 }
 
-                if (String.isNotBlank(sp.Company_Id__c)) {
-                    p.Source__c = sp.Company_Id__c;
+                String companyId = getStr(sp, KEY_COMPANY_ID);
+                if (String.isNotBlank(companyId)) {
+                    p.Source__c = companyId;
                 }
 
-                if (String.isNotBlank(sp.Fixed_Price_Item__c)) {
-                    p.Remarks__c = 'Fixed Price: ' + sp.Fixed_Price_Item__c;
-                }
-
-                if (String.isNotBlank(sp.GST__c)) {
-                    p.Tax__c = Decimal.valueOf(sp.GST__c);
-                }
-
-                if (String.isNotBlank(sp.Purchase_Tax__c)) {
-                    // Store purchase tax info if different from sales tax
+                String fixedPrice = getStr(sp, KEY_FIXED_PRICE);
+                if (String.isNotBlank(fixedPrice)) {
+                    p.Remarks__c = 'Fixed Price: ' + fixedPrice;
                 }
 
                 productsToUpsert.add(p);
@@ -120,7 +135,7 @@ global without sharing class SAPProductController {
      * GET /services/apexrest/SAPProduct?productCode=F01706
      * GET /services/apexrest/SAPProduct?category=Critical+Care
      * GET /services/apexrest/SAPProduct (returns all active, limit 200)
-     * Returns: {"data":[{...product fields...}]}
+     * Returns: {"data":[{"Company_Id__c":"...","Product_Code__c":"...",...}]}
      */
     @HttpGet
     global static void getProducts() {
@@ -155,29 +170,29 @@ global without sharing class SAPProductController {
 
             List<Product2> products = Database.query(query);
 
-            // Map to SAP JSON format
-            List<SAPProductWrapper> sapProducts = new List<SAPProductWrapper>();
+            // Build response in SAP JSON format using maps to preserve __c keys
+            List<Map<String, String>> sapProducts = new List<Map<String, String>>();
             for (Product2 p : products) {
-                SAPProductWrapper sp = new SAPProductWrapper();
-                sp.Company_Id__c = p.Source__c;
-                sp.Product_Code__c = p.Item_Code__c;
-                sp.SKU__c = p.ProductCode;
-                sp.Name = p.Name;
-                sp.Item_Description__c = p.Line_Description__c;
-                sp.Brand__c = p.Brand__c;
-                sp.Sales_Tax__c = p.Tax__c != null ? String.valueOf(p.Tax__c) : '';
-                sp.Purchase_Tax__c = p.Tax__c != null ? String.valueOf(p.Tax__c) : '';
-                sp.HSN_Code__c = p.HSN_Code__c != null ? p.HSN_Code__c : '';
-                sp.GST__c = p.Tax__c != null ? String.valueOf(p.Tax__c) : '';
-                sp.Fixed_Price_Item__c = 'N';
+                Map<String, String> sp = new Map<String, String>();
+                sp.put(KEY_COMPANY_ID, p.Source__c != null ? p.Source__c : '');
+                sp.put(KEY_PRODUCT_CODE, p.Item_Code__c != null ? p.Item_Code__c : '');
+                sp.put(KEY_SKU, p.ProductCode != null ? p.ProductCode : '');
+                sp.put(KEY_NAME, p.Name != null ? p.Name : '');
+                sp.put(KEY_ITEM_DESC, p.Line_Description__c != null ? p.Line_Description__c : '');
+                sp.put(KEY_BRAND, p.Brand__c != null ? p.Brand__c : '');
+                sp.put(KEY_SALES_TAX, p.Tax__c != null ? String.valueOf(p.Tax__c) : '');
+                sp.put(KEY_PURCHASE_TAX, p.Tax__c != null ? String.valueOf(p.Tax__c) : '');
+                sp.put(KEY_HSN_CODE, p.HSN_Code__c != null ? p.HSN_Code__c : '');
+                sp.put(KEY_GST, p.Tax__c != null ? String.valueOf(p.Tax__c) : '');
+                sp.put(KEY_FIXED_PRICE, 'N');
                 sapProducts.add(sp);
             }
 
-            SAPResponseWrapper responseWrapper = new SAPResponseWrapper();
-            responseWrapper.data = sapProducts;
+            Map<String, Object> responseMap = new Map<String, Object>();
+            responseMap.put('data', sapProducts);
 
             res.statusCode = 200;
-            res.responseBody = Blob.valueOf(JSON.serialize(responseWrapper));
+            res.responseBody = Blob.valueOf(JSON.serialize(responseMap));
         } catch (Exception e) {
             res.statusCode = 500;
             res.responseBody = Blob.valueOf(JSON.serialize(
@@ -186,29 +201,13 @@ global without sharing class SAPProductController {
         }
     }
 
-    // ---- Wrapper Classes ----
-
-    global class SAPRequestWrapper {
-        public List<SAPProductWrapper> data;
+    // Helper to safely get a string value from a map
+    private static String getStr(Map<String, Object> m, String key) {
+        Object val = m.get(key);
+        return val != null ? String.valueOf(val) : '';
     }
 
-    global class SAPResponseWrapper {
-        public List<SAPProductWrapper> data;
-    }
-
-    global class SAPProductWrapper {
-        public String Company_Id__c;
-        public String Product_Code__c;
-        public String SKU__c;
-        public String Item_Description__c;
-        public String Name;
-        public String Brand__c;
-        public String Sales_Tax__c;
-        public String Purchase_Tax__c;
-        public String HSN_Code__c;
-        public String GST__c;
-        public String Fixed_Price_Item__c;
-    }
+    // ---- Response Wrapper ----
 
     global class ApiResponse {
         public Boolean success;
