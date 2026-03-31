@@ -3,7 +3,7 @@
     <apiVersion>66.0</apiVersion>
     <isExposed>true</isExposed>
     <masterLabel>Product Search</masterLabel>
-    <description>Cyrix Healthcare - Search and select products from ERP-synced Cyrix - Product Master for Opportunities, Quotes, and Orders.</description>
+    <description>Cyrix Healthcare - Search and select products from ERP-synced Cyrix Product Master for Opportunities, Quotes, and Orders.</description>
     <targets>
         <target>lightning__RecordPage</target>
         <target>lightning__AppPage</target>

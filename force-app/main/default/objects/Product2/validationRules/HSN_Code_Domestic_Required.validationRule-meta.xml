@@ -2,7 +2,7 @@
 <ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>HSN_Code_Domestic_Required</fullName>
     <active>true</active>
-    <description>HSN Code (Domestic) is mandatory for all products as per BRD Module 7</description>
+    <description>HSN Code (Domestic) is mandatory for all products as per BRD Module 7.</description>
     <errorConditionFormula>ISBLANK(HSN_Code__c)</errorConditionFormula>
     <errorDisplayField>HSN_Code__c</errorDisplayField>
     <errorMessage>HSN Code (Domestic) is required for all products.</errorMessage>

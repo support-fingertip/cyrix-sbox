@@ -3,7 +3,7 @@
     <fullName>Promotional_Cost_Percent__c</fullName>
     <externalId>false</externalId>
     <label>Promotional Cost %</label>
-    <description>Promotional Cost %.</description>
+    <description>Promotional Cost %</description>
     <precision>5</precision>
     <required>false</required>
     <scale>2</scale>

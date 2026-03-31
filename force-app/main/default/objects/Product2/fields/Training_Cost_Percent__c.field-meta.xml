@@ -3,7 +3,7 @@
     <fullName>Training_Cost_Percent__c</fullName>
     <externalId>false</externalId>
     <label>Training Cost %</label>
-    <description>Training Cost %.</description>
+    <description>Training Cost %</description>
     <precision>5</precision>
     <required>false</required>
     <scale>2</scale>

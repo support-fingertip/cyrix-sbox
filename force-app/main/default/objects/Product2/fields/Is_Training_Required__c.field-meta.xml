@@ -3,7 +3,7 @@
     <fullName>Is_Training_Required__c</fullName>
     <externalId>false</externalId>
     <label>Is Training Required</label>
-    <description>Is Training Required.</description>
+    <description>Is Training Required</description>
     <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>
