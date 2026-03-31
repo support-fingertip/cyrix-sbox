@@ -252,7 +252,7 @@ private class SAPIntegrationControllerTest {
         System.assertEquals(200, RestContext.response.statusCode);
         String responseStr = RestContext.response.responseBody.toString();
         System.assert(responseStr.contains('F01706'), 'Should contain product code');
-        System.assert(responseStr.contains('"success":true'));
+        System.assert(responseStr.contains('"Status":"Success"'));
     }
 
     @isTest
@@ -271,7 +271,7 @@ private class SAPIntegrationControllerTest {
 
         System.assertEquals(200, RestContext.response.statusCode);
         String responseStr = RestContext.response.responseBody.toString();
-        System.assert(responseStr.contains('Zebronics'), 'Should contain brand');
+        System.assert(responseStr.contains('Bluetooth Speaker Zebronics'), 'Should contain product name');
     }
 
     @isTest
@@ -290,6 +290,6 @@ private class SAPIntegrationControllerTest {
 
         System.assertEquals(200, RestContext.response.statusCode);
         String responseStr = RestContext.response.responseBody.toString();
-        System.assert(responseStr.contains('0 product(s) found'));
+        System.assertEquals('[]', responseStr);
     }
 }

@@ -219,31 +219,19 @@ global without sharing class SAPIntegrationController {
 
             List<Product2> products = Database.query(query);
 
-            // Build response in SAP JSON format
-            List<Map<String, String>> sapProducts = new List<Map<String, String>>();
+            // Build response in Response format
+            List<Response> lstResponse = new List<Response>();
             for (Product2 p : products) {
-                Map<String, String> sp = new Map<String, String>();
-                sp.put('Company_Id__c', p.Source__c != null ? p.Source__c : '');
-                sp.put('Product_Code__c', p.Item_Code__c != null ? p.Item_Code__c : '');
-                sp.put('SKU__c', p.ProductCode != null ? p.ProductCode : '');
-                sp.put('Name', p.Name != null ? p.Name : '');
-                sp.put('Item_Description__c', p.Line_Description__c != null ? p.Line_Description__c : '');
-                sp.put('Brand__c', p.Brand__c != null ? p.Brand__c : '');
-                sp.put('Sales_Tax__c', p.Tax__c != null ? String.valueOf(p.Tax__c) : '');
-                sp.put('Purchase_Tax__c', p.Tax__c != null ? String.valueOf(p.Tax__c) : '');
-                sp.put('HSN_Code__c', p.HSN_Code__c != null ? p.HSN_Code__c : '');
-                sp.put('GST__c', p.Tax__c != null ? String.valueOf(p.Tax__c) : '');
-                sp.put('Fixed_Price_Item__c', 'N');
-                sapProducts.add(sp);
+                lstResponse.add(new Response(
+                    p.Id,
+                    p.Item_Code__c,
+                    'Success',
+                    p.Name
+                ));
             }
 
-            Map<String, Object> responseMap = new Map<String, Object>();
-            responseMap.put('success', true);
-            responseMap.put('message', products.size() + ' product(s) found');
-            responseMap.put('data', sapProducts);
-
             res.statusCode = 200;
-            res.responseBody = Blob.valueOf(JSON.serialize(responseMap));
+            res.responseBody = Blob.valueOf(JSON.serialize(lstResponse));
         } catch (Exception e) {
             res.statusCode = 500;
             List<Response> lstResponse = new List<Response>();
