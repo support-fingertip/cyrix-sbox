@@ -354,19 +354,23 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>ProductQuoteAPIController</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
         <apexClass>ProductSearchController</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>ProductSyncService</apexClass>
+        <apexClass>ProductSearchControllerTest</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>ProductSyncServiceTest</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>ProductTriggerHandler</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>ProductTriggerHandlerTest</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
@@ -375,6 +379,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>QuoteCreatorControllerTest</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>SAPIntegrationController</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
@@ -1904,6 +1912,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>Log__c.Product__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>Log__c.Request__c</field>
         <readable>false</readable>
     </fieldPermissions>
@@ -2259,6 +2272,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>Product2.Category__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>Product2.Color__c</field>
         <readable>false</readable>
     </fieldPermissions>
@@ -2270,6 +2288,11 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Product2.Default_Warranty_Months__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Product2.Default_Warranty__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -2444,6 +2467,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>Product2.SAP_Item_No__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>Product2.Shipping_Charges_Percent__c</field>
         <readable>false</readable>
     </fieldPermissions>
@@ -2480,11 +2508,6 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Product2.Training_Cost_Percent__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Product2.UOM__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
