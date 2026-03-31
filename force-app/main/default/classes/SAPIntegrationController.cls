@@ -66,11 +66,11 @@ global without sharing class SAPIntegrationController {
         
                     try{
                         upsert prd Item_Code__c;
-                  lstResponse.add(new Response('Success',prd.Item_Code__c));
+                
                     }
                     catch(DmlException ex){
                      
-                        lstResponse.add(new Response('Failure', prd.Item_Code__c,ex.getMessage()));
+                   
                        
                     }
                     
@@ -103,7 +103,7 @@ global without sharing class SAPIntegrationController {
             else{
                 
                 List < Response > lstResponse = new List < Response > ();
-                lstResponse.add(new Response('Failure', 'Invalid Parameter Value.',false));
+               // lstResponse.add(new Response('Failure', 'Invalid Parameter Value.',false));
                 res.statusCode = 403;
                 res.addHeader('Content-Type', 'application/json');
                 res.responseBody = Blob.valueOf(JSON.serialize(lstResponse));   
@@ -114,7 +114,7 @@ global without sharing class SAPIntegrationController {
         else{
               
             List < Response > lstResponse = new List < Response > ();
-            lstResponse.add(new Response('Failure', 'Invalid Key.',false));
+       //     lstResponse.add(new Response('Failure', 'Invalid Key.',false));
             res.statusCode = 401;
             res.addHeader('Content-Type', 'application/json');
             res.responseBody = Blob.valueOf(JSON.serialize(lstResponse));               
@@ -124,22 +124,10 @@ global without sharing class SAPIntegrationController {
         
     }
     
-    public class Response {
-        public String Status;
-        public String Message;
-        public String ID;
-        public Response(String Status, String ID) {
-            this.Status = Status;
-            this.ID = ID;
-        }
-        public Response(String Status, String Message,Boolean noIds) {
-            this.Status = Status;
-            this.Message = Message;
-        }
-        public Response(String Status, String ID, String Message) {
-            this.Status = Status;
-            this.ID = ID;
-            this.Message = Message;
-        }
+   public class response{
+        public String SF_RecordId;
+        public String SAPUniqueId;
+        public string Status;
+        public string Message;  
     }
 }
