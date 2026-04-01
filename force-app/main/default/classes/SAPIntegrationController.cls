@@ -14,16 +14,10 @@ global without sharing class SAPIntegrationController {
 * Ver | Author           | Date       | Description
 * -----------------------------------------------------------------------------
 * 1.0 | Nanma            | 30-03-2026 | Initial version
-* 1.1 | Claude AI        | 31-03-2026 | Enhanced per-item response, API key auth
+* 1.1 | Claude AI        | 01-04-2026 | Updated field mappings, per-item response
 * -----------------------------------------------------------------------------
 **************************************************************/
 
-    /**
-     * POST /services/apexrest/api?key=xxx&value=productMaster
-     * Accepts: {"data":[{"Company_Id__c":"Dev","Product_Code__c":"F01706",...}]}
-     * Upserts products using Product_Code__c mapped to Item_Code__c as external ID.
-     * Returns per-item success/failure details.
-     */
     @HttpPost
     global static void doPost() {
         RestRequest req = RestContext.request;
@@ -59,8 +53,7 @@ global without sharing class SAPIntegrationController {
         // Log the request
         Log__c log = new Log__c();
         log.Object__c = 'Product';
-        log.Request__c = data.length() > 32000
-            ? data.substring(0, 32000) : data;
+        log.Request__c = data.length() > 32000 ? data.substring(0, 32000) : data;
 
         try {
             Map<String, Object> parsed = (Map<String, Object>) JSON.deserializeUntyped(data);
@@ -83,38 +76,48 @@ global without sharing class SAPIntegrationController {
                 Map<String, Object> sp = (Map<String, Object>) item;
                 Product2 p = new Product2();
 
-                String productCode = getStr(sp, 'Product_Code__c');
+                String productCode = getStr(sp, 'ProductCode');
                 p.Item_Code__c = productCode;
-                p.ProductCode = getStr(sp, 'SKU__c');
+                p.ProductCode = productCode;
                 p.Name = getStr(sp, 'Name');
-                p.Brand__c = getStr(sp, 'Brand__c');
+                p.SAP_Item_Code__c = getStr(sp, 'SAP_Item_Code__c');
+                p.Product_Category__c = getStr(sp, 'Product_Category__c');
+                p.Product_Vertical__c = getStr(sp, 'Product_Vertical__c');
+                p.Product_Type__c = getStr(sp, 'Product_Type__c');
+                p.Source__c = getStr(sp, 'Source__c');
+                p.Equipment_Name__c = getStr(sp, 'Equipment_Name__c');
+                p.Make__c = getStr(sp, 'Make__c');
+                p.Model__c = getStr(sp, 'Model__c');
+                p.OEM_Part_Number__c = getStr(sp, 'OEM_Part_Number__c');
+                p.QuantityUnitOfMeasure = getStr(sp, 'QuantityUnitOfMeasure');
+                p.Compatibility__c = getStr(sp, 'Compatibility__c');
+                p.Specification__c = getStr(sp, 'Specification__c');
                 p.HSN_Code__c = getStr(sp, 'HSN_Code__c');
-                p.IsActive = true;
+                p.IsActive = Boolean.valueOf(getStr(sp, 'IsActive'));
                 p.ERP_Sync_Status__c = 'Synced';
                 p.Last_ERP_Sync_Date__c = Datetime.now();
 
-                String salesTax = getStr(sp, 'Sales_Tax__c');
-                String gst = getStr(sp, 'GST__c');
-                if (String.isNotBlank(gst)) {
-                    p.Tax__c = Decimal.valueOf(gst);
-                } else if (String.isNotBlank(salesTax)) {
-                    p.Tax__c = Decimal.valueOf(salesTax);
+                String packSize = getStr(sp, 'Quantity_Pack_Size__c');
+                if (String.isNotBlank(packSize)) {
+                    p.Quantity_Pack_Size__c = Decimal.valueOf(packSize);
                 }
 
-                String itemDesc = getStr(sp, 'Item_Description__c');
+                String tax = getStr(sp, 'Tax__c');
+                if (String.isNotBlank(tax)) {
+                    p.Tax__c = Decimal.valueOf(tax);
+                }
+
+                p.Product_Image_URL__c = getStr(sp, 'Product_Image_URL__c');
+                p.Product_Image_URL_2__c = getStr(sp, 'Product_Image_URL_2__c');
+                p.Product_Image_URL_3__c = getStr(sp, 'Product_Image_URL_3__c');
+
+                String itemDesc = getStr(sp, 'Description');
                 if (String.isNotBlank(itemDesc)) {
-                    p.Line_Description__c = itemDesc;
+                    p.Description = itemDesc;
                 }
 
-                String companyId = getStr(sp, 'Company_Id__c');
-                if (String.isNotBlank(companyId)) {
-                    p.Source__c = companyId;
-                }
-
-                String fixedPrice = getStr(sp, 'Fixed_Price_Item__c');
-                if (String.isNotBlank(fixedPrice)) {
-                    p.Remarks__c = 'Fixed Price: ' + fixedPrice;
-                }
+                p.Remarks__c = getStr(sp, 'Remarks__c');
+                p.Any_Other_Levies__c = getStr(sp, 'Any_Other_Levies__c');
 
                 productsToUpsert.add(p);
                 productCodes.add(productCode);
@@ -131,24 +134,14 @@ global without sharing class SAPIntegrationController {
                 Database.UpsertResult ur = upsertResults[i];
                 if (ur.isSuccess()) {
                     successCount++;
-                    lstResponse.add(new Response(
-                        ur.getId(),
-                        productCodes[i],
-                        'Success',
-                        ur.isCreated() ? 'Created' : 'Updated'
-                    ));
+                    lstResponse.add(new Response(ur.getId(), productCodes[i], 'Success', ur.isCreated() ? 'Created' : 'Updated'));
                 } else {
                     failCount++;
                     String errorMsg = '';
                     for (Database.Error err : ur.getErrors()) {
                         errorMsg += err.getStatusCode() + ': ' + err.getMessage() + '; ';
                     }
-                    lstResponse.add(new Response(
-                        null,
-                        productCodes[i],
-                        'Failure',
-                        errorMsg
-                    ));
+                    lstResponse.add(new Response(null, productCodes[i], 'Failure', errorMsg));
                 }
             }
 
@@ -170,12 +163,6 @@ global without sharing class SAPIntegrationController {
         }
     }
 
-    /**
-     * GET /services/apexrest/api?key=xxx&productCode=F01706
-     * GET /services/apexrest/api?key=xxx&category=Critical+Care
-     * GET /services/apexrest/api?key=xxx (returns all active, limit 200)
-     * Returns: {"data":[{"Company_Id__c":"...","Product_Code__c":"...",...}]}
-     */
     @HttpGet
     global static void doGet() {
         RestRequest req = RestContext.request;
@@ -200,9 +187,13 @@ global without sharing class SAPIntegrationController {
                 ? Integer.valueOf(req.params.get('limit')) : 200;
 
             String query = 'SELECT Id, Name, ProductCode, Item_Code__c, ' +
-                'Product_Category__c, Brand__c, Make__c, Model__c, ' +
-                'Line_Description__c, Standard_Price__c, Tax__c, ' +
-                'HSN_Code__c, Source__c, Remarks__c, IsActive, ' +
+                'SAP_Item_Code__c, Product_Category__c, Product_Vertical__c, ' +
+                'Product_Type__c, Source__c, Equipment_Name__c, ' +
+                'Make__c, Model__c, OEM_Part_Number__c, QuantityUnitOfMeasure, ' +
+                'Compatibility__c, Specification__c, Quantity_Pack_Size__c, ' +
+                'HSN_Code__c, Tax__c, Description, Remarks__c, ' +
+                'Any_Other_Levies__c, Brand__c, IsActive, ' +
+                'Product_Image_URL__c, Product_Image_URL_2__c, Product_Image_URL_3__c, ' +
                 'ERP_Sync_Status__c, Last_ERP_Sync_Date__c ' +
                 'FROM Product2 WHERE IsActive = true';
 
