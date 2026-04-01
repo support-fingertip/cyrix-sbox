@@ -1,22 +1,21 @@
-@RestResource(urlMapping='/api/*')
-global without sharing class SAPIntegrationController {
+@RestResource(urlMapping='/SAPToSF/*')
+global without sharing class SAPToSFIntegrationController {
 
-/* Class Name   : SAPIntegrationController
+/* Class Name   : SAPToSFIntegrationController
 * Company      : Fingertipplus
 * Created Date : 30-03-2026
-* @description : REST API for SAP Product integration.
-*                Supports POST (upsert products from SAP) and GET (retrieve products)
-*                JSON format: {"data":[{...product fields...}]}
+* @description : REST API for SAP to Salesforce integration.
+*                Receives data FROM SAP and upserts into Salesforce.
+*                POST: Upsert products from SAP to Salesforce
+*                GET: Query products and customer details for SAP
 *                Includes API Key validation and per-item error reporting.
 *
 * Change Log:
 * -----------------------------------------------------------------------------
 * Ver | Author           | Date       | Description
 * -----------------------------------------------------------------------------
-* 1.0 | Nanma            | 30-03-2026 | Initial version
-* 1.1 | Claude AI        | 01-04-2026 | Updated field mappings, per-item response
-* 1.2 | Claude AI        | 01-04-2026 | Added customer address query (billing + shipping)
-* 1.3 | Claude AI        | 01-04-2026 | Added customer details query (full account info).
+* 1.0 | Nanma            | 30-03-2026 | Initial version (as SAPIntegrationController)
+* 2.0 | Claude AI        | 01-04-2026 | Renamed to SAPToSFIntegrationController
 * -----------------------------------------------------------------------------
 **************************************************************/
 
@@ -52,7 +51,6 @@ global without sharing class SAPIntegrationController {
     private static void upsertProducts(String data, RestResponse res) {
         List<Response> lstResponse = new List<Response>();
 
-        // Log the request
         Log__c log = new Log__c();
         log.Object__c = 'Product';
         log.Request__c = data.length() > 32000 ? data.substring(0, 32000) : data;
@@ -125,10 +123,8 @@ global without sharing class SAPIntegrationController {
                 productCodes.add(productCode);
             }
 
-            // Use allOrNone=false so partial success is possible
             List<Database.UpsertResult> upsertResults = Database.upsert(productsToUpsert, Product2.Item_Code__c, false);
 
-            // Build per-item response
             Integer successCount = 0;
             Integer failCount = 0;
 
@@ -171,7 +167,6 @@ global without sharing class SAPIntegrationController {
         RestResponse res = RestContext.response;
         res.addHeader('Content-Type', 'application/json');
 
-        // API Key validation
         String key = req.params.get('key');
         if (String.isBlank(key) || key != Label.SAP_API) {
             res.statusCode = 401;
@@ -253,7 +248,6 @@ global without sharing class SAPIntegrationController {
 
             String query = 'SELECT Id, Name, Phone, Website, Industry, Description, ' +
                 'AnnualRevenue, CurrencyIsoCode, OwnerId, Owner.Name, CreatedDate, ' +
-                // Custom fields
                 'Customer_Code__c, SAP_Customer_Code__c, Status__c, Customer_Type__c, ' +
                 'Customer_Category__c, Customer_Rating__c, Email__c, ' +
                 'Approval_Status__c, Approval_Date__c, ' +
@@ -261,16 +255,11 @@ global without sharing class SAPIntegrationController {
                 'Contract_Type__c, Payment_Terms__c, ' +
                 'Outstanding_Amount__c, Purchase_Value_Life_Time__c, ' +
                 'GST_Number__c, PAN_Number__c, Country_Code_Phone__c, Previous_History__c, ' +
-                // Bank details
                 'Bank_Name__c, Branch_Name__c, Bank_Account_Number__c, ' +
                 'IFSC_CODE__c, Beneficiary_Name__c, Branch_Address__c, ' +
-                // Billing address
                 'BillingStreet, BillingCity, BillingState, BillingPostalCode, BillingCountry, ' +
-                // Shipping address
                 'ShippingStreet, ShippingCity, ShippingState, ShippingPostalCode, ShippingCountry, ' +
-                // Contacts subquery
                 '(SELECT Id, Name, Email, Phone, MobilePhone, Title, Department FROM Contacts), ' +
-                // Shipping addresses subquery
                 '(SELECT Id, Name, ' +
                     'Address__Street__s, Address__City__s, Address__StateCode__s, ' +
                     'Address__PostalCode__s, Address__CountryCode__s, ' +
@@ -298,7 +287,6 @@ global without sharing class SAPIntegrationController {
             for (Account acc : accounts) {
                 Map<String, Object> accMap = new Map<String, Object>();
 
-                // Basic info
                 accMap.put('AccountId', acc.Id);
                 accMap.put('Name', acc.Name);
                 accMap.put('Phone', acc.Phone);
@@ -310,7 +298,6 @@ global without sharing class SAPIntegrationController {
                 accMap.put('OwnerName', acc.Owner.Name);
                 accMap.put('CreatedDate', acc.CreatedDate);
 
-                // Custom fields
                 accMap.put('Customer_Code__c', acc.Customer_Code__c);
                 accMap.put('SAP_Customer_Code__c', acc.SAP_Customer_Code__c);
                 accMap.put('Status__c', acc.Status__c);
@@ -333,7 +320,6 @@ global without sharing class SAPIntegrationController {
                 accMap.put('Country_Code_Phone__c', acc.Country_Code_Phone__c);
                 accMap.put('Previous_History__c', acc.Previous_History__c);
 
-                // Bank details
                 Map<String, String> bank = new Map<String, String>();
                 bank.put('BankName', acc.Bank_Name__c != null ? acc.Bank_Name__c : '');
                 bank.put('BranchName', acc.Branch_Name__c != null ? acc.Branch_Name__c : '');
@@ -343,7 +329,6 @@ global without sharing class SAPIntegrationController {
                 bank.put('BranchAddress', acc.Branch_Address__c != null ? acc.Branch_Address__c : '');
                 accMap.put('BankDetails', bank);
 
-                // Billing Address
                 Map<String, String> billing = new Map<String, String>();
                 billing.put('Street', acc.BillingStreet != null ? acc.BillingStreet : '');
                 billing.put('City', acc.BillingCity != null ? acc.BillingCity : '');
@@ -352,7 +337,6 @@ global without sharing class SAPIntegrationController {
                 billing.put('Country', acc.BillingCountry != null ? acc.BillingCountry : '');
                 accMap.put('BillingAddress', billing);
 
-                // Shipping Address
                 Map<String, String> shipping = new Map<String, String>();
                 shipping.put('Street', acc.ShippingStreet != null ? acc.ShippingStreet : '');
                 shipping.put('City', acc.ShippingCity != null ? acc.ShippingCity : '');
@@ -361,7 +345,6 @@ global without sharing class SAPIntegrationController {
                 shipping.put('Country', acc.ShippingCountry != null ? acc.ShippingCountry : '');
                 accMap.put('ShippingAddress', shipping);
 
-                // Contacts
                 List<Map<String, String>> contactList = new List<Map<String, String>>();
                 if (acc.Contacts != null) {
                     for (Contact c : acc.Contacts) {
@@ -378,7 +361,6 @@ global without sharing class SAPIntegrationController {
                 }
                 accMap.put('Contacts', contactList);
 
-                // Additional Shipping Addresses
                 List<Map<String, String>> additionalShipping = new List<Map<String, String>>();
                 if (acc.Shipping_Addresses__r != null) {
                     for (Shipping_Address__c sa : acc.Shipping_Addresses__r) {
@@ -409,13 +391,10 @@ global without sharing class SAPIntegrationController {
         }
     }
 
-    // Helper to safely get a string value from a map
     private static String getStr(Map<String, Object> m, String key) {
         Object val = m.get(key);
         return val != null ? String.valueOf(val) : '';
     }
-
-    // ---- Response Wrapper ----
 
     public class Response {
         public String SF_RecordId;
