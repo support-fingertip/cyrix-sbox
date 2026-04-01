@@ -2,7 +2,7 @@
 /****************************************************************
 * Class Name   : SAPIntegrationControllerTest
 * Company      : Fingertipplus
-* Created Date : 31-03-2026
+* Created Date : 01-04-2026
 * @description : Test class for SAPIntegrationController REST API
 **************************************************************/
 @isTest
@@ -14,13 +14,18 @@ private class SAPIntegrationControllerTest {
             Name = 'Bluetooth Speaker Zebronics',
             Item_Code__c = 'F01706',
             ProductCode = 'F01706',
+            SAP_Item_Code__c = 'SAP-F01706',
+            Product_Category__c = 'General',
+            Product_Vertical__c = 'Healthcare',
+            Product_Type__c = 'Accessories',
+            Source__c = 'SAP',
+            Equipment_Name__c = 'Speaker',
+            Make__c = 'Zebronics',
+            Model__c = 'ZEB-100',
             Brand__c = 'Zebronics',
             HSN_Code__c = '8518',
             Tax__c = 18,
-            Standard_Price__c = 1500,
-            Source__c = 'Dev',
-            Line_Description__c = 'Bluetooth Speaker Zebronics',
-            Product_Status__c = 'Active',
+            Description = 'Bluetooth Speaker Zebronics',
             IsActive = true
         );
         insert prod;
@@ -30,7 +35,29 @@ private class SAPIntegrationControllerTest {
 
     @isTest
     static void testPostUpsertSuccess() {
-        String jsonBody = '{"data":[{"Company_Id__c":"Dev","Product_Code__c":"F01707","SKU__c":"F01707","Item_Description__c":"Wireless Mouse Logitech","Name":"Wireless Mouse Logitech","Brand__c":"Logitech","Sales_Tax__c":"18","Purchase_Tax__c":"18","HSN_Code__c":"8471","GST__c":"18","Fixed_Price_Item__c":"N"}]}';
+        String jsonBody = '{"data":[{' +
+            '"ProductCode":"F01707",' +
+            '"Name":"Wireless Mouse Logitech",' +
+            '"SAP_Item_Code__c":"SAP-F01707",' +
+            '"Product_Category__c":"General",' +
+            '"Product_Vertical__c":"Healthcare",' +
+            '"Product_Type__c":"Accessories",' +
+            '"Source__c":"SAP",' +
+            '"Equipment_Name__c":"Mouse",' +
+            '"Make__c":"Logitech",' +
+            '"Model__c":"M235",' +
+            '"OEM_Part_Number__c":"LOG-M235",' +
+            '"QuantityUnitOfMeasure":"Each",' +
+            '"Compatibility__c":"PC, Laptop",' +
+            '"Specification__c":"Wireless 2.4GHz",' +
+            '"HSN_Code__c":"8471",' +
+            '"Tax__c":"18",' +
+            '"IsActive":"true",' +
+            '"Description":"Wireless Mouse Logitech M235",' +
+            '"Remarks__c":"None",' +
+            '"Any_Other_Levies__c":"No",' +
+            '"Brand__c":"Logitech"' +
+            '}]}';
 
         RestRequest req = new RestRequest();
         req.requestURI = '/services/apexrest/api';
@@ -48,16 +75,18 @@ private class SAPIntegrationControllerTest {
         String responseStr = RestContext.response.responseBody.toString();
         System.assert(responseStr.contains('"Status":"Success"'), 'Response should indicate success');
 
-        Product2 created = [SELECT Name, Brand__c FROM Product2 WHERE Item_Code__c = 'F01707'];
+        Product2 created = [SELECT Name, Make__c, Model__c, Remarks__c FROM Product2 WHERE Item_Code__c = 'F01707'];
         System.assertEquals('Wireless Mouse Logitech', created.Name);
-        System.assertEquals('Logitech', created.Brand__c);
+        System.assertEquals('Logitech', created.Make__c);
+        System.assertEquals('M235', created.Model__c);
+        System.assertEquals('None', created.Remarks__c);
     }
 
     @isTest
     static void testPostUpsertMultiple() {
         String jsonBody = '{"data":[' +
-            '{"Company_Id__c":"Dev","Product_Code__c":"F01708","SKU__c":"F01708","Item_Description__c":"Product A","Name":"Product A","Brand__c":"BrandA","Sales_Tax__c":"18","Purchase_Tax__c":"18","HSN_Code__c":"9018","GST__c":"18","Fixed_Price_Item__c":"N"},' +
-            '{"Company_Id__c":"Dev","Product_Code__c":"F01709","SKU__c":"F01709","Item_Description__c":"Product B","Name":"Product B","Brand__c":"BrandB","Sales_Tax__c":"12","Purchase_Tax__c":"12","HSN_Code__c":"8471","GST__c":"12","Fixed_Price_Item__c":"Y"}' +
+            '{"ProductCode":"F01708","Name":"Product A","SAP_Item_Code__c":"SAP-A","Product_Category__c":"General","Make__c":"BrandA","HSN_Code__c":"9018","Tax__c":"18","IsActive":"true"},' +
+            '{"ProductCode":"F01709","Name":"Product B","SAP_Item_Code__c":"SAP-B","Product_Category__c":"General","Make__c":"BrandB","HSN_Code__c":"8471","Tax__c":"12","IsActive":"true"}' +
             ']}';
 
         RestRequest req = new RestRequest();
@@ -79,7 +108,7 @@ private class SAPIntegrationControllerTest {
 
     @isTest
     static void testPostUpdateExisting() {
-        String jsonBody = '{"data":[{"Company_Id__c":"Dev","Product_Code__c":"F01706","SKU__c":"F01706","Item_Description__c":"Updated Speaker","Name":"Updated Speaker Zebronics","Brand__c":"Zebronics","Sales_Tax__c":"18","Purchase_Tax__c":"18","HSN_Code__c":"8518","GST__c":"18","Fixed_Price_Item__c":"N"}]}';
+        String jsonBody = '{"data":[{"ProductCode":"F01706","Name":"Updated Speaker Zebronics","SAP_Item_Code__c":"SAP-F01706","HSN_Code__c":"8518","Tax__c":"18","IsActive":"true"}]}';
 
         RestRequest req = new RestRequest();
         req.requestURI = '/services/apexrest/api';
@@ -96,6 +125,8 @@ private class SAPIntegrationControllerTest {
 
         Product2 updated = [SELECT Name FROM Product2 WHERE Item_Code__c = 'F01706'];
         System.assertEquals('Updated Speaker Zebronics', updated.Name);
+        String responseStr = RestContext.response.responseBody.toString();
+        System.assert(responseStr.contains('"Message":"Updated"'));
     }
 
     @isTest
@@ -132,14 +163,15 @@ private class SAPIntegrationControllerTest {
         Test.stopTest();
 
         System.assertEquals(500, RestContext.response.statusCode);
+        String responseStr = RestContext.response.responseBody.toString();
+        System.assert(responseStr.contains('"Status":"Failure"'));
     }
 
     @isTest
     static void testPostItemFailure() {
-        // Send item with missing required Name to trigger partial failure
         String jsonBody = '{"data":[' +
-            '{"Company_Id__c":"Dev","Product_Code__c":"F01710","SKU__c":"F01710","Item_Description__c":"Good Product","Name":"Good Product","Brand__c":"BrandX","Sales_Tax__c":"18","Purchase_Tax__c":"18","HSN_Code__c":"9018","GST__c":"18","Fixed_Price_Item__c":"N"},' +
-            '{"Company_Id__c":"Dev","Product_Code__c":"F01711","SKU__c":"F01711","Item_Description__c":"Bad Product","Name":"","Brand__c":"BrandY","Sales_Tax__c":"18","Purchase_Tax__c":"18","HSN_Code__c":"","GST__c":"18","Fixed_Price_Item__c":"N"}' +
+            '{"ProductCode":"F01710","Name":"Good Product","HSN_Code__c":"9018","Tax__c":"18","IsActive":"true"},' +
+            '{"ProductCode":"F01711","Name":"","HSN_Code__c":"","Tax__c":"18","IsActive":"true"}' +
             ']}';
 
         RestRequest req = new RestRequest();
