@@ -185,14 +185,12 @@ global without sharing class SAPIntegrationController {
 
         if (value == 'productMaster') {
             getProducts(req, res);
-        } else if (value == 'customerAddress') {
-            getCustomerAddresses(req, res);
         } else if (value == 'customerDetails') {
             getCustomerDetails(req, res);
         } else {
             res.statusCode = 403;
             List<Response> lstResponse = new List<Response>();
-            lstResponse.add(new Response(null, null, 'Failure', 'Invalid Parameter Value. Use: productMaster, customerAddress, or customerDetails'));
+            lstResponse.add(new Response(null, null, 'Failure', 'Invalid Parameter Value. Use: productMaster or customerDetails'));
             res.responseBody = Blob.valueOf(JSON.serialize(lstResponse));
         }
     }
@@ -236,92 +234,6 @@ global without sharing class SAPIntegrationController {
 
             res.statusCode = 200;
             res.responseBody = Blob.valueOf(JSON.serialize(lstResponse));
-        } catch (Exception e) {
-            res.statusCode = 500;
-            List<Response> lstResponse = new List<Response>();
-            lstResponse.add(new Response(null, null, 'Failure', 'Error: ' + e.getMessage()));
-            res.responseBody = Blob.valueOf(JSON.serialize(lstResponse));
-        }
-    }
-
-    private static void getCustomerAddresses(RestRequest req, RestResponse res) {
-        try {
-            String accountId = req.params.get('accountId');
-            String customerCode = req.params.get('customerCode');
-            Integer limitVal = req.params.get('limit') != null
-                ? Integer.valueOf(req.params.get('limit')) : 200;
-
-            // Query Accounts with billing address
-            String query = 'SELECT Id, Name, Customer_Code__c, ' +
-                'BillingStreet, BillingCity, BillingState, BillingStateCode, ' +
-                'BillingPostalCode, BillingCountry, BillingCountryCode, ' +
-                'ShippingStreet, ShippingCity, ShippingState, ShippingStateCode, ' +
-                'ShippingPostalCode, ShippingCountry, ShippingCountryCode, ' +
-                '(SELECT Id, Name, ' +
-                    'Address__Street__s, Address__City__s, Address__StateCode__s, ' +
-                    'Address__PostalCode__s, Address__CountryCode__s, ' +
-                    'Same_as_BillingAddress__c ' +
-                 'FROM Shipping_Addresses__r) ' +
-                'FROM Account WHERE Id != null';
-
-            if (String.isNotBlank(accountId)) {
-                query += ' AND Id = :accountId';
-            }
-            if (String.isNotBlank(customerCode)) {
-                query += ' AND Customer_Code__c = :customerCode';
-            }
-            query += ' ORDER BY Name ASC LIMIT :limitVal';
-
-            List<Account> accounts = Database.query(query);
-
-            List<Map<String, Object>> results = new List<Map<String, Object>>();
-            for (Account acc : accounts) {
-                Map<String, Object> accMap = new Map<String, Object>();
-                accMap.put('AccountId', acc.Id);
-                accMap.put('AccountName', acc.Name);
-                accMap.put('CustomerCode', acc.Customer_Code__c);
-
-                // Billing Address
-                Map<String, String> billing = new Map<String, String>();
-                billing.put('Street', acc.BillingStreet != null ? acc.BillingStreet : '');
-                billing.put('City', acc.BillingCity != null ? acc.BillingCity : '');
-                billing.put('State', acc.BillingState != null ? acc.BillingState : '');
-                billing.put('PostalCode', acc.BillingPostalCode != null ? acc.BillingPostalCode : '');
-                billing.put('Country', acc.BillingCountry != null ? acc.BillingCountry : '');
-                accMap.put('BillingAddress', billing);
-
-                // Standard Shipping Address
-                Map<String, String> shipping = new Map<String, String>();
-                shipping.put('Street', acc.ShippingStreet != null ? acc.ShippingStreet : '');
-                shipping.put('City', acc.ShippingCity != null ? acc.ShippingCity : '');
-                shipping.put('State', acc.ShippingState != null ? acc.ShippingState : '');
-                shipping.put('PostalCode', acc.ShippingPostalCode != null ? acc.ShippingPostalCode : '');
-                shipping.put('Country', acc.ShippingCountry != null ? acc.ShippingCountry : '');
-                accMap.put('ShippingAddress', shipping);
-
-                // Additional Shipping Addresses from Shipping_Address__c
-                List<Map<String, String>> additionalShipping = new List<Map<String, String>>();
-                if (acc.Shipping_Addresses__r != null) {
-                    for (Shipping_Address__c sa : acc.Shipping_Addresses__r) {
-                        Map<String, String> saMap = new Map<String, String>();
-                        saMap.put('Id', sa.Id);
-                        saMap.put('Name', sa.Name);
-                        saMap.put('Street', sa.Address__Street__s != null ? sa.Address__Street__s : '');
-                        saMap.put('City', sa.Address__City__s != null ? sa.Address__City__s : '');
-                        saMap.put('State', sa.Address__StateCode__s != null ? sa.Address__StateCode__s : '');
-                        saMap.put('PostalCode', sa.Address__PostalCode__s != null ? sa.Address__PostalCode__s : '');
-                        saMap.put('Country', sa.Address__CountryCode__s != null ? sa.Address__CountryCode__s : '');
-                        saMap.put('SameAsBilling', String.valueOf(sa.Same_as_BillingAddress__c));
-                        additionalShipping.add(saMap);
-                    }
-                }
-                accMap.put('AdditionalShippingAddresses', additionalShipping);
-
-                results.add(accMap);
-            }
-
-            res.statusCode = 200;
-            res.responseBody = Blob.valueOf(JSON.serialize(results));
         } catch (Exception e) {
             res.statusCode = 500;
             List<Response> lstResponse = new List<Response>();
