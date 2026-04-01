@@ -32,7 +32,6 @@ private class SAPIntegrationControllerTest {
 
         Account acc = new Account(
             Name = 'Test Hospital',
-            Customer_Code__c = 'CUST-001',
             BillingStreet = '123 Main Street',
             BillingCity = 'Mumbai',
             BillingState = 'Maharashtra',
@@ -382,12 +381,14 @@ private class SAPIntegrationControllerTest {
 
     @isTest
     static void testGetCustomerDetails() {
+        Account acc = [SELECT Id FROM Account WHERE Name = 'Test Hospital' LIMIT 1];
+
         RestRequest req = new RestRequest();
         req.requestURI = '/services/apexrest/api';
         req.httpMethod = 'GET';
         req.params.put('key', Label.SAP_API);
         req.params.put('value', 'customerDetails');
-        req.params.put('customerCode', 'CUST-001');
+        req.params.put('accountId', acc.Id);
         RestContext.request = req;
         RestContext.response = new RestResponse();
 
@@ -398,7 +399,6 @@ private class SAPIntegrationControllerTest {
         System.assertEquals(200, RestContext.response.statusCode);
         String responseStr = RestContext.response.responseBody.toString();
         System.assert(responseStr.contains('Test Hospital'), 'Should contain account name');
-        System.assert(responseStr.contains('CUST-001'), 'Should contain customer code');
         System.assert(responseStr.contains('BillingAddress'), 'Should contain billing address');
         System.assert(responseStr.contains('Contacts'), 'Should contain contacts');
         System.assert(responseStr.contains('Rahul'), 'Should contain contact name');
@@ -408,7 +408,7 @@ private class SAPIntegrationControllerTest {
 
     @isTest
     static void testGetCustomerDetailsByAccountId() {
-        Account acc = [SELECT Id FROM Account WHERE Customer_Code__c = 'CUST-001' LIMIT 1];
+        Account acc = [SELECT Id FROM Account WHERE Name = 'Test Hospital' LIMIT 1];
 
         RestRequest req = new RestRequest();
         req.requestURI = '/services/apexrest/api';
