@@ -16,7 +16,7 @@ global without sharing class SAPIntegrationController {
 * 1.0 | Nanma            | 30-03-2026 | Initial version
 * 1.1 | Claude AI        | 01-04-2026 | Updated field mappings, per-item response
 * 1.2 | Claude AI        | 01-04-2026 | Added customer address query (billing + shipping)
-* 1.3 | Claude AI        | 01-04-2026 | Added customer details query (full account info)
+* 1.3 | Claude AI        | 01-04-2026 | Added customer details query (full account info).
 * -----------------------------------------------------------------------------
 **************************************************************/
 
