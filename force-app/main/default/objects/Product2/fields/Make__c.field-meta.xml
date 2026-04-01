@@ -4,13 +4,9 @@
     <description>Product manufacturer/make - Product Master Module 7</description>
     <externalId>false</externalId>
     <label>Make</label>
+    <length>255</length>
     <required>false</required>
     <trackTrending>false</trackTrending>
-    <type>Picklist</type>
-    <valueSet>
-        <restricted>false</restricted>
-        <valueSetDefinition>
-            <sorted>false</sorted>
-        </valueSetDefinition>
-    </valueSet>
+    <type>Text</type>
+    <unique>false</unique>
 </CustomField>
