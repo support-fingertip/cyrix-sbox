@@ -29,6 +29,28 @@ private class SAPIntegrationControllerTest {
             IsActive = true
         );
         insert prod;
+
+        Account acc = new Account(
+            Name = 'Test Hospital',
+            Customer_Code__c = 'CUST-001',
+            BillingStreet = '123 Main Street',
+            BillingCity = 'Mumbai',
+            BillingState = 'Maharashtra',
+            BillingPostalCode = '400001',
+            BillingCountry = 'India',
+            ShippingStreet = '456 Branch Road',
+            ShippingCity = 'Pune',
+            ShippingState = 'Maharashtra',
+            ShippingPostalCode = '411001',
+            ShippingCountry = 'India'
+        );
+        insert acc;
+
+        Shipping_Address__c sa = new Shipping_Address__c(
+            Account__c = acc.Id,
+            Same_as_BillingAddress__c = false
+        );
+        insert sa;
     }
 
     // ---- POST Tests ----
@@ -266,7 +288,24 @@ private class SAPIntegrationControllerTest {
         System.assert(responseStr.contains('Invalid Key'));
     }
 
-    // ---- GET Tests ----
+    @isTest
+    static void testGetInvalidValue() {
+        RestRequest req = new RestRequest();
+        req.requestURI = '/services/apexrest/api';
+        req.httpMethod = 'GET';
+        req.params.put('key', Label.SAP_API);
+        req.params.put('value', 'invalidValue');
+        RestContext.request = req;
+        RestContext.response = new RestResponse();
+
+        Test.startTest();
+        SAPIntegrationController.doGet();
+        Test.stopTest();
+
+        System.assertEquals(403, RestContext.response.statusCode);
+    }
+
+    // ---- GET Product Tests ----
 
     @isTest
     static void testGetAllProducts() {
@@ -274,6 +313,7 @@ private class SAPIntegrationControllerTest {
         req.requestURI = '/services/apexrest/api';
         req.httpMethod = 'GET';
         req.params.put('key', Label.SAP_API);
+        req.params.put('value', 'productMaster');
         RestContext.request = req;
         RestContext.response = new RestResponse();
 
@@ -293,6 +333,7 @@ private class SAPIntegrationControllerTest {
         req.requestURI = '/services/apexrest/api';
         req.httpMethod = 'GET';
         req.params.put('key', Label.SAP_API);
+        req.params.put('value', 'productMaster');
         req.params.put('productCode', 'F01706');
         RestContext.request = req;
         RestContext.response = new RestResponse();
@@ -312,6 +353,7 @@ private class SAPIntegrationControllerTest {
         req.requestURI = '/services/apexrest/api';
         req.httpMethod = 'GET';
         req.params.put('key', Label.SAP_API);
+        req.params.put('value', 'productMaster');
         req.params.put('category', 'NonExistent');
         RestContext.request = req;
         RestContext.response = new RestResponse();
@@ -323,5 +365,72 @@ private class SAPIntegrationControllerTest {
         System.assertEquals(200, RestContext.response.statusCode);
         String responseStr = RestContext.response.responseBody.toString();
         System.assertEquals('[]', responseStr);
+    }
+
+    // ---- GET Customer Address Tests ----
+
+    @isTest
+    static void testGetCustomerAddresses() {
+        RestRequest req = new RestRequest();
+        req.requestURI = '/services/apexrest/api';
+        req.httpMethod = 'GET';
+        req.params.put('key', Label.SAP_API);
+        req.params.put('value', 'customerAddress');
+        req.params.put('customerCode', 'CUST-001');
+        RestContext.request = req;
+        RestContext.response = new RestResponse();
+
+        Test.startTest();
+        SAPIntegrationController.doGet();
+        Test.stopTest();
+
+        System.assertEquals(200, RestContext.response.statusCode);
+        String responseStr = RestContext.response.responseBody.toString();
+        System.assert(responseStr.contains('Test Hospital'), 'Should contain account name');
+        System.assert(responseStr.contains('BillingAddress'), 'Should contain billing address');
+        System.assert(responseStr.contains('ShippingAddress'), 'Should contain shipping address');
+        System.assert(responseStr.contains('Mumbai'), 'Should contain billing city');
+        System.assert(responseStr.contains('Pune'), 'Should contain shipping city');
+    }
+
+    @isTest
+    static void testGetCustomerAddressByAccountId() {
+        Account acc = [SELECT Id FROM Account WHERE Customer_Code__c = 'CUST-001' LIMIT 1];
+
+        RestRequest req = new RestRequest();
+        req.requestURI = '/services/apexrest/api';
+        req.httpMethod = 'GET';
+        req.params.put('key', Label.SAP_API);
+        req.params.put('value', 'customerAddress');
+        req.params.put('accountId', acc.Id);
+        RestContext.request = req;
+        RestContext.response = new RestResponse();
+
+        Test.startTest();
+        SAPIntegrationController.doGet();
+        Test.stopTest();
+
+        System.assertEquals(200, RestContext.response.statusCode);
+        String responseStr = RestContext.response.responseBody.toString();
+        System.assert(responseStr.contains('CUST-001'), 'Should contain customer code');
+        System.assert(responseStr.contains('AdditionalShippingAddresses'), 'Should contain additional shipping');
+    }
+
+    @isTest
+    static void testGetCustomerAddressNoFilter() {
+        RestRequest req = new RestRequest();
+        req.requestURI = '/services/apexrest/api';
+        req.httpMethod = 'GET';
+        req.params.put('key', Label.SAP_API);
+        req.params.put('value', 'customerAddress');
+        RestContext.request = req;
+        RestContext.response = new RestResponse();
+
+        Test.startTest();
+        SAPIntegrationController.doGet();
+        Test.stopTest();
+
+        System.assertEquals(200, RestContext.response.statusCode);
+        System.assertNotEquals(null, RestContext.response.responseBody);
     }
 }
