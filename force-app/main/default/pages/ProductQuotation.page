@@ -517,6 +517,100 @@
         installation.
     </p>
 
+    <!-- ====================================================================== -->
+    <!-- PAGE 3: WARRANTY, BANK, ACCEPTANCE, CANCELLATION, SIGNATORY           -->
+    <!-- ====================================================================== -->
+    <div class="page-break"></div>
+
+    <!-- COMPANY HEADER -->
+    <div class="company-header">
+        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+    </div>
+
+    <!-- QUOTE REF LINE -->
+    <table class="ref-line">
+        <tr>
+            <td style="text-align: left; width: 70%;">
+                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/QTN{!quote.Quote_Id__c}-</span>{!quote.QuoteNumber}
+            </td>
+            <td style="text-align: right; width: 30%;">
+                <span style="color: #000000;">DATE:</span> {!quoteDate}
+            </td>
+        </tr>
+    </table>
+
+    <!-- WARRANTY -->
+    <p style="font-size: 10pt; font-weight: bold; text-decoration: underline; margin: 10px 0 5px 0;">Warranty</p>
+    <p style="font-size: 9pt;">
+        12-month standard warranty <apex:outputPanel rendered="{!warrantyExtra != ''}"><strong><u>{!warrantyExtra}</u></strong></apex:outputPanel> from the date of installation covers manufacturing defects
+        only.<br/>
+        Repair or replacement of defective components during this period will be at the Company&#8217;s discretion.<br/>
+        Warranty excludes damages arising from power fluctuations, environmental conditions, mishandling, natural
+        calamities, pest-related issues, or third-party interference.
+    </p>
+
+    <!-- SITE RESPONSIBILITIES -->
+    <p style="font-size: 10pt; font-weight: bold; margin: 15px 0 5px 20px;">Site Responsibilities</p>
+    <p style="font-size: 9pt; margin-left: 20px;">
+        The customer shall maintain recommended environmental and electrical conditions. Any damage caused due to
+        non-compliance will not be covered under warranty
+    </p>
+
+    <!-- BANK DETAILS -->
+    <p style="font-size: 10pt; font-weight: bold; margin: 15px 0 5px 20px;">BANK DETAILS:</p>
+    <p style="font-size: 9pt; margin-left: 20px;">
+        A/C Number: {!bankAccountNumber}<br/>
+        Bank Name: {!bankName}<br/>
+        Branch Code: {!bankBranch}<br/>
+        IFSC: {!bankIfsc}
+    </p>
+
+    <!-- ACCEPTANCE OF QUOTATION -->
+    <p style="font-size: 10pt; font-weight: bold; margin: 15px 0 5px 20px;">ACCEPTANCE OF QUOTATION:</p>
+    <p style="font-size: 9pt; margin-left: 20px;">
+        The quotation shall be considered accepted upon issuance of a formal Purchase Order or written confirmation by the
+        CLIENT. Acceptance of the quotation shall constitute agreement to all terms and conditions mentioned herein.
+    </p>
+
+    <!-- CANCELLATION/REFUND NORMS -->
+    <p style="font-size: 10pt; font-weight: bold; margin: 15px 0 5px 20px;">CANCELLATION/REFUND NORMS:</p>
+    <p style="font-size: 9pt; margin-left: 20px;">
+        Cancellation after issuance of Purchase Order will attract a <strong>10%</strong> charge on the total order value.
+        Orders cannot be cancelled once the equipment is shipped.
+    </p>
+
+    <!-- FORCE MAJEURE -->
+    <p style="font-size: 10pt; font-weight: bold; margin: 15px 0 5px 20px;">FORCE MAJEURE:</p>
+    <p style="font-size: 9pt; margin-left: 20px;">
+        The Company shall not be liable for delays or non-performance due to circumstances beyond reasonable control.
+        Delivery timelines will be extended accordingly.
+    </p>
+
+    <!-- JURISDICTION -->
+    <p style="font-size: 10pt; font-weight: bold; margin: 15px 0 5px 20px;">JURISDICTION:</p>
+    <p style="font-size: 9pt; margin-left: 20px;">
+        All disputes shall be subject to the jurisdiction of the Company&#8217;s registered office location.
+    </p>
+
+    <!-- CLOSING -->
+    <p style="font-size: 9pt; margin-top: 25px;">
+        Thanking you and always assuring you of our best services.
+    </p>
+
+    <p style="font-size: 10pt; font-weight: bold; margin-top: 15px;">
+        For CYRIX HEALTHCARE PVT.LTD
+    </p>
+
+    <!-- STAMP/SEAL -->
+    <div style="margin-top: 15px;">
+        <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 80px;" />
+    </div>
+
+    <!-- AUTHORIZED SIGNATORY -->
+    <p style="font-size: 10pt; font-weight: bold; color: #0000cc; margin-top: 5px;">
+        Authorized Signatory
+    </p>
+
 </body>
 </html>
 </apex:page>

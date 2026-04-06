@@ -76,6 +76,7 @@ public with sharing class QuotationPDFController {
     public String deliveryWeeks { get; set; }
     public String installationScope { get; set; }
     public String gstDisplayRate { get; set; }
+    public String warrantyExtra { get; set; }
 
     public String companyName { get { return COMPANY_NAME; } }
     public String companyAddress { get { return COMPANY_ADDRESS; } }
@@ -120,6 +121,7 @@ public with sharing class QuotationPDFController {
         deliveryWeeks = '12-15 weeks';
         installationScope = 'installation and commissioning';
         gstDisplayRate = '';
+        warrantyExtra = '';
 
         if (quoteId != null) {
             loadData(quoteId);
