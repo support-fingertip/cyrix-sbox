@@ -473,13 +473,13 @@
 
     <!-- Validity -->
     <p style="font-size: 10pt; font-weight: bold; margin: 10px 0 3px 0;">Validity</p>
-    <p style="font-size: 9pt; text-align: justify;">
+    <p style="font-size: 9pt;">
         This quotation is valid for <strong>{!validityDays}</strong> from the date of issue and is subject to reconfirmation thereafter.
     </p>
 
     <!-- Price -->
     <p style="font-size: 10pt; font-weight: bold; margin: 10px 0 3px 0;">Price</p>
-    <p style="font-size: 9pt; text-align: justify;">
+    <p style="font-size: 9pt;">
         The quoted price includes applicable levies such as GST, import duties (if any), freight, packing, forwarding,
         transportation, insurance, <strong><u>{!installationScope}</u></strong> at the installation site.<br/>
         Any additional statutory levies imposed by Government authorities shall be borne by the purchaser.
@@ -496,7 +496,7 @@
 
     <!-- Delivery -->
     <p style="font-size: 10pt; font-weight: bold; margin: 10px 0 3px 0;">DELIVERY</p>
-    <p style="font-size: 9pt; text-align: justify;">
+    <p style="font-size: 9pt;">
         Delivery will be scheduled within <strong>{!deliveryWeeks}</strong> from receipt of confirmed Purchase Order along with advance payment.
     </p>
 
