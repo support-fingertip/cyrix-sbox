@@ -119,7 +119,7 @@ public with sharing class QuotationPDFController {
         installationPercent = '5%';
         deliveryWeeks = '12-15 weeks';
         installationScope = 'installation and commissioning';
-        gstDisplayRate = '';
+        gstDisplayRate = 'GST 5%/ 12%/ 18%';
 
         if (quoteId != null) {
             loadData(quoteId);
