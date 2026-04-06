@@ -725,8 +725,8 @@
 
             <!-- TOTAL -->
             <tr>
-                <td style="border: none;" colspan="3">&nbsp;</td>
-                <td colspan="2" style="border: 1px solid #000000; text-align: center; font-weight: bold;">TOTAL</td>
+                <td style="border: 1px solid #000000;" colspan="4">&nbsp;</td>
+                <td style="border: 1px solid #000000; text-align: center; font-weight: bold;">TOTAL</td>
                 <td style="border: 1px solid #000000; text-align: right;">
                     <apex:outputText value="{0, number, ###,##0}">
                         <apex:param value="{!subtotal}" />
@@ -736,8 +736,8 @@
 
             <!-- GST 18% -->
             <tr>
-                <td style="border: none;" colspan="3">&nbsp;</td>
-                <td colspan="2" style="border: 1px solid #000000; text-align: center; font-weight: bold;">GST 18%</td>
+                <td style="border: 1px solid #000000;" colspan="4">&nbsp;</td>
+                <td style="border: 1px solid #000000; text-align: center; font-weight: bold;">GST 18%</td>
                 <td style="border: 1px solid #000000; text-align: right;">
                     <apex:outputText value="{0, number, ###,##0}">
                         <apex:param value="{!taxAmount}" />
@@ -747,8 +747,8 @@
 
             <!-- GRAND TOTAL -->
             <tr>
-                <td style="border: none;" colspan="3">&nbsp;</td>
-                <td colspan="2" style="border: 1px solid #000000; text-align: center; font-weight: bold;">GRAND TOTAL</td>
+                <td style="border: 1px solid #000000;" colspan="4">&nbsp;</td>
+                <td style="border: 1px solid #000000; text-align: center; font-weight: bold;">GRAND TOTAL</td>
                 <td style="border: 1px solid #000000; text-align: right; font-weight: bold;">
                     <apex:outputText value="{0, number, ###,##0}">
                         <apex:param value="{!grandTotal}" />
