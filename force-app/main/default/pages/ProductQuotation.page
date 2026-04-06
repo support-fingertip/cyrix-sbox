@@ -362,13 +362,13 @@
     <table class="pricing-table">
         <thead>
             <tr>
-                <th class="num-col">SLN o</th>
-                <th class="code-col">ITEM CODE</th>
-                <th class="desc-col">Description of Goods</th>
-                <th class="unit-col">Unit</th>
-                <th class="price-col">Unit Price</th>
-                <th class="qty-col">Qty</th>
-                <th class="price-col">Price</th>
+                <th class="num-col"><strong>SLN<br/>o</strong></th>
+                <th class="code-col"><strong>ITEM<br/>CODE</strong></th>
+                <th class="desc-col"><strong>Description of Goods</strong></th>
+                <th class="unit-col"><strong>Unit</strong></th>
+                <th class="price-col"><strong>Unit<br/>Price</strong></th>
+                <th class="qty-col"><strong>Qty</strong></th>
+                <th class="price-col"><strong>Price</strong></th>
             </tr>
         </thead>
         <tbody>
@@ -386,10 +386,7 @@
                     <td class="desc-col">
                         <strong>{!item.Product2.Name}</strong>
                         <apex:outputPanel rendered="{!item.Product_Line_Description__c != null}">
-                            <br/><em>({!item.Product_Line_Description__c})</em>
-                        </apex:outputPanel>
-                        <apex:outputPanel rendered="{!item.Product_Detailed_Description__c != null}">
-                            <br/><span style="font-size:8pt; color:#666;">{!item.Product_Detailed_Description__c}</span>
+                            <br/><br/>({!item.Product_Line_Description__c})
                         </apex:outputPanel>
                     </td>
                     <td class="unit-col">
@@ -414,26 +411,36 @@
                 <apex:variable var="rowNum" value="{!rowNum + 1}" />
             </apex:repeat>
 
-            <!-- Empty rows for spacing (like PDF shows) -->
-            <tr><td colspan="7" style="border: 1px solid #cccccc;">&nbsp;</td></tr>
+            <!-- Empty rows -->
+            <tr>
+                <td class="num-col">&nbsp;</td>
+                <td class="code-col">&nbsp;</td>
+                <td class="desc-col">&nbsp;</td>
+                <td class="unit-col">&nbsp;</td>
+                <td class="price-col">&nbsp;</td>
+                <td class="qty-col">&nbsp;</td>
+                <td class="price-col">&nbsp;</td>
+            </tr>
 
-            <!-- TOTAL -->
-            <tr class="total-row">
-                <td colspan="6" style="text-align: right; padding-right: 10px;">Total</td>
-                <td class="price-col">
+            <!-- TOTAL ROW - right side only -->
+            <tr>
+                <td style="border: none;" colspan="4">&nbsp;</td>
+                <td colspan="2" style="text-align: right; padding-right: 5px; border: 1px solid #000000; font-weight: bold;">Total</td>
+                <td class="price-col" style="border: 1px solid #000000; font-weight: bold;">
                     <apex:outputText value="{0, number, ###,##0.00}">
                         <apex:param value="{!subtotal}" />
                     </apex:outputText>
                 </td>
             </tr>
 
-            <!-- GST (single row as shown in PDF) -->
+            <!-- GST ROW - right side only -->
             <apex:outputPanel layout="none" rendered="{!!isExempt}">
                 <tr>
-                    <td colspan="6" style="text-align: right; padding-right: 10px;">
+                    <td style="border: none;" colspan="4">&nbsp;</td>
+                    <td colspan="2" style="text-align: right; padding-right: 5px; border: 1px solid #000000;">
                         {!gstDisplayRate}
                     </td>
-                    <td class="price-col">
+                    <td class="price-col" style="border: 1px solid #000000;">
                         <apex:outputText value="{0, number, ###,##0.00}">
                             <apex:param value="{!taxAmount}" />
                         </apex:outputText>
@@ -441,10 +448,11 @@
                 </tr>
             </apex:outputPanel>
 
-            <!-- GRAND TOTAL -->
-            <tr class="grand-total-row">
-                <td colspan="6" style="text-align: right; padding-right: 10px;">Grand Total</td>
-                <td class="price-col">
+            <!-- GRAND TOTAL ROW - right side only -->
+            <tr>
+                <td style="border: none;" colspan="4">&nbsp;</td>
+                <td colspan="2" style="text-align: right; padding-right: 5px; border: 1px solid #000000; font-weight: bold;">Grand Total</td>
+                <td class="price-col" style="border: 1px solid #000000; font-weight: bold;">
                     <apex:outputText value="{0, number, ###,##0.00}">
                         <apex:param value="{!grandTotal}" />
                     </apex:outputText>
@@ -454,12 +462,11 @@
     </table>
 
     <!-- GRAND TOTAL IN WORDS -->
-    <div class="total-words">
+    <p style="font-weight: bold; font-size: 9pt; margin: 10px 0 0 0;">
         &lt;{!grandTotalInWords}&gt;
-    </div>
-
+    </p>
     <!-- NOTE -->
-    <p style="font-size: 8pt; font-weight: bold; color: #cc0000; margin: 5px 0 20px 0;">
+    <p style="font-size: 8pt; font-weight: bold; color: #cc0000; margin: 2px 0 20px 15px;">
         ***Note: If required
     </p>
 
