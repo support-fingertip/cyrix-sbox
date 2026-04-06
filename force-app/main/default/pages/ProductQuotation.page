@@ -317,7 +317,7 @@
 
         <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 80px;" />
 
-        <p style="margin-left: 30px;"><strong>Authorised Signatory</strong></p>
+        <p style="margin-left: 30px; color: #0000cc;"><strong>Authorised Signatory</strong></p>
 
         <p>For queries contact:<br/>
             <apex:outputPanel rendered="{!salesEngineerName != null}">
