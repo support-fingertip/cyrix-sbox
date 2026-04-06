@@ -311,7 +311,7 @@
         <p>With Regards,<br/>
            For Cyrix Healthcare Pvt. Ltd</p>
 
-        <p>&lt;Sign with Seal&gt;</p>
+        <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 80px;" />
 
         <p style="margin-left: 30px;"><strong>Authorised Signatory</strong></p>
 
