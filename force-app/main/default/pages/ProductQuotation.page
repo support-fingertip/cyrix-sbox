@@ -37,7 +37,7 @@
     /* ---------- COMPANY HEADER ---------- */
     .company-header {
         text-align: left;
-        margin-bottom: 10px;
+        margin-bottom: 20px;
     }
     .company-logo {
         max-height: 70px;
@@ -65,7 +65,7 @@
     /* ---------- QUOTE REF LINE ---------- */
     .ref-line {
         width: 100%;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
         font-size: 9pt;
         color: #cc0000;
         font-weight: bold;
@@ -74,7 +74,7 @@
     /* ---------- TO SECTION ---------- */
     .to-section {
         font-size: 10pt;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
     }
 
     /* ---------- SUBJECT ---------- */
@@ -83,27 +83,27 @@
         font-size: 11pt;
         font-weight: bold;
         color: #000000;
-        margin: 15px 0 10px 0;
+        margin: 20px 0 15px 0;
     }
 
     /* ---------- LETTER BODY ---------- */
     .letter-body {
         font-size: 10pt;
         text-align: justify;
-        line-height: 1.5;
+        line-height: 1.6;
     }
     .letter-body p {
-        margin: 8px 0;
+        margin: 10px 0;
     }
     .product-list {
-        margin: 5px 0 5px 0;
+        margin: 3px 0 3px 0;
         font-weight: bold;
         color: #000000;
     }
 
     /* ---------- SIGNATURE SECTION ---------- */
     .sign-section {
-        margin-top: 30px;
+        margin-top: 40px;
     }
     .sign-line {
         border-bottom: 1px solid #333333;
@@ -278,7 +278,7 @@
 
     <!-- LETTER BODY -->
     <div class="letter-body">
-        <p><strong>Dear Sir/Madam,</strong></p>
+        <p><u>Dear Sir/Madam,</u></p>
 
         <p>Greetings from Cyrix Healthcare Pvt Ltd!!!</p>
 
@@ -291,7 +291,7 @@
             <p class="product-list">
                 <apex:outputText value="{0, number, 0}">
                     <apex:param value="{!pIdx}" />
-                </apex:outputText>.{!pName}
+                </apex:outputText>.&lt;{!pName}&gt;
             </p>
             <apex:variable var="pIdx" value="{!pIdx + 1}" />
         </apex:repeat>
@@ -313,17 +313,17 @@
 
         <p>&lt;Sign with Seal&gt;</p>
 
-        <p style="margin-top: 15px;"><strong>Authorised Signatory</strong></p>
+        <p style="margin-left: 30px;"><strong>Authorised Signatory</strong></p>
 
         <p>For queries contact:<br/>
             <apex:outputPanel rendered="{!salesEngineerName != null}">
-                {!salesEngineerName}<br/>
+                <span style="margin-left: 10px;">{!salesEngineerName}</span><br/>
             </apex:outputPanel>
             <apex:outputPanel rendered="{!salesEngineerTitle != null}">
-                {!salesEngineerTitle}<br/>
+                <span style="margin-left: 10px;">{!salesEngineerTitle}</span><br/>
             </apex:outputPanel>
             <apex:outputPanel rendered="{!salesEngineerPhone != null}">
-                {!salesEngineerPhone}
+                <span style="margin-left: 10px;">{!salesEngineerPhone}</span>
             </apex:outputPanel>
         </p>
     </div>
