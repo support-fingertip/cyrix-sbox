@@ -610,6 +610,173 @@
         Authorized Signatory
     </p>
 
+    <!-- ====================================================================== -->
+    <!-- PAGE 4: GENERAL/CALIBRATION OVERVIEW + CALIBRATION TABLE              -->
+    <!-- ====================================================================== -->
+    <div class="page-break"></div>
+
+    <!-- COMPANY HEADER -->
+    <div class="company-header">
+        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+    </div>
+
+    <!-- QUOTE REF LINE -->
+    <table class="ref-line">
+        <tr>
+            <td style="text-align: left; width: 70%;">
+                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/QTN{!quote.Quote_Id__c}-</span>{!quote.QuoteNumber}
+            </td>
+            <td style="text-align: right; width: 30%;">
+                <span style="color: #000000;">DATE:</span> {!quoteDate}
+            </td>
+        </tr>
+    </table>
+
+    <!-- HORIZONTAL LINE -->
+    <hr style="border: 1px solid #000000; margin: 10px 0;"/>
+
+    <!-- IN GENERAL QUOTATIONS AND CONSUMABLES -->
+    <p style="font-size: 10pt; font-weight: bold; font-style: italic; text-decoration: underline; margin: 10px 0 8px 0;">
+        IN GENERAL QUOTATIONS AND CONSUMABLES
+    </p>
+
+    <p style="font-size: 9pt; font-weight: bold; text-decoration: underline; margin: 8px 0 5px 0;">
+        TERMS AND CONDITIONS <span style="font-weight: normal; font-style: italic; text-decoration: none;">&nbsp;&nbsp;**(Balance all same)</span>
+    </p>
+
+    <p style="font-size: 9pt; margin-left: 30px; line-height: 1.8;">
+        VALIDITY:<br/>
+        PRICE:<br/>
+        DELIVERY:<br/>
+        PAYMENT TERMS &amp; CONDITIONS:<br/>
+        CANCELLATION/REFUND NORMS:<br/>
+        ACCEPTANCE OF QUOTATION:<br/>
+        BANK DETAILS:
+    </p>
+
+    <!-- HORIZONTAL LINE -->
+    <hr style="border: 1px solid #000000; margin: 15px 0;"/>
+
+    <!-- IN CALIBRATION QUOTATIONS -->
+    <p style="font-size: 10pt; font-weight: bold; font-style: italic; text-decoration: underline; margin: 10px 0 5px 0;">
+        IN CALIBRATION QUOTATIONS
+    </p>
+
+    <p style="font-size: 8pt; font-style: italic; margin: 3px 0 8px 0;">
+        **2<sup>nd</sup> page in this document changes
+    </p>
+
+    <!-- PROJECT COSTING -->
+    <p style="font-size: 10pt; font-weight: bold; text-align: center; margin: 10px 0;">
+        PROJECT COSTING - &lt;&#8220;{!quote.Vertical__c}&#8221;&gt;
+    </p>
+
+    <!-- CALIBRATION TABLE -->
+    <table class="pricing-table">
+        <thead>
+            <tr>
+                <th style="width: 30px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">SN</th>
+                <th style="width: 120px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">EQUIPMENT</th>
+                <th style="width: 40px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">QTY</th>
+                <th style="background-color: #ffffff; color: #000000; border: 1px solid #000000;">PARAMETER</th>
+                <th style="width: 50px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">UNIT<br/>RATE</th>
+                <th style="width: 50px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">RATE</th>
+            </tr>
+        </thead>
+        <tbody>
+            <apex:variable var="calIdx" value="{!1}" />
+            <apex:repeat value="{!lineItems}" var="calItem">
+                <tr>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, 0}">
+                            <apex:param value="{!calIdx}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="border: 1px solid #000000; font-weight: bold;">
+                        {!calItem.Product2.Name}
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000; font-weight: bold;">
+                        <apex:outputText value="{!IF(calItem.Product2.QuantityUnitOfMeasure != null, calItem.Product2.QuantityUnitOfMeasure, 'NOS')}" />
+                    </td>
+                    <td style="border: 1px solid #000000; font-weight: bold; text-decoration: underline;">
+                        AS PER THE EQUIPMENT TYPE
+                    </td>
+                    <td style="text-align: right; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!calItem.UnitPrice}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="text-align: right; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!calItem.TotalPrice}" />
+                        </apex:outputText>
+                    </td>
+                </tr>
+                <apex:variable var="calIdx" value="{!calIdx + 1}" />
+            </apex:repeat>
+
+            <!-- Empty row if no items -->
+            <tr>
+                <td style="border: 1px solid #000000;">&nbsp;</td>
+                <td style="border: 1px solid #000000;">&nbsp;</td>
+                <td style="border: 1px solid #000000;">&nbsp;</td>
+                <td style="border: 1px solid #000000;">&nbsp;</td>
+                <td style="border: 1px solid #000000;">&nbsp;</td>
+                <td style="border: 1px solid #000000;">&nbsp;</td>
+            </tr>
+
+            <!-- TOTAL -->
+            <tr>
+                <td style="border: none;" colspan="3">&nbsp;</td>
+                <td colspan="2" style="border: 1px solid #000000; text-align: center; font-weight: bold;">TOTAL</td>
+                <td style="border: 1px solid #000000; text-align: right;">
+                    <apex:outputText value="{0, number, ###,##0}">
+                        <apex:param value="{!subtotal}" />
+                    </apex:outputText>
+                </td>
+            </tr>
+
+            <!-- GST 18% -->
+            <tr>
+                <td style="border: none;" colspan="3">&nbsp;</td>
+                <td colspan="2" style="border: 1px solid #000000; text-align: center; font-weight: bold;">GST 18%</td>
+                <td style="border: 1px solid #000000; text-align: right;">
+                    <apex:outputText value="{0, number, ###,##0}">
+                        <apex:param value="{!taxAmount}" />
+                    </apex:outputText>
+                </td>
+            </tr>
+
+            <!-- GRAND TOTAL -->
+            <tr>
+                <td style="border: none;" colspan="3">&nbsp;</td>
+                <td colspan="2" style="border: 1px solid #000000; text-align: center; font-weight: bold;">GRAND TOTAL</td>
+                <td style="border: 1px solid #000000; text-align: right; font-weight: bold;">
+                    <apex:outputText value="{0, number, ###,##0}">
+                        <apex:param value="{!grandTotal}" />
+                    </apex:outputText>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- NOTE -->
+    <p style="font-size: 8pt; font-weight: bold; color: #cc0000; margin: 3px 0 15px 0;">
+        ***Note: If required
+    </p>
+
+    <!-- CALIBRATION TERMS AND CONDITIONS -->
+    <div style="text-align: center; font-size: 10pt; font-weight: bold; text-decoration: underline; margin: 10px 0 8px 0;">
+        TERMS AND CONDITIONS
+    </div>
+
+    <p style="font-size: 9pt; margin-left: 30px; line-height: 1.8;">
+        PRICE:<br/>
+        VALIDITY:<br/>
+        PAYMENT TERMS &amp; CONDITIONS:<br/>
+        BANK DETAILS:
+    </p>
+
 </body>
 </html>
 </apex:page>
