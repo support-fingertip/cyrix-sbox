@@ -1096,33 +1096,33 @@
     </table>
 
     <!-- Jurisdiction continued -->
-    <ul style="font-size: 7pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
-        <li style="margin-bottom: 2px;">Jurisdiction: Cochin, Kerala.</li>
+    <ul style="font-size: 7pt; margin: 0 0 2px 15px; padding-left: 12px; line-height: 1.3;">
+        <li>Jurisdiction: Cochin, Kerala.</li>
     </ul>
 
     <!-- 11. Bank Details -->
-    <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">11. BANK DETAILS:</p>
-    <ul style="font-size: 7pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
-        <li style="margin-bottom: 2px;">A/C Number: &lt;Bank Account Number&gt;</li>
-        <li style="margin-bottom: 2px;">Bank Name: &lt;Bank Name&gt;</li>
-        <li style="margin-bottom: 2px;">Branch Code: &lt;Branch Code&gt;</li>
-        <li style="margin-bottom: 2px;">IFSC: &lt;Code&gt;</li>
+    <p style="font-size: 8pt; font-weight: bold; margin: 5px 0 1px 0;">11. BANK DETAILS:</p>
+    <ul style="font-size: 7pt; margin: 0 0 2px 15px; padding-left: 12px; line-height: 1.3;">
+        <li>A/C Number: &lt;Bank Account Number&gt;</li>
+        <li>Bank Name: &lt;Bank Name&gt;</li>
+        <li>Branch Code: &lt;Branch Code&gt;</li>
+        <li>IFSC: &lt;Code&gt;</li>
     </ul>
 
     <!-- 12. Service Report Acknowledgement -->
-    <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">12. Service Report Acknowledgement</p>
-    <ul style="font-size: 7pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
-        <li style="margin-bottom: 2px;">The CLIENT shall sign and acknowledge the service report upon completion of each service visit as confirmation of the work performed.</li>
+    <p style="font-size: 8pt; font-weight: bold; margin: 5px 0 1px 0;">12. Service Report Acknowledgement</p>
+    <ul style="font-size: 7pt; margin: 0 0 2px 15px; padding-left: 12px; line-height: 1.3;">
+        <li>The CLIENT shall sign and acknowledge the service report upon completion of each service visit as confirmation of the work performed.</li>
     </ul>
 
     <!-- 13. Addition of Equipment -->
-    <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">13. Addition of Equipment</p>
-    <ul style="font-size: 7pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
-        <li style="margin-bottom: 2px;">Any new equipment installed by the CLIENT during the contract period that is not listed in Annexure-A shall not be covered under this agreement. Such equipment may be included in the contract only upon mutual agreement, subject to inspection and revision of contract charges through a written amendment or separate Purchase Order.</li>
+    <p style="font-size: 8pt; font-weight: bold; margin: 5px 0 1px 0;">13. Addition of Equipment</p>
+    <ul style="font-size: 7pt; margin: 0 0 2px 15px; padding-left: 12px; line-height: 1.3;">
+        <li>Any new equipment installed by the CLIENT during the contract period that is not listed in Annexure-A shall not be covered under this agreement. Such equipment may be included in the contract only upon mutual agreement, subject to inspection and revision of contract charges through a written amendment or separate Purchase Order.</li>
     </ul>
 
     <!-- SECOND PARTY / FIRST PARTY -->
-    <table style="width: 100%; margin-top: 20px; font-size: 9pt;">
+    <table style="width: 100%; margin-top: 10px; font-size: 8pt;">
         <tr>
             <td style="width: 50%; vertical-align: top;">
                 <p style="font-weight: bold;">SECOND PARTY</p>
@@ -1133,12 +1133,12 @@
         </tr>
         <tr>
             <td style="vertical-align: top;">
-                <br/><br/>
+                <br/>
                 <p>&lt;Customer Name&gt;</p>
                 <p>&lt;Address&gt;</p>
             </td>
             <td style="vertical-align: top; text-align: right;">
-                <br/><br/>
+                <br/>
                 <p style="font-weight: bold;">Cyrix Healthcare Pvt. Ltd</p>
                 <p>30/641B, Petta, Poonithura</p>
                 <p>Ernakulam, Kerala</p>
@@ -1147,10 +1147,8 @@
         </tr>
     </table>
 
-    <br/><br/>
-
     <!-- ANNEXURE - A -->
-    <div style="text-align: center; font-size: 11pt; font-weight: bold; text-decoration: underline; margin: 20px 0 15px 0;">
+    <div style="text-align: center; font-size: 10pt; font-weight: bold; text-decoration: underline; margin: 12px 0 8px 0;">
         ANNEXURE &#8211; A
     </div>
 
@@ -1179,12 +1177,12 @@
     <br/>
 
     <!-- CAMC QUOTATIONS -->
-    <p style="font-size: 10pt; font-weight: bold; font-style: italic; text-decoration: underline; margin: 10px 0 10px 0;">
+    <p style="font-size: 9pt; font-weight: bold; font-style: italic; text-decoration: underline; margin: 8px 0 5px 0;">
         CAMC QUOTATIONS
     </p>
 
     <!-- PROJECT COSTING -->
-    <p style="font-size: 10pt; font-weight: bold; text-align: center; margin: 10px 0;">
+    <p style="font-size: 9pt; font-weight: bold; text-align: center; margin: 5px 0;">
         PROJECT COSTING - &lt;&#8220;VERTICAL&#8221;&gt;
     </p>
 
