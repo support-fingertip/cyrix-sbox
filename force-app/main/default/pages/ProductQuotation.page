@@ -1171,6 +1171,28 @@
         </tbody>
     </table>
 
+    <!-- ====================================================================== -->
+    <!-- CAMC QUOTATION PAGE                                                   -->
+    <!-- ====================================================================== -->
+    <div class="page-break"></div>
+
+    <!-- COMPANY HEADER -->
+    <div class="company-header">
+        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+    </div>
+
+    <!-- QUOTE REF LINE -->
+    <table class="ref-line">
+        <tr>
+            <td style="text-align: left; width: 70%;">
+                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/QTN{!quote.Quote_Id__c}-</span>{!quote.QuoteNumber}
+            </td>
+            <td style="text-align: right; width: 30%;">
+                <span style="color: #000000;">DATE:</span> {!quoteDate}
+            </td>
+        </tr>
+    </table>
+
     <!-- CAMC QUOTATIONS -->
     <p style="font-size: 8pt; font-weight: bold; font-style: italic; text-decoration: underline; margin: 5px 0 3px 0;">
         CAMC QUOTATIONS
