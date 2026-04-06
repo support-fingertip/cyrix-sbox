@@ -935,7 +935,7 @@
                 <td style="text-align: center; border: 1px solid #000000;">000</td>
             </tr>
             <tr>
-                <td style="border: none;" colspan="6" style="text-align: center; font-size: 8pt; border: none;">
+                <td colspan="6" style="text-align: center; font-size: 8pt; border: none;">
                     <p style="text-align: center; font-size: 8pt; font-weight: bold; margin: 3px 0;">
                         Contract Period: - 01/01/2026 to 31/12/2026
                     </p>
