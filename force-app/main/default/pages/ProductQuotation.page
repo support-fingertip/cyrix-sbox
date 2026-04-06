@@ -231,10 +231,7 @@
 
     <!-- COMPANY HEADER WITH LOGO -->
     <div class="company-header">
-        <!-- TODO: Replace with actual logo static resource once uploaded -->
-        <!-- <apex:image url="{!URLFOR($Resource.CyrixLogo)}" styleClass="company-logo" /> -->
-        <p class="company-name">CYRIX<sup style="font-size:8pt;">&reg;</sup></p>
-        <p class="company-sub">HEALTH CARE PVT LTD</p>
+        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
         <p class="company-tagline">{!companyTagline}</p>
     </div>
 
@@ -339,8 +336,7 @@
 
     <!-- COMPANY HEADER (repeated on page 2) -->
     <div class="company-header">
-        <p class="company-name">CYRIX<sup style="font-size:8pt;">&reg;</sup></p>
-        <p class="company-sub">HEALTH CARE PVT LTD</p>
+        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
         <p class="company-tagline">{!companyTagline}</p>
     </div>
 
