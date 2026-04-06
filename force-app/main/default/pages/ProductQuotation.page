@@ -684,38 +684,17 @@
             </tr>
         </thead>
         <tbody>
-            <apex:variable var="calIdx" value="{!1}" />
-            <apex:repeat value="{!lineItems}" var="calItem">
-                <tr>
-                    <td style="text-align: center; border: 1px solid #000000;">
-                        <apex:outputText value="{0, number, 0}">
-                            <apex:param value="{!calIdx}" />
-                        </apex:outputText>
-                    </td>
-                    <td style="border: 1px solid #000000; font-weight: bold;">
-                        {!calItem.Product2.Name}
-                    </td>
-                    <td style="text-align: center; border: 1px solid #000000; font-weight: bold;">
-                        <apex:outputText value="{!IF(calItem.Product2.QuantityUnitOfMeasure != null, calItem.Product2.QuantityUnitOfMeasure, 'NOS')}" />
-                    </td>
-                    <td style="border: 1px solid #000000; font-weight: bold; text-decoration: underline;">
-                        AS PER THE EQUIPMENT TYPE
-                    </td>
-                    <td style="text-align: right; border: 1px solid #000000;">
-                        <apex:outputText value="{0, number, ###,##0}">
-                            <apex:param value="{!calItem.UnitPrice}" />
-                        </apex:outputText>
-                    </td>
-                    <td style="text-align: right; border: 1px solid #000000;">
-                        <apex:outputText value="{0, number, ###,##0}">
-                            <apex:param value="{!calItem.TotalPrice}" />
-                        </apex:outputText>
-                    </td>
-                </tr>
-                <apex:variable var="calIdx" value="{!calIdx + 1}" />
-            </apex:repeat>
+            <!-- Placeholder row showing calibration format -->
+            <tr>
+                <td style="text-align: center; border: 1px solid #000000;">1</td>
+                <td style="border: 1px solid #000000; font-weight: bold;">EQUIPMENT NAME</td>
+                <td style="text-align: center; border: 1px solid #000000; font-weight: bold;">NOS</td>
+                <td style="border: 1px solid #000000; font-weight: bold; text-decoration: underline;">AS PER THE EQUIPMENT TYPE</td>
+                <td style="text-align: center; border: 1px solid #000000;">00</td>
+                <td style="text-align: right; border: 1px solid #000000;">000</td>
+            </tr>
 
-            <!-- Empty row if no items -->
+            <!-- Empty row -->
             <tr>
                 <td style="border: 1px solid #000000;">&nbsp;</td>
                 <td style="border: 1px solid #000000;">&nbsp;</td>
@@ -729,33 +708,21 @@
             <tr>
                 <td style="border: none;" colspan="3">&nbsp;</td>
                 <td colspan="2" style="border: 1px solid #000000; text-align: center; font-weight: bold;">TOTAL</td>
-                <td style="border: 1px solid #000000; text-align: right;">
-                    <apex:outputText value="{0, number, ###,##0}">
-                        <apex:param value="{!subtotal}" />
-                    </apex:outputText>
-                </td>
+                <td style="border: 1px solid #000000; text-align: right;">000</td>
             </tr>
 
             <!-- GST 18% -->
             <tr>
                 <td style="border: none;" colspan="3">&nbsp;</td>
                 <td colspan="2" style="border: 1px solid #000000; text-align: center; font-weight: bold;">GST 18%</td>
-                <td style="border: 1px solid #000000; text-align: right;">
-                    <apex:outputText value="{0, number, ###,##0}">
-                        <apex:param value="{!taxAmount}" />
-                    </apex:outputText>
-                </td>
+                <td style="border: 1px solid #000000; text-align: right;">000</td>
             </tr>
 
             <!-- GRAND TOTAL -->
             <tr>
                 <td style="border: none;" colspan="3">&nbsp;</td>
                 <td colspan="2" style="border: 1px solid #000000; text-align: center; font-weight: bold;">GRAND TOTAL</td>
-                <td style="border: 1px solid #000000; text-align: right; font-weight: bold;">
-                    <apex:outputText value="{0, number, ###,##0}">
-                        <apex:param value="{!grandTotal}" />
-                    </apex:outputText>
-                </td>
+                <td style="border: 1px solid #000000; text-align: right; font-weight: bold;">000</td>
             </tr>
         </tbody>
     </table>
