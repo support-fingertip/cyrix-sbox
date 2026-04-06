@@ -1178,6 +1178,20 @@
         PROJECT COSTING - &lt;&#8220;VERTICAL&#8221;&gt;
     </p>
 
+    <!-- CAMC TABLE - Header only on this page -->
+    <table class="pricing-table">
+        <thead>
+            <tr>
+                <th style="width: 40px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">SI NO.</th>
+                <th style="width: 180px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">CONTRACT TYPE</th>
+                <th style="width: 60px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">RATE</th>
+                <th style="width: 50px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">GST %</th>
+                <th style="width: 60px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">GST RATE</th>
+                <th style="width: 60px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">TOTAL</th>
+            </tr>
+        </thead>
+    </table>
+
     <!-- ====================================================================== -->
     <!-- CAMC DATA + T&C PAGE                                                  -->
     <!-- ====================================================================== -->
@@ -1216,8 +1230,8 @@
             <tr>
                 <td style="text-align: center; border: 1px solid #000000;">1.</td>
                 <td style="border: 1px solid #000000; font-weight: bold;">
-                    Comprehensive Annual Maintenance<br/>Contract (CAMC)<br/>
-                    <u>(Annexure A List of Equipment)</u>
+                    Comprehensive Annual Maintenance Contract (CAMC)<br/>
+                    (Annexure A List of Equipment)
                 </td>
                 <td style="text-align: center; border: 1px solid #000000;">000</td>
                 <td style="text-align: center; border: 1px solid #000000;">18%</td>
@@ -1225,17 +1239,13 @@
                 <td style="text-align: center; border: 1px solid #000000;">000</td>
             </tr>
             <tr>
-                <td colspan="6" style="text-align: center; font-size: 7pt; border: 1px solid #000000;">
+                <td colspan="6" style="text-align: center; font-size: 7pt; border: none;">
                     <strong>Contract Period: - 01/01/2026 to 31/12/2026</strong>
-                </td>
-            </tr>
-            <tr>
-                <td colspan="6" style="border: none; font-size: 7pt; padding: 2px 0;">
-                    <span style="font-weight: bold; color: #cc0000;">***Note: If required</span>
                 </td>
             </tr>
         </tbody>
     </table>
+    <p style="font-size: 7pt; font-weight: bold; color: #cc0000; margin: 1px 0 0 0;">***Note: If required</p>
 
     <!-- TERMS AND CONDITIONS -->
     <div style="text-align: center; font-size: 10pt; font-weight: bold; text-decoration: underline; margin: 5px 0 8px 0;">
