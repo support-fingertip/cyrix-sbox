@@ -1139,10 +1139,11 @@
             </td>
             <td style="vertical-align: top; text-align: right;">
                 <br/>
-                <p style="font-weight: bold;">Cyrix Healthcare Pvt. Ltd</p>
-                <p>30/641B, Petta, Poonithura</p>
-                <p>Ernakulam, Kerala</p>
-                <p>India</p>
+                <p style="font-weight: bold; margin: 0;">Cyrix Healthcare Pvt. Ltd</p>
+                <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 50px; margin: 3px 0;" />
+                <p style="margin: 0;">30/641B, Petta, Poonithura</p>
+                <p style="margin: 0;">Ernakulam, Kerala</p>
+                <p style="margin: 0;">India</p>
             </td>
         </tr>
     </table>
