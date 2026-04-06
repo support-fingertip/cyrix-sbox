@@ -1248,51 +1248,51 @@
     <p style="font-size: 7pt; font-weight: bold; color: #cc0000; margin: 1px 0 0 0;">***Note: If required</p>
 
     <!-- TERMS AND CONDITIONS -->
-    <div style="text-align: center; font-size: 11pt; font-weight: bold; text-decoration: underline; margin: 10px 0 12px 0;">
+    <div style="text-align: center; font-size: 10pt; font-weight: bold; text-decoration: underline; margin: 8px 0 10px 0;">
         TERMS &amp; CONDITIONS
     </div>
 
     <!-- 1. Scope of Services -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 10px 0 3px 0;">1. Scope of Services</p>
-    <ul style="font-size: 8pt; margin: 0 0 5px 15px; padding-left: 12px; line-height: 1.6;">
-        <li style="margin-bottom: 4px;">All internal electronic and mechanical spare parts, labour, and service charges included.</li>
-        <li style="margin-bottom: 4px;"><strong>Breakdown Support:</strong> Attendance for major or complete system breakdown within <strong>48 hours</strong> of complaint registration.</li>
-        <li style="margin-bottom: 4px;"><strong>Preventive Maintenance:</strong> <strong>Two (2)</strong> Preventive Maintenance visits per year to ensure optimal performance and reliability.</li>
-        <li style="margin-bottom: 4px;"><strong>User Training:</strong> Basic operational training for end users during the contract period.</li>
-        <li style="margin-bottom: 4px;"><strong>Asset Digital Inventory:</strong> Maintenance of digital asset records for tracking and service history documentation.</li>
-        <li style="margin-bottom: 4px;"><strong>Yearly Calibration:</strong> One annual calibration as per applicable standards.</li>
+    <p style="font-size: 8pt; font-weight: bold; margin: 8px 0 2px 0;">1. Scope of Services</p>
+    <ul style="font-size: 7.5pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+        <li style="margin-bottom: 3px;">All internal electronic and mechanical spare parts, labour, and service charges included.</li>
+        <li style="margin-bottom: 3px;"><strong>Breakdown Support:</strong> Attendance for major or complete system breakdown within <strong>48 hours</strong> of complaint registration.</li>
+        <li style="margin-bottom: 3px;"><strong>Preventive Maintenance:</strong> <strong>Two (2)</strong> Preventive Maintenance visits per year to ensure optimal performance and reliability.</li>
+        <li style="margin-bottom: 3px;"><strong>User Training:</strong> Basic operational training for end users during the contract period.</li>
+        <li style="margin-bottom: 3px;"><strong>Asset Digital Inventory:</strong> Maintenance of digital asset records for tracking and service history documentation.</li>
+        <li style="margin-bottom: 3px;"><strong>Yearly Calibration:</strong> One annual calibration as per applicable standards.</li>
     </ul>
 
     <!-- 2. Exclusions -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 10px 0 3px 0;">2. Exclusions</p>
-    <p style="font-size: 8pt; margin: 0 0 3px 0;">The CAMC does not cover:</p>
-    <ul style="font-size: 8pt; margin: 0 0 5px 15px; padding-left: 12px; line-height: 1.6;">
-        <li style="margin-bottom: 4px;">Consumables and accessories such as probes, cables, batteries, cuffs, tubing, printer cartridges, sensors, and similar items are not included under CAMC.</li>
-        <li style="margin-bottom: 4px;">Software upgrades, updates, licenses, or application software are not covered under this CAMC unless specifically mentioned in the contract.</li>
-        <li style="margin-bottom: 4px;">Physical/accidental damage, fire, flood, electrical surge, rodent damage, corrosion, tampering, or misuse.</li>
-        <li style="margin-bottom: 4px;">Failures due to improper earthing, voltage fluctuation, or faulty power supply.</li>
-        <li style="margin-bottom: 4px;">Equipment shifting, dismantling, reinstallation, relocation, or major overhauls.</li>
-        <li style="margin-bottom: 4px;">Any failure or service interruption due to the CLIENT&#8217;s non-compliance with statutory or regulatory requirements (such as AERB, PC-PNDT, etc.) will not be covered under this CAMC.</li>
+    <p style="font-size: 8pt; font-weight: bold; margin: 8px 0 2px 0;">2. Exclusions</p>
+    <p style="font-size: 7.5pt; margin: 0 0 3px 0;">The CAMC does not cover:</p>
+    <ul style="font-size: 7.5pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+        <li style="margin-bottom: 3px;">Consumables and accessories such as probes, cables, batteries, cuffs, tubing, printer cartridges, sensors, and similar items are not included under CAMC.</li>
+        <li style="margin-bottom: 3px;">Software upgrades, updates, licenses, or application software are not covered under this CAMC unless specifically mentioned in the contract.</li>
+        <li style="margin-bottom: 3px;">Physical/accidental damage, fire, flood, electrical surge, rodent damage, corrosion, tampering, or misuse.</li>
+        <li style="margin-bottom: 3px;">Failures due to improper earthing, voltage fluctuation, or faulty power supply.</li>
+        <li style="margin-bottom: 3px;">Equipment shifting, dismantling, reinstallation, relocation, or major overhauls.</li>
+        <li style="margin-bottom: 3px;">Any failure or service interruption due to the CLIENT&#8217;s non-compliance with statutory or regulatory requirements (such as AERB, PC-PNDT, etc.) will not be covered under this CAMC.</li>
     </ul>
 
     <!-- 3. Contract Period -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 10px 0 3px 0;">3. Contract Period</p>
-    <ul style="font-size: 8pt; margin: 0 0 5px 15px; padding-left: 12px; line-height: 1.6;">
-        <li style="margin-bottom: 4px;">The contract shall be valid for a period of one year, or for such duration as may be mutually agreed upon by both parties.</li>
-        <li style="margin-bottom: 4px;">Cyrix Healthcare Pvt. Ltd. agrees to provide maintenance services for the equipment listed in <strong>Annexure-A</strong> installed at the CLIENT premises.</li>
-        <li style="margin-bottom: 4px;">Renewable annually with 5% escalation, up to <strong>five years</strong>, subject to mutual agreement.</li>
+    <p style="font-size: 8pt; font-weight: bold; margin: 8px 0 2px 0;">3. Contract Period</p>
+    <ul style="font-size: 7.5pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+        <li style="margin-bottom: 3px;">The contract shall be valid for a period of one year, or for such duration as may be mutually agreed upon by both parties.</li>
+        <li style="margin-bottom: 3px;">Cyrix Healthcare Pvt. Ltd. agrees to provide maintenance services for the equipment listed in <strong>Annexure-A</strong> installed at the CLIENT premises.</li>
+        <li style="margin-bottom: 3px;">Renewable annually with 5% escalation, up to <strong>five years</strong>, subject to mutual agreement.</li>
     </ul>
 
     <!-- 4. Payment Terms -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 10px 0 3px 0;">4. Payment Terms</p>
-    <ul style="font-size: 8pt; margin: 0 0 5px 15px; padding-left: 12px; line-height: 1.6;">
-        <li style="margin-bottom: 4px;"><strong>&lt;100 % along with the work order&gt;</strong></li>
+    <p style="font-size: 8pt; font-weight: bold; margin: 8px 0 2px 0;">4. Payment Terms</p>
+    <ul style="font-size: 7.5pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+        <li style="margin-bottom: 3px;"><strong>&lt;100 % along with the work order&gt;</strong></li>
     </ul>
 
     <!-- 5. Service Conditions -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 10px 0 3px 0;">5. Service Conditions</p>
-    <ul style="font-size: 8pt; margin: 0 0 5px 15px; padding-left: 12px; line-height: 1.6;">
-        <li style="margin-bottom: 4px;">Service hours: 9:00 AM &#8211; 5:00 PM (Monday&#8211;Saturday), excluding holidays.</li>
+    <p style="font-size: 8pt; font-weight: bold; margin: 8px 0 2px 0;">5. Service Conditions</p>
+    <ul style="font-size: 7.5pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+        <li style="margin-bottom: 3px;">Service hours: 9:00 AM &#8211; 5:00 PM (Monday&#8211;Saturday), excluding holidays.</li>
     </ul>
 
     <!-- ====================================================================== -->
