@@ -242,10 +242,10 @@
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/QTN{!quote.Quote_Id__c}-</span>{!quote.QuoteNumber}
+                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> {!quoteDate}
+                <span style="color: #000000;">DATE:</span> 01/03/2026
             </td>
         </tr>
     </table>
@@ -346,10 +346,10 @@
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/QTN{!quote.Quote_Id__c}-</span>{!quote.QuoteNumber}
+                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> {!quoteDate}
+                <span style="color: #000000;">DATE:</span> 01/03/2026
             </td>
         </tr>
     </table>
@@ -531,10 +531,10 @@
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/QTN{!quote.Quote_Id__c}-</span>{!quote.QuoteNumber}
+                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> {!quoteDate}
+                <span style="color: #000000;">DATE:</span> 01/03/2026
             </td>
         </tr>
     </table>
@@ -624,10 +624,10 @@
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/QTN{!quote.Quote_Id__c}-</span>{!quote.QuoteNumber}
+                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> {!quoteDate}
+                <span style="color: #000000;">DATE:</span> 01/03/2026
             </td>
         </tr>
     </table>
@@ -789,10 +789,10 @@
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/QTN{!quote.Quote_Id__c}-</span>{!quote.QuoteNumber}
+                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> {!quoteDate}
+                <span style="color: #000000;">DATE:</span> 01/03/2026
             </td>
         </tr>
     </table>
@@ -869,10 +869,10 @@
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/QTN{!quote.Quote_Id__c}-</span>{!quote.QuoteNumber}
+                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> {!quoteDate}
+                <span style="color: #000000;">DATE:</span> 01/03/2026
             </td>
         </tr>
     </table>
@@ -993,10 +993,10 @@
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/QTN{!quote.Quote_Id__c}-</span>{!quote.QuoteNumber}
+                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> {!quoteDate}
+                <span style="color: #000000;">DATE:</span> 01/03/2026
             </td>
         </tr>
     </table>
@@ -1085,10 +1085,10 @@
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/QTN{!quote.Quote_Id__c}-</span>{!quote.QuoteNumber}
+                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> {!quoteDate}
+                <span style="color: #000000;">DATE:</span> 01/03/2026
             </td>
         </tr>
     </table>
@@ -1206,10 +1206,10 @@
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/QTN{!quote.Quote_Id__c}-</span>{!quote.QuoteNumber}
+                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> {!quoteDate}
+                <span style="color: #000000;">DATE:</span> 01/03/2026
             </td>
         </tr>
     </table>
@@ -1309,10 +1309,10 @@
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/QTN{!quote.Quote_Id__c}-</span>{!quote.QuoteNumber}
+                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> {!quoteDate}
+                <span style="color: #000000;">DATE:</span> 01/03/2026
             </td>
         </tr>
     </table>
@@ -1395,10 +1395,10 @@
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/QTN{!quote.Quote_Id__c}-</span>{!quote.QuoteNumber}
+                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> {!quoteDate}
+                <span style="color: #000000;">DATE:</span> 01/03/2026
             </td>
         </tr>
     </table>
