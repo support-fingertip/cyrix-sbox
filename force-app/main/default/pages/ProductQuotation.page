@@ -1,0 +1,498 @@
+<apex:page standardController="Quote"
+           extensions="QuotationPDFController"
+           renderAs="pdf"
+           showHeader="false"
+           sidebar="false"
+           applyHtmlTag="false"
+           applyBodyTag="false"
+           standardStylesheets="false">
+<html>
+<head>
+<style type="text/css">
+    @page {
+        size: A4;
+        margin: 15mm 15mm 20mm 15mm;
+    }
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10pt;
+        color: #333333;
+        line-height: 1.4;
+    }
+    .company-header {
+        text-align: center;
+        border-bottom: 2px solid #003366;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+    .company-name {
+        font-size: 16pt;
+        font-weight: bold;
+        color: #003366;
+        margin: 0;
+    }
+    .company-details {
+        font-size: 8pt;
+        color: #666666;
+        margin-top: 3px;
+    }
+    .header-table {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    .header-table td {
+        vertical-align: top;
+    }
+    .to-section {
+        font-size: 10pt;
+    }
+    .to-label {
+        font-weight: bold;
+        font-size: 10pt;
+        color: #003366;
+    }
+    .ref-table {
+        border-collapse: collapse;
+        float: right;
+    }
+    .ref-table td {
+        border: 1px solid #999999;
+        padding: 4px 8px;
+        font-size: 9pt;
+    }
+    .ref-label {
+        font-weight: bold;
+        background-color: #f0f0f0;
+    }
+    .subject {
+        text-align: center;
+        font-size: 12pt;
+        font-weight: bold;
+        color: #003366;
+        text-decoration: underline;
+        margin: 20px 0 15px 0;
+        clear: both;
+    }
+    .greeting {
+        margin: 10px 0 15px 0;
+        text-align: justify;
+    }
+    .pricing-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 15px 0;
+    }
+    .pricing-table th {
+        background-color: #003366;
+        color: #ffffff;
+        font-size: 9pt;
+        padding: 6px 4px;
+        border: 1px solid #003366;
+        text-align: center;
+    }
+    .pricing-table td {
+        border: 1px solid #cccccc;
+        padding: 5px 4px;
+        font-size: 9pt;
+        vertical-align: top;
+    }
+    .pricing-table .num-col {
+        text-align: center;
+        width: 35px;
+    }
+    .pricing-table .code-col {
+        width: 80px;
+    }
+    .pricing-table .desc-col {
+        width: auto;
+    }
+    .pricing-table .unit-col {
+        text-align: center;
+        width: 45px;
+    }
+    .pricing-table .price-col {
+        text-align: right;
+        width: 85px;
+    }
+    .pricing-table .qty-col {
+        text-align: center;
+        width: 40px;
+    }
+    .total-row td {
+        font-weight: bold;
+        background-color: #f9f9f9;
+    }
+    .grand-total-row td {
+        font-weight: bold;
+        background-color: #e8e8e8;
+        font-size: 10pt;
+    }
+    .total-words {
+        margin: 10px 0;
+        font-weight: bold;
+        font-style: italic;
+        font-size: 10pt;
+    }
+    .section-title {
+        font-size: 11pt;
+        font-weight: bold;
+        color: #003366;
+        margin: 20px 0 8px 0;
+        border-bottom: 1px solid #003366;
+        padding-bottom: 3px;
+    }
+    .tc-list {
+        margin: 0;
+        padding-left: 20px;
+    }
+    .tc-list li {
+        margin-bottom: 5px;
+        font-size: 9pt;
+        text-align: justify;
+    }
+    .bank-table {
+        border-collapse: collapse;
+        width: 50%;
+        margin: 10px 0;
+    }
+    .bank-table td {
+        border: 1px solid #cccccc;
+        padding: 4px 8px;
+        font-size: 9pt;
+    }
+    .bank-table .bank-label {
+        font-weight: bold;
+        background-color: #f0f0f0;
+        width: 40%;
+    }
+    .acceptance-box {
+        border: 1px solid #cccccc;
+        padding: 15px;
+        margin: 15px 0;
+    }
+    .sign-section {
+        margin-top: 40px;
+        width: 100%;
+    }
+    .sign-section td {
+        vertical-align: bottom;
+        padding: 5px;
+    }
+    .sign-line {
+        border-bottom: 1px solid #333333;
+        width: 200px;
+        height: 40px;
+    }
+    .page-break {
+        page-break-before: always;
+    }
+</style>
+</head>
+<body>
+
+    <!-- COMPANY HEADER -->
+    <div class="company-header">
+        <p class="company-name">{!companyName}</p>
+        <div class="company-details">
+            {!companyAddress}<br/>
+            <apex:outputPanel rendered="{!companyPhone != ''}">Phone: {!companyPhone} | </apex:outputPanel>
+            <apex:outputPanel rendered="{!companyEmail != ''}">Email: {!companyEmail} | </apex:outputPanel>
+            <apex:outputPanel rendered="{!companyWebsite != ''}">Web: {!companyWebsite}</apex:outputPanel>
+        </div>
+    </div>
+
+    <!-- RECIPIENT AND QUOTE REFERENCE -->
+    <table class="header-table">
+        <tr>
+            <td style="width: 55%;">
+                <div class="to-section">
+                    <span class="to-label">To,</span><br/>
+                    <strong>{!account.Name}</strong><br/>
+                    <apex:outputPanel rendered="{!quote.Billing_Address__c != null}">
+                        {!quote.Billing_Address__c}<br/>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!account.BillingStreet != null && quote.Billing_Address__c == null}">
+                        {!account.BillingStreet}<br/>
+                        {!account.BillingCity}<apex:outputPanel rendered="{!account.BillingState != null}">, {!account.BillingState}</apex:outputPanel>
+                        <apex:outputPanel rendered="{!account.BillingPostalCode != null}"> - {!account.BillingPostalCode}</apex:outputPanel><br/>
+                        <apex:outputPanel rendered="{!account.BillingCountry != null}">{!account.BillingCountry}<br/></apex:outputPanel>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!account.GST_Number__c != null}">
+                        <strong>GSTIN:</strong> {!account.GST_Number__c}<br/>
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{!account.PAN_Number__c != null}">
+                        <strong>PAN:</strong> {!account.PAN_Number__c}
+                    </apex:outputPanel>
+                </div>
+            </td>
+            <td style="width: 45%; text-align: right;">
+                <table class="ref-table">
+                    <tr>
+                        <td class="ref-label">Quote No.</td>
+                        <td>{!quote.Quote_Id__c}</td>
+                    </tr>
+                    <tr>
+                        <td class="ref-label">Date</td>
+                        <td>{!quoteDate}</td>
+                    </tr>
+                    <tr>
+                        <td class="ref-label">Valid Till</td>
+                        <td>{!validTillDate}</td>
+                    </tr>
+                    <tr>
+                        <td class="ref-label">Status</td>
+                        <td>{!quote.Status}</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!-- SUBJECT -->
+    <div class="subject">
+        QUOTATION FOR {!quote.Vertical__c}
+    </div>
+
+    <!-- GREETING -->
+    <div class="greeting">
+        <p>Dear Sir/Madam,</p>
+        <p>We thank you for the enquiry and are pleased to quote our best prices for the following
+           product(s): <strong>{!productNamesList}</strong></p>
+    </div>
+
+    <!-- PRICING TABLE -->
+    <table class="pricing-table">
+        <thead>
+            <tr>
+                <th class="num-col">Sl.No</th>
+                <th class="code-col">Item Code</th>
+                <th class="desc-col">Description of Goods</th>
+                <th class="unit-col">Unit</th>
+                <th class="price-col">Unit Price</th>
+                <th class="qty-col">Qty</th>
+                <th class="price-col">Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            <apex:variable var="rowNum" value="{!1}" />
+            <apex:repeat value="{!lineItems}" var="item">
+                <tr>
+                    <td class="num-col">
+                        <apex:outputText value="{0, number, 0}">
+                            <apex:param value="{!rowNum}" />
+                        </apex:outputText>
+                    </td>
+                    <td class="code-col">
+                        <apex:outputText value="{!IF(item.Product2.Item_Code__c != null, item.Product2.Item_Code__c, item.Product2.ProductCode)}" />
+                    </td>
+                    <td class="desc-col">
+                        <strong>{!item.Product2.Name}</strong>
+                        <apex:outputPanel rendered="{!item.Product_Line_Description__c != null}">
+                            <br/>{!item.Product_Line_Description__c}
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!item.Product_Detailed_Description__c != null}">
+                            <br/><span style="font-size:8pt; color:#666;">{!item.Product_Detailed_Description__c}</span>
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!item.Product2.HSN_Code__c != null}">
+                            <br/><span style="font-size:8pt;">HSN: {!item.Product2.HSN_Code__c}</span>
+                        </apex:outputPanel>
+                    </td>
+                    <td class="unit-col">
+                        <apex:outputText value="{!IF(item.Product2.QuantityUnitOfMeasure != null, item.Product2.QuantityUnitOfMeasure, 'Nos')}" />
+                    </td>
+                    <td class="price-col">
+                        <apex:outputText value="{0, number, ###,##0.00}">
+                            <apex:param value="{!item.UnitPrice}" />
+                        </apex:outputText>
+                    </td>
+                    <td class="qty-col">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!item.Quantity}" />
+                        </apex:outputText>
+                    </td>
+                    <td class="price-col">
+                        <apex:outputText value="{0, number, ###,##0.00}">
+                            <apex:param value="{!item.TotalPrice}" />
+                        </apex:outputText>
+                    </td>
+                </tr>
+                <apex:variable var="rowNum" value="{!rowNum + 1}" />
+            </apex:repeat>
+
+            <!-- SUBTOTAL -->
+            <tr class="total-row">
+                <td colspan="6" style="text-align: right; padding-right: 10px;">Sub Total</td>
+                <td class="price-col">
+                    <apex:outputText value="{0, number, ###,##0.00}">
+                        <apex:param value="{!subtotal}" />
+                    </apex:outputText>
+                </td>
+            </tr>
+
+            <!-- GST (Same State) -->
+            <apex:outputPanel layout="none" rendered="{!isSameState && !isExempt}">
+                <tr>
+                    <td colspan="6" style="text-align: right; padding-right: 10px;">
+                        CGST @
+                        <apex:outputText value="{0, number, ##0.00}">
+                            <apex:param value="{!cgstRate}" />
+                        </apex:outputText>%
+                    </td>
+                    <td class="price-col">
+                        <apex:outputText value="{0, number, ###,##0.00}">
+                            <apex:param value="{!cgstAmount}" />
+                        </apex:outputText>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="text-align: right; padding-right: 10px;">
+                        SGST @
+                        <apex:outputText value="{0, number, ##0.00}">
+                            <apex:param value="{!sgstRate}" />
+                        </apex:outputText>%
+                    </td>
+                    <td class="price-col">
+                        <apex:outputText value="{0, number, ###,##0.00}">
+                            <apex:param value="{!sgstAmount}" />
+                        </apex:outputText>
+                    </td>
+                </tr>
+            </apex:outputPanel>
+
+            <!-- IGST (Different State) -->
+            <apex:outputPanel layout="none" rendered="{!!isSameState && !isExempt}">
+                <tr>
+                    <td colspan="6" style="text-align: right; padding-right: 10px;">
+                        IGST @
+                        <apex:outputText value="{0, number, ##0.00}">
+                            <apex:param value="{!igstRate}" />
+                        </apex:outputText>%
+                    </td>
+                    <td class="price-col">
+                        <apex:outputText value="{0, number, ###,##0.00}">
+                            <apex:param value="{!igstAmount}" />
+                        </apex:outputText>
+                    </td>
+                </tr>
+            </apex:outputPanel>
+
+            <!-- GRAND TOTAL -->
+            <tr class="grand-total-row">
+                <td colspan="6" style="text-align: right; padding-right: 10px;">Grand Total</td>
+                <td class="price-col">
+                    <apex:outputText value="{0, number, ###,##0.00}">
+                        <apex:param value="{!grandTotal}" />
+                    </apex:outputText>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- GRAND TOTAL IN WORDS -->
+    <div class="total-words">
+        Grand Total (in words): {!grandTotalInWords}
+    </div>
+
+    <!-- ====== PAGE 2: TERMS & CONDITIONS ====== -->
+    <div class="page-break"></div>
+
+    <!-- COMPANY HEADER (repeated) -->
+    <div class="company-header">
+        <p class="company-name">{!companyName}</p>
+        <div class="company-details">
+            {!companyAddress}
+        </div>
+    </div>
+
+    <div class="section-title">Terms &amp; Conditions</div>
+
+    <ol class="tc-list">
+        <li><strong>Validity:</strong> This quotation is valid for 30 days from the date of issue and is subject to reconfirmation thereafter.</li>
+        <li><strong>Price:</strong> The quoted price includes GST, import duties, freight, packing, forwarding, transportation, insurance, installation &amp; commissioning charges. Any additional statutory levies imposed after the date of quotation shall be borne by the purchaser.</li>
+        <li><strong>Payment Terms:</strong>
+            <ul>
+                <li>40% Advance along with Purchase Order</li>
+                <li>45% on Shipping Confirmation</li>
+                <li>10% on Delivery at Site</li>
+                <li>5% after Installation &amp; Handover</li>
+            </ul>
+        </li>
+        <li><strong>Delivery:</strong> 12-15 weeks from receipt of confirmed Purchase Order and advance payment.</li>
+        <li><strong>Shipping Mode:</strong> {!IF(quote.Shipping_Mode__c != null, quote.Shipping_Mode__c, 'As applicable')}</li>
+        <li><strong>Installation:</strong> Free installation at approved site, subject to site readiness. Civil, electrical, air conditioning, and earthing works are the customer's responsibility. All statutory approvals (PC-PNDT, AERB, etc.) must be obtained by the customer prior to installation.</li>
+        <li><strong>Warranty:</strong> 12 months from the date of installation. Covers manufacturing defects only. Excludes damage due to power fluctuations, environmental conditions, mishandling, natural calamities, pests, or third-party interference.</li>
+        <li><strong>Cancellation:</strong> 10% cancellation charge after Purchase Order issuance. No cancellation permitted after shipping.</li>
+        <li><strong>Force Majeure:</strong> The company shall not be held liable for delays caused by events beyond its control. Delivery timelines will be extended accordingly.</li>
+        <li><strong>Jurisdiction:</strong> All disputes shall be subject to the jurisdiction of courts at the company's registered office location.</li>
+    </ol>
+
+    <!-- BANK DETAILS -->
+    <div class="section-title">Bank Details</div>
+    <table class="bank-table">
+        <tr>
+            <td class="bank-label">Account Holder</td>
+            <td>{!bankAccountHolder}</td>
+        </tr>
+        <tr>
+            <td class="bank-label">Bank Name</td>
+            <td>{!bankName}</td>
+        </tr>
+        <tr>
+            <td class="bank-label">Account Number</td>
+            <td>{!bankAccountNumber}</td>
+        </tr>
+        <tr>
+            <td class="bank-label">IFSC Code</td>
+            <td>{!bankIfsc}</td>
+        </tr>
+        <tr>
+            <td class="bank-label">Branch</td>
+            <td>{!bankBranch}</td>
+        </tr>
+    </table>
+
+    <!-- ACCEPTANCE -->
+    <div class="section-title">Acceptance</div>
+    <div class="acceptance-box">
+        <p>We accept the above quotation and confirm the order as per the terms and conditions mentioned herein.</p>
+        <br/><br/>
+        <table style="width: 100%;">
+            <tr>
+                <td style="width: 50%;">
+                    <div class="sign-line"></div>
+                    <p style="font-size: 9pt;">Authorized Signatory (Customer)</p>
+                    <p style="font-size: 9pt;">Company Name: ________________________</p>
+                    <p style="font-size: 9pt;">Date: ________________________</p>
+                </td>
+                <td style="width: 50%;"></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- SIGNATORY -->
+    <div class="section-title">For {!companyName}</div>
+    <table class="sign-section">
+        <tr>
+            <td style="width: 50%;">
+                <div class="sign-line"></div>
+                <p><strong>Authorized Signatory</strong></p>
+                <apex:outputPanel rendered="{!salesEngineerName != null}">
+                    <p>Name: {!salesEngineerName}</p>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!salesEngineerTitle != null}">
+                    <p>Designation: {!salesEngineerTitle}</p>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!salesEngineerPhone != null}">
+                    <p>Contact: {!salesEngineerPhone}</p>
+                </apex:outputPanel>
+                <apex:outputPanel rendered="{!salesEngineerEmail != null}">
+                    <p>Email: {!salesEngineerEmail}</p>
+                </apex:outputPanel>
+            </td>
+            <td style="width: 50%;"></td>
+        </tr>
+    </table>
+
+</body>
+</html>
+</apex:page>
