@@ -22,6 +22,8 @@ public with sharing class QuotationPDFController {
     public static final String COMPANY_PHONE = '';
     public static final String COMPANY_EMAIL = '';
     public static final String COMPANY_WEBSITE = '';
+    public static final String COMPANY_TAGLINE = 'The X-Factor in Medical Technology Reliability';
+    public static final String COMPANY_CIN = 'CIN: U74140KL2013PTC034081';
 
     // Bank detail constants (placeholders - to be configured)
     public static final String BANK_NAME = '';
@@ -61,12 +63,16 @@ public with sharing class QuotationPDFController {
     public String salesEngineerPhone { get; set; }
     public String salesEngineerEmail { get; set; }
     public String productNamesList { get; set; }
+    public List<String> productNamesNumbered { get; set; }
+    public String quoteRefNumber { get; set; }
 
     public String companyName { get { return COMPANY_NAME; } }
     public String companyAddress { get { return COMPANY_ADDRESS; } }
     public String companyPhone { get { return COMPANY_PHONE; } }
     public String companyEmail { get { return COMPANY_EMAIL; } }
     public String companyWebsite { get { return COMPANY_WEBSITE; } }
+    public String companyTagline { get { return COMPANY_TAGLINE; } }
+    public String companyCin { get { return COMPANY_CIN; } }
 
     public String bankName { get { return BANK_NAME; } }
     public String bankAccountNumber { get { return BANK_ACCOUNT_NUMBER; } }
@@ -89,6 +95,9 @@ public with sharing class QuotationPDFController {
         cgstRate = 0;
         sgstRate = 0;
         igstRate = 0;
+
+        productNamesNumbered = new List<String>();
+        quoteRefNumber = '';
 
         if (quoteId != null) {
             loadData(quoteId);
@@ -155,12 +164,21 @@ public with sharing class QuotationPDFController {
 
         // Build product names list
         List<String> prodNames = new List<String>();
+        productNamesNumbered = new List<String>();
+        Integer prodIndex = 1;
         for (QuoteLineItem qli : lineItems) {
             if (qli.Product2 != null && String.isNotBlank(qli.Product2.Name)) {
                 prodNames.add(qli.Product2.Name);
+                productNamesNumbered.add(qli.Product2.Name);
+                prodIndex++;
             }
         }
         productNamesList = String.join(prodNames, ', ');
+
+        // Build quote reference number: C-KL/<VERTICAL>/<Quote_Id__c>
+        String vertical = quote.Vertical__c != null ? quote.Vertical__c : '';
+        String qtnId = quote.Quote_Id__c != null ? quote.Quote_Id__c : quote.QuoteNumber;
+        quoteRefNumber = 'C-KL/' + vertical + '/' + qtnId;
 
         // Compute tax and totals
         computeTax();

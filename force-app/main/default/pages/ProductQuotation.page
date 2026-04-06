@@ -12,71 +12,111 @@
     @page {
         size: A4;
         margin: 15mm 15mm 20mm 15mm;
+
+        @bottom-center {
+            content: element(footer);
+        }
     }
     body {
         font-family: Arial, Helvetica, sans-serif;
         font-size: 10pt;
-        color: #333333;
+        color: #000000;
         line-height: 1.4;
     }
+
+    /* ---------- FOOTER ---------- */
+    .page-footer {
+        position: running(footer);
+        text-align: center;
+        font-size: 7pt;
+        color: #cc0000;
+        border-top: 1px solid #cc0000;
+        padding-top: 3px;
+    }
+
+    /* ---------- COMPANY HEADER ---------- */
     .company-header {
         text-align: center;
-        border-bottom: 2px solid #003366;
-        padding-bottom: 10px;
-        margin-bottom: 15px;
+        margin-bottom: 10px;
+    }
+    .company-logo {
+        max-height: 60px;
     }
     .company-name {
-        font-size: 16pt;
+        font-size: 14pt;
+        font-weight: bold;
+        color: #003366;
+        margin: 0;
+        letter-spacing: 2px;
+    }
+    .company-sub {
+        font-size: 9pt;
         font-weight: bold;
         color: #003366;
         margin: 0;
     }
-    .company-details {
-        font-size: 8pt;
+    .company-tagline {
+        font-size: 7pt;
         color: #666666;
-        margin-top: 3px;
+        font-style: italic;
+        margin: 2px 0 8px 0;
     }
-    .header-table {
+
+    /* ---------- QUOTE REF LINE ---------- */
+    .ref-line {
         width: 100%;
         margin-bottom: 15px;
+        font-size: 9pt;
+        color: #cc0000;
+        font-weight: bold;
     }
-    .header-table td {
-        vertical-align: top;
-    }
+
+    /* ---------- TO SECTION ---------- */
     .to-section {
         font-size: 10pt;
+        margin-bottom: 15px;
     }
-    .to-label {
-        font-weight: bold;
-        font-size: 10pt;
-        color: #003366;
-    }
-    .ref-table {
-        border-collapse: collapse;
-        float: right;
-    }
-    .ref-table td {
-        border: 1px solid #999999;
-        padding: 4px 8px;
-        font-size: 9pt;
-    }
-    .ref-label {
-        font-weight: bold;
-        background-color: #f0f0f0;
-    }
+
+    /* ---------- SUBJECT ---------- */
     .subject {
         text-align: center;
-        font-size: 12pt;
+        font-size: 11pt;
         font-weight: bold;
-        color: #003366;
-        text-decoration: underline;
-        margin: 20px 0 15px 0;
-        clear: both;
+        color: #000000;
+        margin: 15px 0 10px 0;
     }
-    .greeting {
-        margin: 10px 0 15px 0;
+
+    /* ---------- LETTER BODY ---------- */
+    .letter-body {
+        font-size: 10pt;
         text-align: justify;
+        line-height: 1.5;
     }
+    .letter-body p {
+        margin: 8px 0;
+    }
+    .product-list {
+        margin: 5px 0 5px 0;
+        font-weight: bold;
+        color: #000000;
+    }
+
+    /* ---------- SIGNATURE SECTION ---------- */
+    .sign-section {
+        margin-top: 30px;
+    }
+    .sign-line {
+        border-bottom: 1px solid #333333;
+        width: 200px;
+        height: 40px;
+    }
+
+    /* ---------- PAGE BREAK ---------- */
+    .page-break {
+        page-break-before: always;
+    }
+
+    /* ---------- PRICING TABLE (for later pages) ---------- */
     .pricing-table {
         width: 100%;
         border-collapse: collapse;
@@ -133,6 +173,8 @@
         font-style: italic;
         font-size: 10pt;
     }
+
+    /* ---------- TERMS & CONDITIONS ---------- */
     .section-title {
         font-size: 11pt;
         font-weight: bold;
@@ -150,6 +192,8 @@
         font-size: 9pt;
         text-align: justify;
     }
+
+    /* ---------- BANK TABLE ---------- */
     .bank-table {
         border-collapse: collapse;
         width: 50%;
@@ -165,100 +209,152 @@
         background-color: #f0f0f0;
         width: 40%;
     }
+
+    /* ---------- ACCEPTANCE ---------- */
     .acceptance-box {
         border: 1px solid #cccccc;
         padding: 15px;
         margin: 15px 0;
     }
-    .sign-section {
-        margin-top: 40px;
-        width: 100%;
-    }
-    .sign-section td {
-        vertical-align: bottom;
-        padding: 5px;
-    }
-    .sign-line {
-        border-bottom: 1px solid #333333;
-        width: 200px;
-        height: 40px;
-    }
-    .page-break {
-        page-break-before: always;
-    }
 </style>
 </head>
 <body>
 
-    <!-- COMPANY HEADER -->
-    <div class="company-header">
-        <p class="company-name">{!companyName}</p>
-        <div class="company-details">
-            {!companyAddress}<br/>
-            <apex:outputPanel rendered="{!companyPhone != ''}">Phone: {!companyPhone} | </apex:outputPanel>
-            <apex:outputPanel rendered="{!companyEmail != ''}">Email: {!companyEmail} | </apex:outputPanel>
-            <apex:outputPanel rendered="{!companyWebsite != ''}">Web: {!companyWebsite}</apex:outputPanel>
-        </div>
+    <!-- RUNNING FOOTER (appears on every page) -->
+    <div class="page-footer">
+        {!companyCin}
     </div>
 
-    <!-- RECIPIENT AND QUOTE REFERENCE -->
-    <table class="header-table">
+    <!-- ====================================================================== -->
+    <!-- PAGE 1: COVER LETTER                                                   -->
+    <!-- ====================================================================== -->
+
+    <!-- COMPANY HEADER WITH LOGO -->
+    <div class="company-header">
+        <!-- TODO: Replace with actual logo static resource once uploaded -->
+        <!-- <apex:image url="{!URLFOR($Resource.CyrixLogo)}" styleClass="company-logo" /> -->
+        <p class="company-name">CYRIX<sup style="font-size:8pt;">&reg;</sup></p>
+        <p class="company-sub">HEALTH CARE PVT LTD</p>
+        <p class="company-tagline">{!companyTagline}</p>
+    </div>
+
+    <!-- QUOTE REFERENCE LINE -->
+    <table class="ref-line">
         <tr>
-            <td style="width: 55%;">
-                <div class="to-section">
-                    <span class="to-label">To,</span><br/>
-                    <strong>{!account.Name}</strong><br/>
-                    <apex:outputPanel rendered="{!quote.Billing_Address__c != null}">
-                        {!quote.Billing_Address__c}<br/>
-                    </apex:outputPanel>
-                    <apex:outputPanel rendered="{!account.BillingStreet != null && quote.Billing_Address__c == null}">
-                        {!account.BillingStreet}<br/>
-                        {!account.BillingCity}<apex:outputPanel rendered="{!account.BillingState != null}">, {!account.BillingState}</apex:outputPanel>
-                        <apex:outputPanel rendered="{!account.BillingPostalCode != null}"> - {!account.BillingPostalCode}</apex:outputPanel><br/>
-                        <apex:outputPanel rendered="{!account.BillingCountry != null}">{!account.BillingCountry}<br/></apex:outputPanel>
-                    </apex:outputPanel>
-                    <apex:outputPanel rendered="{!account.GST_Number__c != null}">
-                        <strong>GSTIN:</strong> {!account.GST_Number__c}<br/>
-                    </apex:outputPanel>
-                    <apex:outputPanel rendered="{!account.PAN_Number__c != null}">
-                        <strong>PAN:</strong> {!account.PAN_Number__c}
-                    </apex:outputPanel>
-                </div>
+            <td style="text-align: left; width: 70%;">
+                {!quoteRefNumber}
             </td>
-            <td style="width: 45%; text-align: right;">
-                <table class="ref-table">
-                    <tr>
-                        <td class="ref-label">Quote No.</td>
-                        <td>{!quote.Quote_Id__c}</td>
-                    </tr>
-                    <tr>
-                        <td class="ref-label">Date</td>
-                        <td>{!quoteDate}</td>
-                    </tr>
-                    <tr>
-                        <td class="ref-label">Valid Till</td>
-                        <td>{!validTillDate}</td>
-                    </tr>
-                    <tr>
-                        <td class="ref-label">Status</td>
-                        <td>{!quote.Status}</td>
-                    </tr>
-                </table>
+            <td style="text-align: right; width: 30%;">
+                <strong>DATE: {!quoteDate}</strong>
             </td>
         </tr>
     </table>
 
-    <!-- SUBJECT -->
-    <div class="subject">
-        QUOTATION FOR {!quote.Vertical__c}
+    <!-- TO SECTION -->
+    <div class="to-section">
+        <p>To,</p>
+        <p>
+            <strong>{!account.Name}</strong><br/>
+            <apex:outputPanel rendered="{!quote.Billing_Address__c != null}">
+                {!quote.Billing_Address__c}<br/>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!account.BillingStreet != null && quote.Billing_Address__c == null}">
+                {!account.BillingStreet}<br/>
+                {!account.BillingCity}<apex:outputPanel rendered="{!account.BillingState != null}">, {!account.BillingState}</apex:outputPanel>
+                <apex:outputPanel rendered="{!account.BillingPostalCode != null}"> - {!account.BillingPostalCode}</apex:outputPanel><br/>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!account.BillingCity != null && quote.Billing_Address__c == null}">
+                {!account.BillingCity}<br/>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!account.GST_Number__c != null}">
+                {!account.GST_Number__c}<br/>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!account.PAN_Number__c != null}">
+                {!account.PAN_Number__c}
+            </apex:outputPanel>
+        </p>
     </div>
 
-    <!-- GREETING -->
-    <div class="greeting">
-        <p>Dear Sir/Madam,</p>
-        <p>We thank you for the enquiry and are pleased to quote our best prices for the following
-           product(s): <strong>{!productNamesList}</strong></p>
+    <!-- SUBJECT -->
+    <div class="subject">
+        SUBJECT: QUOTATION FOR &ldquo;{!quote.Vertical__c}&rdquo;
     </div>
+
+    <!-- LETTER BODY -->
+    <div class="letter-body">
+        <p><strong>Dear Sir/Madam,</strong></p>
+
+        <p>Greetings from Cyrix Healthcare Pvt Ltd!!!</p>
+
+        <p>We sincerely appreciate your continued trust in our products and services. As per your requirement, we are pleased
+           to submit our proposal for <strong>{!quote.Vertical__c}</strong> for your kind consideration.</p>
+
+        <!-- Numbered Product List -->
+        <apex:variable var="pIdx" value="{!1}" />
+        <apex:repeat value="{!productNamesNumbered}" var="pName">
+            <p class="product-list">
+                <apex:outputText value="{0, number, 0}">
+                    <apex:param value="{!pIdx}" />
+                </apex:outputText>.{!pName}
+            </p>
+            <apex:variable var="pIdx" value="{!pIdx + 1}" />
+        </apex:repeat>
+
+        <p>At Cyrix Healthcare, we are committed to providing high-quality medical equipment and reliable service support
+           that meet your clinical and operational needs. We believe this proposal will align well with your expectations and
+           add value to your facility&#8217;s healthcare delivery.</p>
+
+        <p>Please find the detailed quotation attached for your review. Should you require any further clarification or
+           technical discussion, we will be glad to assist at your convenience.</p>
+
+        <p>Thank you for the opportunity to serve your esteemed organization.</p>
+    </div>
+
+    <!-- SIGNATURE SECTION -->
+    <div class="sign-section">
+        <p>With Regards,<br/>
+           For Cyrix Healthcare Pvt. Ltd</p>
+
+        <p>&lt;Sign with Seal&gt;</p>
+
+        <p style="margin-top: 15px;"><strong>Authorised Signatory</strong></p>
+
+        <p>For queries contact:<br/>
+            <apex:outputPanel rendered="{!salesEngineerName != null}">
+                {!salesEngineerName}<br/>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!salesEngineerTitle != null}">
+                {!salesEngineerTitle}<br/>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!salesEngineerPhone != null}">
+                {!salesEngineerPhone}
+            </apex:outputPanel>
+        </p>
+    </div>
+
+    <!-- ====================================================================== -->
+    <!-- PAGE 2: PRODUCT TABLE                                                 -->
+    <!-- ====================================================================== -->
+    <div class="page-break"></div>
+
+    <!-- COMPANY HEADER (repeated on page 2) -->
+    <div class="company-header">
+        <p class="company-name">CYRIX<sup style="font-size:8pt;">&reg;</sup></p>
+        <p class="company-sub">HEALTH CARE PVT LTD</p>
+        <p class="company-tagline">{!companyTagline}</p>
+    </div>
+
+    <!-- QUOTE REF LINE (repeated) -->
+    <table class="ref-line">
+        <tr>
+            <td style="text-align: left; width: 70%;">
+                {!quoteRefNumber}
+            </td>
+            <td style="text-align: right; width: 30%;">
+                <strong>DATE: {!quoteDate}</strong>
+            </td>
+        </tr>
+    </table>
 
     <!-- PRICING TABLE -->
     <table class="pricing-table">
