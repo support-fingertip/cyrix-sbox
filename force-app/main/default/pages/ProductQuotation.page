@@ -435,19 +435,17 @@
             </tr>
 
             <!-- GST ROW - last column only -->
-            <apex:outputPanel layout="none" rendered="{!!isExempt}">
-                <tr>
-                    <td style="border: none;" colspan="5">&nbsp;</td>
-                    <td style="border: 1px solid #000000; text-align: right; padding-right: 5px;">
-                        {!gstDisplayRate}
-                    </td>
-                    <td style="border: 1px solid #000000; text-align: right; padding-right: 5px;">
-                        <apex:outputText value="{0, number, ###,##0.00}">
-                            <apex:param value="{!taxAmount}" />
-                        </apex:outputText>
-                    </td>
-                </tr>
-            </apex:outputPanel>
+            <tr>
+                <td style="border: none;" colspan="5">&nbsp;</td>
+                <td style="border: 1px solid #000000; text-align: right; padding-right: 5px;">
+                    {!gstDisplayRate}
+                </td>
+                <td style="border: 1px solid #000000; text-align: right; padding-right: 5px;">
+                    <apex:outputText value="{0, number, ###,##0.00}">
+                        <apex:param value="{!taxAmount}" />
+                    </apex:outputText>
+                </td>
+            </tr>
 
             <!-- GRAND TOTAL ROW - last column only -->
             <tr>
