@@ -798,58 +798,58 @@
     </table>
 
     <!-- ACCEPTANCE OF QUOTATION -->
-    <p style="font-size: 10pt; font-weight: bold; margin: 5px 0 8px 0;">ACCEPTANCE OF QUOTATION:</p>
+    <p style="font-size: 11pt; font-weight: bold; margin: 10px 0 10px 0;">ACCEPTANCE OF QUOTATION:</p>
 
     <!-- ADDITIONAL TERMS TO BE ADDED -->
-    <p style="font-size: 9pt; font-weight: bold; text-decoration: underline; margin: 5px 0 8px 0;">ADDITIONAL TERMS TO BE ADDED:</p>
+    <p style="font-size: 10pt; font-weight: bold; text-decoration: underline; margin: 5px 0 10px 0;">ADDITIONAL TERMS TO BE ADDED:</p>
 
-    <ol style="font-size: 8pt; margin: 0; padding-left: 25px; line-height: 1.6;">
-        <li style="margin-bottom: 6px;">
+    <ol style="font-size: 9pt; margin: 0; padding-left: 25px; line-height: 1.8;">
+        <li style="margin-bottom: 8px;">
             Calibration and Quality Assurance (QA) services shall be carried out in accordance with applicable
             guidelines and standards of NABL/NABH/AERB wherever applicable.
         </li>
-        <li style="margin-bottom: 6px;">
+        <li style="margin-bottom: 8px;">
             The equipment to be calibrated/tested, along with all required accessories, must be provided in proper
             working condition and accessible at the time of service.
         </li>
-        <li style="margin-bottom: 6px;">
+        <li style="margin-bottom: 8px;">
             The customer shall provide previous calibration/QA reports, technical specifications, operating manuals,
             and necessary infrastructure support including stable power supply and radiation safety clearance (where
             applicable).
         </li>
-        <li style="margin-bottom: 6px;">
+        <li style="margin-bottom: 8px;">
             If calibration/QA cannot be completed due to equipment malfunction, operational defects, or
             circumstances beyond our control, the same shall not be treated as non-performance from our end.
         </li>
-        <li style="margin-bottom: 6px;">
+        <li style="margin-bottom: 8px;">
             In case equipment fails during calibration/QA due to functional defects or complaints, the
             certificate/report will be issued only after rectification of the identified issues, any subsequent revisit for
             recalibration shall be chargeable. Company will not issue a calibration/QA certificate or compliance
             report for equipment that has failed or not been calibrated, even if requested by the customer.
         </li>
-        <li style="margin-bottom: 6px;">
+        <li style="margin-bottom: 8px;">
             Calibration/QA certificates will be issued upon successful completion of work; conformity statements
             shall be provided only if specifically requested and mutually agreed.
         </li>
-        <li style="margin-bottom: 6px;">
+        <li style="margin-bottom: 8px;">
             Use of NABL symbol on certificates shall be strictly as per NABL scope and only when NABL-
             accredited calibration is specifically quoted, ordered, and executed. Non-NABL services shall not carry
             the NABL symbol.
         </li>
-        <li style="margin-bottom: 6px;">
+        <li style="margin-bottom: 8px;">
             Services certify the performance of the equipment at the time of testing only and do not guarantee future
             performance.
         </li>
-        <li style="margin-bottom: 6px;">
+        <li style="margin-bottom: 8px;">
             Any repair, adjustment, replacement of parts, or additional work beyond the quoted scope shall be
             charged extra.
         </li>
-        <li style="margin-bottom: 6px;">
+        <li style="margin-bottom: 8px;">
             The laboratory shall not be liable for delays or non-performance due to force majeure events including
             but not limited to natural calamities, accidents, strikes, transport disruptions, pandemics, or government
             restrictions.
         </li>
-        <li style="margin-bottom: 6px;">
+        <li style="margin-bottom: 8px;">
             Pending or non-functional equipment due to customer related issues shall not be a reason to withhold
             payment for completed services.
         </li>
