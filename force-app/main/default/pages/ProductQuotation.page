@@ -232,7 +232,6 @@
     <!-- COMPANY HEADER WITH LOGO -->
     <div class="company-header">
         <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
-        <p class="company-tagline">{!companyTagline}</p>
     </div>
 
     <!-- QUOTE REFERENCE LINE -->
@@ -337,7 +336,6 @@
     <!-- COMPANY HEADER (repeated on page 2) -->
     <div class="company-header">
         <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
-        <p class="company-tagline">{!companyTagline}</p>
     </div>
 
     <!-- QUOTE REF LINE (repeated) -->
