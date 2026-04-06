@@ -1122,20 +1122,17 @@
     </ul>
 
     <!-- SECOND PARTY / FIRST PARTY -->
-    <table style="width: 100%; margin-top: 5px; font-size: 7pt;">
+    <table style="width: 100%; margin-top: 3px; font-size: 7pt;">
         <tr>
             <td style="width: 50%; vertical-align: top;"><strong>SECOND PARTY</strong></td>
             <td style="width: 50%; vertical-align: top; text-align: right;"><strong>FIRST PARTY</strong></td>
         </tr>
         <tr>
             <td style="vertical-align: top;">
-                <br/>
-                &lt;Customer Name&gt;<br/>
-                &lt;Address&gt;
+                &lt;Customer Name&gt;<br/>&lt;Address&gt;
             </td>
             <td style="vertical-align: top; text-align: right;">
-                <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 45px;" />
-                <br/>
+                <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 40px;" /><br/>
                 <strong><em>Cyrix Healthcare Pvt. Ltd</em></strong><br/>
                 30/641B, Petta, Poonithura<br/>
                 Ernakulam, Kerala<br/>
@@ -1145,52 +1142,30 @@
     </table>
 
     <!-- ANNEXURE - A -->
-    <div style="text-align: center; font-size: 9pt; font-weight: bold; text-decoration: underline; margin: 8px 0 5px 0;">
+    <div style="text-align: center; font-size: 8pt; font-weight: bold; text-decoration: underline; margin: 5px 0 3px 0;">
         ANNEXURE &#8211; A
     </div>
 
     <!-- Annexure Table -->
-    <table class="pricing-table">
+    <table style="width: 80%; margin: 0 auto; border-collapse: collapse; font-size: 7pt;">
         <thead>
             <tr>
-                <th style="width: 40px; background-color: #ffffff; color: #000000; border: 1px solid #000000; font-weight: bold;">SI No</th>
-                <th style="width: 150px; background-color: #ffffff; color: #000000; border: 1px solid #000000; font-weight: bold;">Equipment Name</th>
-                <th style="width: 60px; background-color: #ffffff; color: #000000; border: 1px solid #000000; font-weight: bold;">Quantity</th>
-                <th style="width: 80px; background-color: #ffffff; color: #000000; border: 1px solid #000000; font-weight: bold;">Make</th>
-                <th style="width: 80px; background-color: #ffffff; color: #000000; border: 1px solid #000000; font-weight: bold;">Model</th>
+                <th style="width: 30px; border: 1px solid #000000; padding: 3px;">SI No</th>
+                <th style="width: 120px; border: 1px solid #000000; padding: 3px;">Equipment Name</th>
+                <th style="width: 50px; border: 1px solid #000000; padding: 3px;">Quantity</th>
+                <th style="width: 60px; border: 1px solid #000000; padding: 3px;">Make</th>
+                <th style="width: 60px; border: 1px solid #000000; padding: 3px;">Model</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td style="border: 1px solid #000000;">&nbsp;</td>
-                <td style="border: 1px solid #000000;">&nbsp;</td>
-                <td style="border: 1px solid #000000;">&nbsp;</td>
-                <td style="border: 1px solid #000000;">&nbsp;</td>
-                <td style="border: 1px solid #000000;">&nbsp;</td>
+                <td style="border: 1px solid #000000; padding: 3px;">&nbsp;</td>
+                <td style="border: 1px solid #000000; padding: 3px;">&nbsp;</td>
+                <td style="border: 1px solid #000000; padding: 3px;">&nbsp;</td>
+                <td style="border: 1px solid #000000; padding: 3px;">&nbsp;</td>
+                <td style="border: 1px solid #000000; padding: 3px;">&nbsp;</td>
             </tr>
         </tbody>
-    </table>
-
-    <!-- ====================================================================== -->
-    <!-- CAMC QUOTATION PAGE                                                   -->
-    <!-- ====================================================================== -->
-    <div class="page-break"></div>
-
-    <!-- COMPANY HEADER -->
-    <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
-    </div>
-
-    <!-- QUOTE REF LINE -->
-    <table class="ref-line">
-        <tr>
-            <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/QTN{!quote.Quote_Id__c}-</span>{!quote.QuoteNumber}
-            </td>
-            <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> {!quoteDate}
-            </td>
-        </tr>
     </table>
 
     <!-- CAMC QUOTATIONS -->
