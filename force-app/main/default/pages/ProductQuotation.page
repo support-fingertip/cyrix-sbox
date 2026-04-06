@@ -241,10 +241,10 @@
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                {!quoteRefNumber}
+                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/QTN{!quote.Quote_Id__c}-</span>{!quote.QuoteNumber}
             </td>
             <td style="text-align: right; width: 30%;">
-                <strong>DATE: {!quoteDate}</strong>
+                <span style="color: #000000;">DATE:</span> {!quoteDate}
             </td>
         </tr>
     </table>
@@ -345,17 +345,17 @@
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                {!quoteRefNumber}
+                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/QTN{!quote.Quote_Id__c}-</span>{!quote.QuoteNumber}
             </td>
             <td style="text-align: right; width: 30%;">
-                <strong>DATE: {!quoteDate}</strong>
+                <span style="color: #000000;">DATE:</span> {!quoteDate}
             </td>
         </tr>
     </table>
 
     <!-- QUOTATION TITLE -->
     <div style="text-align: center; font-size: 10pt; font-weight: bold; margin-bottom: 15px; text-decoration: underline;">
-        {!quotationTitle}
+        QUOTATION FOR CYRIX {!productNamesList}<apex:outputPanel rendered="{!quote.Vertical__c != null}"> &amp; {!quote.Vertical__c}</apex:outputPanel>
     </div>
 
     <!-- PRICING TABLE -->
