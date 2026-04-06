@@ -1122,24 +1122,19 @@
     </ul>
 
     <!-- SECOND PARTY / FIRST PARTY -->
-    <table style="width: 100%; margin-top: 10px; font-size: 8pt;">
+    <table style="width: 100%; margin-top: 5px; font-size: 7pt;">
         <tr>
-            <td style="width: 50%; vertical-align: top;">
-                <p style="font-weight: bold;">SECOND PARTY</p>
-            </td>
-            <td style="width: 50%; vertical-align: top; text-align: right;">
-                <p style="font-weight: bold;">FIRST PARTY</p>
-            </td>
+            <td style="width: 50%; vertical-align: top;"><strong>SECOND PARTY</strong></td>
+            <td style="width: 50%; vertical-align: top; text-align: right;"><strong>FIRST PARTY</strong></td>
         </tr>
         <tr>
             <td style="vertical-align: top;">
                 <br/>
-                <p>&lt;Customer Name&gt;</p>
-                <p>&lt;Address&gt;</p>
+                &lt;Customer Name&gt;<br/>
+                &lt;Address&gt;
             </td>
             <td style="vertical-align: top; text-align: right;">
-                <br/>
-                <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 55px;" />
+                <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 45px;" />
                 <br/>
                 <strong><em>Cyrix Healthcare Pvt. Ltd</em></strong><br/>
                 30/641B, Petta, Poonithura<br/>
@@ -1150,7 +1145,7 @@
     </table>
 
     <!-- ANNEXURE - A -->
-    <div style="text-align: center; font-size: 10pt; font-weight: bold; text-decoration: underline; margin: 12px 0 8px 0;">
+    <div style="text-align: center; font-size: 9pt; font-weight: bold; text-decoration: underline; margin: 8px 0 5px 0;">
         ANNEXURE &#8211; A
     </div>
 
@@ -1176,15 +1171,13 @@
         </tbody>
     </table>
 
-    <br/>
-
     <!-- CAMC QUOTATIONS -->
-    <p style="font-size: 9pt; font-weight: bold; font-style: italic; text-decoration: underline; margin: 8px 0 5px 0;">
+    <p style="font-size: 8pt; font-weight: bold; font-style: italic; text-decoration: underline; margin: 5px 0 3px 0;">
         CAMC QUOTATIONS
     </p>
 
     <!-- PROJECT COSTING -->
-    <p style="font-size: 9pt; font-weight: bold; text-align: center; margin: 5px 0;">
+    <p style="font-size: 8pt; font-weight: bold; text-align: center; margin: 3px 0;">
         PROJECT COSTING - &lt;&#8220;VERTICAL&#8221;&gt;
     </p>
 
