@@ -1295,6 +1295,92 @@
         <li style="margin-bottom: 2px;">Service hours: 9:00 AM &#8211; 5:00 PM (Monday&#8211;Saturday), excluding holidays.</li>
     </ul>
 
+    <!-- ====================================================================== -->
+    <!-- CAMC T&C CONTINUED PAGE                                               -->
+    <!-- ====================================================================== -->
+    <div class="page-break"></div>
+
+    <!-- COMPANY HEADER -->
+    <div class="company-header">
+        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+    </div>
+
+    <!-- QUOTE REF LINE -->
+    <table class="ref-line">
+        <tr>
+            <td style="text-align: left; width: 70%;">
+                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/QTN{!quote.Quote_Id__c}-</span>{!quote.QuoteNumber}
+            </td>
+            <td style="text-align: right; width: 30%;">
+                <span style="color: #000000;">DATE:</span> {!quoteDate}
+            </td>
+        </tr>
+    </table>
+
+    <!-- Service Conditions continued -->
+    <ul style="font-size: 7pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
+        <li style="margin-bottom: 2px;">Emergency calls outside working hours are chargeable.</li>
+        <li style="margin-bottom: 2px;">Delays due to non-availability of spares, natural calamities, strikes, or circumstances beyond control shall not be the responsibility of the service provider.</li>
+        <li style="margin-bottom: 2px;">Equipment may be shifted to workshop for repair if required, at CLIENT&#8217;s risk.</li>
+    </ul>
+
+    <!-- 6. Client Responsibilities -->
+    <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">6. Client Responsibilities</p>
+    <ul style="font-size: 7pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
+        <li style="margin-bottom: 2px;">Provide proper electrical supply, earthing, UPS, and stabilizer.</li>
+        <li style="margin-bottom: 2px;">Ensure suitable environmental conditions as per manufacturer guidelines.</li>
+        <li style="margin-bottom: 2px;">Provide full access to equipment and nominate a single point of contact.</li>
+    </ul>
+
+    <!-- 7. Limitations of Liability -->
+    <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">7. Limitations of Liability</p>
+    <ul style="font-size: 7pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
+        <li style="margin-bottom: 2px;">Not liable for misuse, unauthorized repairs, natural disasters, power failures, or normal wear and tear.</li>
+        <li style="margin-bottom: 2px;">Equipment declared irrepairable (spare cost exceeding 60% of equipment value) will not be covered.</li>
+        <li style="margin-bottom: 2px;">No liability for indirect or consequential losses.</li>
+    </ul>
+
+    <!-- 8. Acceptance of Quotation -->
+    <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">8. ACCEPTANCE OF QUOTATION</p>
+    <ul style="font-size: 7pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
+        <li style="margin-bottom: 2px;">The quotation shall be considered accepted upon issuance of a formal Purchase Order or written confirmation by the CLIENT. Acceptance of the quotation shall constitute agreement to all terms and conditions mentioned herein.</li>
+    </ul>
+
+    <!-- 9. Termination -->
+    <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">9. Termination</p>
+    <ul style="font-size: 7pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
+        <li style="margin-bottom: 2px;">Either party may terminate with 30 days&#8217; written notice for valid reasons.</li>
+        <li style="margin-bottom: 2px;">Termination for convenience requires 90 days&#8217; written notice.</li>
+    </ul>
+
+    <!-- 10. Arbitration & Jurisdiction -->
+    <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">10. Arbitration &amp; Jurisdiction</p>
+    <ul style="font-size: 7pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
+        <li style="margin-bottom: 2px;">Disputes shall be resolved through arbitration under the Arbitration and Conciliation Act, 1996.</li>
+        <li style="margin-bottom: 2px;">Jurisdiction: Cochin, Kerala.</li>
+    </ul>
+
+    <!-- 11. Bank Details -->
+    <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">11. BANK DETAILS:</p>
+    <ul style="font-size: 7pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
+        <li style="margin-bottom: 2px;">A/C Number: &lt;Bank Account Number&gt;</li>
+        <li style="margin-bottom: 2px;">Bank Name: &lt;Bank Name&gt;</li>
+        <li style="margin-bottom: 2px;">Branch Code: &lt;Branch Code&gt;</li>
+        <li style="margin-bottom: 2px;">IFSC: &lt;Code&gt;</li>
+    </ul>
+
+    <!-- 12. Service Report Acknowledgement -->
+    <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">12. Service Report Acknowledgement</p>
+    <ul style="font-size: 7pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
+        <li style="margin-bottom: 2px;">The CLIENT shall sign and acknowledge the service report upon completion of each service visit as confirmation of the work performed.</li>
+    </ul>
+
+    <!-- 13. Addition of Equipment -->
+    <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">13. Addition of Equipment</p>
+    <ul style="font-size: 7pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
+        <li style="margin-bottom: 2px;">Any new equipment installed by the CLIENT during the contract period that is <strong>not listed in Annexure-A</strong> shall not be covered under this agreement. Such equipment may be included in the contract only <strong>upon mutual agreement</strong>, subject to inspection and revision of contract charges through a written amendment or separate Purchase Order.</li>
+    </ul>
+
 </body>
 </html>
 </apex:page>
