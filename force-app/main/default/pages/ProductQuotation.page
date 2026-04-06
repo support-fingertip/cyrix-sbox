@@ -29,11 +29,12 @@
         position: running(footer);
         text-align: center;
         font-size: 7pt;
-        color: #cc0000;
-        background-color: #cc0000;
         color: #ffffff;
-        padding: 4px 0;
         font-weight: bold;
+        background-color: #8b0000;
+        border-top: 3px solid #cc0000;
+        border-bottom: 3px solid #cc0000;
+        padding: 5px 0;
     }
 
     /* ---------- COMPANY HEADER ---------- */
