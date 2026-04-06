@@ -1381,6 +1381,80 @@
         <li style="margin-bottom: 2px;">Any new equipment installed by the CLIENT during the contract period that is <strong>not listed in Annexure-A</strong> shall not be covered under this agreement. Such equipment may be included in the contract only <strong>upon mutual agreement</strong>, subject to inspection and revision of contract charges through a written amendment or separate Purchase Order.</li>
     </ul>
 
+    <!-- ====================================================================== -->
+    <!-- LAST PAGE: CAMC SECOND/FIRST PARTY + ANNEXURE-A                       -->
+    <!-- ====================================================================== -->
+    <div class="page-break"></div>
+
+    <!-- COMPANY HEADER -->
+    <div class="company-header">
+        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+    </div>
+
+    <!-- QUOTE REF LINE -->
+    <table class="ref-line">
+        <tr>
+            <td style="text-align: left; width: 70%;">
+                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/QTN{!quote.Quote_Id__c}-</span>{!quote.QuoteNumber}
+            </td>
+            <td style="text-align: right; width: 30%;">
+                <span style="color: #000000;">DATE:</span> {!quoteDate}
+            </td>
+        </tr>
+    </table>
+
+    <!-- SECOND PARTY / FIRST PARTY -->
+    <table style="width: 100%; margin-top: 5px; font-size: 8pt;">
+        <tr>
+            <td style="width: 50%; vertical-align: top;"><strong>SECOND PARTY</strong></td>
+            <td style="width: 50%; vertical-align: top; text-align: right;"><strong>FIRST PARTY</strong></td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top;">
+                <br/><br/>
+                &lt;Customer Name&gt;<br/>
+                &lt;Address&gt;
+            </td>
+            <td style="vertical-align: top; text-align: right;">
+                <br/>
+                <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 55px;" /><br/>
+                <strong><em>Cyrix Healthcare Pvt. Ltd</em></strong><br/>
+                30/641B, Petta, Poonithura<br/>
+                Ernakulam, Kerala<br/>
+                India
+            </td>
+        </tr>
+    </table>
+
+    <br/><br/>
+
+    <!-- ANNEXURE - A -->
+    <div style="text-align: center; font-size: 11pt; font-weight: bold; text-decoration: underline; margin: 20px 0 15px 0;">
+        ANNEXURE &#8211; A
+    </div>
+
+    <!-- Annexure Table -->
+    <table style="width: 90%; margin: 0 auto; border-collapse: collapse; font-size: 9pt;">
+        <thead>
+            <tr>
+                <th style="width: 40px; border: 1px solid #000000; padding: 5px; font-weight: bold;">SI No</th>
+                <th style="width: 150px; border: 1px solid #000000; padding: 5px; font-weight: bold;">Equipment Name</th>
+                <th style="width: 60px; border: 1px solid #000000; padding: 5px; font-weight: bold;">Quantity</th>
+                <th style="width: 80px; border: 1px solid #000000; padding: 5px; font-weight: bold;">Make</th>
+                <th style="width: 80px; border: 1px solid #000000; padding: 5px; font-weight: bold;">Model</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="border: 1px solid #000000; padding: 5px; height: 25px;">&nbsp;</td>
+                <td style="border: 1px solid #000000; padding: 5px;">&nbsp;</td>
+                <td style="border: 1px solid #000000; padding: 5px;">&nbsp;</td>
+                <td style="border: 1px solid #000000; padding: 5px;">&nbsp;</td>
+                <td style="border: 1px solid #000000; padding: 5px;">&nbsp;</td>
+            </tr>
+        </tbody>
+    </table>
+
 </body>
 </html>
 </apex:page>
