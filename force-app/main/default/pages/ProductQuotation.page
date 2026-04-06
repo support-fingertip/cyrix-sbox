@@ -126,15 +126,16 @@
         margin: 15px 0;
     }
     .pricing-table th {
-        background-color: #003366;
-        color: #ffffff;
+        background-color: #ffffff;
+        color: #000000;
         font-size: 9pt;
         padding: 6px 4px;
-        border: 1px solid #003366;
+        border: 1px solid #000000;
         text-align: center;
+        font-weight: bold;
     }
     .pricing-table td {
-        border: 1px solid #cccccc;
+        border: 1px solid #000000;
         padding: 5px 4px;
         font-size: 9pt;
         vertical-align: top;
@@ -422,25 +423,25 @@
                 <td class="price-col">&nbsp;</td>
             </tr>
 
-            <!-- TOTAL ROW - right side only -->
+            <!-- TOTAL ROW - last column only -->
             <tr>
-                <td style="border: none;" colspan="4">&nbsp;</td>
-                <td colspan="2" style="text-align: right; padding-right: 5px; border: 1px solid #000000; font-weight: bold;">Total</td>
-                <td class="price-col" style="border: 1px solid #000000; font-weight: bold;">
+                <td style="border: none;" colspan="5">&nbsp;</td>
+                <td style="border: 1px solid #000000; text-align: right; padding-right: 5px; font-weight: bold;">Total</td>
+                <td style="border: 1px solid #000000; text-align: right; padding-right: 5px;">
                     <apex:outputText value="{0, number, ###,##0.00}">
                         <apex:param value="{!subtotal}" />
                     </apex:outputText>
                 </td>
             </tr>
 
-            <!-- GST ROW - right side only -->
+            <!-- GST ROW - last column only -->
             <apex:outputPanel layout="none" rendered="{!!isExempt}">
                 <tr>
-                    <td style="border: none;" colspan="4">&nbsp;</td>
-                    <td colspan="2" style="text-align: right; padding-right: 5px; border: 1px solid #000000;">
+                    <td style="border: none;" colspan="5">&nbsp;</td>
+                    <td style="border: 1px solid #000000; text-align: right; padding-right: 5px;">
                         {!gstDisplayRate}
                     </td>
-                    <td class="price-col" style="border: 1px solid #000000;">
+                    <td style="border: 1px solid #000000; text-align: right; padding-right: 5px;">
                         <apex:outputText value="{0, number, ###,##0.00}">
                             <apex:param value="{!taxAmount}" />
                         </apex:outputText>
@@ -448,11 +449,11 @@
                 </tr>
             </apex:outputPanel>
 
-            <!-- GRAND TOTAL ROW - right side only -->
+            <!-- GRAND TOTAL ROW - last column only -->
             <tr>
-                <td style="border: none;" colspan="4">&nbsp;</td>
-                <td colspan="2" style="text-align: right; padding-right: 5px; border: 1px solid #000000; font-weight: bold;">Grand Total</td>
-                <td class="price-col" style="border: 1px solid #000000; font-weight: bold;">
+                <td style="border: none;" colspan="5">&nbsp;</td>
+                <td style="border: 1px solid #000000; text-align: right; padding-right: 5px; font-weight: bold;">Grand Total</td>
+                <td style="border: 1px solid #000000; text-align: right; padding-right: 5px; font-weight: bold;">
                     <apex:outputText value="{0, number, ###,##0.00}">
                         <apex:param value="{!grandTotal}" />
                     </apex:outputText>
