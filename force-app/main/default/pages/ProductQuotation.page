@@ -332,7 +332,7 @@
     </div>
 
     <!-- ====================================================================== -->
-    <!-- PAGE 2: PRODUCT TABLE                                                 -->
+    <!-- PAGE 2: PRODUCT TABLE + TERMS AND CONDITIONS                          -->
     <!-- ====================================================================== -->
     <div class="page-break"></div>
 
@@ -353,12 +353,17 @@
         </tr>
     </table>
 
+    <!-- QUOTATION TITLE -->
+    <div style="text-align: center; font-size: 10pt; font-weight: bold; margin-bottom: 15px; text-decoration: underline;">
+        {!quotationTitle}
+    </div>
+
     <!-- PRICING TABLE -->
     <table class="pricing-table">
         <thead>
             <tr>
-                <th class="num-col">Sl.No</th>
-                <th class="code-col">Item Code</th>
+                <th class="num-col">SLN o</th>
+                <th class="code-col">ITEM CODE</th>
                 <th class="desc-col">Description of Goods</th>
                 <th class="unit-col">Unit</th>
                 <th class="price-col">Unit Price</th>
@@ -381,13 +386,10 @@
                     <td class="desc-col">
                         <strong>{!item.Product2.Name}</strong>
                         <apex:outputPanel rendered="{!item.Product_Line_Description__c != null}">
-                            <br/>{!item.Product_Line_Description__c}
+                            <br/><em>({!item.Product_Line_Description__c})</em>
                         </apex:outputPanel>
                         <apex:outputPanel rendered="{!item.Product_Detailed_Description__c != null}">
                             <br/><span style="font-size:8pt; color:#666;">{!item.Product_Detailed_Description__c}</span>
-                        </apex:outputPanel>
-                        <apex:outputPanel rendered="{!item.Product2.HSN_Code__c != null}">
-                            <br/><span style="font-size:8pt;">HSN: {!item.Product2.HSN_Code__c}</span>
                         </apex:outputPanel>
                     </td>
                     <td class="unit-col">
@@ -412,9 +414,12 @@
                 <apex:variable var="rowNum" value="{!rowNum + 1}" />
             </apex:repeat>
 
-            <!-- SUBTOTAL -->
+            <!-- Empty rows for spacing (like PDF shows) -->
+            <tr><td colspan="7" style="border: 1px solid #cccccc;">&nbsp;</td></tr>
+
+            <!-- TOTAL -->
             <tr class="total-row">
-                <td colspan="6" style="text-align: right; padding-right: 10px;">Sub Total</td>
+                <td colspan="6" style="text-align: right; padding-right: 10px;">Total</td>
                 <td class="price-col">
                     <apex:outputText value="{0, number, ###,##0.00}">
                         <apex:param value="{!subtotal}" />
@@ -422,48 +427,15 @@
                 </td>
             </tr>
 
-            <!-- GST (Same State) -->
-            <apex:outputPanel layout="none" rendered="{!isSameState && !isExempt}">
+            <!-- GST (single row as shown in PDF) -->
+            <apex:outputPanel layout="none" rendered="{!!isExempt}">
                 <tr>
                     <td colspan="6" style="text-align: right; padding-right: 10px;">
-                        CGST @
-                        <apex:outputText value="{0, number, ##0.00}">
-                            <apex:param value="{!cgstRate}" />
-                        </apex:outputText>%
+                        {!gstDisplayRate}
                     </td>
                     <td class="price-col">
                         <apex:outputText value="{0, number, ###,##0.00}">
-                            <apex:param value="{!cgstAmount}" />
-                        </apex:outputText>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="6" style="text-align: right; padding-right: 10px;">
-                        SGST @
-                        <apex:outputText value="{0, number, ##0.00}">
-                            <apex:param value="{!sgstRate}" />
-                        </apex:outputText>%
-                    </td>
-                    <td class="price-col">
-                        <apex:outputText value="{0, number, ###,##0.00}">
-                            <apex:param value="{!sgstAmount}" />
-                        </apex:outputText>
-                    </td>
-                </tr>
-            </apex:outputPanel>
-
-            <!-- IGST (Different State) -->
-            <apex:outputPanel layout="none" rendered="{!!isSameState && !isExempt}">
-                <tr>
-                    <td colspan="6" style="text-align: right; padding-right: 10px;">
-                        IGST @
-                        <apex:outputText value="{0, number, ##0.00}">
-                            <apex:param value="{!igstRate}" />
-                        </apex:outputText>%
-                    </td>
-                    <td class="price-col">
-                        <apex:outputText value="{0, number, ###,##0.00}">
-                            <apex:param value="{!igstAmount}" />
+                            <apex:param value="{!taxAmount}" />
                         </apex:outputText>
                     </td>
                 </tr>
@@ -483,108 +455,61 @@
 
     <!-- GRAND TOTAL IN WORDS -->
     <div class="total-words">
-        Grand Total (in words): {!grandTotalInWords}
+        &lt;{!grandTotalInWords}&gt;
     </div>
 
-    <!-- ====== PAGE 2: TERMS AND CONDITIONS ====== -->
-    <div class="page-break"></div>
+    <!-- NOTE -->
+    <p style="font-size: 8pt; font-weight: bold; color: #cc0000; margin: 5px 0 20px 0;">
+        ***Note: If required
+    </p>
 
-    <!-- COMPANY HEADER (repeated) -->
-    <div class="company-header">
-        <p class="company-name">{!companyName}</p>
-        <div class="company-details">
-            {!companyAddress}
-        </div>
+    <!-- ====================================================================== -->
+    <!-- STANDARD TERMS AND CONDITIONS (same page, below table)                -->
+    <!-- ====================================================================== -->
+
+    <div style="text-align: center; font-size: 11pt; font-weight: bold; text-decoration: underline; margin: 20px 0 15px 0;">
+        STANDARD TERMS AND CONDITIONS:
     </div>
 
-    <div class="section-title">Terms &amp; Conditions</div>
+    <!-- Validity -->
+    <p style="font-size: 10pt; font-weight: bold; margin: 10px 0 3px 0;">Validity</p>
+    <p style="font-size: 9pt; text-align: justify;">
+        This quotation is valid for <strong>{!validityDays}</strong> from the date of issue and is subject to reconfirmation thereafter.
+    </p>
 
-    <ol class="tc-list">
-        <li><strong>Validity:</strong> This quotation is valid for 30 days from the date of issue and is subject to reconfirmation thereafter.</li>
-        <li><strong>Price:</strong> The quoted price includes GST, import duties, freight, packing, forwarding, transportation, insurance, installation &amp; commissioning charges. Any additional statutory levies imposed after the date of quotation shall be borne by the purchaser.</li>
-        <li><strong>Payment Terms:</strong>
-            <ul>
-                <li>40% Advance along with Purchase Order</li>
-                <li>45% on Shipping Confirmation</li>
-                <li>10% on Delivery at Site</li>
-                <li>5% after Installation &amp; Handover</li>
-            </ul>
-        </li>
-        <li><strong>Delivery:</strong> 12-15 weeks from receipt of confirmed Purchase Order and advance payment.</li>
-        <li><strong>Shipping Mode:</strong> {!IF(quote.Shipping_Mode__c != null, quote.Shipping_Mode__c, 'As applicable')}</li>
-        <li><strong>Installation:</strong> Free installation at approved site, subject to site readiness. Civil, electrical, air conditioning, and earthing works are the customer's responsibility. All statutory approvals (PC-PNDT, AERB, etc.) must be obtained by the customer prior to installation.</li>
-        <li><strong>Warranty:</strong> 12 months from the date of installation. Covers manufacturing defects only. Excludes damage due to power fluctuations, environmental conditions, mishandling, natural calamities, pests, or third-party interference.</li>
-        <li><strong>Cancellation:</strong> 10% cancellation charge after Purchase Order issuance. No cancellation permitted after shipping.</li>
-        <li><strong>Force Majeure:</strong> The company shall not be held liable for delays caused by events beyond its control. Delivery timelines will be extended accordingly.</li>
-        <li><strong>Jurisdiction:</strong> All disputes shall be subject to the jurisdiction of courts at the company's registered office location.</li>
-    </ol>
+    <!-- Price -->
+    <p style="font-size: 10pt; font-weight: bold; margin: 10px 0 3px 0;">Price</p>
+    <p style="font-size: 9pt; text-align: justify;">
+        The quoted price includes applicable levies such as GST, import duties (if any), freight, packing, forwarding,
+        transportation, insurance, <strong><u>{!installationScope}</u></strong> at the installation site.<br/>
+        Any additional statutory levies imposed by Government authorities shall be borne by the purchaser.
+    </p>
 
-    <!-- BANK DETAILS -->
-    <div class="section-title">Bank Details</div>
-    <table class="bank-table">
-        <tr>
-            <td class="bank-label">Account Holder</td>
-            <td>{!bankAccountHolder}</td>
-        </tr>
-        <tr>
-            <td class="bank-label">Bank Name</td>
-            <td>{!bankName}</td>
-        </tr>
-        <tr>
-            <td class="bank-label">Account Number</td>
-            <td>{!bankAccountNumber}</td>
-        </tr>
-        <tr>
-            <td class="bank-label">IFSC Code</td>
-            <td>{!bankIfsc}</td>
-        </tr>
-        <tr>
-            <td class="bank-label">Branch</td>
-            <td>{!bankBranch}</td>
-        </tr>
-    </table>
+    <!-- Payment Terms -->
+    <p style="font-size: 10pt; font-weight: bold; margin: 10px 0 3px 0;">PAYMENT TERMS AND CONDITIONS:</p>
+    <p style="font-size: 9pt;">
+        <strong>{!advancePercent}</strong> Advance payment with Purchase Order<br/>
+        <strong>{!shippingPercent}</strong> payment on confirmation of shipping<br/>
+        <strong>{!deliveryPercent}</strong> payment on delivery to site<br/>
+        <strong>{!installationPercent}</strong> payment after installation and handover
+    </p>
 
-    <!-- ACCEPTANCE -->
-    <div class="section-title">Acceptance</div>
-    <div class="acceptance-box">
-        <p>We accept the above quotation and confirm the order as per the terms and conditions mentioned herein.</p>
-        <br/><br/>
-        <table style="width: 100%;">
-            <tr>
-                <td style="width: 50%;">
-                    <div class="sign-line"></div>
-                    <p style="font-size: 9pt;">Authorized Signatory (Customer)</p>
-                    <p style="font-size: 9pt;">Company Name: ________________________</p>
-                    <p style="font-size: 9pt;">Date: ________________________</p>
-                </td>
-                <td style="width: 50%;"></td>
-            </tr>
-        </table>
-    </div>
+    <!-- Delivery -->
+    <p style="font-size: 10pt; font-weight: bold; margin: 10px 0 3px 0;">DELIVERY</p>
+    <p style="font-size: 9pt; text-align: justify;">
+        Delivery will be scheduled within <strong>{!deliveryWeeks}</strong> from receipt of confirmed Purchase Order along with advance payment.
+    </p>
 
-    <!-- SIGNATORY -->
-    <div class="section-title">For {!companyName}</div>
-    <table class="sign-section">
-        <tr>
-            <td style="width: 50%;">
-                <div class="sign-line"></div>
-                <p><strong>Authorized Signatory</strong></p>
-                <apex:outputPanel rendered="{!salesEngineerName != null}">
-                    <p>Name: {!salesEngineerName}</p>
-                </apex:outputPanel>
-                <apex:outputPanel rendered="{!salesEngineerTitle != null}">
-                    <p>Designation: {!salesEngineerTitle}</p>
-                </apex:outputPanel>
-                <apex:outputPanel rendered="{!salesEngineerPhone != null}">
-                    <p>Contact: {!salesEngineerPhone}</p>
-                </apex:outputPanel>
-                <apex:outputPanel rendered="{!salesEngineerEmail != null}">
-                    <p>Email: {!salesEngineerEmail}</p>
-                </apex:outputPanel>
-            </td>
-            <td style="width: 50%;"></td>
-        </tr>
-    </table>
+    <!-- Installation and Approvals -->
+    <p style="font-size: 10pt; font-weight: bold; margin: 10px 0 3px 0;">Installation &amp; Approvals</p>
+    <p style="font-size: 9pt; text-align: justify;">
+        Installation will be carried out at the approved site without additional charges, subject to site readiness
+        confirmation from the customer.<br/>
+        All civil, electrical, air conditioning, earthing, and related pre-installation requirements are the responsibility of
+        the purchaser.<br/>
+        Statutory approvals such as PC-PNDT and AERB (where applicable) must be obtained by the customer prior to
+        installation.
+    </p>
 
 </body>
 </html>

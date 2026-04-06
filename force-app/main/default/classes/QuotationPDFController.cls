@@ -65,6 +65,17 @@ public with sharing class QuotationPDFController {
     public String productNamesList { get; set; }
     public List<String> productNamesNumbered { get; set; }
     public String quoteRefNumber { get; set; }
+    public String quotationTitle { get; set; }
+
+    // Dynamic T&C fields
+    public String validityDays { get; set; }
+    public String advancePercent { get; set; }
+    public String shippingPercent { get; set; }
+    public String deliveryPercent { get; set; }
+    public String installationPercent { get; set; }
+    public String deliveryWeeks { get; set; }
+    public String installationScope { get; set; }
+    public String gstDisplayRate { get; set; }
 
     public String companyName { get { return COMPANY_NAME; } }
     public String companyAddress { get { return COMPANY_ADDRESS; } }
@@ -98,6 +109,17 @@ public with sharing class QuotationPDFController {
 
         productNamesNumbered = new List<String>();
         quoteRefNumber = '';
+        quotationTitle = '';
+
+        // Default T&C values
+        validityDays = '30 days';
+        advancePercent = '40%';
+        shippingPercent = '45%';
+        deliveryPercent = '10%';
+        installationPercent = '5%';
+        deliveryWeeks = '12-15 weeks';
+        installationScope = 'installation and commissioning';
+        gstDisplayRate = '';
 
         if (quoteId != null) {
             loadData(quoteId);
@@ -180,6 +202,10 @@ public with sharing class QuotationPDFController {
         String qtnId = quote.Quote_Id__c != null ? quote.Quote_Id__c : quote.QuoteNumber;
         quoteRefNumber = 'C-KL/' + vertical + '/' + qtnId;
 
+        // Build quotation title: QUOTATION FOR CYRIX <Product name & Vertical>
+        quotationTitle = 'QUOTATION FOR CYRIX ' + productNamesList +
+            (String.isNotBlank(vertical) ? ' & ' + vertical : '');
+
         // Compute tax and totals
         computeTax();
     }
@@ -246,6 +272,12 @@ public with sharing class QuotationPDFController {
 
         grandTotal = (subtotal + taxAmount).setScale(2, RoundingMode.HALF_UP);
         grandTotalInWords = convertNumberToWords(grandTotal);
+
+        // Set GST display rate for PDF
+        if (!isExempt && taxRate != null) {
+            Integer rateInt = taxRate.intValue();
+            gstDisplayRate = 'GST ' + String.valueOf(rateInt) + '%';
+        }
     }
 
     private String formatDate(Date d) {
