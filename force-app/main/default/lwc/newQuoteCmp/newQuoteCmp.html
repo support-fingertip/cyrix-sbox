@@ -1,0 +1,478 @@
+<template>
+    <!-- LOADING SPINNER -->
+    <template if:true={isLoading}>
+        <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+    </template>
+
+    <lightning-card title="Create Quote" icon-name="standard:quotes">
+
+        <!-- ===== QUOTE HEADER SECTION ===== -->
+        <div class="slds-p-around_medium">
+            <div class="section-header slds-m-bottom_small">
+                <h2 class="slds-text-heading_small slds-text-color_default">
+                    <lightning-icon icon-name="utility:description" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                    Quote Information
+                </h2>
+            </div>
+
+            <lightning-layout multiple-rows>
+                <!-- Row 1 -->
+                <lightning-layout-item size="12" medium-device-size="4" padding="around-small">
+                    <lightning-input
+                        label="Quote Name"
+                        value={quoteName}
+                        onchange={handleQuoteNameChange}
+                        required
+                        placeholder="Enter quote name">
+                    </lightning-input>
+                </lightning-layout-item>
+                <lightning-layout-item size="12" medium-device-size="4" padding="around-small">
+                    <lightning-input
+                        type="date"
+                        label="Quote Date"
+                        value={quoteDate}
+                        onchange={handleQuoteDateChange}
+                        required>
+                    </lightning-input>
+                </lightning-layout-item>
+                <lightning-layout-item size="12" medium-device-size="4" padding="around-small">
+                    <lightning-combobox
+                        label="Valid Till (Days)"
+                        value={validTillDays}
+                        options={validTillOptions}
+                        onchange={handleValidTillDaysChange}
+                        required>
+                    </lightning-combobox>
+                </lightning-layout-item>
+
+                <!-- Row 2 -->
+                <lightning-layout-item size="12" medium-device-size="4" padding="around-small">
+                    <lightning-input
+                        type="date"
+                        label="Valid Till Date"
+                        value={validTillDate}
+                        readonly>
+                    </lightning-input>
+                </lightning-layout-item>
+                <lightning-layout-item size="12" medium-device-size="4" padding="around-small">
+                    <lightning-combobox
+                        label="Vertical"
+                        value={vertical}
+                        options={verticalOptions}
+                        onchange={handleVerticalChange}
+                        required>
+                    </lightning-combobox>
+                </lightning-layout-item>
+                <lightning-layout-item size="12" medium-device-size="4" padding="around-small">
+                    <lightning-combobox
+                        label="Shipping Mode"
+                        value={shippingMode}
+                        options={shippingModeOptions}
+                        onchange={handleShippingModeChange}>
+                    </lightning-combobox>
+                </lightning-layout-item>
+
+                <!-- Row 3: Addresses -->
+                <lightning-layout-item size="12" medium-device-size="6" padding="around-small">
+                    <lightning-textarea
+                        label="Billing Address"
+                        value={billingAddress}
+                        onchange={handleBillingAddressChange}
+                        required>
+                    </lightning-textarea>
+                </lightning-layout-item>
+                <lightning-layout-item size="12" medium-device-size="6" padding="around-small">
+                    <lightning-textarea
+                        label="Shipping Address"
+                        value={shippingAddress}
+                        onchange={handleShippingAddressChange}
+                        required>
+                    </lightning-textarea>
+                </lightning-layout-item>
+
+                <!-- Row 4 -->
+                <lightning-layout-item size="12" medium-device-size="4" padding="around-small">
+                    <lightning-input
+                        label="Account"
+                        value={accountName}
+                        readonly>
+                    </lightning-input>
+                </lightning-layout-item>
+                <lightning-layout-item size="12" medium-device-size="4" padding="around-small">
+                    <lightning-input
+                        label="Opportunity"
+                        value={opportunityName}
+                        readonly>
+                    </lightning-input>
+                </lightning-layout-item>
+                <lightning-layout-item size="12" medium-device-size="4" padding="around-small">
+                    <lightning-input
+                        type="checkbox"
+                        label="Active Quote"
+                        checked={isActive}
+                        onchange={handleIsActiveChange}>
+                    </lightning-input>
+                </lightning-layout-item>
+            </lightning-layout>
+        </div>
+
+        <div class="slds-m-top_small slds-m-horizontal_medium"><hr class="divider"/></div>
+
+        <!-- ===== PRODUCT SEARCH SECTION ===== -->
+        <div class="slds-p-around_medium">
+            <div class="section-header slds-m-bottom_small">
+                <h2 class="slds-text-heading_small slds-text-color_default">
+                    <lightning-icon icon-name="utility:search" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                    Add Products
+                </h2>
+            </div>
+
+            <lightning-layout>
+                <lightning-layout-item size="12" medium-device-size="5" padding="around-small">
+                    <lightning-input
+                        label="Search Products"
+                        value={searchTerm}
+                        onchange={handleSearchTermChange}
+                        placeholder="Search by name, code, or item code..."
+                        type="search">
+                    </lightning-input>
+                </lightning-layout-item>
+                <lightning-layout-item size="12" medium-device-size="4" padding="around-small">
+                    <lightning-combobox
+                        label="Category Filter"
+                        value={categoryFilter}
+                        options={categoryOptions}
+                        onchange={handleCategoryFilterChange}
+                        placeholder="All Categories">
+                    </lightning-combobox>
+                </lightning-layout-item>
+                <lightning-layout-item size="12" medium-device-size="3" padding="around-small">
+                    <div class="slds-m-top_large">
+                        <lightning-button
+                            label="Search"
+                            variant="brand"
+                            onclick={handleSearch}
+                            disabled={isSearchDisabled}>
+                        </lightning-button>
+                    </div>
+                </lightning-layout-item>
+            </lightning-layout>
+
+            <!-- Search Results -->
+            <template if:true={showSearchResults}>
+                <div class="search-results slds-m-top_small">
+                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                        <thead>
+                            <tr class="slds-line-height_reset">
+                                <th scope="col"><div class="slds-truncate">Product Name</div></th>
+                                <th scope="col"><div class="slds-truncate">Code</div></th>
+                                <th scope="col"><div class="slds-truncate">Category</div></th>
+                                <th scope="col"><div class="slds-truncate">Make / Model</div></th>
+                                <th scope="col"><div class="slds-truncate">Unit Price</div></th>
+                                <th scope="col"><div class="slds-truncate">HSN</div></th>
+                                <th scope="col"><div class="slds-truncate">Tax %</div></th>
+                                <th scope="col"><div class="slds-truncate">Action</div></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={searchResults} for:item="prod">
+                                <tr key={prod.pricebookEntryId}>
+                                    <td><div class="slds-truncate" title={prod.productName}>{prod.productName}</div></td>
+                                    <td><div class="slds-truncate">{prod.productCode}</div></td>
+                                    <td><div class="slds-truncate">{prod.category}</div></td>
+                                    <td><div class="slds-truncate">{prod.make} {prod.model}</div></td>
+                                    <td><div class="slds-truncate">{prod.formattedPrice}</div></td>
+                                    <td><div class="slds-truncate">{prod.hsnCode}</div></td>
+                                    <td><div class="slds-truncate">{prod.formattedTax}</div></td>
+                                    <td>
+                                        <lightning-button-icon
+                                            icon-name="utility:add"
+                                            alternative-text="Add"
+                                            variant="brand"
+                                            data-id={prod.pricebookEntryId}
+                                            onclick={handleAddProduct}>
+                                        </lightning-button-icon>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                    <template if:true={noSearchResults}>
+                        <div class="slds-text-align_center slds-p-around_small slds-text-color_weak">
+                            No products found matching your search.
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
+
+        <div class="slds-m-top_small slds-m-horizontal_medium"><hr class="divider"/></div>
+
+        <!-- ===== QUOTE LINE ITEMS TABLE ===== -->
+        <div class="slds-p-around_medium">
+            <div class="section-header slds-m-bottom_small">
+                <h2 class="slds-text-heading_small slds-text-color_default">
+                    <lightning-icon icon-name="utility:cart" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                    Quote Line Items ({lineItemCount})
+                </h2>
+            </div>
+
+            <template if:true={hasLineItems}>
+                <div class="line-items-table">
+                    <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                        <thead>
+                            <tr class="slds-line-height_reset">
+                                <th scope="col" style="width:30px"><div class="slds-truncate">#</div></th>
+                                <th scope="col"><div class="slds-truncate">Product</div></th>
+                                <th scope="col" style="width:60px"><div class="slds-truncate">UOM</div></th>
+                                <th scope="col" style="width:80px"><div class="slds-truncate">Qty</div></th>
+                                <th scope="col" style="width:110px"><div class="slds-truncate">Unit Price</div></th>
+                                <th scope="col" style="width:90px"><div class="slds-truncate">Discount %</div></th>
+                                <th scope="col" style="width:90px"><div class="slds-truncate">Tax %</div></th>
+                                <th scope="col" style="width:100px"><div class="slds-truncate">Tax Type</div></th>
+                                <th scope="col" style="width:110px"><div class="slds-truncate">Line Total</div></th>
+                                <th scope="col" style="width:40px"><div class="slds-truncate"></div></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={lineItems} for:item="item">
+                                <tr key={item.rowId}>
+                                    <td>{item.rowNumber}</td>
+                                    <td>
+                                        <div class="slds-truncate" title={item.productName}>
+                                            <strong>{item.productName}</strong>
+                                        </div>
+                                        <div class="slds-text-body_small slds-text-color_weak">{item.productCode}</div>
+                                    </td>
+                                    <td>{item.uom}</td>
+                                    <td>
+                                        <lightning-input
+                                            type="number"
+                                            value={item.quantity}
+                                            min="1"
+                                            step="1"
+                                            variant="label-hidden"
+                                            data-row-id={item.rowId}
+                                            data-field="quantity"
+                                            onchange={handleLineItemChange}>
+                                        </lightning-input>
+                                    </td>
+                                    <td>
+                                        <lightning-formatted-number
+                                            value={item.unitPrice}
+                                            format-style="currency"
+                                            currency-code={currencyCode}>
+                                        </lightning-formatted-number>
+                                    </td>
+                                    <td>
+                                        <lightning-input
+                                            type="number"
+                                            value={item.discount}
+                                            min="0"
+                                            max="100"
+                                            step="0.01"
+                                            variant="label-hidden"
+                                            data-row-id={item.rowId}
+                                            data-field="discount"
+                                            onchange={handleLineItemChange}>
+                                        </lightning-input>
+                                    </td>
+                                    <td>
+                                        <lightning-formatted-number
+                                            value={item.taxPercent}
+                                            format-style="percent"
+                                            maximum-fraction-digits="2">
+                                        </lightning-formatted-number>
+                                    </td>
+                                    <td>
+                                        <lightning-combobox
+                                            value={item.taxType}
+                                            options={taxTypeOptions}
+                                            variant="label-hidden"
+                                            data-row-id={item.rowId}
+                                            data-field="taxType"
+                                            onchange={handleLineItemChange}>
+                                        </lightning-combobox>
+                                    </td>
+                                    <td>
+                                        <lightning-formatted-number
+                                            value={item.lineTotal}
+                                            format-style="currency"
+                                            currency-code={currencyCode}>
+                                        </lightning-formatted-number>
+                                    </td>
+                                    <td>
+                                        <lightning-button-icon
+                                            icon-name="utility:delete"
+                                            alternative-text="Remove"
+                                            variant="bare"
+                                            class="slds-text-color_error"
+                                            data-row-id={item.rowId}
+                                            onclick={handleRemoveLineItem}>
+                                        </lightning-button-icon>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+
+            <template if:false={hasLineItems}>
+                <div class="slds-illustration slds-illustration_small slds-text-align_center slds-p-around_medium">
+                    <p class="slds-text-color_weak">No products added yet. Use the search above to find and add products.</p>
+                </div>
+            </template>
+        </div>
+
+        <div class="slds-m-top_small slds-m-horizontal_medium"><hr class="divider"/></div>
+
+        <!-- ===== ADDITIONAL CHARGES & TOTALS ===== -->
+        <div class="slds-p-around_medium">
+            <lightning-layout multiple-rows>
+                <!-- Extra Charges (Left) -->
+                <lightning-layout-item size="12" medium-device-size="6" padding="around-small">
+                    <div class="section-header slds-m-bottom_small">
+                        <h2 class="slds-text-heading_small slds-text-color_default">
+                            <lightning-icon icon-name="utility:money" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                            Additional Charges (Internal - Not shown on Quote PDF)
+                        </h2>
+                    </div>
+
+                    <lightning-layout multiple-rows>
+                        <lightning-layout-item size="6" padding="around-small">
+                            <lightning-input
+                                type="number"
+                                label="Shipping Charges"
+                                value={shippingCharges}
+                                formatter="currency"
+                                step="0.01"
+                                min="0"
+                                onchange={handleChargeChange}
+                                data-field="shippingCharges">
+                            </lightning-input>
+                        </lightning-layout-item>
+                        <lightning-layout-item size="6" padding="around-small">
+                            <lightning-input
+                                type="number"
+                                label="Transport Charges"
+                                value={transportCharges}
+                                formatter="currency"
+                                step="0.01"
+                                min="0"
+                                onchange={handleChargeChange}
+                                data-field="transportCharges">
+                            </lightning-input>
+                        </lightning-layout-item>
+                        <lightning-layout-item size="6" padding="around-small">
+                            <lightning-input
+                                type="number"
+                                label="Warranty Cost"
+                                value={warrantyCost}
+                                formatter="currency"
+                                step="0.01"
+                                min="0"
+                                onchange={handleChargeChange}
+                                data-field="warrantyCost">
+                            </lightning-input>
+                        </lightning-layout-item>
+                        <lightning-layout-item size="6" padding="around-small">
+                            <lightning-input
+                                type="number"
+                                label="Installation Cost"
+                                value={installationCost}
+                                formatter="currency"
+                                step="0.01"
+                                min="0"
+                                onchange={handleChargeChange}
+                                data-field="installationCost">
+                            </lightning-input>
+                        </lightning-layout-item>
+                        <lightning-layout-item size="6" padding="around-small">
+                            <lightning-input
+                                type="number"
+                                label="Packing Charges"
+                                value={packingCharges}
+                                formatter="currency"
+                                step="0.01"
+                                min="0"
+                                onchange={handleChargeChange}
+                                data-field="packingCharges">
+                            </lightning-input>
+                        </lightning-layout-item>
+                        <lightning-layout-item size="6" padding="around-small">
+                            <lightning-input
+                                type="number"
+                                label="Training Cost"
+                                value={trainingCost}
+                                formatter="currency"
+                                step="0.01"
+                                min="0"
+                                onchange={handleChargeChange}
+                                data-field="trainingCost">
+                            </lightning-input>
+                        </lightning-layout-item>
+                    </lightning-layout>
+                </lightning-layout-item>
+
+                <!-- Totals Summary (Right) -->
+                <lightning-layout-item size="12" medium-device-size="6" padding="around-small">
+                    <div class="section-header slds-m-bottom_small">
+                        <h2 class="slds-text-heading_small slds-text-color_default">
+                            <lightning-icon icon-name="utility:summary" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                            Quote Summary
+                        </h2>
+                    </div>
+
+                    <div class="totals-box">
+                        <div class="total-row">
+                            <span class="total-label">Subtotal (before tax)</span>
+                            <span class="total-value">
+                                <lightning-formatted-number value={subtotal} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                            </span>
+                        </div>
+                        <div class="total-row">
+                            <span class="total-label">Total Discount</span>
+                            <span class="total-value discount-value">
+                                - <lightning-formatted-number value={totalDiscount} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                            </span>
+                        </div>
+                        <div class="total-row">
+                            <span class="total-label">Total Tax</span>
+                            <span class="total-value">
+                                <lightning-formatted-number value={totalTax} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                            </span>
+                        </div>
+                        <div class="total-row">
+                            <span class="total-label">Additional Charges</span>
+                            <span class="total-value">
+                                <lightning-formatted-number value={totalCharges} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                            </span>
+                        </div>
+                        <div class="total-row grand-total">
+                            <span class="total-label">Grand Total</span>
+                            <span class="total-value">
+                                <lightning-formatted-number value={grandTotal} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                            </span>
+                        </div>
+                    </div>
+                </lightning-layout-item>
+            </lightning-layout>
+        </div>
+
+        <!-- ===== FOOTER ACTIONS ===== -->
+        <div slot="footer" class="slds-text-align_right">
+            <lightning-button
+                label="Cancel"
+                onclick={handleCancel}
+                class="slds-m-right_small">
+            </lightning-button>
+            <lightning-button
+                label="Save Quote"
+                variant="brand"
+                onclick={handleSave}
+                disabled={isSaveDisabled}>
+            </lightning-button>
+        </div>
+    </lightning-card>
+</template>
