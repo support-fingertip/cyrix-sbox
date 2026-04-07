@@ -1,0 +1,102 @@
+:host {
+    --border-color: #d8dde6;
+}
+
+.section-header {
+    padding: 8px 0;
+    border-bottom: 2px solid #003366;
+    margin-bottom: 12px;
+}
+
+.section-header h2 {
+    font-weight: 600;
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 0;
+}
+
+/* Search Results */
+.search-results {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.search-results table th {
+    position: sticky;
+    top: 0;
+    background-color: #f3f3f3;
+    z-index: 1;
+}
+
+/* Line Items Table */
+.line-items-table {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.line-items-table table th {
+    position: sticky;
+    top: 0;
+    background-color: #f3f3f3;
+    z-index: 1;
+}
+
+/* Totals Box */
+.totals-box {
+    background-color: #f4f6f9;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 4px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.total-row:last-child {
+    border-bottom: none;
+}
+
+.total-label {
+    font-size: 13px;
+    color: #444;
+}
+
+.total-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+}
+
+.discount-value {
+    color: #c23934;
+}
+
+.grand-total {
+    border-top: 2px solid #003366;
+    margin-top: 4px;
+    padding-top: 12px;
+}
+
+.grand-total .total-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: #003366;
+}
+
+.grand-total .total-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #003366;
+}
