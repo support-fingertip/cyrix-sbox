@@ -497,7 +497,7 @@
     <p style="font-size: 9pt; margin: 0 0 10px 0;">
         <apex:outputPanel rendered="{!paymentTerms.size > 0}">
             <apex:repeat value="{!paymentTerms}" var="pt">
-                <strong>{!pt.Percentage__c}%</strong> {!pt.Name}<br/>
+                <strong>{!pt.Percentage__c}%</strong> {!pt.Payment_Term__c}<br/>
             </apex:repeat>
         </apex:outputPanel>
         <apex:outputPanel rendered="{!paymentTerms.size == 0}">

@@ -250,7 +250,7 @@ public with sharing class QuotationPDFController {
 
         // Query Payment Terms for this Quote
         paymentTerms = [
-            SELECT Id, Name, Percentage__c
+            SELECT Id, Name, Payment_Term__c, Percentage__c
             FROM Payment_Term__c
             WHERE Quote__c = :quoteId
             ORDER BY CreatedDate ASC
