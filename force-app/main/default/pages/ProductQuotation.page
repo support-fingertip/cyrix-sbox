@@ -69,7 +69,7 @@
     .ref-line {
         width: 100%;
         margin-bottom: 20px;
-        font-size: 9pt;
+        font-size: 10pt;
         color: #cc0000;
         font-weight: bold;
     }
@@ -245,7 +245,7 @@
                 <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
@@ -349,7 +349,7 @@
                 <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
@@ -534,7 +534,7 @@
                 <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
@@ -627,7 +627,7 @@
                 <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
@@ -792,7 +792,7 @@
                 <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
@@ -872,7 +872,7 @@
                 <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
@@ -996,7 +996,7 @@
                 <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
@@ -1088,7 +1088,7 @@
                 <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
@@ -1209,7 +1209,7 @@
                 <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
@@ -1312,7 +1312,7 @@
                 <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
@@ -1398,7 +1398,7 @@
                 <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
