@@ -4,6 +4,7 @@ import { NavigationMixin } from 'lightning/navigation';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import getOpportunityContext from '@salesforce/apex/QuoteBuilderController.getOpportunityContext';
 import getQuoteForEdit from '@salesforce/apex/QuoteBuilderController.getQuoteForEdit';
+import getShippingAddresses from '@salesforce/apex/QuoteBuilderController.getShippingAddresses';
 import searchProducts from '@salesforce/apex/QuoteBuilderController.searchProducts';
 import saveQuoteLineItems from '@salesforce/apex/QuoteBuilderController.saveQuoteLineItems';
 import updateQuoteLineItems from '@salesforce/apex/QuoteBuilderController.updateQuoteLineItems';
@@ -22,9 +23,31 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     isLoading = false;
     isSaving = false;
 
-    // Context from Opportunity (for product search)
+    // Context
     pricebookId;
     currencyCode = 'INR';
+    accountId;
+    accountName = '';
+
+    // Bill To address fields (pre-populated from Account)
+    billingName = '';
+    billingStreet = '';
+    billingCity = '';
+    billingState = '';
+    billingPostalCode = '';
+    billingCountry = '';
+
+    // Ship To address fields (from Shipping_Address__c selector)
+    shippingName = '';
+    shippingStreet = '';
+    shippingCity = '';
+    shippingState = '';
+    shippingPostalCode = '';
+    shippingCountry = '';
+
+    // Shipping address picker
+    @track shippingAddresses = [];
+    selectedShippingAddressId = '';
 
     // Search
     searchTerm = '';
@@ -35,7 +58,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // Line items
     @track lineItems = [];
 
-    // Internal charges (injected into form on submit)
+    // Internal charges
     packingCharges = 0;
     transportCharges = 0;
     warrantyCost = 0;
@@ -64,6 +87,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         ];
     }
 
+    get shippingAddressOptions() {
+        return this.shippingAddresses.map(addr => ({
+            label: addr.displayLabel,
+            value: addr.addressId
+        }));
+    }
+
     // ===== COMPUTED PROPERTIES =====
 
     get hasLineItems() { return this.lineItems.length > 0; }
@@ -74,6 +104,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     get isSaveDisabled() { return this.isSaving || this.lineItems.length === 0; }
     get pageTitle() { return this.isEditMode ? 'Edit Quote' : 'Create Quote'; }
     get saveButtonLabel() { return this.isSaving ? 'Saving...' : (this.isEditMode ? 'Update Quote' : 'Save Quote'); }
+    get hasShippingAddresses() { return this.shippingAddresses.length > 0; }
 
     // ===== CALCULATIONS =====
 
@@ -124,12 +155,10 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         const idPrefix = this.recordId.substring(0, 3);
 
         if (idPrefix === '0Q0') {
-            // Edit mode: recordId is a Quote Id
             this.isEditMode = true;
             this.editRecordId = this.recordId;
             await this.loadQuoteLineItems();
         } else {
-            // New mode: recordId is an Opportunity Id
             this.isEditMode = false;
             this.defaultOpportunityId = this.recordId;
             await this.loadOpportunityContext();
@@ -143,6 +172,21 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             const data = await getOpportunityContext({ opportunityId: this.recordId });
             this.pricebookId = data.pricebookId;
             this.currencyCode = data.currencyCode || 'INR';
+            this.accountId = data.accountId;
+            this.accountName = data.accountName || '';
+
+            // Pre-populate Bill To from Account billing address
+            this.billingName = data.billingName || '';
+            this.billingStreet = data.billingStreet || '';
+            this.billingCity = data.billingCity || '';
+            this.billingState = data.billingState || '';
+            this.billingPostalCode = data.billingPostalCode || '';
+            this.billingCountry = data.billingCountry || '';
+
+            // Fetch shipping addresses for the Account
+            if (this.accountId) {
+                await this.loadShippingAddresses(this.accountId);
+            }
         } catch (error) {
             this.showError('Error loading opportunity', this.reduceErrors(error));
         }
@@ -152,6 +196,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         try {
             const data = await getQuoteForEdit({ quoteId: this.editRecordId });
             this.pricebookId = data.pricebookId;
+            this.accountId = data.accountId;
+
+            // Fetch shipping addresses for edit mode too
+            if (this.accountId) {
+                await this.loadShippingAddresses(this.accountId);
+            }
 
             if (data.lineItems && data.lineItems.length > 0) {
                 this.lineItems = data.lineItems.map((item, index) => {
@@ -186,12 +236,56 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }
     }
 
+    async loadShippingAddresses(accountId) {
+        try {
+            const addresses = await getShippingAddresses({ accountId: accountId });
+            this.shippingAddresses = addresses || [];
+
+            // Auto-select first address if available and in new mode
+            if (!this.isEditMode && this.shippingAddresses.length > 0) {
+                this.selectedShippingAddressId = this.shippingAddresses[0].addressId;
+                this.applyShippingAddress(this.shippingAddresses[0]);
+            }
+        } catch (error) {
+            console.warn('Could not load shipping addresses:', error);
+            this.shippingAddresses = [];
+        }
+    }
+
+    // ===== ADDRESS HANDLERS =====
+
+    handleBillingFieldChange(event) {
+        const field = event.currentTarget.dataset.field;
+        this[field] = event.target.value;
+    }
+
+    handleShippingFieldChange(event) {
+        const field = event.currentTarget.dataset.field;
+        this[field] = event.target.value;
+    }
+
+    handleShippingAddressSelect(event) {
+        this.selectedShippingAddressId = event.detail.value;
+        const selected = this.shippingAddresses.find(a => a.addressId === this.selectedShippingAddressId);
+        if (selected) {
+            this.applyShippingAddress(selected);
+        }
+    }
+
+    applyShippingAddress(addr) {
+        this.shippingName = addr.name || '';
+        this.shippingStreet = addr.street || '';
+        this.shippingCity = addr.city || '';
+        this.shippingState = addr.state || '';
+        this.shippingPostalCode = addr.postalCode || '';
+        this.shippingCountry = addr.country || '';
+    }
+
     // ===== FORM HANDLERS =====
 
     handleFormSubmit(event) {
         event.preventDefault();
 
-        // Validate line items before submitting
         const errors = this.validateLineItems();
         if (errors.length > 0) {
             this.showError('Validation Error', errors.join('\n'));
@@ -200,8 +294,24 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
         const fields = event.detail.fields;
 
-        // Inject Pricebook2Id (required for Quote)
+        // Inject Pricebook2Id
         fields.Pricebook2Id = this.pricebookId;
+
+        // Inject Bill To address fields
+        fields.BillingName = this.billingName;
+        fields.BillingStreet = this.billingStreet;
+        fields.BillingCity = this.billingCity;
+        fields.BillingState = this.billingState;
+        fields.BillingPostalCode = this.billingPostalCode;
+        fields.BillingCountry = this.billingCountry;
+
+        // Inject Ship To address fields
+        fields.ShippingName = this.shippingName;
+        fields.ShippingStreet = this.shippingStreet;
+        fields.ShippingCity = this.shippingCity;
+        fields.ShippingState = this.shippingState;
+        fields.ShippingPostalCode = this.shippingPostalCode;
+        fields.ShippingCountry = this.shippingCountry;
 
         // Inject internal charge fields
         fields.Packing_Charge__c = this.packingCharges || 0;
@@ -250,7 +360,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 this.showSuccess('Quote Created', 'Quote and line items created successfully.');
             }
 
-            // Navigate to the Quote record
             this[NavigationMixin.Navigate]({
                 type: 'standard__recordPage',
                 attributes: {
@@ -263,7 +372,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.showError('Line Items Save Failed',
                 'Quote header was saved but line items failed: ' + this.reduceErrors(error) +
                 '. Please add line items from the Quote record page.');
-            // Navigate to the Quote so user can fix line items
             this[NavigationMixin.Navigate]({
                 type: 'standard__recordPage',
                 attributes: {
@@ -281,7 +389,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     handleFormError(event) {
         this.isSaving = false;
         this.isLoading = false;
-
         const message = event.detail?.message || 'An error occurred while saving the quote.';
         this.showError('Save Failed', message);
     }

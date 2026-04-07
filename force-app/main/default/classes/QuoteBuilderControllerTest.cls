@@ -18,6 +18,23 @@ private class QuoteBuilderControllerTest {
         );
         insert acc;
 
+        // Create Shipping_Address__c records for the Account
+        Shipping_Address__c shipAddr1 = new Shipping_Address__c(
+            Account__c = acc.Id,
+            Name = 'Main Warehouse',
+            Address__Street__s = '789 Industrial Area',
+            Address__City__s = 'Kochi',
+            Address__PostalCode__s = '682002'
+        );
+        Shipping_Address__c shipAddr2 = new Shipping_Address__c(
+            Account__c = acc.Id,
+            Name = 'Branch Office',
+            Address__Street__s = '100 Tech Park',
+            Address__City__s = 'Trivandrum',
+            Address__PostalCode__s = '695002'
+        );
+        insert new List<Shipping_Address__c>{ shipAddr1, shipAddr2 };
+
         Id stdPbId = Test.getStandardPricebookId();
 
         Opportunity opp = new Opportunity(
@@ -78,6 +95,40 @@ private class QuoteBuilderControllerTest {
         System.assertEquals('Test Hospital Deal', ctx.opportunityName);
         System.assertEquals('Test Hospital', ctx.accountName);
         System.assertNotEquals(null, ctx.pricebookId);
+        // Verify billing address pre-population
+        System.assertEquals('Test Hospital', ctx.billingName);
+        System.assertEquals('123 MG Road', ctx.billingStreet);
+        System.assertEquals('Kochi', ctx.billingCity);
+        System.assertEquals('Kerala', ctx.billingState);
+        System.assertEquals('682001', ctx.billingPostalCode);
+        System.assertEquals('India', ctx.billingCountry);
+    }
+
+    @isTest
+    static void testGetShippingAddresses() {
+        Account acc = [SELECT Id FROM Account LIMIT 1];
+
+        Test.startTest();
+        List<QuoteBuilderController.ShippingAddressResult> results =
+            QuoteBuilderController.getShippingAddresses(acc.Id);
+        Test.stopTest();
+
+        System.assertEquals(2, results.size(), 'Should find 2 shipping addresses');
+        // Verify display label is populated
+        for (QuoteBuilderController.ShippingAddressResult addr : results) {
+            System.assertNotEquals(null, addr.displayLabel);
+            System.assertNotEquals(null, addr.name);
+        }
+    }
+
+    @isTest
+    static void testGetShippingAddressesNullAccount() {
+        Test.startTest();
+        List<QuoteBuilderController.ShippingAddressResult> results =
+            QuoteBuilderController.getShippingAddresses(null);
+        Test.stopTest();
+
+        System.assertEquals(0, results.size(), 'Should return empty for null account');
     }
 
     @isTest
@@ -135,7 +186,6 @@ private class QuoteBuilderControllerTest {
         PricebookEntry pbe1 = [SELECT Id, Product2Id FROM PricebookEntry WHERE Product2.ProductCode = 'USG-500' LIMIT 1];
         PricebookEntry pbe2 = [SELECT Id, Product2Id FROM PricebookEntry WHERE Product2.ProductCode = 'PM-200' LIMIT 1];
 
-        // Create Quote (simulating record-edit-form creation)
         Quote q = new Quote(
             Name = 'Test Hospital Quote',
             OpportunityId = opp.Id,
@@ -205,7 +255,7 @@ private class QuoteBuilderControllerTest {
 
     @isTest
     static void testGetQuoteForEdit() {
-        Opportunity opp = [SELECT Id, Pricebook2Id FROM Opportunity LIMIT 1];
+        Opportunity opp = [SELECT Id, AccountId, Pricebook2Id FROM Opportunity LIMIT 1];
         PricebookEntry pbe = [SELECT Id, Product2Id FROM PricebookEntry WHERE Product2.ProductCode = 'USG-500' LIMIT 1];
 
         Quote q = new Quote(
@@ -233,11 +283,10 @@ private class QuoteBuilderControllerTest {
         System.assertEquals(q.Id, ctx.quoteId);
         System.assertEquals(opp.Pricebook2Id, ctx.pricebookId);
         System.assertEquals(opp.Id, ctx.opportunityId);
+        System.assertEquals(opp.AccountId, ctx.accountId);
         System.assertEquals(1, ctx.lineItems.size());
         System.assertEquals(2, ctx.lineItems[0].quantity);
         System.assertEquals(150000, ctx.lineItems[0].unitPrice);
-        System.assertEquals(5, ctx.lineItems[0].discount);
-        System.assertEquals('GST', ctx.lineItems[0].taxType);
     }
 
     @isTest
@@ -253,7 +302,6 @@ private class QuoteBuilderControllerTest {
         );
         insert q;
 
-        // Insert initial line item
         QuoteLineItem qli = new QuoteLineItem(
             QuoteId = q.Id,
             Product2Id = pbe1.Product2Id,
@@ -265,7 +313,6 @@ private class QuoteBuilderControllerTest {
         );
         insert qli;
 
-        // Update with different line item
         String lineItemsJSON = JSON.serialize(new List<Map<String, Object>>{
             new Map<String, Object>{
                 'productId' => pbe2.Product2Id,

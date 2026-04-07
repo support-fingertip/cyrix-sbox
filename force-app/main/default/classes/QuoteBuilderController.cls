@@ -3,7 +3,7 @@
 * Created Date : 07-04-2026
 * @description : Apex controller for the newQuoteCmp LWC component.
 *                Provides methods for Opportunity context, product search,
-*                price book entry retrieval, and QuoteLineItem management.
+*                shipping address lookup, and QuoteLineItem management.
 *                Quote header is saved via lightning-record-edit-form (LDS).
 *
 * Change Log:
@@ -12,17 +12,22 @@
 * -----------------------------------------------------------------------------
 * 1.0 | Claude AI        | 07-04-2026 | Initial version
 * 2.0 | Claude AI        | 07-04-2026 | Refactored for record-edit-form pattern
+* 3.0 | Claude AI        | 07-04-2026 | Added shipping address lookup, billing
+*     |                  |            | address auto-fetch from Account
 * -----------------------------------------------------------------------------
 **************************************************************/
 public with sharing class QuoteBuilderController {
 
     /**
-     * Fetches Opportunity context for quote creation (pricebook, account info).
+     * Fetches Opportunity context including Account billing address for pre-population.
      */
     @AuraEnabled(cacheable=true)
     public static OpportunityContext getOpportunityContext(Id opportunityId) {
         Opportunity opp = [
             SELECT Id, Name, AccountId, Account.Name,
+                   Account.BillingStreet, Account.BillingCity,
+                   Account.BillingState, Account.BillingPostalCode,
+                   Account.BillingCountry,
                    Pricebook2Id, CurrencyIsoCode, Buisness_Vertical__c
             FROM Opportunity
             WHERE Id = :opportunityId
@@ -37,12 +42,61 @@ public with sharing class QuoteBuilderController {
         ctx.pricebookId = opp.Pricebook2Id;
         ctx.currencyCode = opp.CurrencyIsoCode;
         ctx.vertical = opp.Buisness_Vertical__c;
+
+        // Account billing address for Bill To pre-population
+        if (opp.Account != null) {
+            ctx.billingName = opp.Account.Name;
+            ctx.billingStreet = opp.Account.BillingStreet;
+            ctx.billingCity = opp.Account.BillingCity;
+            ctx.billingState = opp.Account.BillingState;
+            ctx.billingPostalCode = opp.Account.BillingPostalCode;
+            ctx.billingCountry = opp.Account.BillingCountry;
+        }
+
         return ctx;
     }
 
     /**
+     * Fetches Shipping_Address__c records related to an Account.
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<ShippingAddressResult> getShippingAddresses(Id accountId) {
+        List<ShippingAddressResult> results = new List<ShippingAddressResult>();
+        if (accountId == null) return results;
+
+        for (Shipping_Address__c sa : [
+            SELECT Id, Name, Address__Street__s, Address__City__s,
+                   Address__StateCode__s, Address__PostalCode__s,
+                   Address__CountryCode__s, Same_as_BillingAddress__c
+            FROM Shipping_Address__c
+            WHERE Account__c = :accountId
+            ORDER BY CreatedDate DESC
+        ]) {
+            ShippingAddressResult sar = new ShippingAddressResult();
+            sar.addressId = sa.Id;
+            sar.name = sa.Name;
+            sar.street = sa.Address__Street__s;
+            sar.city = sa.Address__City__s;
+            sar.state = sa.Address__StateCode__s;
+            sar.postalCode = sa.Address__PostalCode__s;
+            sar.country = sa.Address__CountryCode__s;
+            sar.sameAsBilling = sa.Same_as_BillingAddress__c;
+
+            // Build display label
+            List<String> parts = new List<String>();
+            parts.add(sa.Name);
+            if (String.isNotBlank(sa.Address__City__s)) parts.add(sa.Address__City__s);
+            if (String.isNotBlank(sa.Address__StateCode__s)) parts.add(sa.Address__StateCode__s);
+            sar.displayLabel = String.join(parts, ', ');
+
+            results.add(sar);
+        }
+
+        return results;
+    }
+
+    /**
      * Searches active products by name, code, or category.
-     * Returns products with their PricebookEntry for the given pricebook.
      */
     @AuraEnabled
     public static List<ProductSearchResult> searchProducts(String searchTerm, Id pricebookId, String category) {
@@ -115,13 +169,12 @@ public with sharing class QuoteBuilderController {
     }
 
     /**
-     * Loads pricebook context and line items for an existing Quote (edit mode).
-     * Quote header fields are loaded automatically by lightning-record-edit-form.
+     * Loads pricebook context, accountId, and line items for an existing Quote (edit mode).
      */
     @AuraEnabled
     public static QuoteEditContext getQuoteForEdit(Id quoteId) {
         Quote q = [
-            SELECT Id, Pricebook2Id, OpportunityId
+            SELECT Id, Pricebook2Id, OpportunityId, Opportunity.AccountId
             FROM Quote
             WHERE Id = :quoteId
             LIMIT 1
@@ -131,6 +184,7 @@ public with sharing class QuoteBuilderController {
         ctx.quoteId = q.Id;
         ctx.pricebookId = q.Pricebook2Id;
         ctx.opportunityId = q.OpportunityId;
+        ctx.accountId = q.Opportunity != null ? q.Opportunity.AccountId : null;
 
         ctx.lineItems = new List<QuoteLineItemResult>();
         for (QuoteLineItem qli : [
@@ -250,6 +304,25 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Id pricebookId;
         @AuraEnabled public String currencyCode;
         @AuraEnabled public String vertical;
+        // Account billing address for Bill To pre-population
+        @AuraEnabled public String billingName;
+        @AuraEnabled public String billingStreet;
+        @AuraEnabled public String billingCity;
+        @AuraEnabled public String billingState;
+        @AuraEnabled public String billingPostalCode;
+        @AuraEnabled public String billingCountry;
+    }
+
+    public class ShippingAddressResult {
+        @AuraEnabled public Id addressId;
+        @AuraEnabled public String name;
+        @AuraEnabled public String street;
+        @AuraEnabled public String city;
+        @AuraEnabled public String state;
+        @AuraEnabled public String postalCode;
+        @AuraEnabled public String country;
+        @AuraEnabled public Boolean sameAsBilling;
+        @AuraEnabled public String displayLabel;
     }
 
     public class ProductSearchResult {
@@ -283,6 +356,7 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Id quoteId;
         @AuraEnabled public Id pricebookId;
         @AuraEnabled public Id opportunityId;
+        @AuraEnabled public Id accountId;
         @AuraEnabled public List<QuoteLineItemResult> lineItems;
     }
 
