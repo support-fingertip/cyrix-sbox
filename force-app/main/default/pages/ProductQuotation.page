@@ -931,17 +931,19 @@
             </tr>
         </thead>
         <tbody>
-            <apex:variable var="amcIdx" value="{!1}" />
+            <!-- Static header row -->
+            <tr>
+                <td style="text-align: center; border: 1px solid #000000;" rowspan="2">1.</td>
+                <td style="border: 1px solid #000000; font-weight: bold;" colspan="5">
+                    ANNUAL MAINTENANCE CONTRACT (AMC)<br/>
+                    <u>(Annexure A List of Equipment)</u>
+                </td>
+            </tr>
+            <!-- Dynamic product rows -->
             <apex:repeat value="{!lineItems}" var="amcItem">
                 <tr>
-                    <td style="text-align: center; border: 1px solid #000000;">
-                        <apex:outputText value="{0, number, 0}">
-                            <apex:param value="{!amcIdx}" />
-                        </apex:outputText>.
-                    </td>
                     <td style="border: 1px solid #000000; font-weight: bold;">
-                        {!amcItem.Product2.Name}<br/>
-                        <u>(Annexure A List of Equipment)</u>
+                        {!amcItem.Product2.Name}
                     </td>
                     <td style="text-align: center; border: 1px solid #000000;">
                         <apex:outputText value="{0, number, ###,##0}">
@@ -962,7 +964,6 @@
                         </apex:outputText>
                     </td>
                 </tr>
-                <apex:variable var="amcIdx" value="{!amcIdx + 1}" />
             </apex:repeat>
             <tr>
                 <td colspan="6" style="text-align: center; font-size: 8pt; border: 1px solid #000000;">
@@ -1267,17 +1268,19 @@
             </tr>
         </thead>
         <tbody>
-            <apex:variable var="camcIdx" value="{!1}" />
+            <!-- Static header row -->
+            <tr>
+                <td style="text-align: center; border: 1px solid #000000;" rowspan="2">1.</td>
+                <td style="border: 1px solid #000000; font-weight: bold;" colspan="5">
+                    Comprehensive Annual Maintenance Contract (CAMC)<br/>
+                    <u>(Annexure A List of Equipment)</u>
+                </td>
+            </tr>
+            <!-- Dynamic product rows -->
             <apex:repeat value="{!lineItems}" var="camcItem">
                 <tr>
-                    <td style="text-align: center; border: 1px solid #000000;">
-                        <apex:outputText value="{0, number, 0}">
-                            <apex:param value="{!camcIdx}" />
-                        </apex:outputText>.
-                    </td>
                     <td style="border: 1px solid #000000; font-weight: bold;">
-                        {!camcItem.Product2.Name}<br/>
-                        <u>(Annexure A List of Equipment)</u>
+                        {!camcItem.Product2.Name}
                     </td>
                     <td style="text-align: center; border: 1px solid #000000;">
                         <apex:outputText value="{0, number, ###,##0}">
@@ -1298,7 +1301,6 @@
                         </apex:outputText>
                     </td>
                 </tr>
-                <apex:variable var="camcIdx" value="{!camcIdx + 1}" />
             </apex:repeat>
             <tr>
                 <td colspan="6" style="text-align: center; font-size: 7pt; border: 1px solid #000000;">
