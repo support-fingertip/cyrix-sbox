@@ -1,6 +1,7 @@
 import { LightningElement, api, wire, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
+import { CloseActionScreenEvent } from 'lightning/actions';
 import getOpportunityContext from '@salesforce/apex/QuoteBuilderController.getOpportunityContext';
 import searchProducts from '@salesforce/apex/QuoteBuilderController.searchProducts';
 import saveQuoteWithLineItems from '@salesforce/apex/QuoteBuilderController.saveQuoteWithLineItems';
@@ -395,6 +396,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     }
 
     handleCancel() {
+        // Close quick action modal if launched from action
+        this.dispatchEvent(new CloseActionScreenEvent());
         this[NavigationMixin.Navigate]({
             type: 'standard__recordPage',
             attributes: {
