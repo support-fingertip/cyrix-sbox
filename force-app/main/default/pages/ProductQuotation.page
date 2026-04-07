@@ -634,7 +634,7 @@
     </table>
 
     <!-- HORIZONTAL LINE -->
-    <hr style="border: 1px solid #000000; margin: 15px 0;"/>
+    <hr style="border: none; border-top: 1px dashed #000000; margin: 15px 0;"/>
 
     <!-- IN GENERAL QUOTATIONS AND CONSUMABLES -->
     <p style="font-size: 10pt; font-weight: bold; font-style: italic; text-decoration: underline; margin: 15px 0 12px 0;">
@@ -656,7 +656,7 @@
     </p>
 
     <!-- HORIZONTAL LINE -->
-    <hr style="border: 1px solid #000000; margin: 20px 0;"/>
+    <hr style="border: none; border-top: 1px dashed #000000; margin: 20px 0;"/>
 
     <!-- IN CALIBRATION QUOTATIONS -->
     <p style="font-size: 10pt; font-weight: bold; font-style: italic; text-decoration: underline; margin: 15px 0 8px 0;">
