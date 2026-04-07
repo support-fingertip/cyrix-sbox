@@ -68,7 +68,7 @@
     /* ---------- QUOTE REF LINE ---------- */
     .ref-line {
         width: 100%;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
         font-size: 10pt;
         color: #cc0000;
         font-weight: bold;
@@ -77,7 +77,7 @@
     /* ---------- TO SECTION ---------- */
     .to-section {
         font-size: 10pt;
-        margin-bottom: 10px;
+        margin-bottom: 5px;
     }
 
     /* ---------- SUBJECT ---------- */
@@ -86,7 +86,7 @@
         font-size: 11pt;
         font-weight: bold;
         color: #000000;
-        margin: 20px 0 15px 0;
+        margin: 10px 0 8px 0;
     }
 
     /* ---------- LETTER BODY ---------- */
@@ -106,7 +106,7 @@
 
     /* ---------- SIGNATURE SECTION ---------- */
     .sign-section {
-        margin-top: 40px;
+        margin-top: 25px;
     }
     .sign-line {
         border-bottom: 1px solid #333333;
