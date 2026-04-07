@@ -1,4 +1,4 @@
-@RestResource(urlMapping='/SAPToSF/*')
+@RestResource(urlMapping='/api/*')
 global without sharing class SAPToSFIntegrationController {
 
 /* Class Name   : SAPToSFIntegrationController
@@ -178,9 +178,7 @@ global without sharing class SAPToSFIntegrationController {
 
         String value = req.params.get('value');
 
-        if (value == 'productMaster') {
-            getProducts(req, res);
-        } else if (value == 'customerDetails') {
+     if (value == 'customerDetails') {
             getCustomerDetails(req, res);
         } else {
             res.statusCode = 403;
@@ -190,52 +188,7 @@ global without sharing class SAPToSFIntegrationController {
         }
     }
 
-    private static void getProducts(RestRequest req, RestResponse res) {
-        try {
-            String productCode = req.params.get('productCode');
-            String category = req.params.get('category');
-            String brand = req.params.get('brand');
-            Integer limitVal = req.params.get('limit') != null
-                ? Integer.valueOf(req.params.get('limit')) : 200;
-
-            String query = 'SELECT Id, Name, ProductCode, Item_Code__c, ' +
-                'SAP_Item_Code__c, Product_Category__c, Product_Vertical__c, ' +
-                'Product_Type__c, Source__c, Equipment_Name__c, ' +
-                'Make__c, Model__c, OEM_Part_Number__c, QuantityUnitOfMeasure, ' +
-                'Compatibility__c, Specification__c, Quantity_Pack_Size__c, ' +
-                'HSN_Code__c, Tax__c, Description, Remarks__c, ' +
-                'Any_Other_Levies__c, Brand__c, IsActive, ' +
-                'Product_Image_URL__c, Product_Image_URL_2__c, Product_Image_URL_3__c, ' +
-                'ERP_Sync_Status__c, Last_ERP_Sync_Date__c ' +
-                'FROM Product2 WHERE IsActive = true';
-
-            if (String.isNotBlank(productCode)) {
-                query += ' AND Item_Code__c = :productCode';
-            }
-            if (String.isNotBlank(category)) {
-                query += ' AND Product_Category__c = :category';
-            }
-            if (String.isNotBlank(brand)) {
-                query += ' AND Brand__c = :brand';
-            }
-            query += ' ORDER BY Name ASC LIMIT :limitVal';
-
-            List<Product2> products = Database.query(query);
-
-            List<Response> lstResponse = new List<Response>();
-            for (Product2 p : products) {
-                lstResponse.add(new Response(p.Id, p.Item_Code__c, 'Success', p.Name));
-            }
-
-            res.statusCode = 200;
-            res.responseBody = Blob.valueOf(JSON.serialize(lstResponse));
-        } catch (Exception e) {
-            res.statusCode = 500;
-            List<Response> lstResponse = new List<Response>();
-            lstResponse.add(new Response(null, null, 'Failure', 'Error: ' + e.getMessage()));
-            res.responseBody = Blob.valueOf(JSON.serialize(lstResponse));
-        }
-    }
+ 
 
     private static void getCustomerDetails(RestRequest req, RestResponse res) {
         try {
