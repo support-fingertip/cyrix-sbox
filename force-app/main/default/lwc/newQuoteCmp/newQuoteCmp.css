@@ -1,4 +1,4 @@
-/* ===== Quote Builder - Full Screen Professional Responsive Styles ===== */
+/* ===== Quote Builder - Professional Responsive Styles ===== */
 
 :host {
     --brand-primary: #003366;
@@ -13,21 +13,19 @@
     --success-color: #2e844a;
 
     display: block;
-    min-height: 100vh;
     background: #f3f3f3;
 }
 
-/* Full-screen layout */
+/* Layout container - fills available space, no forced viewport height */
 .quote-builder {
     width: 100%;
-    min-height: 100vh;
-    padding: 0 0 80px 0;
+    padding: 0 0 16px 0;
     background: #f3f3f3;
 }
 
 /* Loading Overlay */
 .loading-overlay {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
@@ -37,6 +35,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 200px;
 }
 
 /* Page Header */
@@ -44,9 +43,6 @@
     background: linear-gradient(135deg, var(--brand-primary) 0%, #004d99 100%);
     color: #fff;
     padding: 16px 24px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
 }
 
@@ -245,17 +241,15 @@
     color: var(--brand-primary);
 }
 
-/* Footer Actions - fixed at bottom */
+/* Footer Actions - flows with content, sticks to bottom of visible area */
 .footer-actions {
     background: #fff;
     border-top: 1px solid var(--border-color);
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 10;
     box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
     padding: 12px 24px;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
 }
 
 /* Full-width button helper */
@@ -295,10 +289,6 @@
 
 /* ===== RESPONSIVE: MOBILE ===== */
 @media (max-width: 768px) {
-    .quote-builder {
-        padding: 0 0 72px 0;
-    }
-
     .section-card {
         margin: 8px 8px;
         border-radius: 6px;
