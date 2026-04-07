@@ -396,7 +396,7 @@
                     </td>
                     <td class="price-col">
                         <apex:outputText value="{0, number, ###,##0.00}">
-                            <apex:param value="{!item.UnitPrice}" />
+                            <apex:param value="{!item.ListPrice}" />
                         </apex:outputText>
                     </td>
                     <td class="qty-col">
@@ -709,7 +709,7 @@
                     </td>
                     <td style="text-align: center; border: 1px solid #000000;">
                         <apex:outputText value="{0, number, ###,##0}">
-                            <apex:param value="{!calItem.UnitPrice}" />
+                            <apex:param value="{!calItem.ListPrice}" />
                         </apex:outputText>
                     </td>
                     <td style="text-align: right; border: 1px solid #000000;">
