@@ -495,10 +495,17 @@
     <!-- Payment Terms -->
     <p style="font-size: 9pt; font-weight: bold; margin: 12px 0 3px 0;">PAYMENT TERMS &amp; CONDITIONS:</p>
     <p style="font-size: 9pt; margin: 0 0 10px 0;">
-        <strong>{!advancePercent}</strong> Advance payment with Purchase Order<br/>
-        <strong>{!shippingPercent}</strong> payment on confirmation of shipping<br/>
-        <strong>{!deliveryPercent}</strong> payment on delivery to site<br/>
-        <strong>{!installationPercent}</strong> payment after installation and handover
+        <apex:outputPanel rendered="{!paymentTerms.size > 0}">
+            <apex:repeat value="{!paymentTerms}" var="pt">
+                <strong>{!pt.Percentage__c}%</strong> {!pt.Name}<br/>
+            </apex:repeat>
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{!paymentTerms.size == 0}">
+            <strong>{!advancePercent}</strong> Advance payment with Purchase Order<br/>
+            <strong>{!shippingPercent}</strong> payment on confirmation of shipping<br/>
+            <strong>{!deliveryPercent}</strong> payment on delivery to site<br/>
+            <strong>{!installationPercent}</strong> payment after installation and handover
+        </apex:outputPanel>
     </p>
 
     <!-- Delivery -->

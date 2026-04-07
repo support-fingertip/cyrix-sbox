@@ -77,6 +77,7 @@ public with sharing class QuotationPDFController {
     public String installationScope { get; set; }
     public String gstDisplayRate { get; set; }
     public String warrantyExtra { get; set; }
+    public List<Payment_Term__c> paymentTerms { get; set; }
 
     public String companyName { get { return COMPANY_NAME; } }
     public String companyAddress { get { return COMPANY_ADDRESS; } }
@@ -122,6 +123,7 @@ public with sharing class QuotationPDFController {
         installationScope = 'installation and commissioning';
         gstDisplayRate = '';
         warrantyExtra = '';
+        paymentTerms = new List<Payment_Term__c>();
 
         // Initialize bank details with defaults
         bankName = BANK_NAME;
@@ -243,6 +245,14 @@ public with sharing class QuotationPDFController {
                    Product_Line_Description__c, Product_Detailed_Description__c
             FROM QuoteLineItem
             WHERE QuoteId = :quoteId
+            ORDER BY CreatedDate ASC
+        ];
+
+        // Query Payment Terms for this Quote
+        paymentTerms = [
+            SELECT Id, Name, Percentage__c
+            FROM Payment_Term__c
+            WHERE Quote__c = :quoteId
             ORDER BY CreatedDate ASC
         ];
 
