@@ -19,9 +19,9 @@
     }
     body {
         font-family: 'Times New Roman', Times, serif;
-        font-size: 8pt;
+        font-size: 9pt;
         color: #000000;
-        line-height: 1.3;
+        line-height: 1.5;
     }
 
     /* ---------- FOOTER ---------- */
@@ -70,34 +70,34 @@
         width: 100%;
         margin-top: 0px;
         margin-bottom: 15px;
-        font-size: 8pt;
+        font-size: 9pt;
         color: #cc0000;
         font-weight: bold;
     }
 
     /* ---------- TO SECTION ---------- */
     .to-section {
-        font-size: 8pt;
-        margin-bottom: 10px;
+        font-size: 9pt;
+        margin-bottom: 15px;
     }
 
     /* ---------- SUBJECT ---------- */
     .subject {
         text-align: center;
-        font-size: 8pt;
+        font-size: 9pt;
         font-weight: bold;
         color: #000000;
-        margin: 5px 0 10px 0;
+        margin: 10px 0 15px 0;
     }
 
     /* ---------- LETTER BODY ---------- */
     .letter-body {
-        font-size: 7.5pt;
+        font-size: 9pt;
         text-align: justify;
-        line-height: 1.4;
+        line-height: 1.5;
     }
     .letter-body p {
-        margin: 12px 0;
+        margin: 10px 0;
     }
     .product-list {
         margin: 3px 0 3px 0;
@@ -107,7 +107,7 @@
 
     /* ---------- SIGNATURE SECTION ---------- */
     .sign-section {
-        margin-top: 20px;
+        margin-top: 30px;
     }
     .sign-line {
         border-bottom: 1px solid #333333;
