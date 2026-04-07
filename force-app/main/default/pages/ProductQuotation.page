@@ -634,18 +634,18 @@
     </table>
 
     <!-- HORIZONTAL LINE -->
-    <hr style="border: 1px solid #000000; margin: 10px 0;"/>
+    <hr style="border: 1px solid #000000; margin: 15px 0;"/>
 
     <!-- IN GENERAL QUOTATIONS AND CONSUMABLES -->
-    <p style="font-size: 10pt; font-weight: bold; font-style: italic; text-decoration: underline; margin: 10px 0 8px 0;">
+    <p style="font-size: 10pt; font-weight: bold; font-style: italic; text-decoration: underline; margin: 15px 0 12px 0;">
         IN GENERAL QUOTATIONS AND CONSUMABLES
     </p>
 
-    <p style="font-size: 9pt; font-weight: bold; text-decoration: underline; margin: 8px 0 5px 0;">
+    <p style="font-size: 9pt; font-weight: bold; text-decoration: underline; margin: 12px 0 10px 0;">
         TERMS AND CONDITIONS <span style="font-weight: normal; font-style: italic; text-decoration: none;">&nbsp;&nbsp;**(Balance all same)</span>
     </p>
 
-    <p style="font-size: 9pt; margin-left: 30px; line-height: 1.8;">
+    <p style="font-size: 9pt; font-weight: bold; margin-left: 30px; line-height: 2.2;">
         VALIDITY:<br/>
         PRICE:<br/>
         DELIVERY:<br/>
@@ -656,10 +656,10 @@
     </p>
 
     <!-- HORIZONTAL LINE -->
-    <hr style="border: 1px solid #000000; margin: 15px 0;"/>
+    <hr style="border: 1px solid #000000; margin: 20px 0;"/>
 
     <!-- IN CALIBRATION QUOTATIONS -->
-    <p style="font-size: 10pt; font-weight: bold; font-style: italic; text-decoration: underline; margin: 10px 0 5px 0;">
+    <p style="font-size: 10pt; font-weight: bold; font-style: italic; text-decoration: underline; margin: 15px 0 8px 0;">
         IN CALIBRATION QUOTATIONS
     </p>
 
@@ -769,7 +769,7 @@
         TERMS AND CONDITIONS
     </div>
 
-    <p style="font-size: 9pt; margin-left: 30px; line-height: 1.8;">
+    <p style="font-size: 9pt; font-weight: bold; margin-left: 30px; line-height: 2.2;">
         PRICE:<br/>
         VALIDITY:<br/>
         PAYMENT TERMS &amp; CONDITIONS:<br/>
