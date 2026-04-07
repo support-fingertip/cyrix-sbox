@@ -24,6 +24,16 @@
         line-height: 1.5;
     }
 
+    /* ---------- WATERMARK ---------- */
+    .watermark {
+        position: fixed;
+        top: 35%;
+        left: 15%;
+        width: 70%;
+        opacity: 0.06;
+        z-index: -1;
+    }
+
     /* ---------- FOOTER ---------- */
     .page-footer {
         position: running(footer);
@@ -226,6 +236,9 @@
 </style>
 </head>
 <body>
+
+    <!-- WATERMARK (appears on every page) -->
+    <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="watermark" />
 
     <!-- RUNNING FOOTER (appears on every page) -->
     <div class="page-footer">
