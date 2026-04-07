@@ -135,6 +135,7 @@ public with sharing class QuotationPDFController {
                    Status, Price_Status__c, is_Active__c, Vertical__c,
                    Billing_Address__c, Shipping_Address__c, Shipping_Mode__c,
                    Quote_Valid_Till_in_days__c,
+                   Delivery__c,
                    Subtotal, TotalPrice, GrandTotal, Discount, Tax, ShippingHandling,
                    CurrencyIsoCode, Description, OwnerId,
                    OpportunityId, Opportunity.Name,
@@ -169,6 +170,11 @@ public with sharing class QuotationPDFController {
         // Validity days from Quote_Valid_Till_in_days__c picklist field
         if (quote.Quote_Valid_Till_in_days__c != null) {
             validityDays = quote.Quote_Valid_Till_in_days__c;
+        }
+
+        // Delivery weeks from Quote
+        if (quote.Delivery__c != null) {
+            deliveryWeeks = quote.Delivery__c;
         }
 
         // Payment terms from Account
