@@ -69,35 +69,35 @@
     .ref-line {
         width: 100%;
         margin-top: 0px;
-        margin-bottom: 5px;
-        font-size: 10pt;
+        margin-bottom: 3px;
+        font-size: 9pt;
         color: #cc0000;
         font-weight: bold;
     }
 
     /* ---------- TO SECTION ---------- */
     .to-section {
-        font-size: 10pt;
-        margin-bottom: 5px;
+        font-size: 8pt;
+        margin-bottom: 3px;
     }
 
     /* ---------- SUBJECT ---------- */
     .subject {
         text-align: center;
-        font-size: 10pt;
+        font-size: 9pt;
         font-weight: bold;
         color: #000000;
-        margin: 10px 0 8px 0;
+        margin: 5px 0 5px 0;
     }
 
     /* ---------- LETTER BODY ---------- */
     .letter-body {
-        font-size: 9pt;
+        font-size: 8pt;
         text-align: justify;
-        line-height: 1.5;
+        line-height: 1.4;
     }
     .letter-body p {
-        margin: 8px 0;
+        margin: 5px 0;
     }
     .product-list {
         margin: 3px 0 3px 0;
@@ -107,7 +107,7 @@
 
     /* ---------- SIGNATURE SECTION ---------- */
     .sign-section {
-        margin-top: 25px;
+        margin-top: 15px;
     }
     .sign-line {
         border-bottom: 1px solid #333333;
