@@ -1031,7 +1031,14 @@
     <!-- 4. Payment Terms -->
     <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">4. Payment Terms</p>
     <ul style="font-size: 7pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
-        <li style="margin-bottom: 2px;"><strong>&lt;100 % along with the work order&gt;</strong></li>
+        <apex:outputPanel rendered="{!paymentTerms.size > 0}">
+            <apex:repeat value="{!paymentTerms}" var="pt">
+                <li style="margin-bottom: 2px;"><strong>{!pt.Percentage__c}%</strong> {!pt.Payment_Term__c}</li>
+            </apex:repeat>
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{!paymentTerms.size == 0}">
+            <li style="margin-bottom: 2px;"><strong>&lt;100 % along with the work order&gt;</strong></li>
+        </apex:outputPanel>
     </ul>
 
     <!-- 5. Service Conditions -->
@@ -1297,7 +1304,14 @@
     <!-- 4. Payment Terms -->
     <p style="font-size: 8pt; font-weight: bold; margin: 8px 0 2px 0;">4. Payment Terms</p>
     <ul style="font-size: 7.5pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
-        <li style="margin-bottom: 3px;"><strong>&lt;100 % along with the work order&gt;</strong></li>
+        <apex:outputPanel rendered="{!paymentTerms.size > 0}">
+            <apex:repeat value="{!paymentTerms}" var="pt">
+                <li style="margin-bottom: 3px;"><strong>{!pt.Percentage__c}%</strong> {!pt.Payment_Term__c}</li>
+            </apex:repeat>
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{!paymentTerms.size == 0}">
+            <li style="margin-bottom: 3px;"><strong>&lt;100 % along with the work order&gt;</strong></li>
+        </apex:outputPanel>
     </ul>
 
     <!-- 5. Service Conditions -->
