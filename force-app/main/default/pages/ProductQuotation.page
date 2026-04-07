@@ -268,7 +268,7 @@
                 {!account.BillingCity}<br/>
             </apex:outputPanel>
             <apex:outputPanel rendered="{!account.GST_Number__c != null}">
-                **<strong>GST:</strong> {!account.GST_Number__c}<br/>
+                <strong>GST:</strong> {!account.GST_Number__c}<br/>
             </apex:outputPanel>
             <apex:outputPanel rendered="{!account.PAN_Number__c != null}">
                 <strong>PAN:</strong> {!account.PAN_Number__c}
