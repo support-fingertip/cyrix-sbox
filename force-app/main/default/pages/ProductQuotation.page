@@ -1121,17 +1121,18 @@
     </ul>
 
     <!-- SECOND PARTY / FIRST PARTY -->
-    <table style="width: 100%; margin-top: 3px; font-size: 7pt;">
+    <table style="width: 100%; margin-top: 5px; font-size: 9pt;">
         <tr>
             <td style="width: 50%; vertical-align: top;"><strong>SECOND PARTY</strong></td>
-            <td style="width: 50%; vertical-align: top; text-align: right;"><strong>FIRST PARTY</strong></td>
+            <td style="width: 50%; vertical-align: top;"><strong>FIRST PARTY</strong></td>
         </tr>
         <tr>
             <td style="vertical-align: top;">
+                <br/>
                 &lt;Customer Name&gt;<br/>&lt;Address&gt;
             </td>
-            <td style="vertical-align: top; text-align: right;">
-                <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 40px;" /><br/>
+            <td style="vertical-align: top;">
+                <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 50px;" /><br/>
                 <strong><em>Cyrix Healthcare Pvt. Ltd</em></strong><br/>
                 30/641B, Petta, Poonithura<br/>
                 Ernakulam, Kerala<br/>
