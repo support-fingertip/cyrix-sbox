@@ -474,27 +474,27 @@
     <!-- STANDARD TERMS AND CONDITIONS (same page, below table)                -->
     <!-- ====================================================================== -->
 
-    <div style="text-align: center; font-size: 10pt; font-weight: bold; text-decoration: underline; margin: 10px 0 8px 0;">
+    <div style="text-align: center; font-size: 8pt; font-weight: bold; text-decoration: underline; margin: 15px 0 12px 0;">
         STANDARD TERMS AND CONDITIONS:
     </div>
 
     <!-- Validity -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 8px 0 2px 0;">Validity</p>
-    <p style="font-size: 8pt; margin: 0 0 5px 0;">
+    <p style="font-size: 8pt; font-weight: bold; margin: 12px 0 3px 0;">Validity</p>
+    <p style="font-size: 7.5pt; margin: 0 0 10px 0;">
         This quotation is valid for <strong>{!validityDays}</strong> from the date of issue and is subject to reconfirmation thereafter.
     </p>
 
     <!-- Price -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 8px 0 2px 0;">Price</p>
-    <p style="font-size: 8pt; margin: 0 0 5px 0;">
+    <p style="font-size: 8pt; font-weight: bold; margin: 12px 0 3px 0;">Price</p>
+    <p style="font-size: 7.5pt; margin: 0 0 10px 0;">
         The quoted price includes applicable levies such as GST, import duties (if any), freight, packing, forwarding,
         transportation, insurance, <strong><u>{!installationScope}</u></strong> at the installation site.
         Any additional statutory levies imposed by Government authorities shall be borne by the purchaser.
     </p>
 
     <!-- Payment Terms -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 8px 0 2px 0;">PAYMENT TERMS &amp; CONDITIONS:</p>
-    <p style="font-size: 8pt; margin: 0 0 5px 0;">
+    <p style="font-size: 8pt; font-weight: bold; margin: 12px 0 3px 0;">PAYMENT TERMS &amp; CONDITIONS:</p>
+    <p style="font-size: 7.5pt; margin: 0 0 10px 0;">
         <strong>{!advancePercent}</strong> Advance payment with Purchase Order<br/>
         <strong>{!shippingPercent}</strong> payment on confirmation of shipping<br/>
         <strong>{!deliveryPercent}</strong> payment on delivery to site<br/>
@@ -502,14 +502,14 @@
     </p>
 
     <!-- Delivery -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 8px 0 2px 0;">DELIVERY</p>
-    <p style="font-size: 8pt; margin: 0 0 5px 0;">
+    <p style="font-size: 8pt; font-weight: bold; margin: 12px 0 3px 0;">DELIVERY</p>
+    <p style="font-size: 7.5pt; margin: 0 0 10px 0;">
         Delivery will be scheduled within <strong>{!deliveryWeeks}</strong> from receipt of confirmed Purchase Order along with advance payment.
     </p>
 
     <!-- Installation and Approvals -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 8px 0 2px 0;">Installation &amp; Approvals</p>
-    <p style="font-size: 8pt; margin: 0 0 5px 0;">
+    <p style="font-size: 8pt; font-weight: bold; margin: 12px 0 3px 0;">Installation &amp; Approvals</p>
+    <p style="font-size: 7.5pt; margin: 0 0 10px 0;">
         Installation will be carried out at the approved site without additional charges, subject to site readiness
         confirmation from the customer.
         All civil, electrical, air conditioning, earthing, and related pre-installation requirements are the responsibility of
