@@ -40,7 +40,7 @@
     /* ---------- COMPANY HEADER ---------- */
     .company-header {
         text-align: left;
-        margin-bottom: 5px;
+        margin-bottom: 0px;
     }
     .company-logo {
         max-height: 70px;
@@ -68,6 +68,7 @@
     /* ---------- QUOTE REF LINE ---------- */
     .ref-line {
         width: 100%;
+        margin-top: 0px;
         margin-bottom: 10px;
         font-size: 10pt;
         color: #cc0000;
