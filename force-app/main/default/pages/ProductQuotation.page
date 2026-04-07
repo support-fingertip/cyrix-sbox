@@ -915,7 +915,7 @@
 
     <!-- PROJECT COSTING -->
     <p style="font-size: 10pt; font-weight: bold; text-align: center; margin: 10px 0;">
-        PROJECT COSTING - &lt;&#8220;VERTICAL&#8221;&gt;
+        PROJECT COSTING - &lt;&#8220;{!quote.Vertical__c}&#8221;&gt;
     </p>
 
     <!-- AMC TABLE -->
@@ -1228,7 +1228,7 @@
 
     <!-- PROJECT COSTING -->
     <p style="font-size: 8pt; font-weight: bold; text-align: center; margin: 3px 0;">
-        PROJECT COSTING - &lt;&#8220;VERTICAL&#8221;&gt;
+        PROJECT COSTING - &lt;&#8220;{!quote.Vertical__c}&#8221;&gt;
     </p>
 
     <!-- CAMC TABLE - Header only on this page -->
