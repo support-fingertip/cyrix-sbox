@@ -342,7 +342,23 @@ public with sharing class QuotationPDFController {
             }
         }
 
-        grandTotal = (subtotal + taxAmount).setScale(2, RoundingMode.HALF_UP);
+        // Use Grand Total from Quote object
+        if (quote.GrandTotal != null) {
+            grandTotal = quote.GrandTotal;
+        } else {
+            grandTotal = (subtotal + taxAmount).setScale(2, RoundingMode.HALF_UP);
+        }
+
+        // Use Subtotal from Quote object
+        if (quote.Subtotal != null) {
+            subtotal = quote.Subtotal;
+        }
+
+        // Use Tax from Quote object
+        if (quote.Tax != null) {
+            taxAmount = quote.Tax;
+        }
+
         grandTotalInWords = convertNumberToWords(grandTotal);
 
         // Set GST display rate for PDF
