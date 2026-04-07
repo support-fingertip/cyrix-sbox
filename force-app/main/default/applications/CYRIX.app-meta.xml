@@ -36,6 +36,8 @@
     <tabs>Asset__c</tabs>
     <tabs>General_Settings__c</tabs>
     <tabs>TestVisit</tabs>
+    <tabs>Bank__c</tabs>
+    <tabs>Payment_Term__c</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>CYRIX_UtilityBar</utilityBar>
 </CustomApplication>
