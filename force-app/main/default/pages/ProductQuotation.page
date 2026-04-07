@@ -1197,13 +1197,25 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td style="border: 1px solid #000000; padding: 3px;">&nbsp;</td>
-                <td style="border: 1px solid #000000; padding: 3px;">&nbsp;</td>
-                <td style="border: 1px solid #000000; padding: 3px;">&nbsp;</td>
-                <td style="border: 1px solid #000000; padding: 3px;">&nbsp;</td>
-                <td style="border: 1px solid #000000; padding: 3px;">&nbsp;</td>
-            </tr>
+            <apex:variable var="annexIdx" value="{!1}" />
+            <apex:repeat value="{!lineItems}" var="annexItem">
+                <tr>
+                    <td style="border: 1px solid #000000; padding: 3px; text-align: center;">
+                        <apex:outputText value="{0, number, 0}">
+                            <apex:param value="{!annexIdx}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="border: 1px solid #000000; padding: 3px;">{!annexItem.Product2.Name}</td>
+                    <td style="border: 1px solid #000000; padding: 3px; text-align: center;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!annexItem.Quantity}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="border: 1px solid #000000; padding: 3px;">{!annexItem.Product2.Make__c}</td>
+                    <td style="border: 1px solid #000000; padding: 3px;">{!annexItem.Product2.Model__c}</td>
+                </tr>
+                <apex:variable var="annexIdx" value="{!annexIdx + 1}" />
+            </apex:repeat>
         </tbody>
     </table>
 
@@ -1516,13 +1528,25 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td style="border: 1px solid #000000; padding: 5px; height: 25px;">&nbsp;</td>
-                <td style="border: 1px solid #000000; padding: 5px;">&nbsp;</td>
-                <td style="border: 1px solid #000000; padding: 5px;">&nbsp;</td>
-                <td style="border: 1px solid #000000; padding: 5px;">&nbsp;</td>
-                <td style="border: 1px solid #000000; padding: 5px;">&nbsp;</td>
-            </tr>
+            <apex:variable var="annexIdx2" value="{!1}" />
+            <apex:repeat value="{!lineItems}" var="annexItem2">
+                <tr>
+                    <td style="border: 1px solid #000000; padding: 5px; text-align: center;">
+                        <apex:outputText value="{0, number, 0}">
+                            <apex:param value="{!annexIdx2}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="border: 1px solid #000000; padding: 5px;">{!annexItem2.Product2.Name}</td>
+                    <td style="border: 1px solid #000000; padding: 5px; text-align: center;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!annexItem2.Quantity}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="border: 1px solid #000000; padding: 5px;">{!annexItem2.Product2.Make__c}</td>
+                    <td style="border: 1px solid #000000; padding: 5px;">{!annexItem2.Product2.Model__c}</td>
+                </tr>
+                <apex:variable var="annexIdx2" value="{!annexIdx2 + 1}" />
+            </apex:repeat>
         </tbody>
     </table>
 
