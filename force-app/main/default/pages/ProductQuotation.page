@@ -1129,7 +1129,7 @@
         <tr>
             <td style="vertical-align: top;">
                 <br/>
-                &lt;Customer Name&gt;<br/>&lt;Address&gt;
+                {!account.Name}<br/>{!quote.Billing_Address__c}
             </td>
             <td style="vertical-align: top; padding-left: 80px;">
                 <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 50px;" /><br/>
@@ -1414,8 +1414,8 @@
         <tr>
             <td style="vertical-align: top;">
                 <br/><br/>
-                &lt;Customer Name&gt;<br/>
-                &lt;Address&gt;
+                {!account.Name}<br/>
+                {!quote.Billing_Address__c}
             </td>
             <td style="vertical-align: top; text-align: right;">
                 <br/>
