@@ -43,7 +43,7 @@
         margin-bottom: 0px;
     }
     .company-logo {
-        max-height: 70px;
+        max-height: 60px;
     }
     .company-name {
         font-size: 14pt;
