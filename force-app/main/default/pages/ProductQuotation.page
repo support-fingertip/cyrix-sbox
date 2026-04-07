@@ -1231,6 +1231,59 @@
         PROJECT COSTING - &lt;&#8220;{!quote.Vertical__c}&#8221;&gt;
     </p>
 
+    <!-- CAMC TABLE with data -->
+    <table class="pricing-table">
+        <thead>
+            <tr>
+                <th style="width: 40px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">SI NO.</th>
+                <th style="width: 180px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">CONTRACT TYPE</th>
+                <th style="width: 60px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">RATE</th>
+                <th style="width: 50px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">GST %</th>
+                <th style="width: 60px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">GST RATE</th>
+                <th style="width: 60px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">TOTAL</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Static header row -->
+            <tr>
+                <td style="text-align: center; border: 1px solid #000000;" rowspan="2">1.</td>
+                <td style="border: 1px solid #000000; font-weight: bold;" colspan="5">
+                    Comprehensive Annual Maintenance Contract (CAMC)<br/>
+                    <u>(Annexure A List of Equipment)</u>
+                </td>
+            </tr>
+            <!-- Dynamic product rows -->
+            <apex:repeat value="{!lineItems}" var="camcItem2">
+                <tr>
+                    <td style="border: 1px solid #000000; font-weight: bold;">{!camcItem2.Product2.Name}</td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!camcItem2.TotalPrice}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{!IF(camcItem2.Product2.Tax__c != null, TEXT(camcItem2.Product2.Tax__c), '18')}"/>%
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!IF(camcItem2.Product2.Tax__c != null, camcItem2.TotalPrice * camcItem2.Product2.Tax__c / 100, camcItem2.TotalPrice * 0.18)}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!IF(camcItem2.Product2.Tax__c != null, camcItem2.TotalPrice + (camcItem2.TotalPrice * camcItem2.Product2.Tax__c / 100), camcItem2.TotalPrice * 1.18)}" />
+                        </apex:outputText>
+                    </td>
+                </tr>
+            </apex:repeat>
+            <tr>
+                <td colspan="6" style="text-align: center; font-size: 8pt; border: 1px solid #000000;">
+                    <strong>Contract Period: - 01/01/2026 to 31/12/2026</strong>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
     <!-- ====================================================================== -->
     <!-- CAMC DATA + T&C PAGE                                                  -->
     <!-- ====================================================================== -->
