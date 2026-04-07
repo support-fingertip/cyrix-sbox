@@ -237,9 +237,6 @@
 </head>
 <body>
 
-    <!-- WATERMARK (appears on every page) -->
-    <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="watermark" />
-
     <!-- RUNNING FOOTER (appears on every page) -->
     <div class="page-footer">
         {!companyCin}
