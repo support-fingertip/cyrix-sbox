@@ -1,27 +1,35 @@
 <template>
     <!-- LOADING OVERLAY -->
     <template if:true={isLoading}>
-        <lightning-spinner alternative-text="Loading" size="medium" class="slds-is-fixed"></lightning-spinner>
+        <div class="loading-overlay">
+            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+        </div>
     </template>
 
     <div class="quote-builder">
         <!-- PAGE HEADER -->
-        <div class="page-header slds-p-around_medium slds-m-bottom_small">
+        <div class="page-header slds-p-around_medium">
             <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
                 <div>
                     <h1 class="slds-text-heading_medium page-title">{pageTitle}</h1>
-                    <p class="slds-text-body_small slds-text-color_weak slds-m-top_xxx-small">
+                    <p class="slds-text-body_small slds-m-top_xxx-small page-subtitle">
                         <template if:false={isEditMode}>Fill in the details below to create a new quote.</template>
                         <template if:true={isEditMode}>Modify the quote details and save your changes.</template>
                     </p>
                 </div>
-                <div>
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <template if:true={accountName}>
+                        <div class="customer-badge slds-m-right_small">
+                            <lightning-icon icon-name="standard:account" size="x-small" class="slds-m-right_xx-small"></lightning-icon>
+                            <span>{accountName}</span>
+                        </div>
+                    </template>
                     <lightning-icon icon-name="standard:quotes" size="medium"></lightning-icon>
                 </div>
             </div>
         </div>
 
-        <!-- RECORD EDIT FORM wraps all content -->
+        <!-- RECORD EDIT FORM -->
         <lightning-record-edit-form
             object-api-name="Quote"
             record-id={editRecordId}
@@ -31,7 +39,7 @@
             density="comfy">
 
             <!-- ===== SECTION: QUOTE INFORMATION ===== -->
-            <div class="section-card slds-m-bottom_small">
+            <div class="section-card">
                 <div class="section-header">
                     <lightning-icon icon-name="utility:description" size="x-small" class="slds-m-right_x-small"></lightning-icon>
                     <span>Quote Information</span>
@@ -69,27 +77,101 @@
             </div>
 
             <!-- ===== SECTION: BILL TO / SHIP TO ===== -->
-            <div class="section-card slds-m-bottom_small">
+            <div class="section-card">
                 <div class="section-header">
                     <lightning-icon icon-name="utility:location" size="x-small" class="slds-m-right_x-small"></lightning-icon>
                     <span>Bill To / Ship To</span>
                 </div>
                 <div class="section-body">
                     <div class="slds-grid slds-wrap slds-gutters_small">
-                        <!-- Bill To -->
+                        <!-- Bill To (auto-populated from Account billing address) -->
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
                             <div class="address-block slds-p-around_x-small">
-                                <h3 class="address-label slds-m-bottom_xx-small">Bill To</h3>
-                                <lightning-input-field field-name="BillingName"></lightning-input-field>
-                                <lightning-input-field field-name="BillingAddress"></lightning-input-field>
+                                <h3 class="address-label slds-m-bottom_xx-small">
+                                    <lightning-icon icon-name="utility:company" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                    Bill To
+                                </h3>
+                                <div class="slds-grid slds-wrap slds-gutters_xx-small">
+                                    <div class="slds-col slds-size_1-of-1 slds-p-bottom_xx-small">
+                                        <lightning-input label="Billing Name" value={billingName}
+                                            onchange={handleBillingFieldChange} data-field="billingName"></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-p-bottom_xx-small">
+                                        <lightning-textarea label="Street" value={billingStreet}
+                                            onchange={handleBillingFieldChange} data-field="billingStreet"
+                                            max-length="255"></lightning-textarea>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">
+                                        <lightning-input label="City" value={billingCity}
+                                            onchange={handleBillingFieldChange} data-field="billingCity"></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">
+                                        <lightning-input label="State" value={billingState}
+                                            onchange={handleBillingFieldChange} data-field="billingState"></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">
+                                        <lightning-input label="Postal Code" value={billingPostalCode}
+                                            onchange={handleBillingFieldChange} data-field="billingPostalCode"></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">
+                                        <lightning-input label="Country" value={billingCountry}
+                                            onchange={handleBillingFieldChange} data-field="billingCountry"></lightning-input>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <!-- Ship To -->
+
+                        <!-- Ship To (from Shipping_Address__c records) -->
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
                             <div class="address-block slds-p-around_x-small">
-                                <h3 class="address-label slds-m-bottom_xx-small">Ship To</h3>
-                                <lightning-input-field field-name="ShippingName"></lightning-input-field>
-                                <lightning-input-field field-name="ShippingAddress"></lightning-input-field>
+                                <h3 class="address-label slds-m-bottom_xx-small">
+                                    <lightning-icon icon-name="utility:shipping" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                    Ship To
+                                </h3>
+                                <!-- Shipping Address Selector -->
+                                <template if:true={hasShippingAddresses}>
+                                    <div class="slds-p-bottom_xx-small">
+                                        <lightning-combobox
+                                            label="Select Shipping Address"
+                                            value={selectedShippingAddressId}
+                                            options={shippingAddressOptions}
+                                            onchange={handleShippingAddressSelect}
+                                            placeholder="Choose a shipping address...">
+                                        </lightning-combobox>
+                                    </div>
+                                </template>
+                                <template if:false={hasShippingAddresses}>
+                                    <div class="slds-text-body_small slds-text-color_weak slds-p-bottom_xx-small no-address-msg">
+                                        No shipping addresses found for this customer. Enter manually below.
+                                    </div>
+                                </template>
+                                <div class="slds-grid slds-wrap slds-gutters_xx-small">
+                                    <div class="slds-col slds-size_1-of-1 slds-p-bottom_xx-small">
+                                        <lightning-input label="Shipping Name" value={shippingName}
+                                            onchange={handleShippingFieldChange} data-field="shippingName"></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-p-bottom_xx-small">
+                                        <lightning-textarea label="Street" value={shippingStreet}
+                                            onchange={handleShippingFieldChange} data-field="shippingStreet"
+                                            max-length="255"></lightning-textarea>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">
+                                        <lightning-input label="City" value={shippingCity}
+                                            onchange={handleShippingFieldChange} data-field="shippingCity"></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">
+                                        <lightning-input label="State" value={shippingState}
+                                            onchange={handleShippingFieldChange} data-field="shippingState"></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">
+                                        <lightning-input label="Postal Code" value={shippingPostalCode}
+                                            onchange={handleShippingFieldChange} data-field="shippingPostalCode"></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">
+                                        <lightning-input label="Country" value={shippingCountry}
+                                            onchange={handleShippingFieldChange} data-field="shippingCountry"></lightning-input>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -97,7 +179,7 @@
             </div>
 
             <!-- ===== SECTION: PRODUCT SEARCH ===== -->
-            <div class="section-card slds-m-bottom_small">
+            <div class="section-card">
                 <div class="section-header">
                     <lightning-icon icon-name="utility:search" size="x-small" class="slds-m-right_x-small"></lightning-icon>
                     <span>Add Products</span>
@@ -190,7 +272,7 @@
             </div>
 
             <!-- ===== SECTION: LINE ITEMS ===== -->
-            <div class="section-card slds-m-bottom_small">
+            <div class="section-card">
                 <div class="section-header">
                     <lightning-icon icon-name="utility:cart" size="x-small" class="slds-m-right_x-small"></lightning-icon>
                     <span>Quote Line Items ({lineItemCount})</span>
@@ -301,8 +383,8 @@
             </div>
 
             <!-- ===== SECTION: CHARGES & TOTALS ===== -->
-            <div class="slds-grid slds-wrap slds-gutters_small slds-m-bottom_small">
-                <!-- Internal Charges (Left) -->
+            <div class="slds-grid slds-wrap slds-gutters_small charges-totals-row">
+                <!-- Internal Charges -->
                 <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
                     <div class="section-card full-height">
                         <div class="section-header">
@@ -312,63 +394,33 @@
                         <div class="section-body">
                             <div class="slds-grid slds-wrap slds-gutters_x-small">
                                 <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
-                                    <lightning-input
-                                        type="number"
-                                        label="Packing Charges"
-                                        value={packingCharges}
-                                        formatter="currency"
-                                        step="0.01"
-                                        min="0"
-                                        data-field="packingCharges"
-                                        onchange={handleChargeChange}>
+                                    <lightning-input type="number" label="Packing Charges" value={packingCharges}
+                                        formatter="currency" step="0.01" min="0"
+                                        data-field="packingCharges" onchange={handleChargeChange}>
                                     </lightning-input>
                                 </div>
                                 <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
-                                    <lightning-input
-                                        type="number"
-                                        label="Transport Cost"
-                                        value={transportCharges}
-                                        formatter="currency"
-                                        step="0.01"
-                                        min="0"
-                                        data-field="transportCharges"
-                                        onchange={handleChargeChange}>
+                                    <lightning-input type="number" label="Transport Cost" value={transportCharges}
+                                        formatter="currency" step="0.01" min="0"
+                                        data-field="transportCharges" onchange={handleChargeChange}>
                                     </lightning-input>
                                 </div>
                                 <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
-                                    <lightning-input
-                                        type="number"
-                                        label="Warranty Cost"
-                                        value={warrantyCost}
-                                        formatter="currency"
-                                        step="0.01"
-                                        min="0"
-                                        data-field="warrantyCost"
-                                        onchange={handleChargeChange}>
+                                    <lightning-input type="number" label="Warranty Cost" value={warrantyCost}
+                                        formatter="currency" step="0.01" min="0"
+                                        data-field="warrantyCost" onchange={handleChargeChange}>
                                     </lightning-input>
                                 </div>
                                 <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
-                                    <lightning-input
-                                        type="number"
-                                        label="Installation Cost"
-                                        value={installationCost}
-                                        formatter="currency"
-                                        step="0.01"
-                                        min="0"
-                                        data-field="installationCost"
-                                        onchange={handleChargeChange}>
+                                    <lightning-input type="number" label="Installation Cost" value={installationCost}
+                                        formatter="currency" step="0.01" min="0"
+                                        data-field="installationCost" onchange={handleChargeChange}>
                                     </lightning-input>
                                 </div>
                                 <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
-                                    <lightning-input
-                                        type="number"
-                                        label="Training Cost"
-                                        value={trainingCost}
-                                        formatter="currency"
-                                        step="0.01"
-                                        min="0"
-                                        data-field="trainingCost"
-                                        onchange={handleChargeChange}>
+                                    <lightning-input type="number" label="Training Cost" value={trainingCost}
+                                        formatter="currency" step="0.01" min="0"
+                                        data-field="trainingCost" onchange={handleChargeChange}>
                                     </lightning-input>
                                 </div>
                             </div>
@@ -376,7 +428,7 @@
                     </div>
                 </div>
 
-                <!-- Quote Summary (Right) -->
+                <!-- Quote Summary -->
                 <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
                     <div class="section-card full-height">
                         <div class="section-header">
@@ -422,19 +474,21 @@
             </div>
 
             <!-- ===== FOOTER ACTIONS ===== -->
-            <div class="footer-actions slds-p-around_medium slds-text-align_right">
-                <lightning-button
-                    label="Cancel"
-                    onclick={handleCancel}
-                    class="slds-m-right_small">
-                </lightning-button>
-                <lightning-button
-                    label={saveButtonLabel}
-                    variant="brand"
-                    type="submit"
-                    disabled={isSaveDisabled}
-                    icon-name="utility:save">
-                </lightning-button>
+            <div class="footer-actions slds-p-around_medium">
+                <div class="slds-grid slds-grid_align-end">
+                    <lightning-button
+                        label="Cancel"
+                        onclick={handleCancel}
+                        class="slds-m-right_small">
+                    </lightning-button>
+                    <lightning-button
+                        label={saveButtonLabel}
+                        variant="brand"
+                        type="submit"
+                        disabled={isSaveDisabled}
+                        icon-name="utility:save">
+                    </lightning-button>
+                </div>
             </div>
 
         </lightning-record-edit-form>
