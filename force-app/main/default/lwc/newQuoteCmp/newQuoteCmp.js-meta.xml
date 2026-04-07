@@ -16,5 +16,5 @@
         </targetConfig>
     </targetConfigs>
     <masterLabel>New Quote</masterLabel>
-    <description>Create a quote with line items, product search, pricing, discounts, and additional charges.</description>
+    <description>Create or edit a quote with line items, product search, pricing, discounts, and additional charges.</description>
 </LightningComponentBundle>

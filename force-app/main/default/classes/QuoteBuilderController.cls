@@ -1,7 +1,7 @@
 /* Class Name   : QuoteBuilderController
 * Company      : Fingertipplus
 * Created Date : 07-04-2026
-* @description : Apex controller for the quoteBuilder LWC component.
+* @description : Apex controller for the newQuoteCmp LWC component.
 *                Provides methods for Opportunity context, product search,
 *                price book entry retrieval, account addresses, and
 *                atomic Quote + QuoteLineItem save.
