@@ -11,7 +11,7 @@
 <style type="text/css">
     @page {
         size: A4;
-        margin: 0mm 15mm 20mm 15mm;
+        margin: 5mm 15mm 20mm 15mm;
 
         @bottom-center {
             content: element(footer);
@@ -40,7 +40,7 @@
     /* ---------- COMPANY HEADER ---------- */
     .company-header {
         text-align: left;
-        margin-bottom: -10px;
+        margin-bottom: 5px;
     }
     .company-logo {
         max-height: 55px;
@@ -69,7 +69,7 @@
     .ref-line {
         width: 100%;
         margin-top: 0px;
-        margin-bottom: 3px;
+        margin-bottom: 8px;
         font-size: 9pt;
         color: #cc0000;
         font-weight: bold;
@@ -78,7 +78,7 @@
     /* ---------- TO SECTION ---------- */
     .to-section {
         font-size: 8pt;
-        margin-bottom: 3px;
+        margin-bottom: 8px;
     }
 
     /* ---------- SUBJECT ---------- */
