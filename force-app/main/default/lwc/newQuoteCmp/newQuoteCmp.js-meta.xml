@@ -5,11 +5,13 @@
     <targets>
         <target>lightning__RecordPage</target>
         <target>lightning__AppPage</target>
+        <target>lightning__RecordAction</target>
     </targets>
     <targetConfigs>
         <targetConfig targets="lightning__RecordPage">
             <objects>
                 <object>Opportunity</object>
+                <object>Quote</object>
             </objects>
         </targetConfig>
     </targetConfigs>

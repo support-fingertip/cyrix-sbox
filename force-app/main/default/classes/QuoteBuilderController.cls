@@ -229,6 +229,177 @@ public with sharing class QuoteBuilderController {
         return parts.isEmpty() ? '' : 'Additional Charges: ' + String.join(parts, ' | ');
     }
 
+    /**
+     * Loads an existing Quote with its line items for editing.
+     */
+    @AuraEnabled
+    public static QuoteEditContext getQuoteForEdit(Id quoteId) {
+        Quote q = [
+            SELECT Id, Name, OpportunityId, Opportunity.Name,
+                   Opportunity.AccountId, Opportunity.Account.Name,
+                   Pricebook2Id, CurrencyIsoCode,
+                   Quote_Date__c, Valid_Till__c, Billing_Address__c,
+                   Shipping_Address__c, Shipping_Mode__c, Vertical__c,
+                   is_Active__c, Status, ShippingHandling, Tax, Description
+            FROM Quote
+            WHERE Id = :quoteId
+            LIMIT 1
+        ];
+
+        QuoteEditContext ctx = new QuoteEditContext();
+        ctx.quoteId = q.Id;
+        ctx.quoteName = q.Name;
+        ctx.opportunityId = q.OpportunityId;
+        ctx.opportunityName = q.Opportunity.Name;
+        ctx.accountName = q.Opportunity.Account != null ? q.Opportunity.Account.Name : '';
+        ctx.pricebookId = q.Pricebook2Id;
+        ctx.currencyCode = q.CurrencyIsoCode;
+        ctx.quoteDate = q.Quote_Date__c;
+        ctx.validTill = q.Valid_Till__c;
+        ctx.billingAddress = q.Billing_Address__c;
+        ctx.shippingAddress = q.Shipping_Address__c;
+        ctx.shippingMode = q.Shipping_Mode__c;
+        ctx.vertical = q.Vertical__c;
+        ctx.isActive = q.is_Active__c;
+
+        // Parse charges from Description field
+        ctx.shippingCharges = q.ShippingHandling != null ? q.ShippingHandling : 0;
+        ctx.transportCharges = 0;
+        ctx.warrantyCost = 0;
+        ctx.installationCost = 0;
+        ctx.packingCharges = 0;
+        ctx.trainingCost = 0;
+
+        if (String.isNotBlank(q.Description)) {
+            ctx.transportCharges = parseChargeFromDescription(q.Description, 'Transport');
+            ctx.warrantyCost = parseChargeFromDescription(q.Description, 'Warranty');
+            ctx.installationCost = parseChargeFromDescription(q.Description, 'Installation');
+            ctx.packingCharges = parseChargeFromDescription(q.Description, 'Packing');
+            ctx.trainingCost = parseChargeFromDescription(q.Description, 'Training');
+        }
+
+        // Load line items
+        ctx.lineItems = new List<QuoteLineItemResult>();
+        for (QuoteLineItem qli : [
+            SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
+                   Product2.QuantityUnitOfMeasure, Product2.Tax__c,
+                   PricebookEntryId, Quantity, UnitPrice, Discount,
+                   Tax_Type__c, Product_Line_Description__c,
+                   Product_Detailed_Description__c
+            FROM QuoteLineItem
+            WHERE QuoteId = :quoteId
+            ORDER BY SortOrder ASC, Id ASC
+        ]) {
+            QuoteLineItemResult item = new QuoteLineItemResult();
+            item.lineItemId = qli.Id;
+            item.productId = qli.Product2Id;
+            item.pricebookEntryId = qli.PricebookEntryId;
+            item.productName = qli.Product2.Name;
+            item.productCode = qli.Product2.ProductCode;
+            item.uom = qli.Product2.QuantityUnitOfMeasure != null ? qli.Product2.QuantityUnitOfMeasure : 'Nos';
+            item.quantity = qli.Quantity;
+            item.unitPrice = qli.UnitPrice;
+            item.discount = qli.Discount != null ? qli.Discount : 0;
+            item.taxPercent = qli.Product2.Tax__c != null ? qli.Product2.Tax__c : 0;
+            item.taxType = qli.Tax_Type__c != null ? qli.Tax_Type__c : 'GST';
+            item.lineDescription = qli.Product_Line_Description__c;
+            item.detailedDescription = qli.Product_Detailed_Description__c;
+            ctx.lineItems.add(item);
+        }
+
+        return ctx;
+    }
+
+    /**
+     * Updates an existing Quote and its line items.
+     * Deletes removed items, updates existing, adds new ones.
+     */
+    @AuraEnabled
+    public static Id updateQuoteWithLineItems(Id quoteId, String quoteJSON, String lineItemsJSON, String chargesJSON) {
+        SavePoint sp = Database.setSavepoint();
+        try {
+            QuoteHeaderInput header = (QuoteHeaderInput) JSON.deserialize(quoteJSON, QuoteHeaderInput.class);
+            List<LineItemInput> lineItems = (List<LineItemInput>) JSON.deserialize(lineItemsJSON, List<LineItemInput>.class);
+            ChargesInput charges = (ChargesInput) JSON.deserialize(chargesJSON, ChargesInput.class);
+
+            if (lineItems == null || lineItems.isEmpty()) {
+                throw new AuraHandledException('At least one line item is required.');
+            }
+
+            // Update Quote header
+            Quote existingQuote = [SELECT Id FROM Quote WHERE Id = :quoteId LIMIT 1];
+            existingQuote.Name = header.name;
+            existingQuote.Quote_Date__c = header.quoteDate;
+            existingQuote.Valid_Till__c = header.validTill;
+            existingQuote.Billing_Address__c = header.billingAddress;
+            existingQuote.Shipping_Address__c = header.shippingAddress;
+            existingQuote.Shipping_Mode__c = header.shippingMode;
+            existingQuote.Vertical__c = header.vertical;
+            existingQuote.is_Active__c = header.isActive;
+
+            if (charges != null) {
+                existingQuote.ShippingHandling = charges.shippingCharges != null ? charges.shippingCharges : 0;
+                existingQuote.Tax = charges.taxAmount != null ? charges.taxAmount : 0;
+                existingQuote.Description = buildChargesDescription(charges);
+            }
+
+            update existingQuote;
+
+            // Delete all existing line items and re-create
+            List<QuoteLineItem> oldItems = [SELECT Id FROM QuoteLineItem WHERE QuoteId = :quoteId];
+            if (!oldItems.isEmpty()) {
+                delete oldItems;
+            }
+
+            // Create new line items
+            List<QuoteLineItem> qliList = new List<QuoteLineItem>();
+            for (LineItemInput item : lineItems) {
+                QuoteLineItem qli = new QuoteLineItem();
+                qli.QuoteId = quoteId;
+                qli.Product2Id = item.productId;
+                qli.PricebookEntryId = item.pricebookEntryId;
+                qli.Quantity = item.quantity;
+                qli.UnitPrice = item.unitPrice;
+                qli.Discount = item.discount;
+                qli.Tax_Type__c = item.taxType;
+                qli.Product_Line_Description__c = item.lineDescription;
+                qli.Product_Detailed_Description__c = item.detailedDescription;
+                qli.Price_Status__c = 'Standard';
+                qliList.add(qli);
+            }
+            insert qliList;
+
+            return quoteId;
+        } catch (AuraHandledException e) {
+            Database.rollback(sp);
+            throw e;
+        } catch (Exception e) {
+            Database.rollback(sp);
+            throw new AuraHandledException('Error updating quote: ' + e.getMessage());
+        }
+    }
+
+    /**
+     * Parses a charge amount from the Description field.
+     */
+    private static Decimal parseChargeFromDescription(String description, String chargeType) {
+        if (String.isBlank(description) || !description.contains(chargeType + ': ')) {
+            return 0;
+        }
+        try {
+            String searchStr = chargeType + ': ';
+            Integer startIdx = description.indexOf(searchStr) + searchStr.length();
+            Integer endIdx = description.indexOf(' |', startIdx);
+            if (endIdx == -1) {
+                endIdx = description.length();
+            }
+            String valueStr = description.substring(startIdx, endIdx).trim();
+            return Decimal.valueOf(valueStr);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
     // ===== Input Classes =====
 
     public class QuoteHeaderInput {
@@ -305,5 +476,45 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Decimal defaultWarrantyMonths;
         @AuraEnabled public String installationTerms;
         @AuraEnabled public String warrantyTerms;
+    }
+
+    public class QuoteEditContext {
+        @AuraEnabled public Id quoteId;
+        @AuraEnabled public String quoteName;
+        @AuraEnabled public Id opportunityId;
+        @AuraEnabled public String opportunityName;
+        @AuraEnabled public String accountName;
+        @AuraEnabled public Id pricebookId;
+        @AuraEnabled public String currencyCode;
+        @AuraEnabled public Date quoteDate;
+        @AuraEnabled public Date validTill;
+        @AuraEnabled public String billingAddress;
+        @AuraEnabled public String shippingAddress;
+        @AuraEnabled public String shippingMode;
+        @AuraEnabled public String vertical;
+        @AuraEnabled public Boolean isActive;
+        @AuraEnabled public Decimal shippingCharges;
+        @AuraEnabled public Decimal transportCharges;
+        @AuraEnabled public Decimal warrantyCost;
+        @AuraEnabled public Decimal installationCost;
+        @AuraEnabled public Decimal packingCharges;
+        @AuraEnabled public Decimal trainingCost;
+        @AuraEnabled public List<QuoteLineItemResult> lineItems;
+    }
+
+    public class QuoteLineItemResult {
+        @AuraEnabled public Id lineItemId;
+        @AuraEnabled public Id productId;
+        @AuraEnabled public Id pricebookEntryId;
+        @AuraEnabled public String productName;
+        @AuraEnabled public String productCode;
+        @AuraEnabled public String uom;
+        @AuraEnabled public Decimal quantity;
+        @AuraEnabled public Decimal unitPrice;
+        @AuraEnabled public Decimal discount;
+        @AuraEnabled public Decimal taxPercent;
+        @AuraEnabled public String taxType;
+        @AuraEnabled public String lineDescription;
+        @AuraEnabled public String detailedDescription;
     }
 }

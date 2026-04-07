@@ -1,14 +1,22 @@
 import { LightningElement, api, wire, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
+import { CloseActionScreenEvent } from 'lightning/actions';
 import getOpportunityContext from '@salesforce/apex/QuoteBuilderController.getOpportunityContext';
+import getQuoteForEdit from '@salesforce/apex/QuoteBuilderController.getQuoteForEdit';
 import searchProducts from '@salesforce/apex/QuoteBuilderController.searchProducts';
 import saveQuoteWithLineItems from '@salesforce/apex/QuoteBuilderController.saveQuoteWithLineItems';
+import updateQuoteWithLineItems from '@salesforce/apex/QuoteBuilderController.updateQuoteWithLineItems';
 
 let rowCounter = 0;
 
 export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
-    @api recordId; // Opportunity Id from record page
+    @api recordId; // Opportunity Id (new mode) or Quote Id (edit mode)
+
+    // Mode detection
+    isEditMode = false;
+    editQuoteId = null;
+    _modeResolved = false;
 
     // Loading & state
     isLoading = false;
@@ -168,11 +176,45 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         return this.subtotal - this.totalDiscount + this.totalTax + this.totalCharges;
     }
 
-    // ===== WIRE: Load Opportunity Context =====
+    // ===== COMPUTED: Page Title =====
 
-    @wire(getOpportunityContext, { opportunityId: '$recordId' })
-    wiredContext({ error, data }) {
-        if (data) {
+    get pageTitle() {
+        return this.isEditMode ? 'Edit Quote' : 'Create Quote';
+    }
+
+    get saveButtonLabel() {
+        return this.isEditMode ? 'Update Quote' : 'Save Quote';
+    }
+
+    // ===== LIFECYCLE: Detect Mode & Load Data =====
+
+    connectedCallback() {
+        this.detectModeAndLoad();
+    }
+
+    async detectModeAndLoad() {
+        if (!this.recordId) return;
+
+        this.isLoading = true;
+        const idPrefix = this.recordId.substring(0, 3);
+
+        // Quote object key prefix is '0Q0'
+        if (idPrefix === '0Q0') {
+            this.isEditMode = true;
+            this.editQuoteId = this.recordId;
+            await this.loadQuoteForEdit();
+        } else {
+            // Assume Opportunity (key prefix '006')
+            this.isEditMode = false;
+            await this.loadOpportunityContext();
+        }
+
+        this.isLoading = false;
+    }
+
+    async loadOpportunityContext() {
+        try {
+            const data = await getOpportunityContext({ opportunityId: this.recordId });
             this.opportunityName = data.opportunityName;
             this.accountName = data.accountName;
             this.pricebookId = data.pricebookId;
@@ -181,8 +223,81 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.billingAddress = data.billingAddress || '';
             this.shippingAddress = data.shippingAddress || '';
             this.quoteDate = new Date().toISOString().split('T')[0];
-        } else if (error) {
+        } catch (error) {
             this.showError('Error loading opportunity', this.reduceErrors(error));
+        }
+    }
+
+    async loadQuoteForEdit() {
+        try {
+            const data = await getQuoteForEdit({ quoteId: this.editQuoteId });
+
+            this.quoteName = data.quoteName || '';
+            this.opportunityName = data.opportunityName || '';
+            this.accountName = data.accountName || '';
+            this.pricebookId = data.pricebookId;
+            this.currencyCode = data.currencyCode || 'INR';
+            this.vertical = data.vertical || '';
+            this.shippingMode = data.shippingMode || '';
+            this.billingAddress = data.billingAddress || '';
+            this.shippingAddress = data.shippingAddress || '';
+            this.isActive = data.isActive !== false;
+
+            // Set dates
+            this.quoteDate = data.quoteDate || '';
+            this.validTillDate = data.validTill || '';
+
+            // Calculate validTillDays from dates
+            if (data.quoteDate && data.validTill) {
+                const qDate = new Date(data.quoteDate);
+                const vDate = new Date(data.validTill);
+                const diffDays = Math.round((vDate - qDate) / (1000 * 60 * 60 * 24));
+                // Match to nearest option
+                const options = [15, 30, 45, 60, 90];
+                const closest = options.reduce((prev, curr) =>
+                    Math.abs(curr - diffDays) < Math.abs(prev - diffDays) ? curr : prev
+                );
+                this.validTillDays = String(closest);
+            }
+
+            // Load charges
+            this.shippingCharges = data.shippingCharges || 0;
+            this.transportCharges = data.transportCharges || 0;
+            this.warrantyCost = data.warrantyCost || 0;
+            this.installationCost = data.installationCost || 0;
+            this.packingCharges = data.packingCharges || 0;
+            this.trainingCost = data.trainingCost || 0;
+
+            // Load line items
+            if (data.lineItems && data.lineItems.length > 0) {
+                this.lineItems = data.lineItems.map((item, index) => {
+                    rowCounter++;
+                    const base = (item.unitPrice || 0) * (item.quantity || 0);
+                    const discountAmt = base * ((item.discount || 0) / 100);
+                    const afterDiscount = base - discountAmt;
+                    const taxAmt = item.taxType === 'Exempt' ? 0 : afterDiscount * ((item.taxPercent || 0) / 100);
+
+                    return {
+                        rowId: 'row-' + rowCounter,
+                        rowNumber: index + 1,
+                        productId: item.productId,
+                        pricebookEntryId: item.pricebookEntryId,
+                        productName: item.productName,
+                        productCode: item.productCode,
+                        uom: item.uom || 'Nos',
+                        quantity: item.quantity,
+                        unitPrice: item.unitPrice,
+                        discount: item.discount || 0,
+                        taxPercent: item.taxPercent || 0,
+                        taxType: item.taxType || 'GST',
+                        lineTotal: afterDiscount + taxAmt,
+                        lineDescription: item.lineDescription || '',
+                        detailedDescription: item.detailedDescription || ''
+                    };
+                });
+            }
+        } catch (error) {
+            this.showError('Error loading quote', this.reduceErrors(error));
         }
     }
 
@@ -369,13 +484,23 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 taxAmount: this.totalTax
             };
 
-            const quoteId = await saveQuoteWithLineItems({
-                quoteJSON: JSON.stringify(quoteHeader),
-                lineItemsJSON: JSON.stringify(lineItemsPayload),
-                chargesJSON: JSON.stringify(chargesPayload)
-            });
-
-            this.showSuccess('Quote Created', 'Quote has been created successfully.');
+            let quoteId;
+            if (this.isEditMode) {
+                quoteId = await updateQuoteWithLineItems({
+                    quoteId: this.editQuoteId,
+                    quoteJSON: JSON.stringify(quoteHeader),
+                    lineItemsJSON: JSON.stringify(lineItemsPayload),
+                    chargesJSON: JSON.stringify(chargesPayload)
+                });
+                this.showSuccess('Quote Updated', 'Quote has been updated successfully.');
+            } else {
+                quoteId = await saveQuoteWithLineItems({
+                    quoteJSON: JSON.stringify(quoteHeader),
+                    lineItemsJSON: JSON.stringify(lineItemsPayload),
+                    chargesJSON: JSON.stringify(chargesPayload)
+                });
+                this.showSuccess('Quote Created', 'Quote has been created successfully.');
+            }
 
             // Navigate to the new Quote record
             this[NavigationMixin.Navigate]({
@@ -395,14 +520,28 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     }
 
     handleCancel() {
-        this[NavigationMixin.Navigate]({
-            type: 'standard__recordPage',
-            attributes: {
-                recordId: this.recordId,
-                objectApiName: 'Opportunity',
-                actionName: 'view'
-            }
-        });
+        // Close quick action modal if launched from action
+        this.dispatchEvent(new CloseActionScreenEvent());
+
+        if (this.isEditMode) {
+            this[NavigationMixin.Navigate]({
+                type: 'standard__recordPage',
+                attributes: {
+                    recordId: this.editQuoteId,
+                    objectApiName: 'Quote',
+                    actionName: 'view'
+                }
+            });
+        } else {
+            this[NavigationMixin.Navigate]({
+                type: 'standard__recordPage',
+                attributes: {
+                    recordId: this.recordId,
+                    objectApiName: 'Opportunity',
+                    actionName: 'view'
+                }
+            });
+        }
     }
 
     // ===== VALIDATION =====
