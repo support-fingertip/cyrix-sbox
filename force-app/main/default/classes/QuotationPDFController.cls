@@ -143,6 +143,7 @@ public with sharing class QuotationPDFController {
                    Account.GST_Number__c, Account.PAN_Number__c,
                    Account.BillingStreet, Account.BillingCity, Account.BillingState,
                    Account.BillingPostalCode, Account.BillingCountry,
+                   Account.Payment_Terms__c,
                    ContactId, Contact.Name, Contact.Email, Contact.Phone, Contact.Title
             FROM Quote
             WHERE Id = :quoteId
@@ -163,6 +164,33 @@ public with sharing class QuotationPDFController {
             ? formatDate(quote.Quote_Date__c) : '';
         validTillDate = quote.Valid_Till__c != null
             ? formatDate(quote.Valid_Till__c) : '';
+
+        // Calculate validity days from Quote Date to Valid Till
+        if (quote.Quote_Date__c != null && quote.Valid_Till__c != null) {
+            Integer days = quote.Quote_Date__c.daysBetween(quote.Valid_Till__c);
+            validityDays = String.valueOf(days) + ' days';
+        }
+
+        // Payment terms from Account
+        if (account != null && account.Payment_Terms__c != null) {
+            String pt = account.Payment_Terms__c;
+            if (pt == '100% Advance') {
+                advancePercent = '100%';
+                shippingPercent = '0%';
+                deliveryPercent = '0%';
+                installationPercent = '0%';
+            } else if (pt == '50% Advance - 50% After Installation') {
+                advancePercent = '50%';
+                shippingPercent = '0%';
+                deliveryPercent = '0%';
+                installationPercent = '50%';
+            } else if (pt == '30% Advance - 70% After Installation') {
+                advancePercent = '30%';
+                shippingPercent = '0%';
+                deliveryPercent = '0%';
+                installationPercent = '70%';
+            }
+        }
 
         // Sales Engineer info from Quote Owner (User object)
         if (quote.OwnerId != null) {

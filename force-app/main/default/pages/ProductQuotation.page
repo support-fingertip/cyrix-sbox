@@ -356,7 +356,7 @@
     </table>
 
     <!-- QUOTATION TITLE -->
-    <div style="text-align: center; font-size: 10pt; font-weight: bold; margin-bottom: 15px; text-decoration: underline;">
+    <div style="text-align: center; font-size: 8pt; font-weight: bold; margin-top: 10px; margin-bottom: 10px; text-decoration: underline;">
         QUOTATION FOR CYRIX {!productNamesList}<apex:outputPanel rendered="{!quote.Vertical__c != null}"> &amp; {!quote.Vertical__c}</apex:outputPanel>
     </div>
 
