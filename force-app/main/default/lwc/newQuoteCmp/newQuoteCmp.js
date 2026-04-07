@@ -7,7 +7,7 @@ import saveQuoteWithLineItems from '@salesforce/apex/QuoteBuilderController.save
 
 let rowCounter = 0;
 
-export default class QuoteBuilder extends NavigationMixin(LightningElement) {
+export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     @api recordId; // Opportunity Id from record page
 
     // Loading & state
