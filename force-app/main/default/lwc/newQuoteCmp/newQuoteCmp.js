@@ -1,43 +1,30 @@
-import { LightningElement, api, wire, track } from 'lwc';
+import { LightningElement, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import getOpportunityContext from '@salesforce/apex/QuoteBuilderController.getOpportunityContext';
 import getQuoteForEdit from '@salesforce/apex/QuoteBuilderController.getQuoteForEdit';
 import searchProducts from '@salesforce/apex/QuoteBuilderController.searchProducts';
-import saveQuoteWithLineItems from '@salesforce/apex/QuoteBuilderController.saveQuoteWithLineItems';
-import updateQuoteWithLineItems from '@salesforce/apex/QuoteBuilderController.updateQuoteWithLineItems';
+import saveQuoteLineItems from '@salesforce/apex/QuoteBuilderController.saveQuoteLineItems';
+import updateQuoteLineItems from '@salesforce/apex/QuoteBuilderController.updateQuoteLineItems';
 
 let rowCounter = 0;
 
 export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
-    @api recordId; // Opportunity Id (new mode) or Quote Id (edit mode)
+    @api recordId;
 
-    // Mode detection
+    // Mode
     isEditMode = false;
-    editQuoteId = null;
-    _modeResolved = false;
+    editRecordId = null;
+    defaultOpportunityId = null;
 
-    // Loading & state
+    // State
     isLoading = false;
     isSaving = false;
 
-    // Opportunity context
-    opportunityName = '';
-    accountName = '';
+    // Context from Opportunity (for product search)
     pricebookId;
     currencyCode = 'INR';
-
-    // Quote header fields
-    quoteName = '';
-    quoteDate = '';
-    validTillDays = '';
-    validTillDate = '';
-    vertical = '';
-    shippingMode = '';
-    billingAddress = '';
-    shippingAddress = '';
-    isActive = true;
 
     // Search
     searchTerm = '';
@@ -48,51 +35,14 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // Line items
     @track lineItems = [];
 
-    // Additional charges
-    shippingCharges = 0;
+    // Internal charges (injected into form on submit)
+    packingCharges = 0;
     transportCharges = 0;
     warrantyCost = 0;
     installationCost = 0;
-    packingCharges = 0;
     trainingCost = 0;
 
     // ===== PICKLIST OPTIONS =====
-
-    get validTillOptions() {
-        return [
-            { label: '15 Days', value: '15' },
-            { label: '30 Days', value: '30' },
-            { label: '45 Days', value: '45' },
-            { label: '60 Days', value: '60' },
-            { label: '90 Days', value: '90' }
-        ];
-    }
-
-    get verticalOptions() {
-        return [
-            { label: 'Distribution/Sales', value: 'Distribution/Sales' },
-            { label: 'Care 360 CMC', value: 'Care 360 CMC' },
-            { label: 'QA/Calibration', value: 'QA/Calibration' },
-            { label: 'Revive Lab', value: 'Revive Lab' },
-            { label: 'Spares', value: 'Spares' },
-            { label: 'Academy', value: 'Academy' },
-            { label: 'Ciyan', value: 'Ciyan' },
-            { label: 'Aurum', value: 'Aurum' },
-            { label: 'Rental', value: 'Rental' },
-            { label: 'Asset Management', value: 'Asset Management' }
-        ];
-    }
-
-    get shippingModeOptions() {
-        return [
-            { label: '--None--', value: '' },
-            { label: 'By Road', value: 'By Road' },
-            { label: 'By Air', value: 'By Air' },
-            { label: 'By Sea', value: 'By Sea' },
-            { label: 'By Rail', value: 'By Rail' },
-            { label: 'Courier', value: 'Courier' }
-        ];
-    }
 
     get taxTypeOptions() {
         return [
@@ -116,40 +66,27 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
     // ===== COMPUTED PROPERTIES =====
 
-    get hasLineItems() {
-        return this.lineItems.length > 0;
-    }
-
-    get lineItemCount() {
-        return this.lineItems.length;
-    }
-
-    get noSearchResults() {
-        return this.showSearchResults && this.searchResults.length === 0;
-    }
-
-    get isSearchDisabled() {
-        return !this.searchTerm || this.searchTerm.length < 2;
-    }
-
-    get isSaveDisabled() {
-        return this.isSaving || this.lineItems.length === 0;
-    }
+    get hasLineItems() { return this.lineItems.length > 0; }
+    get lineItemCount() { return this.lineItems.length; }
+    get hasSearchResults() { return this.searchResults.length > 0; }
+    get noSearchResults() { return this.showSearchResults && this.searchResults.length === 0; }
+    get isSearchDisabled() { return !this.searchTerm || this.searchTerm.length < 2; }
+    get isSaveDisabled() { return this.isSaving || this.lineItems.length === 0; }
+    get pageTitle() { return this.isEditMode ? 'Edit Quote' : 'Create Quote'; }
+    get saveButtonLabel() { return this.isSaving ? 'Saving...' : (this.isEditMode ? 'Update Quote' : 'Save Quote'); }
 
     // ===== CALCULATIONS =====
 
     get subtotal() {
         return this.lineItems.reduce((sum, item) => {
-            const base = (item.unitPrice || 0) * (item.quantity || 0);
-            return sum + base;
+            return sum + ((item.unitPrice || 0) * (item.quantity || 0));
         }, 0);
     }
 
     get totalDiscount() {
         return this.lineItems.reduce((sum, item) => {
             const base = (item.unitPrice || 0) * (item.quantity || 0);
-            const discountAmt = base * ((item.discount || 0) / 100);
-            return sum + discountAmt;
+            return sum + (base * ((item.discount || 0) / 100));
         }, 0);
     }
 
@@ -158,17 +95,15 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             if (item.taxType === 'Exempt') return sum;
             const base = (item.unitPrice || 0) * (item.quantity || 0);
             const afterDiscount = base - (base * ((item.discount || 0) / 100));
-            const taxAmt = afterDiscount * ((item.taxPercent || 0) / 100);
-            return sum + taxAmt;
+            return sum + (afterDiscount * ((item.taxPercent || 0) / 100));
         }, 0);
     }
 
     get totalCharges() {
-        return (parseFloat(this.shippingCharges) || 0) +
+        return (parseFloat(this.packingCharges) || 0) +
                (parseFloat(this.transportCharges) || 0) +
                (parseFloat(this.warrantyCost) || 0) +
                (parseFloat(this.installationCost) || 0) +
-               (parseFloat(this.packingCharges) || 0) +
                (parseFloat(this.trainingCost) || 0);
     }
 
@@ -176,17 +111,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         return this.subtotal - this.totalDiscount + this.totalTax + this.totalCharges;
     }
 
-    // ===== COMPUTED: Page Title =====
-
-    get pageTitle() {
-        return this.isEditMode ? 'Edit Quote' : 'Create Quote';
-    }
-
-    get saveButtonLabel() {
-        return this.isEditMode ? 'Update Quote' : 'Save Quote';
-    }
-
-    // ===== LIFECYCLE: Detect Mode & Load Data =====
+    // ===== LIFECYCLE =====
 
     connectedCallback() {
         this.detectModeAndLoad();
@@ -198,14 +123,15 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         this.isLoading = true;
         const idPrefix = this.recordId.substring(0, 3);
 
-        // Quote object key prefix is '0Q0'
         if (idPrefix === '0Q0') {
+            // Edit mode: recordId is a Quote Id
             this.isEditMode = true;
-            this.editQuoteId = this.recordId;
-            await this.loadQuoteForEdit();
+            this.editRecordId = this.recordId;
+            await this.loadQuoteLineItems();
         } else {
-            // Assume Opportunity (key prefix '006')
+            // New mode: recordId is an Opportunity Id
             this.isEditMode = false;
+            this.defaultOpportunityId = this.recordId;
             await this.loadOpportunityContext();
         }
 
@@ -215,60 +141,18 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     async loadOpportunityContext() {
         try {
             const data = await getOpportunityContext({ opportunityId: this.recordId });
-            this.opportunityName = data.opportunityName;
-            this.accountName = data.accountName;
             this.pricebookId = data.pricebookId;
             this.currencyCode = data.currencyCode || 'INR';
-            this.vertical = data.vertical || '';
-            this.billingAddress = data.billingAddress || '';
-            this.shippingAddress = data.shippingAddress || '';
-            this.quoteDate = new Date().toISOString().split('T')[0];
         } catch (error) {
             this.showError('Error loading opportunity', this.reduceErrors(error));
         }
     }
 
-    async loadQuoteForEdit() {
+    async loadQuoteLineItems() {
         try {
-            const data = await getQuoteForEdit({ quoteId: this.editQuoteId });
-
-            this.quoteName = data.quoteName || '';
-            this.opportunityName = data.opportunityName || '';
-            this.accountName = data.accountName || '';
+            const data = await getQuoteForEdit({ quoteId: this.editRecordId });
             this.pricebookId = data.pricebookId;
-            this.currencyCode = data.currencyCode || 'INR';
-            this.vertical = data.vertical || '';
-            this.shippingMode = data.shippingMode || '';
-            this.billingAddress = data.billingAddress || '';
-            this.shippingAddress = data.shippingAddress || '';
-            this.isActive = data.isActive !== false;
 
-            // Set dates
-            this.quoteDate = data.quoteDate || '';
-            this.validTillDate = data.validTill || '';
-
-            // Calculate validTillDays from dates
-            if (data.quoteDate && data.validTill) {
-                const qDate = new Date(data.quoteDate);
-                const vDate = new Date(data.validTill);
-                const diffDays = Math.round((vDate - qDate) / (1000 * 60 * 60 * 24));
-                // Match to nearest option
-                const options = [15, 30, 45, 60, 90];
-                const closest = options.reduce((prev, curr) =>
-                    Math.abs(curr - diffDays) < Math.abs(prev - diffDays) ? curr : prev
-                );
-                this.validTillDays = String(closest);
-            }
-
-            // Load charges
-            this.shippingCharges = data.shippingCharges || 0;
-            this.transportCharges = data.transportCharges || 0;
-            this.warrantyCost = data.warrantyCost || 0;
-            this.installationCost = data.installationCost || 0;
-            this.packingCharges = data.packingCharges || 0;
-            this.trainingCost = data.trainingCost || 0;
-
-            // Load line items
             if (data.lineItems && data.lineItems.length > 0) {
                 this.lineItems = data.lineItems.map((item, index) => {
                     rowCounter++;
@@ -289,6 +173,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                         unitPrice: item.unitPrice,
                         discount: item.discount || 0,
                         taxPercent: item.taxPercent || 0,
+                        taxPercentDisplay: (item.taxPercent || 0) + '%',
                         taxType: item.taxType || 'GST',
                         lineTotal: afterDiscount + taxAmt,
                         lineDescription: item.lineDescription || '',
@@ -301,27 +186,104 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }
     }
 
-    // ===== HEADER HANDLERS =====
+    // ===== FORM HANDLERS =====
 
-    handleQuoteNameChange(event) { this.quoteName = event.target.value; }
-    handleQuoteDateChange(event) { this.quoteDate = event.target.value; this.calculateValidTillDate(); }
-    handleVerticalChange(event) { this.vertical = event.detail.value; }
-    handleShippingModeChange(event) { this.shippingMode = event.detail.value; }
-    handleBillingAddressChange(event) { this.billingAddress = event.target.value; }
-    handleShippingAddressChange(event) { this.shippingAddress = event.target.value; }
-    handleIsActiveChange(event) { this.isActive = event.target.checked; }
+    handleFormSubmit(event) {
+        event.preventDefault();
 
-    handleValidTillDaysChange(event) {
-        this.validTillDays = event.detail.value;
-        this.calculateValidTillDate();
+        // Validate line items before submitting
+        const errors = this.validateLineItems();
+        if (errors.length > 0) {
+            this.showError('Validation Error', errors.join('\n'));
+            return;
+        }
+
+        const fields = event.detail.fields;
+
+        // Inject Pricebook2Id (required for Quote)
+        fields.Pricebook2Id = this.pricebookId;
+
+        // Inject internal charge fields
+        fields.Packing_Charge__c = this.packingCharges || 0;
+        fields.Internal_Transport_Cost__c = this.transportCharges || 0;
+        fields.Warrantee_Cost__c = this.warrantyCost || 0;
+        fields.Installation_Cost__c = this.installationCost || 0;
+        fields.Traning_Cost__c = this.trainingCost || 0;
+
+        // Set defaults for new quotes
+        if (!this.isEditMode) {
+            fields.Status = 'Draft';
+            fields.Price_Status__c = 'Draft';
+        }
+
+        this.isSaving = true;
+        this.isLoading = true;
+        this.template.querySelector('lightning-record-edit-form').submit(fields);
     }
 
-    calculateValidTillDate() {
-        if (this.quoteDate && this.validTillDays) {
-            const base = new Date(this.quoteDate);
-            base.setDate(base.getDate() + parseInt(this.validTillDays, 10));
-            this.validTillDate = base.toISOString().split('T')[0];
+    async handleFormSuccess(event) {
+        const quoteId = event.detail.id;
+
+        try {
+            const lineItemsPayload = this.lineItems.map(item => ({
+                productId: item.productId,
+                pricebookEntryId: item.pricebookEntryId,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice,
+                discount: item.discount,
+                taxType: item.taxType,
+                lineDescription: item.lineDescription,
+                detailedDescription: item.detailedDescription
+            }));
+
+            if (this.isEditMode) {
+                await updateQuoteLineItems({
+                    quoteId: quoteId,
+                    lineItemsJSON: JSON.stringify(lineItemsPayload)
+                });
+                this.showSuccess('Quote Updated', 'Quote and line items updated successfully.');
+            } else {
+                await saveQuoteLineItems({
+                    quoteId: quoteId,
+                    lineItemsJSON: JSON.stringify(lineItemsPayload)
+                });
+                this.showSuccess('Quote Created', 'Quote and line items created successfully.');
+            }
+
+            // Navigate to the Quote record
+            this[NavigationMixin.Navigate]({
+                type: 'standard__recordPage',
+                attributes: {
+                    recordId: quoteId,
+                    objectApiName: 'Quote',
+                    actionName: 'view'
+                }
+            });
+        } catch (error) {
+            this.showError('Line Items Save Failed',
+                'Quote header was saved but line items failed: ' + this.reduceErrors(error) +
+                '. Please add line items from the Quote record page.');
+            // Navigate to the Quote so user can fix line items
+            this[NavigationMixin.Navigate]({
+                type: 'standard__recordPage',
+                attributes: {
+                    recordId: quoteId,
+                    objectApiName: 'Quote',
+                    actionName: 'view'
+                }
+            });
+        } finally {
+            this.isSaving = false;
+            this.isLoading = false;
         }
+    }
+
+    handleFormError(event) {
+        this.isSaving = false;
+        this.isLoading = false;
+
+        const message = event.detail?.message || 'An error occurred while saving the quote.';
+        this.showError('Save Failed', message);
     }
 
     // ===== SEARCH HANDLERS =====
@@ -355,16 +317,14 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }
     }
 
-    // ===== ADD / REMOVE LINE ITEMS =====
+    // ===== LINE ITEM HANDLERS =====
 
     handleAddProduct(event) {
         const pbeId = event.currentTarget.dataset.id;
         const product = this.searchResults.find(p => p.pricebookEntryId === pbeId);
         if (!product) return;
 
-        // Check for duplicate
-        const exists = this.lineItems.find(item => item.pricebookEntryId === pbeId);
-        if (exists) {
+        if (this.lineItems.find(item => item.pricebookEntryId === pbeId)) {
             this.showError('Duplicate Product', 'This product is already in the quote. Update the quantity instead.');
             return;
         }
@@ -382,6 +342,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             unitPrice: product.unitPrice,
             discount: 0,
             taxPercent: product.taxPercent || 0,
+            taxPercentDisplay: (product.taxPercent || 0) + '%',
             taxType: 'GST',
             lineTotal: product.unitPrice,
             lineDescription: product.lineDescription || '',
@@ -416,7 +377,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                     updated.taxType = value;
                 }
 
-                // Recalculate line total
                 const base = updated.unitPrice * updated.quantity;
                 const discountAmt = base * (updated.discount / 100);
                 const afterDiscount = base - discountAmt;
@@ -436,98 +396,16 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         this[field] = parseFloat(event.target.value) || 0;
     }
 
-    // ===== SAVE =====
-
-    async handleSave() {
-        // Validate required fields
-        const errors = this.validateForm();
-        if (errors.length > 0) {
-            this.showError('Validation Error', errors.join('\n'));
-            return;
-        }
-
-        this.isSaving = true;
-        this.isLoading = true;
-
-        try {
-            const quoteHeader = {
-                name: this.quoteName,
-                opportunityId: this.recordId,
-                pricebookId: this.pricebookId,
-                quoteDate: this.quoteDate,
-                validTill: this.validTillDate,
-                billingAddress: this.billingAddress,
-                shippingAddress: this.shippingAddress,
-                shippingMode: this.shippingMode,
-                vertical: this.vertical,
-                isActive: this.isActive
-            };
-
-            const lineItemsPayload = this.lineItems.map(item => ({
-                productId: item.productId,
-                pricebookEntryId: item.pricebookEntryId,
-                quantity: item.quantity,
-                unitPrice: item.unitPrice,
-                discount: item.discount,
-                taxType: item.taxType,
-                lineDescription: item.lineDescription,
-                detailedDescription: item.detailedDescription
-            }));
-
-            const chargesPayload = {
-                shippingCharges: this.shippingCharges,
-                transportCharges: this.transportCharges,
-                warrantyCost: this.warrantyCost,
-                installationCost: this.installationCost,
-                packingCharges: this.packingCharges,
-                trainingCost: this.trainingCost,
-                taxAmount: this.totalTax
-            };
-
-            let quoteId;
-            if (this.isEditMode) {
-                quoteId = await updateQuoteWithLineItems({
-                    quoteId: this.editQuoteId,
-                    quoteJSON: JSON.stringify(quoteHeader),
-                    lineItemsJSON: JSON.stringify(lineItemsPayload),
-                    chargesJSON: JSON.stringify(chargesPayload)
-                });
-                this.showSuccess('Quote Updated', 'Quote has been updated successfully.');
-            } else {
-                quoteId = await saveQuoteWithLineItems({
-                    quoteJSON: JSON.stringify(quoteHeader),
-                    lineItemsJSON: JSON.stringify(lineItemsPayload),
-                    chargesJSON: JSON.stringify(chargesPayload)
-                });
-                this.showSuccess('Quote Created', 'Quote has been created successfully.');
-            }
-
-            // Navigate to the new Quote record
-            this[NavigationMixin.Navigate]({
-                type: 'standard__recordPage',
-                attributes: {
-                    recordId: quoteId,
-                    objectApiName: 'Quote',
-                    actionName: 'view'
-                }
-            });
-        } catch (error) {
-            this.showError('Save Failed', this.reduceErrors(error));
-        } finally {
-            this.isSaving = false;
-            this.isLoading = false;
-        }
-    }
+    // ===== CANCEL =====
 
     handleCancel() {
-        // Close quick action modal if launched from action
         this.dispatchEvent(new CloseActionScreenEvent());
 
         if (this.isEditMode) {
             this[NavigationMixin.Navigate]({
                 type: 'standard__recordPage',
                 attributes: {
-                    recordId: this.editQuoteId,
+                    recordId: this.editRecordId,
                     objectApiName: 'Quote',
                     actionName: 'view'
                 }
@@ -546,15 +424,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
     // ===== VALIDATION =====
 
-    validateForm() {
+    validateLineItems() {
         const errors = [];
-
-        if (!this.quoteName) errors.push('Quote Name is required.');
-        if (!this.quoteDate) errors.push('Quote Date is required.');
-        if (!this.validTillDays) errors.push('Valid Till (Days) is required.');
-        if (!this.vertical) errors.push('Vertical is required.');
-        if (!this.billingAddress) errors.push('Billing Address is required.');
-        if (!this.shippingAddress) errors.push('Shipping Address is required.');
 
         if (this.lineItems.length === 0) {
             errors.push('At least one line item is required.');
@@ -568,7 +439,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 errors.push(`Discount for "${item.productName}" must be between 0 and 100.`);
             }
             if (!item.unitPrice || item.unitPrice <= 0) {
-                errors.push(`Unit price for "${item.productName}" is not available. Please check the Price Book.`);
+                errors.push(`Unit price for "${item.productName}" is not available.`);
             }
         }
 
