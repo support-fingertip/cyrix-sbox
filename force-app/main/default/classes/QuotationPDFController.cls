@@ -86,11 +86,11 @@ public with sharing class QuotationPDFController {
     public String companyTagline { get { return COMPANY_TAGLINE; } }
     public String companyCin { get { return COMPANY_CIN; } }
 
-    public String bankName { get { return BANK_NAME; } }
-    public String bankAccountNumber { get { return BANK_ACCOUNT_NUMBER; } }
-    public String bankIfsc { get { return BANK_IFSC; } }
-    public String bankBranch { get { return BANK_BRANCH; } }
-    public String bankAccountHolder { get { return BANK_ACCOUNT_HOLDER; } }
+    public String bankName { get; set; }
+    public String bankAccountNumber { get; set; }
+    public String bankIfsc { get; set; }
+    public String bankBranch { get; set; }
+    public String bankAccountHolder { get; set; }
 
     public QuotationPDFController(ApexPages.StandardController stdController) {
         Id quoteId = stdController.getId();
@@ -123,6 +123,13 @@ public with sharing class QuotationPDFController {
         gstDisplayRate = '';
         warrantyExtra = '';
 
+        // Initialize bank details with defaults
+        bankName = BANK_NAME;
+        bankAccountNumber = BANK_ACCOUNT_NUMBER;
+        bankIfsc = BANK_IFSC;
+        bankBranch = BANK_BRANCH;
+        bankAccountHolder = BANK_ACCOUNT_HOLDER;
+
         if (quoteId != null) {
             loadData(quoteId);
         }
@@ -146,6 +153,9 @@ public with sharing class QuotationPDFController {
                    Account.BillingStreet, Account.BillingCity, Account.BillingState,
                    Account.BillingPostalCode, Account.BillingCountry,
                    Account.Payment_Terms__c,
+                   Bank_Name__c, Bank_Name__r.Name,
+                   Bank_Name__r.Account_No__c, Bank_Name__r.Bank_Name__c,
+                   Bank_Name__r.Branch_Name__c, Bank_Name__r.IFSC_CODE__c,
                    ContactId, Contact.Name, Contact.Email, Contact.Phone, Contact.Title
             FROM Quote
             WHERE Id = :quoteId
@@ -170,6 +180,14 @@ public with sharing class QuotationPDFController {
         // Validity days from Quote_Valid_Till_in_days__c picklist field
         if (quote.Quote_Valid_Till_in_days__c != null) {
             validityDays = quote.Quote_Valid_Till_in_days__c;
+        }
+
+        // Bank details from Quote's Bank lookup
+        if (quote.Bank_Name__c != null && quote.Bank_Name__r != null) {
+            bankAccountNumber = quote.Bank_Name__r.Account_No__c != null ? quote.Bank_Name__r.Account_No__c : '';
+            bankName = quote.Bank_Name__r.Bank_Name__c != null ? quote.Bank_Name__r.Bank_Name__c : '';
+            bankBranch = quote.Bank_Name__r.Branch_Name__c != null ? quote.Bank_Name__r.Branch_Name__c : '';
+            bankIfsc = quote.Bank_Name__r.IFSC_CODE__c != null ? quote.Bank_Name__r.IFSC_CODE__c : '';
         }
 
         // Delivery weeks from Quote
