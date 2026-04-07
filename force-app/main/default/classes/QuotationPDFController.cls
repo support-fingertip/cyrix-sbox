@@ -134,6 +134,7 @@ public with sharing class QuotationPDFController {
             SELECT Id, Name, QuoteNumber, Quote_Id__c, Quote_Date__c, Valid_Till__c,
                    Status, Price_Status__c, is_Active__c, Vertical__c,
                    Billing_Address__c, Shipping_Address__c, Shipping_Mode__c,
+                   Quote_Valid_Till_in_days__c,
                    Subtotal, TotalPrice, GrandTotal, Discount, Tax, ShippingHandling,
                    CurrencyIsoCode, Description, OwnerId,
                    OpportunityId, Opportunity.Name,
@@ -165,10 +166,9 @@ public with sharing class QuotationPDFController {
         validTillDate = quote.Valid_Till__c != null
             ? formatDate(quote.Valid_Till__c) : '';
 
-        // Calculate validity days from Quote Date to Valid Till
-        if (quote.Quote_Date__c != null && quote.Valid_Till__c != null) {
-            Integer days = quote.Quote_Date__c.daysBetween(quote.Valid_Till__c);
-            validityDays = String.valueOf(days) + ' days';
+        // Validity days from Quote_Valid_Till_in_days__c picklist field
+        if (quote.Quote_Valid_Till_in_days__c != null) {
+            validityDays = quote.Quote_Valid_Till_in_days__c;
         }
 
         // Payment terms from Account
