@@ -11,7 +11,7 @@
 <style type="text/css">
     @page {
         size: A4;
-        margin: 8mm 15mm 20mm 15mm;
+        margin: 3mm 15mm 20mm 15mm;
 
         @bottom-center {
             content: element(footer);
