@@ -135,7 +135,7 @@ public with sharing class QuotationPDFController {
                    Status, Price_Status__c, is_Active__c, Vertical__c,
                    Billing_Address__c, Shipping_Address__c, Shipping_Mode__c,
                    Subtotal, TotalPrice, GrandTotal, Discount, Tax, ShippingHandling,
-                   CurrencyIsoCode, Description,
+                   CurrencyIsoCode, Description, OwnerId,
                    OpportunityId, Opportunity.Name,
                    Opportunity.OwnerId, Opportunity.Owner.Name,
                    Opportunity.Owner.Title, Opportunity.Owner.Phone, Opportunity.Owner.Email,
@@ -164,12 +164,20 @@ public with sharing class QuotationPDFController {
         validTillDate = quote.Valid_Till__c != null
             ? formatDate(quote.Valid_Till__c) : '';
 
-        // Sales Engineer info from Opportunity Owner
-        if (opportunity != null && opportunity.Owner != null) {
-            salesEngineerName = opportunity.Owner.Name;
-            salesEngineerTitle = opportunity.Owner.Title;
-            salesEngineerPhone = opportunity.Owner.Phone;
-            salesEngineerEmail = opportunity.Owner.Email;
+        // Sales Engineer info from Quote Owner (User object)
+        if (quote.OwnerId != null) {
+            List<User> owners = [
+                SELECT Id, Name, Title, Phone, Email
+                FROM User
+                WHERE Id = :quote.OwnerId
+                LIMIT 1
+            ];
+            if (!owners.isEmpty()) {
+                salesEngineerName = owners[0].Name;
+                salesEngineerTitle = owners[0].Title;
+                salesEngineerPhone = owners[0].Phone;
+                salesEngineerEmail = owners[0].Email;
+            }
         }
 
         // Query line items

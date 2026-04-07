@@ -18,8 +18,8 @@
         }
     }
     body {
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 10pt;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 9pt;
         color: #000000;
         line-height: 1.4;
     }
@@ -83,7 +83,7 @@
     /* ---------- SUBJECT ---------- */
     .subject {
         text-align: center;
-        font-size: 11pt;
+        font-size: 10pt;
         font-weight: bold;
         color: #000000;
         margin: 10px 0 8px 0;
@@ -91,12 +91,12 @@
 
     /* ---------- LETTER BODY ---------- */
     .letter-body {
-        font-size: 10pt;
+        font-size: 9pt;
         text-align: justify;
-        line-height: 1.6;
+        line-height: 1.5;
     }
     .letter-body p {
-        margin: 10px 0;
+        margin: 8px 0;
     }
     .product-list {
         margin: 3px 0 3px 0;
