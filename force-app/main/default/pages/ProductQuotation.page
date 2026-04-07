@@ -40,7 +40,7 @@
     /* ---------- COMPANY HEADER ---------- */
     .company-header {
         text-align: left;
-        margin-bottom: 20px;
+        margin-bottom: 5px;
     }
     .company-logo {
         max-height: 70px;
