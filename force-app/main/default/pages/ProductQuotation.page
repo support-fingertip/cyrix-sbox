@@ -1102,10 +1102,10 @@
     <!-- 11. Bank Details -->
     <p style="font-size: 8pt; font-weight: bold; margin: 5px 0 1px 0;">11. BANK DETAILS:</p>
     <ul style="font-size: 7pt; margin: 0 0 2px 15px; padding-left: 12px; line-height: 1.3;">
-        <li>A/C Number: &lt;Bank Account Number&gt;</li>
-        <li>Bank Name: &lt;Bank Name&gt;</li>
-        <li>Branch Code: &lt;Branch Code&gt;</li>
-        <li>IFSC: &lt;Code&gt;</li>
+        <li>A/C Number: {!bankAccountNumber}</li>
+        <li>Bank Name: {!bankName}</li>
+        <li>Branch Code: {!bankBranch}</li>
+        <li>IFSC: {!bankIfsc}</li>
     </ul>
 
     <!-- 12. Service Report Acknowledgement -->
@@ -1364,10 +1364,10 @@
     <!-- 11. Bank Details -->
     <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">11. BANK DETAILS:</p>
     <ul style="font-size: 7pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
-        <li style="margin-bottom: 2px;">A/C Number: &lt;Bank Account Number&gt;</li>
-        <li style="margin-bottom: 2px;">Bank Name: &lt;Bank Name&gt;</li>
-        <li style="margin-bottom: 2px;">Branch Code: &lt;Branch Code&gt;</li>
-        <li style="margin-bottom: 2px;">IFSC: &lt;Code&gt;</li>
+        <li style="margin-bottom: 2px;">A/C Number: {!bankAccountNumber}</li>
+        <li style="margin-bottom: 2px;">Bank Name: {!bankName}</li>
+        <li style="margin-bottom: 2px;">Branch Code: {!bankBranch}</li>
+        <li style="margin-bottom: 2px;">IFSC: {!bankIfsc}</li>
     </ul>
 
     <!-- 12. Service Report Acknowledgement -->
