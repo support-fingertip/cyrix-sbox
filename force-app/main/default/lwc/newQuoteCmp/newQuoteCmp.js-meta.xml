@@ -11,6 +11,7 @@
         <targetConfig targets="lightning__RecordPage">
             <objects>
                 <object>Opportunity</object>
+                <object>Quote</object>
             </objects>
         </targetConfig>
     </targetConfigs>

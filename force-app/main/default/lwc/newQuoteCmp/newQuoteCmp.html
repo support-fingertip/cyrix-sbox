@@ -4,7 +4,7 @@
         <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
     </template>
 
-    <lightning-card title="Create Quote" icon-name="standard:quotes">
+    <lightning-card title={pageTitle} icon-name="standard:quotes">
 
         <!-- ===== QUOTE HEADER SECTION ===== -->
         <div class="slds-p-around_medium">
@@ -468,7 +468,7 @@
                 class="slds-m-right_small">
             </lightning-button>
             <lightning-button
-                label="Save Quote"
+                label={saveButtonLabel}
                 variant="brand"
                 onclick={handleSave}
                 disabled={isSaveDisabled}>

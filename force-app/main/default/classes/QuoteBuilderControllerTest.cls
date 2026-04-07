@@ -239,6 +239,175 @@ private class QuoteBuilderControllerTest {
     }
 
     @isTest
+    static void testGetQuoteForEdit() {
+        Opportunity opp = [SELECT Id, Pricebook2Id FROM Opportunity LIMIT 1];
+        PricebookEntry pbe = [SELECT Id, Product2Id FROM PricebookEntry WHERE Product2.ProductCode = 'USG-500' LIMIT 1];
+
+        // Create a quote first
+        Quote q = new Quote(
+            Name = 'Edit Test Quote',
+            OpportunityId = opp.Id,
+            Pricebook2Id = opp.Pricebook2Id,
+            Quote_Date__c = Date.today(),
+            Valid_Till__c = Date.today().addDays(30),
+            Billing_Address__c = '123 MG Road, Kochi',
+            Shipping_Address__c = '456 NH Road, Trivandrum',
+            Shipping_Mode__c = 'By Road',
+            Vertical__c = 'Distribution/Sales',
+            is_Active__c = true,
+            ShippingHandling = 5000,
+            Description = 'Additional Charges: Shipping: 5000 | Transport: 3000 | Warranty: 10000'
+        );
+        insert q;
+
+        QuoteLineItem qli = new QuoteLineItem(
+            QuoteId = q.Id,
+            Product2Id = pbe.Product2Id,
+            PricebookEntryId = pbe.Id,
+            Quantity = 2,
+            UnitPrice = 150000,
+            Discount = 5,
+            Tax_Type__c = 'GST'
+        );
+        insert qli;
+
+        Test.startTest();
+        QuoteBuilderController.QuoteEditContext ctx = QuoteBuilderController.getQuoteForEdit(q.Id);
+        Test.stopTest();
+
+        System.assertEquals('Edit Test Quote', ctx.quoteName);
+        System.assertEquals('Distribution/Sales', ctx.vertical);
+        System.assertEquals('By Road', ctx.shippingMode);
+        System.assertEquals(true, ctx.isActive);
+        System.assertEquals(5000, ctx.shippingCharges);
+        System.assertEquals(3000, ctx.transportCharges);
+        System.assertEquals(10000, ctx.warrantyCost);
+        System.assertEquals(1, ctx.lineItems.size());
+        System.assertEquals(2, ctx.lineItems[0].quantity);
+        System.assertEquals(150000, ctx.lineItems[0].unitPrice);
+        System.assertEquals(5, ctx.lineItems[0].discount);
+    }
+
+    @isTest
+    static void testUpdateQuoteWithLineItems() {
+        Opportunity opp = [SELECT Id, Pricebook2Id FROM Opportunity LIMIT 1];
+        PricebookEntry pbe1 = [SELECT Id, Product2Id FROM PricebookEntry WHERE Product2.ProductCode = 'USG-500' LIMIT 1];
+        PricebookEntry pbe2 = [SELECT Id, Product2Id FROM PricebookEntry WHERE Product2.ProductCode = 'PM-200' LIMIT 1];
+
+        // Create initial quote
+        Quote q = new Quote(
+            Name = 'Original Quote',
+            OpportunityId = opp.Id,
+            Pricebook2Id = opp.Pricebook2Id,
+            Quote_Date__c = Date.today(),
+            Valid_Till__c = Date.today().addDays(30),
+            Billing_Address__c = 'Old Address',
+            Shipping_Address__c = 'Old Shipping',
+            Vertical__c = 'Distribution/Sales',
+            is_Active__c = true
+        );
+        insert q;
+
+        QuoteLineItem qli = new QuoteLineItem(
+            QuoteId = q.Id,
+            Product2Id = pbe1.Product2Id,
+            PricebookEntryId = pbe1.Id,
+            Quantity = 1,
+            UnitPrice = 150000,
+            Discount = 0,
+            Tax_Type__c = 'GST'
+        );
+        insert qli;
+
+        // Now update with different data
+        String quoteJSON = JSON.serialize(new Map<String, Object>{
+            'name' => 'Updated Quote',
+            'opportunityId' => opp.Id,
+            'pricebookId' => opp.Pricebook2Id,
+            'quoteDate' => String.valueOf(Date.today()),
+            'validTill' => String.valueOf(Date.today().addDays(45)),
+            'billingAddress' => 'New Billing Address',
+            'shippingAddress' => 'New Shipping Address',
+            'shippingMode' => 'By Air',
+            'vertical' => 'Spares',
+            'isActive' => true
+        });
+
+        String lineItemsJSON = JSON.serialize(new List<Map<String, Object>>{
+            new Map<String, Object>{
+                'productId' => pbe2.Product2Id,
+                'pricebookEntryId' => pbe2.Id,
+                'quantity' => 5,
+                'unitPrice' => 85000,
+                'discount' => 10,
+                'taxType' => 'IGST',
+                'lineDescription' => 'Updated monitor',
+                'detailedDescription' => 'PM-200 updated'
+            }
+        });
+
+        String chargesJSON = JSON.serialize(new Map<String, Object>{
+            'shippingCharges' => 2000,
+            'transportCharges' => 1000,
+            'warrantyCost' => 0,
+            'installationCost' => 0,
+            'packingCharges' => 0,
+            'trainingCost' => 0,
+            'taxAmount' => 5000
+        });
+
+        Test.startTest();
+        Id updatedId = QuoteBuilderController.updateQuoteWithLineItems(q.Id, quoteJSON, lineItemsJSON, chargesJSON);
+        Test.stopTest();
+
+        System.assertEquals(q.Id, updatedId);
+
+        Quote updated = [SELECT Name, Vertical__c, Shipping_Mode__c, Billing_Address__c FROM Quote WHERE Id = :updatedId];
+        System.assertEquals('Updated Quote', updated.Name);
+        System.assertEquals('Spares', updated.Vertical__c);
+        System.assertEquals('By Air', updated.Shipping_Mode__c);
+        System.assertEquals('New Billing Address', updated.Billing_Address__c);
+
+        List<QuoteLineItem> items = [SELECT Id, Quantity, UnitPrice, Discount, Tax_Type__c FROM QuoteLineItem WHERE QuoteId = :updatedId];
+        System.assertEquals(1, items.size(), 'Should have replaced with 1 new line item');
+        System.assertEquals(5, items[0].Quantity);
+        System.assertEquals(85000, items[0].UnitPrice);
+        System.assertEquals(10, items[0].Discount);
+        System.assertEquals('IGST', items[0].Tax_Type__c);
+    }
+
+    @isTest
+    static void testUpdateQuoteEmptyLineItems() {
+        Opportunity opp = [SELECT Id, Pricebook2Id FROM Opportunity LIMIT 1];
+
+        Quote q = new Quote(
+            Name = 'Empty Update Test',
+            OpportunityId = opp.Id,
+            Pricebook2Id = opp.Pricebook2Id,
+            Vertical__c = 'Distribution/Sales',
+            is_Active__c = true
+        );
+        insert q;
+
+        String quoteJSON = JSON.serialize(new Map<String, Object>{
+            'name' => 'Empty',
+            'opportunityId' => opp.Id,
+            'pricebookId' => opp.Pricebook2Id,
+            'vertical' => 'Distribution/Sales',
+            'isActive' => true
+        });
+
+        Test.startTest();
+        try {
+            QuoteBuilderController.updateQuoteWithLineItems(q.Id, quoteJSON, '[]', '{}');
+            System.assert(false, 'Should have thrown exception');
+        } catch (AuraHandledException e) {
+            System.assert(e.getMessage().contains('line item'), 'Error should mention line items');
+        }
+        Test.stopTest();
+    }
+
+    @isTest
     static void testSaveQuoteNoCharges() {
         Opportunity opp = [SELECT Id, Pricebook2Id FROM Opportunity LIMIT 1];
         PricebookEntry pbe = [SELECT Id, Product2Id FROM PricebookEntry LIMIT 1];
