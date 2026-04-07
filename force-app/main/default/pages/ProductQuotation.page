@@ -1231,20 +1231,6 @@
         PROJECT COSTING - &lt;&#8220;{!quote.Vertical__c}&#8221;&gt;
     </p>
 
-    <!-- CAMC TABLE - Header only on this page -->
-    <table class="pricing-table">
-        <thead>
-            <tr>
-                <th style="width: 40px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">SI NO.</th>
-                <th style="width: 180px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">CONTRACT TYPE</th>
-                <th style="width: 60px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">RATE</th>
-                <th style="width: 50px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">GST %</th>
-                <th style="width: 60px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">GST RATE</th>
-                <th style="width: 60px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">TOTAL</th>
-            </tr>
-        </thead>
-    </table>
-
     <!-- ====================================================================== -->
     <!-- CAMC DATA + T&C PAGE                                                  -->
     <!-- ====================================================================== -->
