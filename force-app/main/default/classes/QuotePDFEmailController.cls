@@ -5,7 +5,7 @@ public with sharing class QuotePDFEmailController {
      */
     @AuraEnabled
     public static QuoteEmailWrapper getQuoteDetails(Id quoteId) {
-        Quote q = [
+        List<Quote> quotes = [
             SELECT Id, Name, QuoteNumber, Quote_Id__c, Vertical__c,
                    AccountId, Account.Name,
                    ContactId, Contact.Name, Contact.Email,
@@ -16,14 +16,20 @@ public with sharing class QuotePDFEmailController {
         ];
 
         QuoteEmailWrapper wrapper = new QuoteEmailWrapper();
+
+        if (quotes.isEmpty()) {
+            return wrapper;
+        }
+
+        Quote q = quotes[0];
         wrapper.quoteId = q.Id;
         wrapper.quoteName = q.Name;
         wrapper.quoteNumber = q.QuoteNumber;
         wrapper.vertical = q.Vertical__c;
-        wrapper.accountName = q.Account != null ? q.Account.Name : '';
-        wrapper.contactEmail = q.Contact != null ? q.Contact.Email : '';
-        wrapper.contactName = q.Contact != null ? q.Contact.Name : '';
-        wrapper.ownerEmail = q.Owner != null ? q.Owner.Email : '';
+        wrapper.accountName = q.AccountId != null ? q.Account.Name : '';
+        wrapper.contactEmail = q.ContactId != null ? q.Contact.Email : '';
+        wrapper.contactName = q.ContactId != null ? q.Contact.Name : '';
+        wrapper.ownerEmail = q.OwnerId != null ? q.Owner.Email : '';
         wrapper.defaultSubject = 'Quotation for ' +
             (q.Vertical__c != null ? q.Vertical__c : '') +
             ' - ' + q.Name;
