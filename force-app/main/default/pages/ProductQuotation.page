@@ -931,17 +931,39 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td style="text-align: center; border: 1px solid #000000;">1.</td>
-                <td style="border: 1px solid #000000; font-weight: bold;">
-                    ANNUAL MAINTENANCE CONTRACT (AMC)<br/>
-                    (Annexure A List of Equipment)
-                </td>
-                <td style="text-align: center; border: 1px solid #000000;">000</td>
-                <td style="text-align: center; border: 1px solid #000000;">18%</td>
-                <td style="text-align: center; border: 1px solid #000000;">000</td>
-                <td style="text-align: center; border: 1px solid #000000;">000</td>
-            </tr>
+            <apex:variable var="amcIdx" value="{!1}" />
+            <apex:repeat value="{!lineItems}" var="amcItem">
+                <tr>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, 0}">
+                            <apex:param value="{!amcIdx}" />
+                        </apex:outputText>.
+                    </td>
+                    <td style="border: 1px solid #000000; font-weight: bold;">
+                        {!amcItem.Product2.Name}<br/>
+                        <u>(Annexure A List of Equipment)</u>
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!amcItem.TotalPrice}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{!IF(amcItem.Product2.Tax__c != null, TEXT(amcItem.Product2.Tax__c), '18')}"/>%
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!IF(amcItem.Product2.Tax__c != null, amcItem.TotalPrice * amcItem.Product2.Tax__c / 100, amcItem.TotalPrice * 0.18)}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!IF(amcItem.Product2.Tax__c != null, amcItem.TotalPrice + (amcItem.TotalPrice * amcItem.Product2.Tax__c / 100), amcItem.TotalPrice * 1.18)}" />
+                        </apex:outputText>
+                    </td>
+                </tr>
+                <apex:variable var="amcIdx" value="{!amcIdx + 1}" />
+            </apex:repeat>
             <tr>
                 <td colspan="6" style="text-align: center; font-size: 8pt; border: 1px solid #000000;">
                     <strong>Contract Period: - 01/01/2026 to 31/12/2026</strong>
@@ -1245,19 +1267,41 @@
             </tr>
         </thead>
         <tbody>
+            <apex:variable var="camcIdx" value="{!1}" />
+            <apex:repeat value="{!lineItems}" var="camcItem">
+                <tr>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, 0}">
+                            <apex:param value="{!camcIdx}" />
+                        </apex:outputText>.
+                    </td>
+                    <td style="border: 1px solid #000000; font-weight: bold;">
+                        {!camcItem.Product2.Name}<br/>
+                        <u>(Annexure A List of Equipment)</u>
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!camcItem.TotalPrice}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{!IF(camcItem.Product2.Tax__c != null, TEXT(camcItem.Product2.Tax__c), '18')}"/>%
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!IF(camcItem.Product2.Tax__c != null, camcItem.TotalPrice * camcItem.Product2.Tax__c / 100, camcItem.TotalPrice * 0.18)}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!IF(camcItem.Product2.Tax__c != null, camcItem.TotalPrice + (camcItem.TotalPrice * camcItem.Product2.Tax__c / 100), camcItem.TotalPrice * 1.18)}" />
+                        </apex:outputText>
+                    </td>
+                </tr>
+                <apex:variable var="camcIdx" value="{!camcIdx + 1}" />
+            </apex:repeat>
             <tr>
-                <td style="text-align: center; border: 1px solid #000000;">1.</td>
-                <td style="border: 1px solid #000000; font-weight: bold;">
-                    Comprehensive Annual Maintenance Contract (CAMC)<br/>
-                    (Annexure A List of Equipment)
-                </td>
-                <td style="text-align: center; border: 1px solid #000000;">000</td>
-                <td style="text-align: center; border: 1px solid #000000;">18%</td>
-                <td style="text-align: center; border: 1px solid #000000;">000</td>
-                <td style="text-align: center; border: 1px solid #000000;">000</td>
-            </tr>
-            <tr>
-                <td colspan="6" style="text-align: center; font-size: 7pt; border: none;">
+                <td colspan="6" style="text-align: center; font-size: 7pt; border: 1px solid #000000;">
                     <strong>Contract Period: - 01/01/2026 to 31/12/2026</strong>
                 </td>
             </tr>
