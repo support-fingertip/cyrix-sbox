@@ -706,6 +706,100 @@
 
     </div>
 
+    <!-- ====================================================================== -->
+    <!-- PAGE 7: AMC EXCLUSIONS, CONTRACT, PAYMENT, SERVICE, etc.              -->
+    <!-- ====================================================================== -->
+    <div class="page-break"></div>
+    <div class="content">
+
+        <!-- QUOTE REF LINE -->
+        <table style="width: 100%; margin-bottom: 5px; font-size: 9pt; color: #cc0000; font-weight: bold;">
+            <tr>
+                <td style="text-align: left; width: 70%;">
+                    <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/{!IF(quote.Quote_Id__c != null, quote.Quote_Id__c, quote.QuoteNumber)}/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
+                </td>
+                <td style="text-align: right; width: 30%;">
+                    <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
+                </td>
+            </tr>
+        </table>
+
+        <!-- AMC Exclusions continued -->
+        <ul style="font-size: 8pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+            <li style="margin-bottom: 3px;"><strong>Spare Parts &amp; Software:</strong> Supply of all spare parts, components, consumables, and software upgrades or updates is excluded from this quotation and shall be provided only upon issuance of a separate Purchase Order by the CLIENT.</li>
+            <li style="margin-bottom: 3px;">Physical/accidental damage, fire, flood, electrical surge, rodent damage, corrosion, tampering, or misuse.</li>
+            <li style="margin-bottom: 3px;">Failures due to improper earthing, voltage fluctuation, or faulty power supply.</li>
+            <li style="margin-bottom: 3px;">Equipment shifting, dismantling, reinstallation, relocation, or major overhauls.</li>
+            <li style="margin-bottom: 3px;">Any failure or service interruption due to the CLIENT&#8217;s non-compliance with statutory or regulatory requirements (such as AERB, PC-PNDT, etc.) will not be covered under this CAMC.</li>
+        </ul>
+
+        <!-- 3. Contract Period -->
+        <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">3. Contract Period</p>
+        <ul style="font-size: 8pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+            <li style="margin-bottom: 3px;">The contract shall be valid for a period of one year, or for such duration as may be mutually agreed upon by both parties.</li>
+            <li style="margin-bottom: 3px;">Cyrix Healthcare Pvt. Ltd. agrees to provide maintenance services for the equipment listed in <strong>Annexure-A</strong> installed at the CLIENT premises.</li>
+            <li style="margin-bottom: 3px;">Renewable annually with 5% escalation, up to <strong>five years</strong>, subject to mutual agreement.</li>
+        </ul>
+
+        <!-- 4. Payment Terms -->
+        <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">4. Payment Terms</p>
+        <ul style="font-size: 8pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+            <apex:outputPanel rendered="{!paymentTerms.size > 0}">
+                <apex:repeat value="{!paymentTerms}" var="pt">
+                    <li style="margin-bottom: 3px;"><strong>{!pt.Percentage__c}%</strong> {!pt.Payment_Term__c}</li>
+                </apex:repeat>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!paymentTerms.size == 0}">
+                <li style="margin-bottom: 3px;"><strong>&lt;100 % along with the work order&gt;</strong></li>
+            </apex:outputPanel>
+        </ul>
+
+        <!-- 5. Service Conditions -->
+        <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">5. Service Conditions</p>
+        <ul style="font-size: 8pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+            <li style="margin-bottom: 3px;">Service hours: 9:00 AM &#8211; 5:00 PM (Monday&#8211;Saturday), excluding holidays.</li>
+            <li style="margin-bottom: 3px;">Emergency calls outside working hours are chargeable.</li>
+            <li style="margin-bottom: 3px;">Delays due to non-availability of spares, natural calamities, strikes, or circumstances beyond control shall not be the responsibility of the service provider.</li>
+            <li style="margin-bottom: 3px;">Equipment may be shifted to workshop for repair if required, at CLIENT&#8217;s risk.</li>
+        </ul>
+
+        <!-- 6. Client Responsibilities -->
+        <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">6. Client Responsibilities</p>
+        <ul style="font-size: 8pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+            <li style="margin-bottom: 3px;">Provide proper electrical supply, earthing, UPS, and stabilizer.</li>
+            <li style="margin-bottom: 3px;">Ensure suitable environmental conditions as per manufacturer guidelines.</li>
+            <li style="margin-bottom: 3px;">Provide full access to equipment and nominate a single point of contact.</li>
+        </ul>
+
+        <!-- 7. Limitations of Liability -->
+        <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">7. Limitations of Liability</p>
+        <ul style="font-size: 8pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+            <li style="margin-bottom: 3px;">Not liable for misuse, unauthorized repairs, natural disasters, power failures, or normal wear and tear.</li>
+            <li style="margin-bottom: 3px;">Equipment declared irrepairable (spare cost exceeding 60% of equipment value) will not be covered.</li>
+            <li style="margin-bottom: 3px;">No liability for indirect or consequential losses.</li>
+        </ul>
+
+        <!-- 8. Acceptance of Quotation -->
+        <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">8. ACCEPTANCE OF QUOTATION</p>
+        <ul style="font-size: 8pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+            <li style="margin-bottom: 3px;">The quotation shall be considered accepted upon issuance of a formal Purchase Order or written confirmation by the CLIENT. Acceptance of the quotation shall constitute agreement to all terms and conditions mentioned herein.</li>
+        </ul>
+
+        <!-- 9. Termination -->
+        <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">9. Termination</p>
+        <ul style="font-size: 8pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+            <li style="margin-bottom: 3px;">Either party may terminate with 30 days&#8217; written notice for valid reasons.</li>
+            <li style="margin-bottom: 3px;">Termination for convenience requires 90 days&#8217; written notice.</li>
+        </ul>
+
+        <!-- 10. Arbitration & Jurisdiction -->
+        <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">10. Arbitration &amp; Jurisdiction</p>
+        <ul style="font-size: 8pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+            <li style="margin-bottom: 3px;">Disputes shall be resolved through arbitration under the Arbitration and Conciliation Act, 1996.</li>
+        </ul>
+
+    </div>
+
 </body>
 </html>
 </apex:page>
