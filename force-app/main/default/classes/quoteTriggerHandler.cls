@@ -19,7 +19,7 @@ public with sharing class quoteTriggerHandler {
             } 
         }
         
-        if (branchYearKeys.isEmpty()) return;
+        if (branchIds.isEmpty()) return;
         
         // Query existing quotes to find the current maximum sequential number per branch/year
         Map<String, Quote_Number_Series__c> maxNumberMap = new Map<String, Quote_Number_Series__c>();
