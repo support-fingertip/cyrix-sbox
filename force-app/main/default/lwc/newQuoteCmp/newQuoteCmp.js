@@ -30,21 +30,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     accountId;
     accountName = '';
 
-    // Bill To address fields (pre-populated from Account)
-    billingName = '';
-    billingStreet = '';
-    billingCity = '';
-    billingState = '';
-    billingPostalCode = '';
-    billingCountry = '';
-
-    // Ship To address fields (from Shipping_Address__c selector)
-    shippingName = '';
-    shippingStreet = '';
-    shippingCity = '';
-    shippingState = '';
-    shippingPostalCode = '';
-    shippingCountry = '';
+    // Default values for new quote (auto-populate Bill To from Account)
+    defaultValues = {};
 
     // Pricebook picklist
     @track pricebookOptions = [];
@@ -68,6 +55,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     warrantyCost = 0;
     installationCost = 0;
     trainingCost = 0;
+    insuranceCost = 0;
 
     // ===== PICKLIST OPTIONS =====
 
@@ -139,6 +127,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                (parseFloat(this.transportCharges) || 0) +
                (parseFloat(this.warrantyCost) || 0) +
                (parseFloat(this.installationCost) || 0) +
+               (parseFloat(this.insuranceCost) || 0) +
                (parseFloat(this.trainingCost) || 0);
     }
 
@@ -183,13 +172,17 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.accountId = data.accountId;
             this.accountName = data.accountName || '';
 
-            // Pre-populate Bill To from Account billing address
-            this.billingName = data.billingName || '';
-            this.billingStreet = data.billingStreet || '';
-            this.billingCity = data.billingCity || '';
-            this.billingState = data.billingState || '';
-            this.billingPostalCode = data.billingPostalCode || '';
-            this.billingCountry = data.billingCountry || '';
+            // === AUTO-POPULATE BILL TO ADDRESS FROM ACCOUNT ===
+            if (!this.isEditMode && this.accountId) {
+                this.defaultValues = {
+                    BillingName: data.billingName || '',
+                    BillingStreet: data.billingStreet || '',
+                    BillingCity: data.billingCity || '',
+                    BillingState: data.billingState || '',
+                    BillingPostalCode: data.billingPostalCode || '',
+                    BillingCountry: data.billingCountry || ''   // ISO code
+                };
+            }
 
             // Fetch shipping addresses for the Account
             if (this.accountId) {
@@ -206,7 +199,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.pricebookId = data.pricebookId;
             this.accountId = data.accountId;
 
-            // Fetch shipping addresses for edit mode too
             if (this.accountId) {
                 await this.loadShippingAddresses(this.accountId);
             }
@@ -249,7 +241,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             const addresses = await getShippingAddresses({ accountId: accountId });
             this.shippingAddresses = addresses || [];
 
-            // Auto-select first address if available and in new mode
+            // === AUTO-SELECT FIRST SHIPPING ADDRESS FOR NEW QUOTES ===
             if (!this.isEditMode && this.shippingAddresses.length > 0) {
                 this.selectedShippingAddressId = this.shippingAddresses[0].addressId;
                 this.applyShippingAddress(this.shippingAddresses[0]);
@@ -301,12 +293,36 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     }
 
     applyShippingAddress(addr) {
-        this.shippingName = addr.name || '';
-        this.shippingStreet = addr.street || '';
-        this.shippingCity = addr.city || '';
-        this.shippingState = addr.state || '';
-        this.shippingPostalCode = addr.postalCode || '';
-        this.shippingCountry = addr.country || '';
+        // Set the individual components of the compound ShippingAddress field
+        const fields = {
+            ShippingName: addr.name || '',
+            ShippingStreet: addr.street || '',
+            ShippingCity: addr.city || '',
+            ShippingState: addr.state || '',
+            ShippingPostalCode: addr.postalCode || '',
+            ShippingCountry: addr.country || ''   // ISO code
+        };
+
+        // Update each field imperatively
+        for (const [fieldName, value] of Object.entries(fields)) {
+            const fieldElement = this.template.querySelector(`lightning-input-field[field-name="${fieldName}"]`);
+            if (fieldElement) {
+                fieldElement.value = value;
+                fieldElement.dispatchEvent(new CustomEvent('change', { detail: { value } }));
+            }
+        }
+
+        // Force the compound ShippingAddress field to refresh
+        setTimeout(() => {
+            const shippingAddressField = this.template.querySelector('lightning-input-field[field-name="ShippingAddress"]');
+            if (shippingAddressField) {
+                const currentValue = shippingAddressField.value;
+                shippingAddressField.value = '';
+                shippingAddressField.dispatchEvent(new CustomEvent('change', { detail: { value: '' } }));
+                shippingAddressField.value = currentValue;
+                shippingAddressField.dispatchEvent(new CustomEvent('change', { detail: { value: currentValue } }));
+            }
+        }, 100);
     }
 
     // ===== FORM HANDLERS =====
@@ -325,33 +341,17 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         // Inject Pricebook2Id
         fields.Pricebook2Id = this.pricebookId;
 
-        // Inject Bill To address fields
-        fields.BillingName = this.billingName;
-        fields.BillingStreet = this.billingStreet;
-        fields.BillingCity = this.billingCity;
-        fields.BillingState = this.billingState;
-        fields.BillingPostalCode = this.billingPostalCode;
-        fields.BillingCountry = this.billingCountry;
-
-        // Inject Ship To address fields
-        fields.ShippingName = this.shippingName;
-        fields.ShippingStreet = this.shippingStreet;
-        fields.ShippingCity = this.shippingCity;
-        fields.ShippingState = this.shippingState;
-        fields.ShippingPostalCode = this.shippingPostalCode;
-        fields.ShippingCountry = this.shippingCountry;
-
-        // Inject internal charge fields
+        // Inject internal charge fields (custom fields on Quote)
         fields.Packing_Charge__c = this.packingCharges || 0;
         fields.Internal_Transport_Cost__c = this.transportCharges || 0;
         fields.Warrantee_Cost__c = this.warrantyCost || 0;
         fields.Installation_Cost__c = this.installationCost || 0;
         fields.Traning_Cost__c = this.trainingCost || 0;
+        fields.Insurance_Charge__c = this.insuranceCost || 0;   // adjust field name if needed
 
         // Set defaults for new quotes
         if (!this.isEditMode) {
             fields.Status = 'Draft';
-            fields.Price_Status__c = 'Draft';
         }
 
         this.isSaving = true;
@@ -388,18 +388,28 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 this.showSuccess('Quote Created', 'Quote and line items created successfully.');
             }
 
-            this[NavigationMixin.Navigate]({
-                type: 'standard__recordPage',
-                attributes: {
-                    recordId: quoteId,
-                    objectApiName: 'Quote',
-                    actionName: 'view'
-                }
-            });
+            // Close the quick action modal
+            this.dispatchEvent(new CloseActionScreenEvent());
+
+            // Navigate after modal closes
+            setTimeout(() => {
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__recordPage',
+                    attributes: {
+                        recordId: quoteId,
+                        objectApiName: 'Quote',
+                        actionName: 'view'
+                    }
+                });
+            }, 300);
+
         } catch (error) {
-            this.showError('Line Items Save Failed',
+            this.showError(
+                'Line Items Save Failed',
                 'Quote header was saved but line items failed: ' + this.reduceErrors(error) +
-                '. Please add line items from the Quote record page.');
+                '. Please add line items from the Quote record page.'
+            );
+            // Stay on the form, do not close modal
             this[NavigationMixin.Navigate]({
                 type: 'standard__recordPage',
                 attributes: {
@@ -419,6 +429,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         this.isLoading = false;
         const message = event.detail?.message || 'An error occurred while saving the quote.';
         this.showError('Save Failed', message);
+        console.error('Form error:', JSON.stringify(event.detail));
     }
 
     // ===== SEARCH HANDLERS =====
@@ -536,25 +547,27 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     handleCancel() {
         this.dispatchEvent(new CloseActionScreenEvent());
 
-        if (this.isEditMode) {
-            this[NavigationMixin.Navigate]({
-                type: 'standard__recordPage',
-                attributes: {
-                    recordId: this.editRecordId,
-                    objectApiName: 'Quote',
-                    actionName: 'view'
-                }
-            });
-        } else {
-            this[NavigationMixin.Navigate]({
-                type: 'standard__recordPage',
-                attributes: {
-                    recordId: this.recordId,
-                    objectApiName: 'Opportunity',
-                    actionName: 'view'
-                }
-            });
-        }
+        setTimeout(() => {
+            if (this.isEditMode) {
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__recordPage',
+                    attributes: {
+                        recordId: this.editRecordId,
+                        objectApiName: 'Quote',
+                        actionName: 'view'
+                    }
+                });
+            } else {
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__recordPage',
+                    attributes: {
+                        recordId: this.recordId,
+                        objectApiName: 'Opportunity',
+                        actionName: 'view'
+                    }
+                });
+            }
+        }, 300);
     }
 
     // ===== VALIDATION =====

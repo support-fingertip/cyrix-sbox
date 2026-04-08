@@ -11,17 +11,17 @@
 <style type="text/css">
     @page {
         size: A4;
-        margin: 15mm 15mm 20mm 15mm;
+        margin: 8mm 15mm 20mm 15mm;
 
         @bottom-center {
             content: element(footer);
         }
     }
     body {
-        font-family: Arial, Helvetica, sans-serif;
+        font-family: 'Times New Roman', Times, serif;
         font-size: 10pt;
         color: #000000;
-        line-height: 1.4;
+        line-height: 1.5;
     }
 
     /* ---------- FOOTER ---------- */
@@ -32,18 +32,25 @@
         color: #ffffff;
         font-weight: bold;
         background-color: #8b0000;
-        border-top: 3px solid #cc0000;
-        border-bottom: 3px solid #cc0000;
-        padding: 5px 0;
+        border-top: 4px solid #cc0000;
+        border-bottom: 2px solid #4a0000;
+        padding: 6px 0;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
     }
 
     /* ---------- COMPANY HEADER ---------- */
     .company-header {
         text-align: left;
-        margin-bottom: 20px;
+        margin-bottom: 5px;
+        width: 100%;
     }
     .company-logo {
-        max-height: 70px;
+        width: 100%;
+        max-height: 90px;
+        display: block;
+        object-fit: contain;
+        object-position: left top;
     }
     .company-name {
         font-size: 14pt;
@@ -68,7 +75,8 @@
     /* ---------- QUOTE REF LINE ---------- */
     .ref-line {
         width: 100%;
-        margin-bottom: 20px;
+        margin-top: 0px;
+        margin-bottom: 15px;
         font-size: 9pt;
         color: #cc0000;
         font-weight: bold;
@@ -76,24 +84,24 @@
 
     /* ---------- TO SECTION ---------- */
     .to-section {
-        font-size: 10pt;
-        margin-bottom: 10px;
+        font-size: 9pt;
+        margin-bottom: 15px;
     }
 
     /* ---------- SUBJECT ---------- */
     .subject {
         text-align: center;
-        font-size: 11pt;
+        font-size: 9pt;
         font-weight: bold;
         color: #000000;
-        margin: 20px 0 15px 0;
+        margin: 10px 0 15px 0;
     }
 
     /* ---------- LETTER BODY ---------- */
     .letter-body {
-        font-size: 10pt;
+        font-size: 9pt;
         text-align: justify;
-        line-height: 1.6;
+        line-height: 1.5;
     }
     .letter-body p {
         margin: 10px 0;
@@ -106,7 +114,7 @@
 
     /* ---------- SIGNATURE SECTION ---------- */
     .sign-section {
-        margin-top: 40px;
+        margin-top: 30px;
     }
     .sign-line {
         border-bottom: 1px solid #333333;
@@ -233,19 +241,19 @@
     <!-- PAGE 1: COVER LETTER                                                   -->
     <!-- ====================================================================== -->
 
-    <!-- COMPANY HEADER WITH LOGO -->
+    <!-- COMPANY HEADER WITH LETTERHEAD -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REFERENCE LINE -->
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
+                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/{!IF(quote.Quote_Id__c != null, quote.Quote_Id__c, quote.QuoteNumber)}/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
@@ -267,10 +275,10 @@
                 {!account.BillingCity}<br/>
             </apex:outputPanel>
             <apex:outputPanel rendered="{!account.GST_Number__c != null}">
-                {!account.GST_Number__c}<br/>
+                <strong>GST:</strong> {!account.GST_Number__c}<br/>
             </apex:outputPanel>
             <apex:outputPanel rendered="{!account.PAN_Number__c != null}">
-                {!account.PAN_Number__c}
+                <strong>PAN:</strong> {!account.PAN_Number__c}
             </apex:outputPanel>
         </p>
     </div>
@@ -311,15 +319,27 @@
     </div>
 
     <!-- SIGNATURE SECTION -->
-    <div class="sign-section">
-        <p>With Regards,<br/>
-           For Cyrix Healthcare Pvt. Ltd</p>
+    <div class="sign-section" style="margin-top: 30px; position: relative;">
 
-        <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 80px;" />
+    <p>
+        With Regards,<br/>
+        For Cyrix Healthcare Pvt. Ltd
+    </p>
 
-        <p style="margin-left: 30px; color: #0000cc;"><strong>Authorized Signatory</strong></p>
+    <!-- SIGNATURE TEXT -->
+    <p style="position: relative; z-index: 2; margin-top: 40px; color: #0000cc;">
+        <strong>Authorized Signatory</strong>
+    </p>
 
-        <p>For queries contact:<br/>
+    <!-- STAMP (OVERLAY ON TEXT) -->
+    <apex:image url="{!URLFOR($Resource.Stamp)}"
+        style="position: absolute;
+               top: 35px;
+               left: 0px;
+               height: 80px;
+               opacity: 0.9;" />
+
+ <p>For queries contact:<br/>
             <apex:outputPanel rendered="{!salesEngineerName != null}">
                 <span style="margin-left: 10px;">{!salesEngineerName}</span><br/>
             </apex:outputPanel>
@@ -330,7 +350,8 @@
                 <span style="margin-left: 10px;">{!salesEngineerPhone}</span>
             </apex:outputPanel>
         </p>
-    </div>
+
+</div>
 
     <!-- ====================================================================== -->
     <!-- PAGE 2: PRODUCT TABLE + TERMS AND CONDITIONS                          -->
@@ -339,23 +360,23 @@
 
     <!-- COMPANY HEADER (repeated on page 2) -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE (repeated) -->
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
+                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/{!IF(quote.Quote_Id__c != null, quote.Quote_Id__c, quote.QuoteNumber)}/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
 
     <!-- QUOTATION TITLE -->
-    <div style="text-align: center; font-size: 10pt; font-weight: bold; margin-bottom: 15px; text-decoration: underline;">
+    <div style="text-align: center; font-size: 8pt; font-weight: bold; margin-top: 10px; margin-bottom: 10px; text-decoration: underline;">
         QUOTATION FOR CYRIX {!productNamesList}<apex:outputPanel rendered="{!quote.Vertical__c != null}"> &amp; {!quote.Vertical__c}</apex:outputPanel>
     </div>
 
@@ -395,7 +416,7 @@
                     </td>
                     <td class="price-col">
                         <apex:outputText value="{0, number, ###,##0.00}">
-                            <apex:param value="{!item.UnitPrice}" />
+                            <apex:param value="{!item.ListPrice}" />
                         </apex:outputText>
                     </td>
                     <td class="qty-col">
@@ -473,42 +494,49 @@
     <!-- STANDARD TERMS AND CONDITIONS (same page, below table)                -->
     <!-- ====================================================================== -->
 
-    <div style="text-align: center; font-size: 10pt; font-weight: bold; text-decoration: underline; margin: 10px 0 8px 0;">
+    <div style="text-align: center; font-size: 10pt; font-weight: bold; text-decoration: underline; margin: 15px 0 12px 0;">
         STANDARD TERMS AND CONDITIONS:
     </div>
 
     <!-- Validity -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 8px 0 2px 0;">Validity</p>
-    <p style="font-size: 8pt; margin: 0 0 5px 0;">
+    <p style="font-size: 9pt; font-weight: bold; margin: 12px 0 3px 0;">Validity</p>
+    <p style="font-size: 9pt; margin: 0 0 10px 0;">
         This quotation is valid for <strong>{!validityDays}</strong> from the date of issue and is subject to reconfirmation thereafter.
     </p>
 
     <!-- Price -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 8px 0 2px 0;">Price</p>
-    <p style="font-size: 8pt; margin: 0 0 5px 0;">
+    <p style="font-size: 9pt; font-weight: bold; margin: 12px 0 3px 0;">Price</p>
+    <p style="font-size: 9pt; margin: 0 0 10px 0;">
         The quoted price includes applicable levies such as GST, import duties (if any), freight, packing, forwarding,
         transportation, insurance, <strong><u>{!installationScope}</u></strong> at the installation site.
         Any additional statutory levies imposed by Government authorities shall be borne by the purchaser.
     </p>
 
     <!-- Payment Terms -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 8px 0 2px 0;">PAYMENT TERMS &amp; CONDITIONS:</p>
-    <p style="font-size: 8pt; margin: 0 0 5px 0;">
-        <strong>{!advancePercent}</strong> Advance payment with Purchase Order<br/>
-        <strong>{!shippingPercent}</strong> payment on confirmation of shipping<br/>
-        <strong>{!deliveryPercent}</strong> payment on delivery to site<br/>
-        <strong>{!installationPercent}</strong> payment after installation and handover
+    <p style="font-size: 9pt; font-weight: bold; margin: 12px 0 3px 0;">PAYMENT TERMS &amp; CONDITIONS:</p>
+    <p style="font-size: 9pt; margin: 0 0 10px 0;">
+        <apex:outputPanel rendered="{!paymentTerms.size > 0}">
+            <apex:repeat value="{!paymentTerms}" var="pt">
+                <strong>{!pt.Percentage__c}%</strong> {!pt.Payment_Term__c}<br/>
+            </apex:repeat>
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{!paymentTerms.size == 0}">
+            <strong>{!advancePercent}</strong> Advance payment with Purchase Order<br/>
+            <strong>{!shippingPercent}</strong> payment on confirmation of shipping<br/>
+            <strong>{!deliveryPercent}</strong> payment on delivery to site<br/>
+            <strong>{!installationPercent}</strong> payment after installation and handover
+        </apex:outputPanel>
     </p>
 
     <!-- Delivery -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 8px 0 2px 0;">DELIVERY</p>
-    <p style="font-size: 8pt; margin: 0 0 5px 0;">
+    <p style="font-size: 9pt; font-weight: bold; margin: 12px 0 3px 0;">DELIVERY</p>
+    <p style="font-size: 9pt; margin: 0 0 10px 0;">
         Delivery will be scheduled within <strong>{!deliveryWeeks}</strong> from receipt of confirmed Purchase Order along with advance payment.
     </p>
 
     <!-- Installation and Approvals -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 8px 0 2px 0;">Installation &amp; Approvals</p>
-    <p style="font-size: 8pt; margin: 0 0 5px 0;">
+    <p style="font-size: 9pt; font-weight: bold; margin: 12px 0 3px 0;">Installation &amp; Approvals</p>
+    <p style="font-size: 9pt; margin: 0 0 10px 0;">
         Installation will be carried out at the approved site without additional charges, subject to site readiness
         confirmation from the customer.
         All civil, electrical, air conditioning, earthing, and related pre-installation requirements are the responsibility of
@@ -524,24 +552,24 @@
 
     <!-- COMPANY HEADER -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE -->
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
+                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/{!IF(quote.Quote_Id__c != null, quote.Quote_Id__c, quote.QuoteNumber)}/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
 
     <!-- WARRANTY -->
-    <p style="font-size: 9pt; font-weight: bold; text-decoration: underline; margin: 5px 0 3px 0;">Warranty</p>
-    <p style="font-size: 8pt; margin: 0 0 3px 10px;">
+    <p style="font-size: 10pt; font-weight: bold; text-decoration: underline; margin: 10px 0 5px 0;">Warranty</p>
+    <p style="font-size: 9pt; margin: 0 0 10px 10px;">
         12-month standard warranty <apex:outputPanel rendered="{!warrantyExtra != ''}"><strong><u>{!warrantyExtra}</u></strong></apex:outputPanel> from the date of installation covers manufacturing defects only.
         Repair or replacement of defective components during this period will be at the Company&#8217;s discretion.
         Warranty excludes damages arising from power fluctuations, environmental conditions, mishandling, natural
@@ -549,15 +577,15 @@
     </p>
 
     <!-- SITE RESPONSIBILITIES -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 8px 0 3px 15px;">Site Responsibilities</p>
-    <p style="font-size: 8pt; margin: 0 0 3px 15px;">
+    <p style="font-size: 10pt; font-weight: bold; margin: 12px 0 5px 15px;">Site Responsibilities</p>
+    <p style="font-size: 9pt; margin: 0 0 10px 15px;">
         The customer shall maintain recommended environmental and electrical conditions. Any damage caused due to
         non-compliance will not be covered under warranty
     </p>
 
     <!-- BANK DETAILS -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 8px 0 3px 15px;">BANK DETAILS:</p>
-    <p style="font-size: 8pt; margin: 0 0 3px 15px;">
+    <p style="font-size: 10pt; font-weight: bold; margin: 12px 0 5px 15px;">BANK DETAILS:</p>
+    <p style="font-size: 9pt; margin: 0 0 10px 15px;">
         A/C Number: {!bankAccountNumber}<br/>
         Bank Name: {!bankName}<br/>
         Branch Code: {!bankBranch}<br/>
@@ -565,38 +593,38 @@
     </p>
 
     <!-- ACCEPTANCE OF QUOTATION -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 8px 0 3px 15px;">ACCEPTANCE OF QUOTATION:</p>
-    <p style="font-size: 8pt; margin: 0 0 3px 15px;">
+    <p style="font-size: 10pt; font-weight: bold; margin: 12px 0 5px 15px;">ACCEPTANCE OF QUOTATION:</p>
+    <p style="font-size: 9pt; margin: 0 0 10px 15px;">
         The quotation shall be considered accepted upon issuance of a formal Purchase Order or written confirmation by the
         CLIENT. Acceptance of the quotation shall constitute agreement to all terms and conditions mentioned herein.
     </p>
 
     <!-- CANCELLATION/REFUND NORMS -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 8px 0 3px 15px;">CANCELLATION/REFUND NORMS:</p>
-    <p style="font-size: 8pt; margin: 0 0 3px 15px;">
-        Cancellation after issuance of Purchase Order will attract a <strong>10%</strong> charge on the total order value.
+    <p style="font-size: 10pt; font-weight: bold; margin: 12px 0 5px 15px;">CANCELLATION/REFUND NORMS:</p>
+    <p style="font-size: 9pt; margin: 0 0 10px 15px;">
+        Cancellation after issuance of Purchase Order will attract a <strong>10% charge</strong> on the total order value.
         Orders cannot be cancelled once the equipment is shipped.
     </p>
 
     <!-- FORCE MAJEURE -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 8px 0 3px 15px;">FORCE MAJEURE:</p>
-    <p style="font-size: 8pt; margin: 0 0 3px 15px;">
+    <p style="font-size: 10pt; font-weight: bold; margin: 12px 0 5px 15px;">FORCE MAJEURE:</p>
+    <p style="font-size: 9pt; margin: 0 0 10px 15px;">
         The Company shall not be liable for delays or non-performance due to circumstances beyond reasonable control.
         Delivery timelines will be extended accordingly.
     </p>
 
     <!-- JURISDICTION -->
-    <p style="font-size: 9pt; font-weight: bold; margin: 8px 0 3px 15px;">JURISDICTION:</p>
-    <p style="font-size: 8pt; margin: 0 0 3px 15px;">
+    <p style="font-size: 10pt; font-weight: bold; margin: 12px 0 5px 15px;">JURISDICTION:</p>
+    <p style="font-size: 9pt; margin: 0 0 10px 15px;">
         All disputes shall be subject to the jurisdiction of the Company&#8217;s registered office location.
     </p>
 
     <!-- CLOSING -->
-    <p style="font-size: 8pt; margin-top: 15px;">
+    <p style="font-size: 9pt; margin-top: 20px;">
         Thanking you and always assuring you of our best services.
     </p>
 
-    <p style="font-size: 9pt; font-weight: bold; margin-top: 8px;">
+    <p style="font-size: 10pt; font-weight: bold; margin-top: 12px;">
         For CYRIX HEALTHCARE PVT.LTD
     </p>
 
@@ -617,34 +645,34 @@
 
     <!-- COMPANY HEADER -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE -->
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
+                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/{!IF(quote.Quote_Id__c != null, quote.Quote_Id__c, quote.QuoteNumber)}/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
 
     <!-- HORIZONTAL LINE -->
-    <hr style="border: 1px solid #000000; margin: 10px 0;"/>
+    <hr style="border: none; border-top: 1px dashed #000000; margin: 15px 0;"/>
 
     <!-- IN GENERAL QUOTATIONS AND CONSUMABLES -->
-    <p style="font-size: 10pt; font-weight: bold; font-style: italic; text-decoration: underline; margin: 10px 0 8px 0;">
+    <p style="font-size: 10pt; font-weight: bold; font-style: italic; text-decoration: underline; margin: 15px 0 12px 0;">
         IN GENERAL QUOTATIONS AND CONSUMABLES
     </p>
 
-    <p style="font-size: 9pt; font-weight: bold; text-decoration: underline; margin: 8px 0 5px 0;">
+    <p style="font-size: 9pt; font-weight: bold; text-decoration: underline; margin: 12px 0 10px 0;">
         TERMS AND CONDITIONS <span style="font-weight: normal; font-style: italic; text-decoration: none;">&nbsp;&nbsp;**(Balance all same)</span>
     </p>
 
-    <p style="font-size: 9pt; margin-left: 30px; line-height: 1.8;">
+    <p style="font-size: 9pt; font-weight: bold; margin-left: 30px; line-height: 2.2;">
         VALIDITY:<br/>
         PRICE:<br/>
         DELIVERY:<br/>
@@ -655,10 +683,10 @@
     </p>
 
     <!-- HORIZONTAL LINE -->
-    <hr style="border: 1px solid #000000; margin: 15px 0;"/>
+    <hr style="border: none; border-top: 1px dashed #000000; margin: 20px 0;"/>
 
     <!-- IN CALIBRATION QUOTATIONS -->
-    <p style="font-size: 10pt; font-weight: bold; font-style: italic; text-decoration: underline; margin: 10px 0 5px 0;">
+    <p style="font-size: 10pt; font-weight: bold; font-style: italic; text-decoration: underline; margin: 15px 0 8px 0;">
         IN CALIBRATION QUOTATIONS
     </p>
 
@@ -701,7 +729,7 @@
                     </td>
                     <td style="text-align: center; border: 1px solid #000000;">
                         <apex:outputText value="{0, number, ###,##0}">
-                            <apex:param value="{!calItem.UnitPrice}" />
+                            <apex:param value="{!calItem.ListPrice}" />
                         </apex:outputText>
                     </td>
                     <td style="text-align: right; border: 1px solid #000000;">
@@ -768,7 +796,7 @@
         TERMS AND CONDITIONS
     </div>
 
-    <p style="font-size: 9pt; margin-left: 30px; line-height: 1.8;">
+    <p style="font-size: 9pt; font-weight: bold; margin-left: 30px; line-height: 2.2;">
         PRICE:<br/>
         VALIDITY:<br/>
         PAYMENT TERMS &amp; CONDITIONS:<br/>
@@ -782,17 +810,17 @@
 
     <!-- COMPANY HEADER -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE -->
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
+                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/{!IF(quote.Quote_Id__c != null, quote.Quote_Id__c, quote.QuoteNumber)}/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
@@ -862,17 +890,17 @@
 
     <!-- COMPANY HEADER -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE -->
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
+                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/{!IF(quote.Quote_Id__c != null, quote.Quote_Id__c, quote.QuoteNumber)}/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
@@ -907,7 +935,7 @@
 
     <!-- PROJECT COSTING -->
     <p style="font-size: 10pt; font-weight: bold; text-align: center; margin: 10px 0;">
-        PROJECT COSTING - &lt;&#8220;VERTICAL&#8221;&gt;
+        PROJECT COSTING - &lt;&#8220;{!quote.Vertical__c}&#8221;&gt;
     </p>
 
     <!-- AMC TABLE -->
@@ -923,17 +951,40 @@
             </tr>
         </thead>
         <tbody>
+            <!-- Static header row -->
             <tr>
-                <td style="text-align: center; border: 1px solid #000000;">1.</td>
-                <td style="border: 1px solid #000000; font-weight: bold;">
+                <td style="text-align: center; border: 1px solid #000000;" rowspan="2">1.</td>
+                <td style="border: 1px solid #000000; font-weight: bold;" colspan="5">
                     ANNUAL MAINTENANCE CONTRACT (AMC)<br/>
-                    (Annexure A List of Equipment)
+                    <u>(Annexure A List of Equipment)</u>
                 </td>
-                <td style="text-align: center; border: 1px solid #000000;">000</td>
-                <td style="text-align: center; border: 1px solid #000000;">18%</td>
-                <td style="text-align: center; border: 1px solid #000000;">000</td>
-                <td style="text-align: center; border: 1px solid #000000;">000</td>
             </tr>
+            <!-- Dynamic product rows -->
+            <apex:repeat value="{!lineItems}" var="amcItem">
+                <tr>
+                    <td style="border: 1px solid #000000; font-weight: bold;">
+                        {!amcItem.Product2.Name}
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!amcItem.TotalPrice}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{!IF(amcItem.Product2.Tax__c != null, TEXT(amcItem.Product2.Tax__c), '18')}"/>%
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!IF(amcItem.Product2.Tax__c != null, amcItem.TotalPrice * amcItem.Product2.Tax__c / 100, amcItem.TotalPrice * 0.18)}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!IF(amcItem.Product2.Tax__c != null, amcItem.TotalPrice + (amcItem.TotalPrice * amcItem.Product2.Tax__c / 100), amcItem.TotalPrice * 1.18)}" />
+                        </apex:outputText>
+                    </td>
+                </tr>
+            </apex:repeat>
             <tr>
                 <td colspan="6" style="text-align: center; font-size: 8pt; border: 1px solid #000000;">
                     <strong>Contract Period: - 01/01/2026 to 31/12/2026</strong>
@@ -986,17 +1037,17 @@
 
     <!-- COMPANY HEADER -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE -->
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
+                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/{!IF(quote.Quote_Id__c != null, quote.Quote_Id__c, quote.QuoteNumber)}/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
@@ -1023,7 +1074,14 @@
     <!-- 4. Payment Terms -->
     <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">4. Payment Terms</p>
     <ul style="font-size: 7pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
-        <li style="margin-bottom: 2px;"><strong>&lt;100 % along with the work order&gt;</strong></li>
+        <apex:outputPanel rendered="{!paymentTerms.size > 0}">
+            <apex:repeat value="{!paymentTerms}" var="pt">
+                <li style="margin-bottom: 2px;"><strong>{!pt.Percentage__c}%</strong> {!pt.Payment_Term__c}</li>
+            </apex:repeat>
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{!paymentTerms.size == 0}">
+            <li style="margin-bottom: 2px;"><strong>&lt;100 % along with the work order&gt;</strong></li>
+        </apex:outputPanel>
     </ul>
 
     <!-- 5. Service Conditions -->
@@ -1078,17 +1136,17 @@
 
     <!-- COMPANY HEADER -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE -->
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
+                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/{!IF(quote.Quote_Id__c != null, quote.Quote_Id__c, quote.QuoteNumber)}/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
@@ -1101,10 +1159,10 @@
     <!-- 11. Bank Details -->
     <p style="font-size: 8pt; font-weight: bold; margin: 5px 0 1px 0;">11. BANK DETAILS:</p>
     <ul style="font-size: 7pt; margin: 0 0 2px 15px; padding-left: 12px; line-height: 1.3;">
-        <li>A/C Number: &lt;Bank Account Number&gt;</li>
-        <li>Bank Name: &lt;Bank Name&gt;</li>
-        <li>Branch Code: &lt;Branch Code&gt;</li>
-        <li>IFSC: &lt;Code&gt;</li>
+        <li>A/C Number: {!bankAccountNumber}</li>
+        <li>Bank Name: {!bankName}</li>
+        <li>Branch Code: {!bankBranch}</li>
+        <li>IFSC: {!bankIfsc}</li>
     </ul>
 
     <!-- 12. Service Report Acknowledgement -->
@@ -1120,17 +1178,18 @@
     </ul>
 
     <!-- SECOND PARTY / FIRST PARTY -->
-    <table style="width: 100%; margin-top: 3px; font-size: 7pt;">
+    <table style="width: 100%; margin-top: 5px; font-size: 9pt;">
         <tr>
             <td style="width: 50%; vertical-align: top;"><strong>SECOND PARTY</strong></td>
-            <td style="width: 50%; vertical-align: top; text-align: right;"><strong>FIRST PARTY</strong></td>
+            <td style="width: 50%; vertical-align: top; padding-left: 80px;"><strong>FIRST PARTY</strong></td>
         </tr>
         <tr>
             <td style="vertical-align: top;">
-                &lt;Customer Name&gt;<br/>&lt;Address&gt;
+                <br/>
+                {!account.Name}<br/>{!quote.Billing_Address__c}
             </td>
-            <td style="vertical-align: top; text-align: right;">
-                <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 40px;" /><br/>
+            <td style="vertical-align: top; padding-left: 80px;">
+                <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 50px;" /><br/>
                 <strong><em>Cyrix Healthcare Pvt. Ltd</em></strong><br/>
                 30/641B, Petta, Poonithura<br/>
                 Ernakulam, Kerala<br/>
@@ -1139,8 +1198,10 @@
         </tr>
     </table>
 
+    <br/><br/>
+
     <!-- ANNEXURE - A -->
-    <div style="text-align: center; font-size: 8pt; font-weight: bold; text-decoration: underline; margin: 5px 0 3px 0;">
+    <div style="text-align: center; font-size: 10pt; font-weight: bold; text-decoration: underline; margin: 15px 0 10px 0;">
         ANNEXURE &#8211; A
     </div>
 
@@ -1156,13 +1217,25 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td style="border: 1px solid #000000; padding: 3px;">&nbsp;</td>
-                <td style="border: 1px solid #000000; padding: 3px;">&nbsp;</td>
-                <td style="border: 1px solid #000000; padding: 3px;">&nbsp;</td>
-                <td style="border: 1px solid #000000; padding: 3px;">&nbsp;</td>
-                <td style="border: 1px solid #000000; padding: 3px;">&nbsp;</td>
-            </tr>
+            <apex:variable var="annexIdx" value="{!1}" />
+            <apex:repeat value="{!lineItems}" var="annexItem">
+                <tr>
+                    <td style="border: 1px solid #000000; padding: 3px; text-align: center;">
+                        <apex:outputText value="{0, number, 0}">
+                            <apex:param value="{!annexIdx}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="border: 1px solid #000000; padding: 3px;">{!annexItem.Product2.Name}</td>
+                    <td style="border: 1px solid #000000; padding: 3px; text-align: center;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!annexItem.Quantity}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="border: 1px solid #000000; padding: 3px;">{!annexItem.Product2.Make__c}</td>
+                    <td style="border: 1px solid #000000; padding: 3px;">{!annexItem.Product2.Model__c}</td>
+                </tr>
+                <apex:variable var="annexIdx" value="{!annexIdx + 1}" />
+            </apex:repeat>
         </tbody>
     </table>
 
@@ -1175,10 +1248,10 @@
 
     <!-- PROJECT COSTING -->
     <p style="font-size: 8pt; font-weight: bold; text-align: center; margin: 3px 0;">
-        PROJECT COSTING - &lt;&#8220;VERTICAL&#8221;&gt;
+        PROJECT COSTING - &lt;&#8220;{!quote.Vertical__c}&#8221;&gt;
     </p>
 
-    <!-- CAMC TABLE - Header only on this page -->
+    <!-- CAMC TABLE with data -->
     <table class="pricing-table">
         <thead>
             <tr>
@@ -1190,6 +1263,45 @@
                 <th style="width: 60px; background-color: #ffffff; color: #000000; border: 1px solid #000000;">TOTAL</th>
             </tr>
         </thead>
+        <tbody>
+            <!-- Static header row -->
+            <tr>
+                <td style="text-align: center; border: 1px solid #000000;" rowspan="2">1.</td>
+                <td style="border: 1px solid #000000; font-weight: bold;" colspan="5">
+                    Comprehensive Annual Maintenance Contract (CAMC)<br/>
+                    <u>(Annexure A List of Equipment)</u>
+                </td>
+            </tr>
+            <!-- Dynamic product rows -->
+            <apex:repeat value="{!lineItems}" var="camcItem2">
+                <tr>
+                    <td style="border: 1px solid #000000; font-weight: bold;">{!camcItem2.Product2.Name}</td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!camcItem2.TotalPrice}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{!IF(camcItem2.Product2.Tax__c != null, TEXT(camcItem2.Product2.Tax__c), '18')}"/>%
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!IF(camcItem2.Product2.Tax__c != null, camcItem2.TotalPrice * camcItem2.Product2.Tax__c / 100, camcItem2.TotalPrice * 0.18)}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!IF(camcItem2.Product2.Tax__c != null, camcItem2.TotalPrice + (camcItem2.TotalPrice * camcItem2.Product2.Tax__c / 100), camcItem2.TotalPrice * 1.18)}" />
+                        </apex:outputText>
+                    </td>
+                </tr>
+            </apex:repeat>
+            <tr>
+                <td colspan="6" style="text-align: center; font-size: 8pt; border: 1px solid #000000;">
+                    <strong>Contract Period: - 01/01/2026 to 31/12/2026</strong>
+                </td>
+            </tr>
+        </tbody>
     </table>
 
     <!-- ====================================================================== -->
@@ -1199,17 +1311,17 @@
 
     <!-- COMPANY HEADER -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE -->
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
+                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/{!IF(quote.Quote_Id__c != null, quote.Quote_Id__c, quote.QuoteNumber)}/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
@@ -1227,19 +1339,42 @@
             </tr>
         </thead>
         <tbody>
+            <!-- Static header row -->
             <tr>
-                <td style="text-align: center; border: 1px solid #000000;">1.</td>
-                <td style="border: 1px solid #000000; font-weight: bold;">
+                <td style="text-align: center; border: 1px solid #000000;" rowspan="2">1.</td>
+                <td style="border: 1px solid #000000; font-weight: bold;" colspan="5">
                     Comprehensive Annual Maintenance Contract (CAMC)<br/>
-                    (Annexure A List of Equipment)
+                    <u>(Annexure A List of Equipment)</u>
                 </td>
-                <td style="text-align: center; border: 1px solid #000000;">000</td>
-                <td style="text-align: center; border: 1px solid #000000;">18%</td>
-                <td style="text-align: center; border: 1px solid #000000;">000</td>
-                <td style="text-align: center; border: 1px solid #000000;">000</td>
             </tr>
+            <!-- Dynamic product rows -->
+            <apex:repeat value="{!lineItems}" var="camcItem">
+                <tr>
+                    <td style="border: 1px solid #000000; font-weight: bold;">
+                        {!camcItem.Product2.Name}
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!camcItem.TotalPrice}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{!IF(camcItem.Product2.Tax__c != null, TEXT(camcItem.Product2.Tax__c), '18')}"/>%
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!IF(camcItem.Product2.Tax__c != null, camcItem.TotalPrice * camcItem.Product2.Tax__c / 100, camcItem.TotalPrice * 0.18)}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="text-align: center; border: 1px solid #000000;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!IF(camcItem.Product2.Tax__c != null, camcItem.TotalPrice + (camcItem.TotalPrice * camcItem.Product2.Tax__c / 100), camcItem.TotalPrice * 1.18)}" />
+                        </apex:outputText>
+                    </td>
+                </tr>
+            </apex:repeat>
             <tr>
-                <td colspan="6" style="text-align: center; font-size: 7pt; border: none;">
+                <td colspan="6" style="text-align: center; font-size: 7pt; border: 1px solid #000000;">
                     <strong>Contract Period: - 01/01/2026 to 31/12/2026</strong>
                 </td>
             </tr>
@@ -1286,7 +1421,14 @@
     <!-- 4. Payment Terms -->
     <p style="font-size: 8pt; font-weight: bold; margin: 8px 0 2px 0;">4. Payment Terms</p>
     <ul style="font-size: 7.5pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
-        <li style="margin-bottom: 3px;"><strong>&lt;100 % along with the work order&gt;</strong></li>
+        <apex:outputPanel rendered="{!paymentTerms.size > 0}">
+            <apex:repeat value="{!paymentTerms}" var="pt">
+                <li style="margin-bottom: 3px;"><strong>{!pt.Percentage__c}%</strong> {!pt.Payment_Term__c}</li>
+            </apex:repeat>
+        </apex:outputPanel>
+        <apex:outputPanel rendered="{!paymentTerms.size == 0}">
+            <li style="margin-bottom: 3px;"><strong>&lt;100 % along with the work order&gt;</strong></li>
+        </apex:outputPanel>
     </ul>
 
     <!-- 5. Service Conditions -->
@@ -1302,17 +1444,17 @@
 
     <!-- COMPANY HEADER -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE -->
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
+                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/{!IF(quote.Quote_Id__c != null, quote.Quote_Id__c, quote.QuoteNumber)}/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
@@ -1363,10 +1505,10 @@
     <!-- 11. Bank Details -->
     <p style="font-size: 8pt; font-weight: bold; margin: 10px 0 2px 0;">11. BANK DETAILS:</p>
     <ul style="font-size: 7pt; margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
-        <li style="margin-bottom: 2px;">A/C Number: &lt;Bank Account Number&gt;</li>
-        <li style="margin-bottom: 2px;">Bank Name: &lt;Bank Name&gt;</li>
-        <li style="margin-bottom: 2px;">Branch Code: &lt;Branch Code&gt;</li>
-        <li style="margin-bottom: 2px;">IFSC: &lt;Code&gt;</li>
+        <li style="margin-bottom: 2px;">A/C Number: {!bankAccountNumber}</li>
+        <li style="margin-bottom: 2px;">Bank Name: {!bankName}</li>
+        <li style="margin-bottom: 2px;">Branch Code: {!bankBranch}</li>
+        <li style="margin-bottom: 2px;">IFSC: {!bankIfsc}</li>
     </ul>
 
     <!-- 12. Service Report Acknowledgement -->
@@ -1388,17 +1530,17 @@
 
     <!-- COMPANY HEADER -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE -->
     <table class="ref-line">
         <tr>
             <td style="text-align: left; width: 70%;">
-                <span style="color: #000000;">C-KL/</span> &lt;VERTICAL&gt;<span style="color: #000000;">/QTN0001/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
+                <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/{!IF(quote.Quote_Id__c != null, quote.Quote_Id__c, quote.QuoteNumber)}/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
             </td>
             <td style="text-align: right; width: 30%;">
-                <span style="color: #000000;">DATE:</span> 01/03/2026
+                <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
             </td>
         </tr>
     </table>
@@ -1412,8 +1554,8 @@
         <tr>
             <td style="vertical-align: top;">
                 <br/><br/>
-                &lt;Customer Name&gt;<br/>
-                &lt;Address&gt;
+                {!account.Name}<br/>
+                {!quote.Billing_Address__c}
             </td>
             <td style="vertical-align: top; text-align: right;">
                 <br/>
@@ -1445,13 +1587,25 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td style="border: 1px solid #000000; padding: 5px; height: 25px;">&nbsp;</td>
-                <td style="border: 1px solid #000000; padding: 5px;">&nbsp;</td>
-                <td style="border: 1px solid #000000; padding: 5px;">&nbsp;</td>
-                <td style="border: 1px solid #000000; padding: 5px;">&nbsp;</td>
-                <td style="border: 1px solid #000000; padding: 5px;">&nbsp;</td>
-            </tr>
+            <apex:variable var="annexIdx2" value="{!1}" />
+            <apex:repeat value="{!lineItems}" var="annexItem2">
+                <tr>
+                    <td style="border: 1px solid #000000; padding: 5px; text-align: center;">
+                        <apex:outputText value="{0, number, 0}">
+                            <apex:param value="{!annexIdx2}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="border: 1px solid #000000; padding: 5px;">{!annexItem2.Product2.Name}</td>
+                    <td style="border: 1px solid #000000; padding: 5px; text-align: center;">
+                        <apex:outputText value="{0, number, ###,##0}">
+                            <apex:param value="{!annexItem2.Quantity}" />
+                        </apex:outputText>
+                    </td>
+                    <td style="border: 1px solid #000000; padding: 5px;">{!annexItem2.Product2.Make__c}</td>
+                    <td style="border: 1px solid #000000; padding: 5px;">{!annexItem2.Product2.Model__c}</td>
+                </tr>
+                <apex:variable var="annexIdx2" value="{!annexIdx2 + 1}" />
+            </apex:repeat>
         </tbody>
     </table>
 
