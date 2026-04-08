@@ -77,6 +77,7 @@ public with sharing class QuotationPDFController {
     public String installationScope { get; set; }
     public String gstDisplayRate { get; set; }
     public String warrantyExtra { get; set; }
+    public List<Payment_Term__c> paymentTerms { get; set; }
 
     public String companyName { get { return COMPANY_NAME; } }
     public String companyAddress { get { return COMPANY_ADDRESS; } }
@@ -86,11 +87,11 @@ public with sharing class QuotationPDFController {
     public String companyTagline { get { return COMPANY_TAGLINE; } }
     public String companyCin { get { return COMPANY_CIN; } }
 
-    public String bankName { get { return BANK_NAME; } }
-    public String bankAccountNumber { get { return BANK_ACCOUNT_NUMBER; } }
-    public String bankIfsc { get { return BANK_IFSC; } }
-    public String bankBranch { get { return BANK_BRANCH; } }
-    public String bankAccountHolder { get { return BANK_ACCOUNT_HOLDER; } }
+    public String bankName { get; set; }
+    public String bankAccountNumber { get; set; }
+    public String bankIfsc { get; set; }
+    public String bankBranch { get; set; }
+    public String bankAccountHolder { get; set; }
 
     public QuotationPDFController(ApexPages.StandardController stdController) {
         Id quoteId = stdController.getId();
@@ -122,6 +123,14 @@ public with sharing class QuotationPDFController {
         installationScope = 'installation and commissioning';
         gstDisplayRate = '';
         warrantyExtra = '';
+        paymentTerms = new List<Payment_Term__c>();
+
+        // Initialize bank details with defaults
+        bankName = BANK_NAME;
+        bankAccountNumber = BANK_ACCOUNT_NUMBER;
+        bankIfsc = BANK_IFSC;
+        bankBranch = BANK_BRANCH;
+        bankAccountHolder = BANK_ACCOUNT_HOLDER;
 
         if (quoteId != null) {
             loadData(quoteId);
@@ -134,8 +143,10 @@ public with sharing class QuotationPDFController {
             SELECT Id, Name, QuoteNumber, Quote_Id__c, Quote_Date__c, Valid_Till__c,
                    Status, Price_Status__c, is_Active__c, Vertical__c,
                    Billing_Address__c, Shipping_Address__c, Shipping_Mode__c,
+                   Quote_Valid_Till_in_days__c,
+                   Delivery__c,
                    Subtotal, TotalPrice, GrandTotal, Discount, Tax, ShippingHandling,
-                   CurrencyIsoCode, Description,
+                   CurrencyIsoCode, Description, OwnerId,
                    OpportunityId, Opportunity.Name,
                    Opportunity.OwnerId, Opportunity.Owner.Name,
                    Opportunity.Owner.Title, Opportunity.Owner.Phone, Opportunity.Owner.Email,
@@ -143,6 +154,10 @@ public with sharing class QuotationPDFController {
                    Account.GST_Number__c, Account.PAN_Number__c,
                    Account.BillingStreet, Account.BillingCity, Account.BillingState,
                    Account.BillingPostalCode, Account.BillingCountry,
+                   Account.Payment_Terms__c,
+                   Bank_Name__c, Bank_Name__r.Name,
+                   Bank_Name__r.Account_No__c, Bank_Name__r.Bank_Name__c,
+                   Bank_Name__r.Branch_Name__c, Bank_Name__r.IFSC_CODE__c,
                    ContactId, Contact.Name, Contact.Email, Contact.Phone, Contact.Title
             FROM Quote
             WHERE Id = :quoteId
@@ -164,12 +179,59 @@ public with sharing class QuotationPDFController {
         validTillDate = quote.Valid_Till__c != null
             ? formatDate(quote.Valid_Till__c) : '';
 
-        // Sales Engineer info from Opportunity Owner
-        if (opportunity != null && opportunity.Owner != null) {
-            salesEngineerName = opportunity.Owner.Name;
-            salesEngineerTitle = opportunity.Owner.Title;
-            salesEngineerPhone = opportunity.Owner.Phone;
-            salesEngineerEmail = opportunity.Owner.Email;
+        // Validity days from Quote_Valid_Till_in_days__c picklist field
+        if (quote.Quote_Valid_Till_in_days__c != null) {
+            validityDays = quote.Quote_Valid_Till_in_days__c;
+        }
+
+        // Bank details from Quote's Bank lookup
+        if (quote.Bank_Name__c != null && quote.Bank_Name__r != null) {
+            bankAccountNumber = quote.Bank_Name__r.Account_No__c != null ? quote.Bank_Name__r.Account_No__c : '';
+            bankName = quote.Bank_Name__r.Bank_Name__c != null ? quote.Bank_Name__r.Bank_Name__c : '';
+            bankBranch = quote.Bank_Name__r.Branch_Name__c != null ? quote.Bank_Name__r.Branch_Name__c : '';
+            bankIfsc = quote.Bank_Name__r.IFSC_CODE__c != null ? quote.Bank_Name__r.IFSC_CODE__c : '';
+        }
+
+        // Delivery weeks from Quote
+        if (quote.Delivery__c != null) {
+            deliveryWeeks = quote.Delivery__c;
+        }
+
+        // Payment terms from Account
+        if (account != null && account.Payment_Terms__c != null) {
+            String pt = account.Payment_Terms__c;
+            if (pt == '100% Advance') {
+                advancePercent = '100%';
+                shippingPercent = '0%';
+                deliveryPercent = '0%';
+                installationPercent = '0%';
+            } else if (pt == '50% Advance - 50% After Installation') {
+                advancePercent = '50%';
+                shippingPercent = '0%';
+                deliveryPercent = '0%';
+                installationPercent = '50%';
+            } else if (pt == '30% Advance - 70% After Installation') {
+                advancePercent = '30%';
+                shippingPercent = '0%';
+                deliveryPercent = '0%';
+                installationPercent = '70%';
+            }
+        }
+
+        // Sales Engineer info from Quote Owner (User object)
+        if (quote.OwnerId != null) {
+            List<User> owners = [
+                SELECT Id, Name, Title, Phone, Email
+                FROM User
+                WHERE Id = :quote.OwnerId
+                LIMIT 1
+            ];
+            if (!owners.isEmpty()) {
+                salesEngineerName = owners[0].Name;
+                salesEngineerTitle = owners[0].Title;
+                salesEngineerPhone = owners[0].Phone;
+                salesEngineerEmail = owners[0].Email;
+            }
         }
 
         // Query line items
@@ -183,6 +245,14 @@ public with sharing class QuotationPDFController {
                    Product_Line_Description__c, Product_Detailed_Description__c
             FROM QuoteLineItem
             WHERE QuoteId = :quoteId
+            ORDER BY CreatedDate ASC
+        ];
+
+        // Query Payment Terms for this Quote
+        paymentTerms = [
+            SELECT Id, Name, Payment_Term__c, Percentage__c
+            FROM Payment_Term__c
+            WHERE Quote__c = :quoteId
             ORDER BY CreatedDate ASC
         ];
 
@@ -272,7 +342,23 @@ public with sharing class QuotationPDFController {
             }
         }
 
-        grandTotal = (subtotal + taxAmount).setScale(2, RoundingMode.HALF_UP);
+        // Use Grand Total from Quote object
+        if (quote.GrandTotal != null) {
+            grandTotal = quote.GrandTotal;
+        } else {
+            grandTotal = (subtotal + taxAmount).setScale(2, RoundingMode.HALF_UP);
+        }
+
+        // Use Subtotal from Quote object
+        if (quote.Subtotal != null) {
+            subtotal = quote.Subtotal;
+        }
+
+        // Use Tax from Quote object
+        if (quote.Tax != null) {
+            taxAmount = quote.Tax;
+        }
+
         grandTotalInWords = convertNumberToWords(grandTotal);
 
         // Set GST display rate for PDF

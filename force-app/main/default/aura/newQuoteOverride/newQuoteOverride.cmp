@@ -1,17 +1,7 @@
-<aura:component implements="lightning:actionOverride,force:hasRecordId,lightning:isUrlAddressable">
-
-    <aura:attribute name="opportunityId" type="String" />
-
-    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
-
-    <aura:if isTrue="{! !empty(v.opportunityId) }">
-        <c:newQuoteCmp recordId="{!v.opportunityId}" />
-        <aura:set attribute="else">
-            <div class="slds-p-around_large slds-text-align_center">
-                <lightning:spinner alternativeText="Loading" size="medium" />
-                <p class="slds-m-top_medium slds-text-color_weak">Loading Quote Builder...</p>
-            </div>
-        </aura:set>
-    </aura:if>
-
+<aura:component implements="force:lightningQuickActionWithoutHeader,force:hasRecordId,flexipage:availableForRecordHome,lightning:actionOverride" access="global">
+    <aura:attribute name="recordId" type="Id"/>
+    <aura:attribute name="opportunityId" type="Id"/>
+    <lightning:overlayLibrary aura:id="overlayLib"/>
+    <lightning:navigation aura:id="navService"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
 </aura:component>

@@ -1,33 +1,12 @@
-/* Class Name   : QuoteBuilderController
-* Company      : Fingertipplus
-* Created Date : 07-04-2026
-* @description : Apex controller for the newQuoteCmp LWC component.
-*                Provides methods for Opportunity context, product search,
-*                shipping address lookup, and QuoteLineItem management.
-*                Quote header is saved via lightning-record-edit-form (LDS).
-*
-* Change Log:
-* -----------------------------------------------------------------------------
-* Ver | Author           | Date       | Description
-* -----------------------------------------------------------------------------
-* 1.0 | Claude AI        | 07-04-2026 | Initial version
-* 2.0 | Claude AI        | 07-04-2026 | Refactored for record-edit-form pattern
-* 3.0 | Claude AI        | 07-04-2026 | Added shipping address lookup, billing
-*     |                  |            | address auto-fetch from Account
-* -----------------------------------------------------------------------------
-**************************************************************/
 public with sharing class QuoteBuilderController {
 
-    /**
-     * Fetches Opportunity context including Account billing address for pre-population.
-     */
     @AuraEnabled(cacheable=true)
     public static OpportunityContext getOpportunityContext(Id opportunityId) {
         Opportunity opp = [
             SELECT Id, Name, AccountId, Account.Name,
                    Account.BillingStreet, Account.BillingCity,
                    Account.BillingState, Account.BillingPostalCode,
-                   Account.BillingCountry,
+                   Account.BillingCountryCode,
                    Pricebook2Id, CurrencyIsoCode, Buisness_Vertical__c
             FROM Opportunity
             WHERE Id = :opportunityId
@@ -43,22 +22,26 @@ public with sharing class QuoteBuilderController {
         ctx.currencyCode = opp.CurrencyIsoCode;
         ctx.vertical = opp.Buisness_Vertical__c;
 
-        // Account billing address for Bill To pre-population
         if (opp.Account != null) {
             ctx.billingName = opp.Account.Name;
             ctx.billingStreet = opp.Account.BillingStreet;
             ctx.billingCity = opp.Account.BillingCity;
             ctx.billingState = opp.Account.BillingState;
             ctx.billingPostalCode = opp.Account.BillingPostalCode;
-            ctx.billingCountry = opp.Account.BillingCountry;
+            ctx.billingCountry = opp.Account.BillingCountryCode;
         }
 
         return ctx;
     }
 
-    /**
-     * Fetches Shipping_Address__c records related to an Account.
-     */
+    @AuraEnabled(cacheable=true)
+    public static List<Pricebook2> getPricebooks() {
+        return [SELECT Id, Name, IsActive, IsStandard 
+                FROM Pricebook2 
+                WHERE IsActive = true 
+                ORDER BY IsStandard DESC, Name ASC];
+    }
+
     @AuraEnabled(cacheable=true)
     public static List<ShippingAddressResult> getShippingAddresses(Id accountId) {
         List<ShippingAddressResult> results = new List<ShippingAddressResult>();
@@ -82,7 +65,6 @@ public with sharing class QuoteBuilderController {
             sar.country = sa.Address__CountryCode__s;
             sar.sameAsBilling = sa.Same_as_BillingAddress__c;
 
-            // Build display label
             List<String> parts = new List<String>();
             parts.add(sa.Name);
             if (String.isNotBlank(sa.Address__City__s)) parts.add(sa.Address__City__s);
@@ -95,20 +77,17 @@ public with sharing class QuoteBuilderController {
         return results;
     }
 
-    /**
-     * Searches active products by name, code, or category.
-     */
     @AuraEnabled
     public static List<ProductSearchResult> searchProducts(String searchTerm, Id pricebookId, String category) {
         List<ProductSearchResult> results = new List<ProductSearchResult>();
+        if (String.isBlank(searchTerm)) return results;
+
         String searchKey = '%' + String.escapeSingleQuotes(searchTerm.trim()) + '%';
 
         Id pbId = pricebookId;
         if (pbId == null) {
             List<Pricebook2> stdPb = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
-            if (!stdPb.isEmpty()) {
-                pbId = stdPb[0].Id;
-            }
+            if (!stdPb.isEmpty()) pbId = stdPb[0].Id;
         }
         if (pbId == null) return results;
 
@@ -117,18 +96,11 @@ public with sharing class QuoteBuilderController {
             'Product2.Description, Product2.HSN_Code__c, Product2.Tax__c, ' +
             'Product2.Standard_Price__c, Product2.QuantityUnitOfMeasure, ' +
             'Product2.Line_Description__c, Product2.Detailed_Description__c, ' +
-            'Product2.Shipping_Charges_Percent__c, Product2.Warranty_Cost_Percent__c, ' +
-            'Product2.Training_Cost_Percent__c, Product2.Installation_Cost_Percent__c, ' +
-            'Product2.Internal_Transport_Cost_Percent__c, Product2.Packing_Charges_Percent__c, ' +
-            'Product2.Default_Warranty_Months__c, Product2.Installation_Terms__c, ' +
-            'Product2.Warranty_Terms_Description__c, ' +
             'UnitPrice, CurrencyIsoCode ' +
             'FROM PricebookEntry ' +
             'WHERE Pricebook2Id = :pbId ' +
             'AND Product2.IsActive = true ' +
-            'AND (Product2.Name LIKE :searchKey ' +
-            'OR Product2.ProductCode LIKE :searchKey ' +
-            'OR Product2.Item_Code__c LIKE :searchKey)';
+            'AND (Product2.Name LIKE :searchKey OR Product2.ProductCode LIKE :searchKey)';
 
         if (String.isNotBlank(category)) {
             query += ' AND Product2.Product_Category__c = :category';
@@ -136,41 +108,33 @@ public with sharing class QuoteBuilderController {
 
         query += ' ORDER BY Product2.Name ASC LIMIT 20';
 
-        for (PricebookEntry pbe : Database.query(query)) {
-            ProductSearchResult psr = new ProductSearchResult();
-            psr.pricebookEntryId = pbe.Id;
-            psr.productId = pbe.Product2Id;
-            psr.productName = pbe.Product2.Name;
-            psr.productCode = pbe.Product2.ProductCode;
-            psr.category = pbe.Product2.Product_Category__c;
-            psr.make = pbe.Product2.Make__c;
-            psr.model = pbe.Product2.Model__c;
-            psr.description = pbe.Product2.Description;
-            psr.hsnCode = pbe.Product2.HSN_Code__c;
-            psr.taxPercent = pbe.Product2.Tax__c;
-            psr.unitPrice = pbe.UnitPrice;
-            psr.standardPrice = pbe.Product2.Standard_Price__c;
-            psr.uom = pbe.Product2.QuantityUnitOfMeasure;
-            psr.lineDescription = pbe.Product2.Line_Description__c;
-            psr.detailedDescription = pbe.Product2.Detailed_Description__c;
-            psr.shippingChargesPercent = pbe.Product2.Shipping_Charges_Percent__c;
-            psr.warrantyCostPercent = pbe.Product2.Warranty_Cost_Percent__c;
-            psr.trainingCostPercent = pbe.Product2.Training_Cost_Percent__c;
-            psr.installationCostPercent = pbe.Product2.Installation_Cost_Percent__c;
-            psr.transportCostPercent = pbe.Product2.Internal_Transport_Cost_Percent__c;
-            psr.packingChargesPercent = pbe.Product2.Packing_Charges_Percent__c;
-            psr.defaultWarrantyMonths = pbe.Product2.Default_Warranty_Months__c;
-            psr.installationTerms = pbe.Product2.Installation_Terms__c;
-            psr.warrantyTerms = pbe.Product2.Warranty_Terms_Description__c;
-            results.add(psr);
+        try {
+            for (PricebookEntry pbe : Database.query(query)) {
+                ProductSearchResult psr = new ProductSearchResult();
+                psr.pricebookEntryId = pbe.Id;
+                psr.productId = pbe.Product2Id;
+                psr.productName = pbe.Product2.Name;
+                psr.productCode = pbe.Product2.ProductCode;
+                psr.category = pbe.Product2.Product_Category__c;
+                psr.make = pbe.Product2.Make__c;
+                psr.model = pbe.Product2.Model__c;
+                psr.description = pbe.Product2.Description;
+                psr.hsnCode = pbe.Product2.HSN_Code__c;
+                psr.taxPercent = pbe.Product2.Tax__c;
+                psr.unitPrice = pbe.UnitPrice;
+                psr.standardPrice = pbe.Product2.Standard_Price__c;
+                psr.uom = pbe.Product2.QuantityUnitOfMeasure;
+                psr.lineDescription = pbe.Product2.Line_Description__c;
+                psr.detailedDescription = pbe.Product2.Detailed_Description__c;
+                results.add(psr);
+            }
+        } catch (Exception e) {
+            throw new AuraHandledException('Search failed: ' + e.getMessage());
         }
 
         return results;
     }
 
-    /**
-     * Loads pricebook context, accountId, and line items for an existing Quote (edit mode).
-     */
     @AuraEnabled
     public static QuoteEditContext getQuoteForEdit(Id quoteId) {
         Quote q = [
@@ -217,13 +181,9 @@ public with sharing class QuoteBuilderController {
         return ctx;
     }
 
-    /**
-     * Saves QuoteLineItems after the Quote header is created by record-edit-form.
-     */
     @AuraEnabled
     public static void saveQuoteLineItems(Id quoteId, String lineItemsJSON) {
         List<LineItemInput> lineItems = (List<LineItemInput>) JSON.deserialize(lineItemsJSON, List<LineItemInput>.class);
-
         if (lineItems == null || lineItems.isEmpty()) {
             throw new AuraHandledException('At least one line item is required.');
         }
@@ -246,22 +206,15 @@ public with sharing class QuoteBuilderController {
         insert qliList;
     }
 
-    /**
-     * Updates QuoteLineItems for an existing Quote.
-     * Deletes all existing items and re-creates from the provided list.
-     */
     @AuraEnabled
     public static void updateQuoteLineItems(Id quoteId, String lineItemsJSON) {
         List<LineItemInput> lineItems = (List<LineItemInput>) JSON.deserialize(lineItemsJSON, List<LineItemInput>.class);
-
         if (lineItems == null || lineItems.isEmpty()) {
             throw new AuraHandledException('At least one line item is required.');
         }
 
         List<QuoteLineItem> oldItems = [SELECT Id FROM QuoteLineItem WHERE QuoteId = :quoteId];
-        if (!oldItems.isEmpty()) {
-            delete oldItems;
-        }
+        if (!oldItems.isEmpty()) delete oldItems;
 
         List<QuoteLineItem> qliList = new List<QuoteLineItem>();
         for (LineItemInput item : lineItems) {
@@ -281,8 +234,7 @@ public with sharing class QuoteBuilderController {
         insert qliList;
     }
 
-    // ===== Input Classes =====
-
+    // ===== Inner Classes =====
     public class LineItemInput {
         public Id productId;
         public Id pricebookEntryId;
@@ -294,8 +246,6 @@ public with sharing class QuoteBuilderController {
         public String detailedDescription;
     }
 
-    // ===== Output Classes =====
-
     public class OpportunityContext {
         @AuraEnabled public Id opportunityId;
         @AuraEnabled public String opportunityName;
@@ -304,7 +254,6 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Id pricebookId;
         @AuraEnabled public String currencyCode;
         @AuraEnabled public String vertical;
-        // Account billing address for Bill To pre-population
         @AuraEnabled public String billingName;
         @AuraEnabled public String billingStreet;
         @AuraEnabled public String billingCity;
@@ -341,15 +290,6 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public String uom;
         @AuraEnabled public String lineDescription;
         @AuraEnabled public String detailedDescription;
-        @AuraEnabled public Decimal shippingChargesPercent;
-        @AuraEnabled public Decimal warrantyCostPercent;
-        @AuraEnabled public Decimal trainingCostPercent;
-        @AuraEnabled public Decimal installationCostPercent;
-        @AuraEnabled public Decimal transportCostPercent;
-        @AuraEnabled public Decimal packingChargesPercent;
-        @AuraEnabled public Decimal defaultWarrantyMonths;
-        @AuraEnabled public String installationTerms;
-        @AuraEnabled public String warrantyTerms;
     }
 
     public class QuoteEditContext {
