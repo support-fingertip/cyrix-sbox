@@ -35,14 +35,6 @@ public with sharing class QuoteBuilderController {
     }
 
     @AuraEnabled(cacheable=true)
-    public static List<Pricebook2> getPricebooks() {
-        return [SELECT Id, Name, IsActive, IsStandard 
-                FROM Pricebook2 
-                WHERE IsActive = true 
-                ORDER BY IsStandard DESC, Name ASC];
-    }
-
-    @AuraEnabled(cacheable=true)
     public static List<ShippingAddressResult> getShippingAddresses(Id accountId) {
         List<ShippingAddressResult> results = new List<ShippingAddressResult>();
         if (accountId == null) return results;
