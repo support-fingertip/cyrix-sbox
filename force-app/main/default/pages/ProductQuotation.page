@@ -38,7 +38,7 @@
 
     /* ---------- CONTENT AREA ---------- */
     .content {
-        padding: 38mm 18mm 22mm 18mm;
+        padding: 45mm 18mm 22mm 18mm;
     }
 
     /* ---------- PAGE BREAK ---------- */
