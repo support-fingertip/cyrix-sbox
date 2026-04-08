@@ -161,7 +161,7 @@ public with sharing class QuoteBuilderController {
             'Product2.Description, Product2.HSN_Code__c, ' +
             'Product2.Standard_Price__c, Product2.QuantityUnitOfMeasure, ' +
             'Product2.Line_Description__c, Product2.Detailed_Description__c, ' +
-            'UnitPrice, Tax__c, Max_Discount__c, CurrencyIsoCode ' +
+            'UnitPrice, Tax__c, Max_Discount_Percentage__c, CurrencyIsoCode ' +
             'FROM PricebookEntry ' +
             'WHERE Pricebook2Id = :pbId ' +
             'AND Product2.IsActive = true ' +
@@ -186,7 +186,7 @@ public with sharing class QuoteBuilderController {
                 psr.description = pbe.Product2.Description;
                 psr.hsnCode = pbe.Product2.HSN_Code__c;
                 psr.taxPercent = pbe.Tax__c;
-                psr.maxDiscount = pbe.Max_Discount__c;
+                psr.maxDiscount = pbe.Max_Discount_Percentage__c;
                 psr.unitPrice = pbe.UnitPrice;
                 psr.standardPrice = pbe.Product2.Standard_Price__c;
                 psr.uom = pbe.Product2.QuantityUnitOfMeasure;
@@ -229,9 +229,9 @@ public with sharing class QuoteBuilderController {
         for (QuoteLineItem qli : [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
                    Product2.QuantityUnitOfMeasure,
-                   PricebookEntryId, PricebookEntry.Tax__c, PricebookEntry.Max_Discount__c,
+                   PricebookEntryId, PricebookEntry.Tax__c, PricebookEntry.Max_Discount_Percentage__c,
                    Quantity, ListPrice, UnitPrice, Discount,
-                   Tax_Percent__c, Tax_Amount__c,
+                   Tax__c, Tax_Amount__c,
                    Product_Line_Description__c,
                    Product_Detailed_Description__c
             FROM QuoteLineItem
@@ -249,9 +249,9 @@ public with sharing class QuoteBuilderController {
             item.listPrice = qli.ListPrice;
             item.unitPrice = qli.UnitPrice;
             item.discount = qli.Discount != null ? qli.Discount : 0;
-            item.taxPercent = qli.Tax_Percent__c != null ? qli.Tax_Percent__c : (qli.PricebookEntry.Tax__c != null ? qli.PricebookEntry.Tax__c : 0);
+            item.taxPercent = qli.Tax__c != null ? qli.Tax__c : (qli.PricebookEntry.Tax__c != null ? qli.PricebookEntry.Tax__c : 0);
             item.taxAmount = qli.Tax_Amount__c;
-            item.maxDiscount = qli.PricebookEntry.Max_Discount__c;
+            item.maxDiscount = qli.PricebookEntry.Max_Discount_Percentage__c;
             item.lineDescription = qli.Product_Line_Description__c;
             item.detailedDescription = qli.Product_Detailed_Description__c;
             ctx.lineItems.add(item);
@@ -277,7 +277,7 @@ public with sharing class QuoteBuilderController {
                 qli.Quantity = item.quantity;
                 qli.UnitPrice = item.unitPrice;
                 qli.Discount = item.discount;
-                qli.Tax_Percent__c = item.taxPercent;
+                qli.Tax__c = item.taxPercent;
                 qli.Tax_Amount__c = item.taxAmount;
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
@@ -317,7 +317,7 @@ public with sharing class QuoteBuilderController {
                 qli.Quantity = item.quantity;
                 qli.UnitPrice = item.unitPrice;
                 qli.Discount = item.discount;
-                qli.Tax_Percent__c = item.taxPercent;
+                qli.Tax__c = item.taxPercent;
                 qli.Tax_Amount__c = item.taxAmount;
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
