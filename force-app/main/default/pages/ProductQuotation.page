@@ -28,18 +28,18 @@
         position: fixed;
         top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
+        width: 210mm;
+        height: 297mm;
         z-index: -1;
     }
     .page-bg img {
-        width: 100%;
-        height: 100%;
+        width: 210mm;
+        height: 297mm;
     }
 
     /* ---------- CONTENT AREA ---------- */
     .content {
-        padding: 45mm 18mm 22mm 18mm;
+        padding: 45mm 18mm 15mm 18mm;
     }
 
     /* ---------- PAGE BREAK ---------- */
