@@ -191,6 +191,14 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.pricebookId = data.pricebookId;
             this.accountId = data.accountId;
 
+            // Populate internal charges from saved Quote data
+            this.packingCharges = data.packingCharge || 0;
+            this.transportCharges = data.transportCost || 0;
+            this.warrantyCost = data.warrantyCost || 0;
+            this.installationCost = data.installationCost || 0;
+            this.trainingCost = data.trainingCost || 0;
+            this.insuranceCost = data.insuranceCost || 0;
+
             if (this.accountId) {
                 await this.loadShippingAddresses(this.accountId);
             }
@@ -334,7 +342,16 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         fields.Warrantee_Cost__c = this.warrantyCost || 0;
         fields.Installation_Cost__c = this.installationCost || 0;
         fields.Traning_Cost__c = this.trainingCost || 0;
-        fields.Insurance_Charge__c = this.insuranceCost || 0;   // adjust field name if needed
+        fields.Insurance_Cost__c = this.insuranceCost || 0;
+
+        // Inject computed totals
+        fields.Total_Internal_Charges__c = this.totalCharges || 0;
+
+        // Total pricebook price = sum of (listPrice * quantity) across all line items
+        const totalPricebookPrice = this.lineItems.reduce((sum, item) => {
+            return sum + ((item.listPrice || 0) * (item.quantity || 0));
+        }, 0);
+        fields.Total_Pricebook_Price__c = totalPricebookPrice;
 
         // Set defaults for new quotes
         if (!this.isEditMode) {
@@ -350,15 +367,23 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         const quoteId = event.detail.id;
 
         try {
-            const lineItemsPayload = this.lineItems.map(item => ({
-                productId: item.productId,
-                pricebookEntryId: item.pricebookEntryId,
-                quantity: item.quantity,
-                unitPrice: item.unitPrice,
-                discount: item.discount,
-                lineDescription: item.lineDescription,
-                detailedDescription: item.detailedDescription
-            }));
+            const lineItemsPayload = this.lineItems.map(item => {
+                const base = (item.unitPrice || 0) * (item.quantity || 0);
+                const discountAmt = base * ((item.discount || 0) / 100);
+                const afterDiscount = base - discountAmt;
+                const taxAmt = afterDiscount * ((item.taxPercent || 0) / 100);
+                return {
+                    productId: item.productId,
+                    pricebookEntryId: item.pricebookEntryId,
+                    quantity: item.quantity,
+                    unitPrice: item.unitPrice,
+                    discount: item.discount,
+                    taxPercent: item.taxPercent || 0,
+                    taxAmount: Math.round(taxAmt * 100) / 100,
+                    lineDescription: item.lineDescription,
+                    detailedDescription: item.detailedDescription
+                };
+            });
 
             if (this.isEditMode) {
                 await updateQuoteLineItems({
