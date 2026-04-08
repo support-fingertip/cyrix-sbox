@@ -210,7 +210,7 @@ public with sharing class QuoteBuilderController {
                 qli.Tax_Type__c = item.taxType;
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
-                qli.Price_Status__c = 'Standard';
+                qli.Price_Status__c = 'Not Required';
                 qliList.add(qli);
             }
             insert qliList;

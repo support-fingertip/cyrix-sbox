@@ -16,7 +16,7 @@
         <layoutColumns>
             <layoutItems>
                 <behavior>Readonly</behavior>
-                <field>QuoteNumber</field>
+                <field>Quote_Id__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Required</behavior>
@@ -461,6 +461,8 @@
     </relatedLists>
     <relatedLists>
         <fields>NAME</fields>
+        <fields>Payment_Term__c</fields>
+        <fields>Percentage__c</fields>
         <relatedList>Payment_Term__c.Quote__c</relatedList>
     </relatedLists>
     <relatedLists>
