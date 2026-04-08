@@ -238,7 +238,7 @@
 
     <!-- COMPANY HEADER WITH LOGO -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REFERENCE LINE -->
@@ -342,7 +342,7 @@
 
     <!-- COMPANY HEADER (repeated on page 2) -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE (repeated) -->
@@ -534,7 +534,7 @@
 
     <!-- COMPANY HEADER -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE -->
@@ -627,7 +627,7 @@
 
     <!-- COMPANY HEADER -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE -->
@@ -792,7 +792,7 @@
 
     <!-- COMPANY HEADER -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE -->
@@ -872,7 +872,7 @@
 
     <!-- COMPANY HEADER -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE -->
@@ -1019,7 +1019,7 @@
 
     <!-- COMPANY HEADER -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE -->
@@ -1118,7 +1118,7 @@
 
     <!-- COMPANY HEADER -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE -->
@@ -1293,7 +1293,7 @@
 
     <!-- COMPANY HEADER -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE -->
@@ -1426,7 +1426,7 @@
 
     <!-- COMPANY HEADER -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE -->
@@ -1512,7 +1512,7 @@
 
     <!-- COMPANY HEADER -->
     <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="company-logo" />
     </div>
 
     <!-- QUOTE REF LINE -->
