@@ -27,9 +27,13 @@
     /* ---------- FOOTER ---------- */
     .page-footer {
         position: running(footer);
-        text-align: center;
+        width: 100%;
         padding: 0;
         margin: 0;
+    }
+    .page-footer img {
+        width: 100%;
+        display: block;
     }
 
     /* ---------- COMPANY HEADER ---------- */
