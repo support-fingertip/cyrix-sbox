@@ -35,6 +35,23 @@ public with sharing class QuoteBuilderController {
     }
 
     @AuraEnabled(cacheable=true)
+    public static List<PricebookOption> getPricebooks() {
+        List<PricebookOption> options = new List<PricebookOption>();
+        for (Pricebook2 pb : [
+            SELECT Id, Name
+            FROM Pricebook2
+            WHERE IsActive = true
+            ORDER BY Name ASC
+        ]) {
+            PricebookOption opt = new PricebookOption();
+            opt.pricebookId = pb.Id;
+            opt.pricebookName = pb.Name;
+            options.add(opt);
+        }
+        return options;
+    }
+
+    @AuraEnabled(cacheable=true)
     public static List<ShippingAddressResult> getShippingAddresses(Id accountId) {
         List<ShippingAddressResult> results = new List<ShippingAddressResult>();
         if (accountId == null) return results;

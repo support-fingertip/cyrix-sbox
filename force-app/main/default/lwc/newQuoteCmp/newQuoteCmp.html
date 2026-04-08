@@ -63,7 +63,26 @@
                             <lightning-input-field field-name="Shipping_Mode__c"></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="Price_Book__c"></lightning-input-field>
+                            <lightning-input-field field-name="Delivery__c"></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                            <lightning-input-field field-name="Bank_Name__c"></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                            <lightning-input-field field-name="Contract_Period_From_Date__c"></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                            <lightning-input-field field-name="Contract_Period_End_Date__c"></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                            <lightning-combobox
+                                label="Pricebook"
+                                value={pricebookId}
+                                options={pricebookOptions}
+                                onchange={handlePricebookChange}
+                                placeholder="Select a Pricebook..."
+                                required>
+                            </lightning-combobox>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
                             <lightning-input-field field-name="is_Active__c"></lightning-input-field>
