@@ -95,6 +95,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     get isSearchDisabled() { return !this.searchTerm || this.searchTerm.length < 2; }
     get isSaveDisabled() { return this.isSaving || this.lineItems.length === 0; }
     get pageTitle() { return this.isEditMode ? 'Edit Quote' : 'Create Quote'; }
+    get quoteName() { return this.isEditMode ? undefined : 'Auto'; }
     get saveButtonLabel() { return this.isSaving ? 'Saving...' : (this.isEditMode ? 'Update Quote' : 'Save Quote'); }
     get hasShippingAddresses() { return this.shippingAddresses.length > 0; }
 
