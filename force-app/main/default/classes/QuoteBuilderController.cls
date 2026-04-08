@@ -300,6 +300,11 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public List<QuoteLineItemResult> lineItems;
     }
 
+    public class PricebookOption {
+        @AuraEnabled public Id pricebookId;
+        @AuraEnabled public String pricebookName;
+    }
+
     public class QuoteLineItemResult {
         @AuraEnabled public Id lineItemId;
         @AuraEnabled public Id productId;

@@ -6,6 +6,7 @@ import getOpportunityContext from '@salesforce/apex/QuoteBuilderController.getOp
 import getQuoteForEdit from '@salesforce/apex/QuoteBuilderController.getQuoteForEdit';
 import getShippingAddresses from '@salesforce/apex/QuoteBuilderController.getShippingAddresses';
 import searchProducts from '@salesforce/apex/QuoteBuilderController.searchProducts';
+import getPricebooks from '@salesforce/apex/QuoteBuilderController.getPricebooks';
 import saveQuoteLineItems from '@salesforce/apex/QuoteBuilderController.saveQuoteLineItems';
 import updateQuoteLineItems from '@salesforce/apex/QuoteBuilderController.updateQuoteLineItems';
 
@@ -141,6 +142,10 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         if (!this.recordId) return;
 
         this.isLoading = true;
+
+        // Load pricebook options for the picklist
+        await this.loadPricebooks();
+
         const idPrefix = this.recordId.substring(0, 3);
 
         if (idPrefix === '0Q0') {
