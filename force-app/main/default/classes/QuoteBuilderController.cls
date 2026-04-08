@@ -96,6 +96,26 @@ public with sharing class QuoteBuilderController {
     }
 
     /**
+     * Fetches all active Pricebook2 records for the pricebook picklist.
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<PricebookOption> getPricebooks() {
+        List<PricebookOption> options = new List<PricebookOption>();
+        for (Pricebook2 pb : [
+            SELECT Id, Name
+            FROM Pricebook2
+            WHERE IsActive = true
+            ORDER BY Name ASC
+        ]) {
+            PricebookOption opt = new PricebookOption();
+            opt.pricebookId = pb.Id;
+            opt.pricebookName = pb.Name;
+            options.add(opt);
+        }
+        return options;
+    }
+
+    /**
      * Searches active products by name, code, or category.
      */
     @AuraEnabled
@@ -358,6 +378,11 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Id opportunityId;
         @AuraEnabled public Id accountId;
         @AuraEnabled public List<QuoteLineItemResult> lineItems;
+    }
+
+    public class PricebookOption {
+        @AuraEnabled public Id pricebookId;
+        @AuraEnabled public String pricebookName;
     }
 
     public class QuoteLineItemResult {

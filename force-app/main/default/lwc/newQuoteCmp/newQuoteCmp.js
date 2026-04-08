@@ -6,6 +6,7 @@ import getOpportunityContext from '@salesforce/apex/QuoteBuilderController.getOp
 import getQuoteForEdit from '@salesforce/apex/QuoteBuilderController.getQuoteForEdit';
 import getShippingAddresses from '@salesforce/apex/QuoteBuilderController.getShippingAddresses';
 import searchProducts from '@salesforce/apex/QuoteBuilderController.searchProducts';
+import getPricebooks from '@salesforce/apex/QuoteBuilderController.getPricebooks';
 import saveQuoteLineItems from '@salesforce/apex/QuoteBuilderController.saveQuoteLineItems';
 import updateQuoteLineItems from '@salesforce/apex/QuoteBuilderController.updateQuoteLineItems';
 
@@ -44,6 +45,9 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     shippingState = '';
     shippingPostalCode = '';
     shippingCountry = '';
+
+    // Pricebook picklist
+    @track pricebookOptions = [];
 
     // Shipping address picker
     @track shippingAddresses = [];
@@ -152,6 +156,10 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         if (!this.recordId) return;
 
         this.isLoading = true;
+
+        // Load pricebook options for the picklist
+        await this.loadPricebooks();
+
         const idPrefix = this.recordId.substring(0, 3);
 
         if (idPrefix === '0Q0') {
@@ -250,6 +258,26 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             console.warn('Could not load shipping addresses:', error);
             this.shippingAddresses = [];
         }
+    }
+
+    async loadPricebooks() {
+        try {
+            const pricebooks = await getPricebooks();
+            this.pricebookOptions = (pricebooks || []).map(pb => ({
+                label: pb.pricebookName,
+                value: pb.pricebookId
+            }));
+        } catch (error) {
+            console.warn('Could not load pricebooks:', error);
+            this.pricebookOptions = [];
+        }
+    }
+
+    handlePricebookChange(event) {
+        this.pricebookId = event.detail.value;
+        // Clear existing search results when pricebook changes
+        this.searchResults = [];
+        this.showSearchResults = false;
     }
 
     // ===== ADDRESS HANDLERS =====
