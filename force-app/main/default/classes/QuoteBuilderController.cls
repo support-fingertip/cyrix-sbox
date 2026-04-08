@@ -34,20 +34,76 @@ public with sharing class QuoteBuilderController {
         return ctx;
     }
 
-    @AuraEnabled(cacheable=true)
-    public static List<PricebookOption> getPricebooks() {
+    @AuraEnabled
+    public static List<PricebookOption> getPricebooks(Id opportunityId) {
+        // Get opportunity context for filtering
+        Opportunity opp = [
+            SELECT AccountId, Region__c, Opportunity_Type__c
+            FROM Opportunity
+            WHERE Id = :opportunityId
+            LIMIT 1
+        ];
+
+        Id accountId = opp.AccountId;
+        Id regionId = opp.Region__c;
+        String oppType = opp.Opportunity_Type__c;
+        Date today = Date.today();
+
         List<PricebookOption> options = new List<PricebookOption>();
         for (Pricebook2 pb : [
-            SELECT Id, Name
+            SELECT Id, Name, IsStandard, Price_Book_Type__c,
+                   Customer__c, Region__c, Valid_From__c, Valid_Till__c
             FROM Pricebook2
             WHERE IsActive = true
             ORDER BY Name ASC
         ]) {
-            PricebookOption opt = new PricebookOption();
-            opt.pricebookId = pb.Id;
-            opt.pricebookName = pb.Name;
-            options.add(opt);
+            String pbType = pb.Price_Book_Type__c;
+            Boolean include = false;
+            Integer priority = 99;
+
+            if (pb.IsStandard) {
+                // Standard pricebook always included
+                include = true;
+                priority = 5;
+            } else if (pbType == 'Promotional Price') {
+                // Promotional: valid date range must cover today
+                if (pb.Valid_From__c != null && pb.Valid_Till__c != null
+                        && pb.Valid_From__c <= today && pb.Valid_Till__c >= today) {
+                    include = true;
+                    priority = 1; // Highest
+                }
+            } else if (pbType == 'Customer Specific') {
+                // Customer Specific: pricebook customer must match opportunity account
+                if (pb.Customer__c != null && pb.Customer__c == accountId) {
+                    include = true;
+                    priority = 2;
+                }
+            } else if (pbType == 'Region Specific') {
+                // Region Specific: pricebook region must match opportunity region
+                if (regionId != null && pb.Region__c != null && pb.Region__c == regionId) {
+                    include = true;
+                    priority = 3;
+                }
+            } else if (pbType == 'Dealer Price') {
+                // Dealer Price: opportunity type must be Dealer Sales
+                if (oppType == 'Dealer Sales') {
+                    include = true;
+                    priority = 4;
+                }
+            }
+
+            if (include) {
+                PricebookOption opt = new PricebookOption();
+                opt.pricebookId = pb.Id;
+                opt.pricebookName = pb.Name;
+                opt.priority = priority;
+                opt.pricebookType = pb.IsStandard ? 'Standard' : pbType;
+                options.add(opt);
+            }
         }
+
+        // Sort by priority (lowest number = highest priority)
+        options.sort();
         return options;
     }
 
@@ -355,9 +411,16 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public List<QuoteLineItemResult> lineItems;
     }
 
-    public class PricebookOption {
+    public class PricebookOption implements Comparable {
         @AuraEnabled public Id pricebookId;
         @AuraEnabled public String pricebookName;
+        @AuraEnabled public Integer priority;
+        @AuraEnabled public String pricebookType;
+
+        public Integer compareTo(Object other) {
+            PricebookOption o = (PricebookOption) other;
+            return this.priority - o.priority;
+        }
     }
 
     public class QuoteLineItemResult {

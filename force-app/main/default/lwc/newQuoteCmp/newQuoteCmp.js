@@ -26,6 +26,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
     // Context
     pricebookId;
+    opportunityId;
     currencyCode = 'INR';
     accountId;
     accountName = '';
@@ -138,18 +139,22 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
         this.isLoading = true;
 
-        // Load pricebook options for the picklist
-        await this.loadPricebooks();
-
         const idPrefix = this.recordId.substring(0, 3);
 
         if (idPrefix === '0Q0') {
+            // Edit mode: load quote data first, then pricebooks
             this.isEditMode = true;
             this.editRecordId = this.recordId;
             await this.loadQuoteLineItems();
+            // Load filtered pricebooks using the quote's opportunity (keep existing selection)
+            if (this.opportunityId) {
+                await this.loadPricebooks(this.opportunityId, false);
+            }
         } else {
+            // New quote mode: load pricebooks first (auto-select highest priority), then context
             this.isEditMode = false;
             this.defaultOpportunityId = this.recordId;
+            await this.loadPricebooks(this.recordId, true);
             await this.loadOpportunityContext();
         }
 
@@ -159,7 +164,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     async loadOpportunityContext() {
         try {
             const data = await getOpportunityContext({ opportunityId: this.recordId });
-            this.pricebookId = data.pricebookId;
+            // pricebookId is already auto-selected by loadPricebooks based on priority
+            // Only use opportunity's pricebook as fallback if none was auto-selected
+            if (!this.pricebookId) {
+                this.pricebookId = data.pricebookId;
+            }
             this.currencyCode = data.currencyCode || 'INR';
             this.accountId = data.accountId;
             this.accountName = data.accountName || '';
@@ -189,6 +198,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         try {
             const data = await getQuoteForEdit({ quoteId: this.editRecordId });
             this.pricebookId = data.pricebookId;
+            this.opportunityId = data.opportunityId;
             this.accountId = data.accountId;
 
             // Populate internal charges from saved Quote data
@@ -253,13 +263,19 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }
     }
 
-    async loadPricebooks() {
+    async loadPricebooks(opportunityId, autoSelect) {
         try {
-            const pricebooks = await getPricebooks();
+            const pricebooks = await getPricebooks({ opportunityId: opportunityId });
             this.pricebookOptions = (pricebooks || []).map(pb => ({
-                label: pb.pricebookName,
+                label: pb.pricebookName + (pb.pricebookType ? ' (' + pb.pricebookType + ')' : ''),
                 value: pb.pricebookId
             }));
+
+            // Auto-select the highest priority pricebook for new quotes
+            // Pricebooks are already sorted by priority from Apex (1=Promotional, 2=Customer, 3=Region, 4=Dealer, 5=Standard)
+            if (autoSelect && pricebooks && pricebooks.length > 0) {
+                this.pricebookId = pricebooks[0].pricebookId;
+            }
         } catch (error) {
             console.warn('Could not load pricebooks:', error);
             this.pricebookOptions = [];
