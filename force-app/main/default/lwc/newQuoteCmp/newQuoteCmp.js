@@ -328,6 +328,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
         const fields = event.detail.fields;
 
+        // Set placeholder Name (trigger auto-generates the actual quote name)
+        if (!this.isEditMode) {
+            fields.Name = 'Auto';
+        }
+
         // Inject Pricebook2Id
         fields.Pricebook2Id = this.pricebookId;
 
