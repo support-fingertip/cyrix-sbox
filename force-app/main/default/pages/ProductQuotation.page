@@ -318,7 +318,7 @@
         <p>With Regards,<br/>
            For Cyrix Healthcare Pvt. Ltd</p>
 
-        <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 80px;" />
+        <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 80px; max-width: 80px;" />
 
         <p style="margin-left: 30px; color: #0000cc;"><strong>Authorized Signatory</strong></p>
 
@@ -612,7 +612,7 @@
 
     <!-- STAMP/SEAL -->
     <div style="margin-top: 8px;">
-        <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 70px;" />
+        <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 70px; max-width: 70px;" />
     </div>
 
     <!-- AUTHORIZED SIGNATORY -->
@@ -1171,7 +1171,7 @@
                 {!account.Name}<br/>{!quote.Billing_Address__c}
             </td>
             <td style="vertical-align: top; padding-left: 80px;">
-                <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 50px;" /><br/>
+                <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 50px; max-width: 50px;" /><br/>
                 <strong><em>Cyrix Healthcare Pvt. Ltd</em></strong><br/>
                 30/641B, Petta, Poonithura<br/>
                 Ernakulam, Kerala<br/>
@@ -1541,7 +1541,7 @@
             </td>
             <td style="vertical-align: top; text-align: right;">
                 <br/>
-                <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 55px;" /><br/>
+                <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 55px; max-width: 55px;" /><br/>
                 <strong><em>Cyrix Healthcare Pvt. Ltd</em></strong><br/>
                 30/641B, Petta, Poonithura<br/>
                 Ernakulam, Kerala<br/>
