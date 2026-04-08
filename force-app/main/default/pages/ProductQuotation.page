@@ -38,7 +38,7 @@
 
     /* ---------- CONTENT AREA ---------- */
     .content {
-        padding: 32mm 18mm 22mm 18mm;
+        padding: 38mm 18mm 22mm 18mm;
     }
 
     /* ---------- PAGE BREAK ---------- */
@@ -140,6 +140,148 @@
                 </apex:outputPanel>
             </p>
         </div>
+
+    </div>
+
+    <!-- ====================================================================== -->
+    <!-- PAGE 2: PRODUCT TABLE + STANDARD T&C                                  -->
+    <!-- ====================================================================== -->
+    <div class="page-break"></div>
+    <div class="content">
+
+        <!-- QUOTE REF LINE -->
+        <table style="width: 100%; margin-bottom: 5px; font-size: 9pt; color: #cc0000; font-weight: bold;">
+            <tr>
+                <td style="text-align: left; width: 70%;">
+                    <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/{!IF(quote.Quote_Id__c != null, quote.Quote_Id__c, quote.QuoteNumber)}/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
+                </td>
+                <td style="text-align: right; width: 30%;">
+                    <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
+                </td>
+            </tr>
+        </table>
+
+        <!-- QUOTATION TITLE -->
+        <div style="text-align: center; font-size: 9pt; font-weight: bold; margin: 5px 0 8px 0; text-decoration: underline;">
+            QUOTATION FOR CYRIX {!productNamesList}<apex:outputPanel rendered="{!quote.Vertical__c != null}"> &amp; {!quote.Vertical__c}</apex:outputPanel>
+        </div>
+
+        <!-- PRICING TABLE -->
+        <table style="width: 100%; border-collapse: collapse; font-size: 8pt;">
+            <thead>
+                <tr>
+                    <th style="width: 30px; border: 1px solid #000; padding: 4px; text-align: center;"><strong>SLN<br/>o</strong></th>
+                    <th style="width: 60px; border: 1px solid #000; padding: 4px;"><strong>ITEM<br/>CODE</strong></th>
+                    <th style="border: 1px solid #000; padding: 4px;"><strong>Description of Goods</strong></th>
+                    <th style="width: 40px; border: 1px solid #000; padding: 4px; text-align: center;"><strong>Unit</strong></th>
+                    <th style="width: 50px; border: 1px solid #000; padding: 4px; text-align: center;"><strong>Unit<br/>Price</strong></th>
+                    <th style="width: 30px; border: 1px solid #000; padding: 4px; text-align: center;"><strong>Qty</strong></th>
+                    <th style="width: 55px; border: 1px solid #000; padding: 4px; text-align: right;"><strong>Price</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                <apex:variable var="rowNum" value="{!1}" />
+                <apex:repeat value="{!lineItems}" var="item">
+                    <tr>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: center;">
+                            <apex:outputText value="{0, number, 0}"><apex:param value="{!rowNum}" /></apex:outputText>
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px;">
+                            <apex:outputText value="{!IF(item.Product2.Item_Code__c != null, item.Product2.Item_Code__c, item.Product2.ProductCode)}" />
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px;">
+                            <strong>{!item.Product2.Name}</strong>
+                            <apex:outputPanel rendered="{!item.Product_Line_Description__c != null}">
+                                <br/><br/>({!item.Product_Line_Description__c})
+                            </apex:outputPanel>
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: center;">
+                            <apex:outputText value="{!IF(item.Product2.QuantityUnitOfMeasure != null, item.Product2.QuantityUnitOfMeasure, 'Nos')}" />
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                            <apex:outputText value="{0, number, ###,##0.00}"><apex:param value="{!item.ListPrice}" /></apex:outputText>
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: center;">
+                            <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!item.Quantity}" /></apex:outputText>
+                        </td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                            <apex:outputText value="{0, number, ###,##0.00}"><apex:param value="{!item.TotalPrice}" /></apex:outputText>
+                        </td>
+                    </tr>
+                    <apex:variable var="rowNum" value="{!rowNum + 1}" />
+                </apex:repeat>
+                <!-- Empty row -->
+                <tr>
+                    <td style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+                    <td style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+                    <td style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+                    <td style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+                    <td style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+                    <td style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+                    <td style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+                </tr>
+                <!-- Total -->
+                <tr>
+                    <td style="border: none;" colspan="5">&nbsp;</td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: right; font-weight: bold;">Total</td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                        <apex:outputText value="{0, number, ###,##0.00}"><apex:param value="{!subtotal}" /></apex:outputText>
+                    </td>
+                </tr>
+                <!-- GST -->
+                <tr>
+                    <td style="border: none;" colspan="5">&nbsp;</td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: right;">{!gstDisplayRate}</td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                        <apex:outputText value="{0, number, ###,##0.00}"><apex:param value="{!taxAmount}" /></apex:outputText>
+                    </td>
+                </tr>
+                <!-- Grand Total -->
+                <tr>
+                    <td style="border: none;" colspan="5">&nbsp;</td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: right; font-weight: bold;">Grand Total</td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: right; font-weight: bold;">
+                        <apex:outputText value="{0, number, ###,##0.00}"><apex:param value="{!grandTotal}" /></apex:outputText>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Grand Total in Words -->
+        <p style="font-weight: bold; font-size: 8pt;">&lt;{!grandTotalInWords}&gt;</p>
+        <p style="font-size: 7pt; font-weight: bold; color: #cc0000;">***Note: If required</p>
+
+        <!-- STANDARD TERMS AND CONDITIONS -->
+        <div style="text-align: center; font-size: 9pt; font-weight: bold; text-decoration: underline; margin: 10px 0 8px 0;">
+            STANDARD TERMS AND CONDITIONS:
+        </div>
+
+        <p style="font-size: 9pt; font-weight: bold; margin: 10px 0 3px 0;">Validity</p>
+        <p style="font-size: 8pt;">This quotation is valid for <strong>{!validityDays}</strong> from the date of issue and is subject to reconfirmation thereafter.</p>
+
+        <p style="font-size: 9pt; font-weight: bold; margin: 10px 0 3px 0;">Price</p>
+        <p style="font-size: 8pt;">The quoted price includes applicable levies such as GST, import duties (if any), freight, packing, forwarding, transportation, insurance, <strong><u>{!installationScope}</u></strong> at the installation site. Any additional statutory levies imposed by Government authorities shall be borne by the purchaser.</p>
+
+        <p style="font-size: 9pt; font-weight: bold; margin: 10px 0 3px 0;">PAYMENT TERMS &amp; CONDITIONS:</p>
+        <p style="font-size: 8pt;">
+            <apex:outputPanel rendered="{!paymentTerms.size > 0}">
+                <apex:repeat value="{!paymentTerms}" var="pt">
+                    <strong>{!pt.Percentage__c}%</strong> {!pt.Payment_Term__c}<br/>
+                </apex:repeat>
+            </apex:outputPanel>
+            <apex:outputPanel rendered="{!paymentTerms.size == 0}">
+                <strong>{!advancePercent}</strong> Advance payment with Purchase Order<br/>
+                <strong>{!shippingPercent}</strong> payment on confirmation of shipping<br/>
+                <strong>{!deliveryPercent}</strong> payment on delivery to site<br/>
+                <strong>{!installationPercent}</strong> payment after installation and handover
+            </apex:outputPanel>
+        </p>
+
+        <p style="font-size: 9pt; font-weight: bold; margin: 10px 0 3px 0;">DELIVERY</p>
+        <p style="font-size: 8pt;">Delivery will be scheduled within <strong>{!deliveryWeeks}</strong> from receipt of confirmed Purchase Order along with advance payment.</p>
+
+        <p style="font-size: 9pt; font-weight: bold; margin: 10px 0 3px 0;">Installation &amp; Approvals</p>
+        <p style="font-size: 8pt;">Installation will be carried out at the approved site without additional charges, subject to site readiness confirmation from the customer. All civil, electrical, air conditioning, earthing, and related pre-installation requirements are the responsibility of the purchaser. Statutory approvals such as PC-PNDT and AERB (where applicable) must be obtained by the customer prior to installation.</p>
 
     </div>
 
