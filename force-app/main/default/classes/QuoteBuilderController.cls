@@ -192,55 +192,67 @@ public with sharing class QuoteBuilderController {
 
     @AuraEnabled
     public static void saveQuoteLineItems(Id quoteId, String lineItemsJSON) {
-        List<LineItemInput> lineItems = (List<LineItemInput>) JSON.deserialize(lineItemsJSON, List<LineItemInput>.class);
-        if (lineItems == null || lineItems.isEmpty()) {
-            throw new AuraHandledException('At least one line item is required.');
-        }
+        try {
+            List<LineItemInput> lineItems = (List<LineItemInput>) JSON.deserialize(lineItemsJSON, List<LineItemInput>.class);
+            if (lineItems == null || lineItems.isEmpty()) {
+                throw new AuraHandledException('At least one line item is required.');
+            }
 
-        List<QuoteLineItem> qliList = new List<QuoteLineItem>();
-        for (LineItemInput item : lineItems) {
-            QuoteLineItem qli = new QuoteLineItem();
-            qli.QuoteId = quoteId;
-            qli.Product2Id = item.productId;
-            qli.PricebookEntryId = item.pricebookEntryId;
-            qli.Quantity = item.quantity;
-            qli.UnitPrice = item.unitPrice;
-            qli.Discount = item.discount;
-            qli.Tax_Type__c = item.taxType;
-            qli.Product_Line_Description__c = item.lineDescription;
-            qli.Product_Detailed_Description__c = item.detailedDescription;
-            qli.Price_Status__c = 'Standard';
-            qliList.add(qli);
+            List<QuoteLineItem> qliList = new List<QuoteLineItem>();
+            for (LineItemInput item : lineItems) {
+                QuoteLineItem qli = new QuoteLineItem();
+                qli.QuoteId = quoteId;
+                qli.Product2Id = item.productId;
+                qli.PricebookEntryId = item.pricebookEntryId;
+                qli.Quantity = item.quantity;
+                qli.UnitPrice = item.unitPrice;
+                qli.Discount = item.discount;
+                qli.Tax_Type__c = item.taxType;
+                qli.Product_Line_Description__c = item.lineDescription;
+                qli.Product_Detailed_Description__c = item.detailedDescription;
+                qli.Price_Status__c = 'Standard';
+                qliList.add(qli);
+            }
+            insert qliList;
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new AuraHandledException('Line item save failed: ' + e.getMessage());
         }
-        insert qliList;
     }
 
     @AuraEnabled
     public static void updateQuoteLineItems(Id quoteId, String lineItemsJSON) {
-        List<LineItemInput> lineItems = (List<LineItemInput>) JSON.deserialize(lineItemsJSON, List<LineItemInput>.class);
-        if (lineItems == null || lineItems.isEmpty()) {
-            throw new AuraHandledException('At least one line item is required.');
-        }
+        try {
+            List<LineItemInput> lineItems = (List<LineItemInput>) JSON.deserialize(lineItemsJSON, List<LineItemInput>.class);
+            if (lineItems == null || lineItems.isEmpty()) {
+                throw new AuraHandledException('At least one line item is required.');
+            }
 
-        List<QuoteLineItem> oldItems = [SELECT Id FROM QuoteLineItem WHERE QuoteId = :quoteId];
-        if (!oldItems.isEmpty()) delete oldItems;
+            List<QuoteLineItem> oldItems = [SELECT Id FROM QuoteLineItem WHERE QuoteId = :quoteId];
+            if (!oldItems.isEmpty()) delete oldItems;
 
-        List<QuoteLineItem> qliList = new List<QuoteLineItem>();
-        for (LineItemInput item : lineItems) {
-            QuoteLineItem qli = new QuoteLineItem();
-            qli.QuoteId = quoteId;
-            qli.Product2Id = item.productId;
-            qli.PricebookEntryId = item.pricebookEntryId;
-            qli.Quantity = item.quantity;
-            qli.UnitPrice = item.unitPrice;
-            qli.Discount = item.discount;
-            qli.Tax_Type__c = item.taxType;
-            qli.Product_Line_Description__c = item.lineDescription;
-            qli.Product_Detailed_Description__c = item.detailedDescription;
-            qli.Price_Status__c = 'Standard';
-            qliList.add(qli);
+            List<QuoteLineItem> qliList = new List<QuoteLineItem>();
+            for (LineItemInput item : lineItems) {
+                QuoteLineItem qli = new QuoteLineItem();
+                qli.QuoteId = quoteId;
+                qli.Product2Id = item.productId;
+                qli.PricebookEntryId = item.pricebookEntryId;
+                qli.Quantity = item.quantity;
+                qli.UnitPrice = item.unitPrice;
+                qli.Discount = item.discount;
+                qli.Tax_Type__c = item.taxType;
+                qli.Product_Line_Description__c = item.lineDescription;
+                qli.Product_Detailed_Description__c = item.detailedDescription;
+                qli.Price_Status__c = 'Standard';
+                qliList.add(qli);
+            }
+            insert qliList;
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new AuraHandledException('Line item update failed: ' + e.getMessage());
         }
-        insert qliList;
     }
 
     // ===== Inner Classes =====
