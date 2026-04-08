@@ -11,11 +11,12 @@
 <style type="text/css">
     @page {
         size: A4;
-        margin: 8mm 15mm 20mm 15mm;
+        margin: 25mm 15mm 25mm 15mm;
 
-        @bottom-center {
-            content: element(footer);
-        }
+        background-image: url("{!URLFOR($Resource.Letter_Head)}");
+        background-size: 100% 100%;
+        background-position: center;
+        background-repeat: no-repeat;
     }
     body {
         font-family: 'Times New Roman', Times, serif;
@@ -227,19 +228,14 @@
 </head>
 <body>
 
-    <!-- RUNNING FOOTER (appears on every page) -->
-    <div class="page-footer">
-        {!companyCin}
-    </div>
+    <!-- Footer removed - using Letter_Head background which includes footer -->
 
     <!-- ====================================================================== -->
     <!-- PAGE 1: COVER LETTER                                                   -->
     <!-- ====================================================================== -->
 
     <!-- COMPANY HEADER WITH LOGO -->
-    <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
-    </div>
+    <!-- Logo from Letter_Head background -->
 
     <!-- QUOTE REFERENCE LINE -->
     <table class="ref-line">
@@ -341,9 +337,7 @@
     <div class="page-break"></div>
 
     <!-- COMPANY HEADER (repeated on page 2) -->
-    <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
-    </div>
+    <!-- Logo from Letter_Head background -->
 
     <!-- QUOTE REF LINE (repeated) -->
     <table class="ref-line">
@@ -533,9 +527,7 @@
     <div class="page-break"></div>
 
     <!-- COMPANY HEADER -->
-    <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
-    </div>
+    <!-- Logo from Letter_Head background -->
 
     <!-- QUOTE REF LINE -->
     <table class="ref-line">
@@ -626,9 +618,7 @@
     <div class="page-break"></div>
 
     <!-- COMPANY HEADER -->
-    <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
-    </div>
+    <!-- Logo from Letter_Head background -->
 
     <!-- QUOTE REF LINE -->
     <table class="ref-line">
@@ -791,9 +781,7 @@
     <div class="page-break"></div>
 
     <!-- COMPANY HEADER -->
-    <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
-    </div>
+    <!-- Logo from Letter_Head background -->
 
     <!-- QUOTE REF LINE -->
     <table class="ref-line">
@@ -871,9 +859,7 @@
     <div class="page-break"></div>
 
     <!-- COMPANY HEADER -->
-    <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
-    </div>
+    <!-- Logo from Letter_Head background -->
 
     <!-- QUOTE REF LINE -->
     <table class="ref-line">
@@ -1018,9 +1004,7 @@
     <div class="page-break"></div>
 
     <!-- COMPANY HEADER -->
-    <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
-    </div>
+    <!-- Logo from Letter_Head background -->
 
     <!-- QUOTE REF LINE -->
     <table class="ref-line">
@@ -1117,9 +1101,7 @@
     <div class="page-break"></div>
 
     <!-- COMPANY HEADER -->
-    <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
-    </div>
+    <!-- Logo from Letter_Head background -->
 
     <!-- QUOTE REF LINE -->
     <table class="ref-line">
@@ -1292,9 +1274,7 @@
     <div class="page-break"></div>
 
     <!-- COMPANY HEADER -->
-    <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
-    </div>
+    <!-- Logo from Letter_Head background -->
 
     <!-- QUOTE REF LINE -->
     <table class="ref-line">
@@ -1425,9 +1405,7 @@
     <div class="page-break"></div>
 
     <!-- COMPANY HEADER -->
-    <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
-    </div>
+    <!-- Logo from Letter_Head background -->
 
     <!-- QUOTE REF LINE -->
     <table class="ref-line">
@@ -1511,9 +1489,7 @@
     <div class="page-break"></div>
 
     <!-- COMPANY HEADER -->
-    <div class="company-header">
-        <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="company-logo" />
-    </div>
+    <!-- Logo from Letter_Head background -->
 
     <!-- QUOTE REF LINE -->
     <table class="ref-line">
