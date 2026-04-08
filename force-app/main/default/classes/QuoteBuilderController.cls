@@ -105,7 +105,7 @@ public with sharing class QuoteBuilderController {
             'Product2.Description, Product2.HSN_Code__c, ' +
             'Product2.Standard_Price__c, Product2.QuantityUnitOfMeasure, ' +
             'Product2.Line_Description__c, Product2.Detailed_Description__c, ' +
-            'UnitPrice, Tax__c, CurrencyIsoCode ' +
+            'UnitPrice, Tax__c, Max_Discount__c, CurrencyIsoCode ' +
             'FROM PricebookEntry ' +
             'WHERE Pricebook2Id = :pbId ' +
             'AND Product2.IsActive = true ' +
@@ -130,6 +130,7 @@ public with sharing class QuoteBuilderController {
                 psr.description = pbe.Product2.Description;
                 psr.hsnCode = pbe.Product2.HSN_Code__c;
                 psr.taxPercent = pbe.Tax__c;
+                psr.maxDiscount = pbe.Max_Discount__c;
                 psr.unitPrice = pbe.UnitPrice;
                 psr.standardPrice = pbe.Product2.Standard_Price__c;
                 psr.uom = pbe.Product2.QuantityUnitOfMeasure;
@@ -147,7 +148,10 @@ public with sharing class QuoteBuilderController {
     @AuraEnabled
     public static QuoteEditContext getQuoteForEdit(Id quoteId) {
         Quote q = [
-            SELECT Id, Pricebook2Id, OpportunityId, Opportunity.AccountId
+            SELECT Id, Pricebook2Id, OpportunityId, Opportunity.AccountId,
+                   Packing_Charge__c, Internal_Transport_Cost__c, Warrantee_Cost__c,
+                   Installation_Cost__c, Traning_Cost__c, Insurance_Cost__c,
+                   Total_Internal_Charges__c, Total_Pricebook_Price__c
             FROM Quote
             WHERE Id = :quoteId
             LIMIT 1
@@ -158,13 +162,20 @@ public with sharing class QuoteBuilderController {
         ctx.pricebookId = q.Pricebook2Id;
         ctx.opportunityId = q.OpportunityId;
         ctx.accountId = q.Opportunity != null ? q.Opportunity.AccountId : null;
+        ctx.packingCharge = q.Packing_Charge__c;
+        ctx.transportCost = q.Internal_Transport_Cost__c;
+        ctx.warrantyCost = q.Warrantee_Cost__c;
+        ctx.installationCost = q.Installation_Cost__c;
+        ctx.trainingCost = q.Traning_Cost__c;
+        ctx.insuranceCost = q.Insurance_Cost__c;
 
         ctx.lineItems = new List<QuoteLineItemResult>();
         for (QuoteLineItem qli : [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
                    Product2.QuantityUnitOfMeasure,
-                   PricebookEntryId, PricebookEntry.Tax__c,
+                   PricebookEntryId, PricebookEntry.Tax__c, PricebookEntry.Max_Discount__c,
                    Quantity, ListPrice, UnitPrice, Discount,
+                   Tax_Percent__c, Tax_Amount__c,
                    Product_Line_Description__c,
                    Product_Detailed_Description__c
             FROM QuoteLineItem
@@ -182,7 +193,9 @@ public with sharing class QuoteBuilderController {
             item.listPrice = qli.ListPrice;
             item.unitPrice = qli.UnitPrice;
             item.discount = qli.Discount != null ? qli.Discount : 0;
-            item.taxPercent = qli.PricebookEntry.Tax__c != null ? qli.PricebookEntry.Tax__c : 0;
+            item.taxPercent = qli.Tax_Percent__c != null ? qli.Tax_Percent__c : (qli.PricebookEntry.Tax__c != null ? qli.PricebookEntry.Tax__c : 0);
+            item.taxAmount = qli.Tax_Amount__c;
+            item.maxDiscount = qli.PricebookEntry.Max_Discount__c;
             item.lineDescription = qli.Product_Line_Description__c;
             item.detailedDescription = qli.Product_Detailed_Description__c;
             ctx.lineItems.add(item);
@@ -208,9 +221,16 @@ public with sharing class QuoteBuilderController {
                 qli.Quantity = item.quantity;
                 qli.UnitPrice = item.unitPrice;
                 qli.Discount = item.discount;
+                qli.Tax_Percent__c = item.taxPercent;
+                qli.Tax_Amount__c = item.taxAmount;
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
-                qli.Price_Status__c = 'Not Required';
+                // Set Price_Status based on discount vs max discount from pricebook entry
+                if (item.maxDiscount != null && item.discount != null && item.discount > item.maxDiscount) {
+                    qli.Price_Status__c = 'Approval Required';
+                } else {
+                    qli.Price_Status__c = 'Standard';
+                }
                 qliList.add(qli);
             }
             insert qliList;
@@ -241,9 +261,15 @@ public with sharing class QuoteBuilderController {
                 qli.Quantity = item.quantity;
                 qli.UnitPrice = item.unitPrice;
                 qli.Discount = item.discount;
+                qli.Tax_Percent__c = item.taxPercent;
+                qli.Tax_Amount__c = item.taxAmount;
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
-                qli.Price_Status__c = 'Not Required';
+                if (item.maxDiscount != null && item.discount != null && item.discount > item.maxDiscount) {
+                    qli.Price_Status__c = 'Approval Required';
+                } else {
+                    qli.Price_Status__c = 'Standard';
+                }
                 qliList.add(qli);
             }
             insert qliList;
@@ -261,6 +287,9 @@ public with sharing class QuoteBuilderController {
         public Decimal quantity;
         public Decimal unitPrice;
         public Decimal discount;
+        public Decimal taxPercent;
+        public Decimal taxAmount;
+        public Decimal maxDiscount;
         public String lineDescription;
         public String detailedDescription;
     }
@@ -304,6 +333,7 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public String description;
         @AuraEnabled public String hsnCode;
         @AuraEnabled public Decimal taxPercent;
+        @AuraEnabled public Decimal maxDiscount;
         @AuraEnabled public Decimal unitPrice;
         @AuraEnabled public Decimal standardPrice;
         @AuraEnabled public String uom;
@@ -316,6 +346,12 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Id pricebookId;
         @AuraEnabled public Id opportunityId;
         @AuraEnabled public Id accountId;
+        @AuraEnabled public Decimal packingCharge;
+        @AuraEnabled public Decimal transportCost;
+        @AuraEnabled public Decimal warrantyCost;
+        @AuraEnabled public Decimal installationCost;
+        @AuraEnabled public Decimal trainingCost;
+        @AuraEnabled public Decimal insuranceCost;
         @AuraEnabled public List<QuoteLineItemResult> lineItems;
     }
 
@@ -336,6 +372,8 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Decimal unitPrice;
         @AuraEnabled public Decimal discount;
         @AuraEnabled public Decimal taxPercent;
+        @AuraEnabled public Decimal taxAmount;
+        @AuraEnabled public Decimal maxDiscount;
         @AuraEnabled public String lineDescription;
         @AuraEnabled public String detailedDescription;
     }
