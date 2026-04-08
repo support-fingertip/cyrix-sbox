@@ -95,6 +95,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     get isSearchDisabled() { return !this.searchTerm || this.searchTerm.length < 2; }
     get isSaveDisabled() { return this.isSaving || this.lineItems.length === 0; }
     get pageTitle() { return this.isEditMode ? 'Edit Quote' : 'Create Quote'; }
+    get quoteName() { return this.isEditMode ? undefined : 'Auto'; }
     get saveButtonLabel() { return this.isSaving ? 'Saving...' : (this.isEditMode ? 'Update Quote' : 'Save Quote'); }
     get hasShippingAddresses() { return this.shippingAddresses.length > 0; }
 
@@ -603,8 +604,17 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     reduceErrors(error) {
         if (typeof error === 'string') return error;
         if (error?.body?.message) return error.body.message;
+        if (error?.body?.fieldErrors) {
+            const fieldMsgs = Object.values(error.body.fieldErrors).flat().map(e => e.message);
+            if (fieldMsgs.length) return fieldMsgs.join(', ');
+        }
+        if (error?.body?.pageErrors) {
+            const pageMsgs = error.body.pageErrors.map(e => e.message);
+            if (pageMsgs.length) return pageMsgs.join(', ');
+        }
         if (error?.message) return error.message;
         if (Array.isArray(error?.body)) return error.body.map(e => e.message).join(', ');
+        console.error('Unhandled error format:', JSON.stringify(error));
         return 'An unexpected error occurred.';
     }
 
