@@ -47,8 +47,8 @@ public with sharing class quoteTriggerHandler {
             
     
             // Build the name
-            String baseName = 'C-' + shortCode +'/'+q.Business_Vertical__c +'/QTN-' + String.format('{0,number,000}', new Object[]{nextNumber}) + '/' + financialYear;
-            if (q.Version_Number__c != null && q.Version_Number__c > 1) {
+            String baseName = 'C-' + shortCode + '/' + q.Business_Vertical__c + '/QTN-' + String.valueOf(nextNumber.intValue()).leftPad(3, '0') + '/' + financialYear;
+            if (q.Version_Number__c != null && q.Version_Number__c >= 1) {
                 baseName += '-RV' + q.Version_Number__c;
             }
             q.Name = baseName;
