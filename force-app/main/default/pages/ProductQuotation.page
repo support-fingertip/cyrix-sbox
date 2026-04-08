@@ -304,8 +304,8 @@
         </table>
 
         <!-- WARRANTY -->
-        <p style="font-size: 10pt; font-weight: bold; text-decoration: underline; margin: 5px 0 5px 0;">Warranty</p>
-        <p style="font-size: 9pt; margin-left: 10px;">
+        <p style="font-size: 9pt; font-weight: bold; text-decoration: underline; margin: 3px 0 3px 0;">Warranty</p>
+        <p style="font-size: 8pt; margin-left: 10px;">
             12-month standard warranty <apex:outputPanel rendered="{!warrantyExtra != ''}"><strong><u>{!warrantyExtra}</u></strong></apex:outputPanel> from the date of installation covers manufacturing defects only.
             Repair or replacement of defective components during this period will be at the Company&#8217;s discretion.
             Warranty excludes damages arising from power fluctuations, environmental conditions, mishandling, natural
@@ -313,15 +313,15 @@
         </p>
 
         <!-- SITE RESPONSIBILITIES -->
-        <p style="font-size: 9pt; font-weight: bold; margin: 10px 0 5px 15px;">Site Responsibilities</p>
-        <p style="font-size: 9pt; margin-left: 15px;">
+        <p style="font-size: 8pt; font-weight: bold; margin: 6px 0 3px 15px;">Site Responsibilities</p>
+        <p style="font-size: 8pt; margin-left: 15px;">
             The customer shall maintain recommended environmental and electrical conditions. Any damage caused due to
             non-compliance will not be covered under warranty
         </p>
 
         <!-- BANK DETAILS -->
-        <p style="font-size: 9pt; font-weight: bold; margin: 10px 0 5px 15px;">BANK DETAILS:</p>
-        <p style="font-size: 9pt; margin-left: 15px;">
+        <p style="font-size: 8pt; font-weight: bold; margin: 6px 0 3px 15px;">BANK DETAILS:</p>
+        <p style="font-size: 8pt; margin-left: 15px;">
             A/C Number: {!bankAccountNumber}<br/>
             Bank Name: {!bankName}<br/>
             Branch Code: {!bankBranch}<br/>
@@ -329,38 +329,38 @@
         </p>
 
         <!-- ACCEPTANCE OF QUOTATION -->
-        <p style="font-size: 9pt; font-weight: bold; margin: 10px 0 5px 15px;">ACCEPTANCE OF QUOTATION:</p>
-        <p style="font-size: 9pt; margin-left: 15px;">
+        <p style="font-size: 8pt; font-weight: bold; margin: 6px 0 3px 15px;">ACCEPTANCE OF QUOTATION:</p>
+        <p style="font-size: 8pt; margin-left: 15px;">
             The quotation shall be considered accepted upon issuance of a formal Purchase Order or written confirmation by the
             CLIENT. Acceptance of the quotation shall constitute agreement to all terms and conditions mentioned herein.
         </p>
 
         <!-- CANCELLATION/REFUND NORMS -->
-        <p style="font-size: 9pt; font-weight: bold; margin: 10px 0 5px 15px;">CANCELLATION/REFUND NORMS:</p>
-        <p style="font-size: 9pt; margin-left: 15px;">
+        <p style="font-size: 8pt; font-weight: bold; margin: 6px 0 3px 15px;">CANCELLATION/REFUND NORMS:</p>
+        <p style="font-size: 8pt; margin-left: 15px;">
             Cancellation after issuance of Purchase Order will attract a <strong>10% charge</strong> on the total order value.
             Orders cannot be cancelled once the equipment is shipped.
         </p>
 
         <!-- FORCE MAJEURE -->
-        <p style="font-size: 9pt; font-weight: bold; margin: 10px 0 5px 15px;">FORCE MAJEURE:</p>
-        <p style="font-size: 9pt; margin-left: 15px;">
+        <p style="font-size: 8pt; font-weight: bold; margin: 6px 0 3px 15px;">FORCE MAJEURE:</p>
+        <p style="font-size: 8pt; margin-left: 15px;">
             The Company shall not be liable for delays or non-performance due to circumstances beyond reasonable control.
             Delivery timelines will be extended accordingly.
         </p>
 
         <!-- JURISDICTION -->
-        <p style="font-size: 9pt; font-weight: bold; margin: 10px 0 5px 15px;">JURISDICTION:</p>
-        <p style="font-size: 9pt; margin-left: 15px;">
+        <p style="font-size: 8pt; font-weight: bold; margin: 6px 0 3px 15px;">JURISDICTION:</p>
+        <p style="font-size: 8pt; margin-left: 15px;">
             All disputes shall be subject to the jurisdiction of the Company&#8217;s registered office location.
         </p>
 
         <!-- CLOSING -->
-        <p style="font-size: 9pt; margin-top: 15px;">
+        <p style="font-size: 8pt; margin-top: 10px;">
             Thanking you and always assuring you of our best services.
         </p>
 
-        <p style="font-size: 10pt; font-weight: bold; margin-top: 10px;">
+        <p style="font-size: 9pt; font-weight: bold; margin-top: 6px;">
             For CYRIX HEALTHCARE PVT.LTD
         </p>
 
