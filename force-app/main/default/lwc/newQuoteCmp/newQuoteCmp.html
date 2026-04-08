@@ -272,10 +272,10 @@
                                         <th scope="col" style="min-width:160px"><div class="slds-truncate">Product</div></th>
                                         <th scope="col" style="width:60px"><div class="slds-truncate">UOM</div></th>
                                         <th scope="col" style="width:85px"><div class="slds-truncate">Qty</div></th>
-                                        <th scope="col" style="width:110px"><div class="slds-truncate">Unit Price</div></th>
+                                        <th scope="col" style="width:110px"><div class="slds-truncate">List Price</div></th>
+                                        <th scope="col" style="width:110px"><div class="slds-truncate">Sales Price</div></th>
                                         <th scope="col" style="width:90px"><div class="slds-truncate">Disc. %</div></th>
                                         <th scope="col" style="width:70px"><div class="slds-truncate">Tax %</div></th>
-                                        <th scope="col" style="width:110px"><div class="slds-truncate">Tax Type</div></th>
                                         <th scope="col" style="width:115px"><div class="slds-truncate">Line Total</div></th>
                                         <th scope="col" style="width:45px"><div class="slds-truncate"></div></th>
                                     </tr>
@@ -305,10 +305,23 @@
                                             </td>
                                             <td>
                                                 <lightning-formatted-number
-                                                    value={item.unitPrice}
+                                                    value={item.listPrice}
                                                     format-style="currency"
                                                     currency-code={currencyCode}>
                                                 </lightning-formatted-number>
+                                            </td>
+                                            <td>
+                                                <lightning-input
+                                                    type="number"
+                                                    value={item.unitPrice}
+                                                    min="0"
+                                                    step="0.01"
+                                                    variant="label-hidden"
+                                                    formatter="currency"
+                                                    data-row-id={item.rowId}
+                                                    data-field="unitPrice"
+                                                    onchange={handleLineItemChange}>
+                                                </lightning-input>
                                             </td>
                                             <td>
                                                 <lightning-input
@@ -324,16 +337,6 @@
                                                 </lightning-input>
                                             </td>
                                             <td class="slds-text-align_center">{item.taxPercentDisplay}</td>
-                                            <td>
-                                                <lightning-combobox
-                                                    value={item.taxType}
-                                                    options={taxTypeOptions}
-                                                    variant="label-hidden"
-                                                    data-row-id={item.rowId}
-                                                    data-field="taxType"
-                                                    onchange={handleLineItemChange}>
-                                                </lightning-combobox>
-                                            </td>
                                             <td class="line-total-cell">
                                                 <lightning-formatted-number
                                                     value={item.lineTotal}

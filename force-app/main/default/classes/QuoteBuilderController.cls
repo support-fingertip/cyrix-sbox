@@ -102,10 +102,10 @@ public with sharing class QuoteBuilderController {
 
         String query = 'SELECT Id, Product2Id, Product2.Name, Product2.ProductCode, ' +
             'Product2.Product_Category__c, Product2.Make__c, Product2.Model__c, ' +
-            'Product2.Description, Product2.HSN_Code__c, Product2.Tax__c, ' +
+            'Product2.Description, Product2.HSN_Code__c, ' +
             'Product2.Standard_Price__c, Product2.QuantityUnitOfMeasure, ' +
             'Product2.Line_Description__c, Product2.Detailed_Description__c, ' +
-            'UnitPrice, CurrencyIsoCode ' +
+            'UnitPrice, Tax__c, CurrencyIsoCode ' +
             'FROM PricebookEntry ' +
             'WHERE Pricebook2Id = :pbId ' +
             'AND Product2.IsActive = true ' +
@@ -129,7 +129,7 @@ public with sharing class QuoteBuilderController {
                 psr.model = pbe.Product2.Model__c;
                 psr.description = pbe.Product2.Description;
                 psr.hsnCode = pbe.Product2.HSN_Code__c;
-                psr.taxPercent = pbe.Product2.Tax__c;
+                psr.taxPercent = pbe.Tax__c;
                 psr.unitPrice = pbe.UnitPrice;
                 psr.standardPrice = pbe.Product2.Standard_Price__c;
                 psr.uom = pbe.Product2.QuantityUnitOfMeasure;
@@ -162,9 +162,10 @@ public with sharing class QuoteBuilderController {
         ctx.lineItems = new List<QuoteLineItemResult>();
         for (QuoteLineItem qli : [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
-                   Product2.QuantityUnitOfMeasure, Product2.Tax__c,
-                   PricebookEntryId, Quantity, UnitPrice, Discount,
-                   Tax_Type__c, Product_Line_Description__c,
+                   Product2.QuantityUnitOfMeasure,
+                   PricebookEntryId, PricebookEntry.Tax__c,
+                   Quantity, ListPrice, UnitPrice, Discount,
+                   Product_Line_Description__c,
                    Product_Detailed_Description__c
             FROM QuoteLineItem
             WHERE QuoteId = :quoteId
@@ -178,10 +179,10 @@ public with sharing class QuoteBuilderController {
             item.productCode = qli.Product2.ProductCode;
             item.uom = qli.Product2.QuantityUnitOfMeasure != null ? qli.Product2.QuantityUnitOfMeasure : 'Nos';
             item.quantity = qli.Quantity;
+            item.listPrice = qli.ListPrice;
             item.unitPrice = qli.UnitPrice;
             item.discount = qli.Discount != null ? qli.Discount : 0;
-            item.taxPercent = qli.Product2.Tax__c != null ? qli.Product2.Tax__c : 0;
-            item.taxType = qli.Tax_Type__c != null ? qli.Tax_Type__c : 'GST';
+            item.taxPercent = qli.PricebookEntry.Tax__c != null ? qli.PricebookEntry.Tax__c : 0;
             item.lineDescription = qli.Product_Line_Description__c;
             item.detailedDescription = qli.Product_Detailed_Description__c;
             ctx.lineItems.add(item);
@@ -207,7 +208,6 @@ public with sharing class QuoteBuilderController {
                 qli.Quantity = item.quantity;
                 qli.UnitPrice = item.unitPrice;
                 qli.Discount = item.discount;
-                qli.Tax_Type__c = item.taxType;
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
                 qli.Price_Status__c = 'Not Required';
@@ -241,10 +241,9 @@ public with sharing class QuoteBuilderController {
                 qli.Quantity = item.quantity;
                 qli.UnitPrice = item.unitPrice;
                 qli.Discount = item.discount;
-                qli.Tax_Type__c = item.taxType;
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
-                qli.Price_Status__c = 'Standard';
+                qli.Price_Status__c = 'Not Required';
                 qliList.add(qli);
             }
             insert qliList;
@@ -262,7 +261,6 @@ public with sharing class QuoteBuilderController {
         public Decimal quantity;
         public Decimal unitPrice;
         public Decimal discount;
-        public String taxType;
         public String lineDescription;
         public String detailedDescription;
     }
@@ -334,10 +332,10 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public String productCode;
         @AuraEnabled public String uom;
         @AuraEnabled public Decimal quantity;
+        @AuraEnabled public Decimal listPrice;
         @AuraEnabled public Decimal unitPrice;
         @AuraEnabled public Decimal discount;
         @AuraEnabled public Decimal taxPercent;
-        @AuraEnabled public String taxType;
         @AuraEnabled public String lineDescription;
         @AuraEnabled public String detailedDescription;
     }

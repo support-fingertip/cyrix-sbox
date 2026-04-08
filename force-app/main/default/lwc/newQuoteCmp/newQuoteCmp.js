@@ -59,14 +59,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
     // ===== PICKLIST OPTIONS =====
 
-    get taxTypeOptions() {
-        return [
-            { label: 'GST', value: 'GST' },
-            { label: 'IGST', value: 'IGST' },
-            { label: 'Exempt', value: 'Exempt' }
-        ];
-    }
-
     get categoryOptions() {
         return [
             { label: 'All Categories', value: '' },
@@ -116,7 +108,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
     get totalTax() {
         return this.lineItems.reduce((sum, item) => {
-            if (item.taxType === 'Exempt') return sum;
             const base = (item.unitPrice || 0) * (item.quantity || 0);
             const afterDiscount = base - (base * ((item.discount || 0) / 100));
             return sum + (afterDiscount * ((item.taxPercent || 0) / 100));
@@ -210,7 +201,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                     const base = (item.unitPrice || 0) * (item.quantity || 0);
                     const discountAmt = base * ((item.discount || 0) / 100);
                     const afterDiscount = base - discountAmt;
-                    const taxAmt = item.taxType === 'Exempt' ? 0 : afterDiscount * ((item.taxPercent || 0) / 100);
+                    const taxAmt = afterDiscount * ((item.taxPercent || 0) / 100);
 
                     return {
                         rowId: 'row-' + rowCounter,
@@ -221,11 +212,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                         productCode: item.productCode,
                         uom: item.uom || 'Nos',
                         quantity: item.quantity,
+                        listPrice: item.listPrice || item.unitPrice,
                         unitPrice: item.unitPrice,
                         discount: item.discount || 0,
                         taxPercent: item.taxPercent || 0,
                         taxPercentDisplay: (item.taxPercent || 0) + '%',
-                        taxType: item.taxType || 'GST',
                         lineTotal: afterDiscount + taxAmt,
                         lineDescription: item.lineDescription || '',
                         detailedDescription: item.detailedDescription || ''
@@ -365,7 +356,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 quantity: item.quantity,
                 unitPrice: item.unitPrice,
                 discount: item.discount,
-                taxType: item.taxType,
                 lineDescription: item.lineDescription,
                 detailedDescription: item.detailedDescription
             }));
@@ -481,11 +471,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             productCode: product.productCode,
             uom: product.uom || 'Nos',
             quantity: 1,
+            listPrice: product.unitPrice,
             unitPrice: product.unitPrice,
             discount: 0,
             taxPercent: product.taxPercent || 0,
             taxPercentDisplay: (product.taxPercent || 0) + '%',
-            taxType: 'GST',
             lineTotal: product.unitPrice,
             lineDescription: product.lineDescription || '',
             detailedDescription: product.detailedDescription || ''
@@ -505,7 +495,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     handleLineItemChange(event) {
         const rowId = event.currentTarget.dataset.rowId;
         const field = event.currentTarget.dataset.field;
-        let value = field === 'taxType' ? event.detail.value : event.target.value;
+        const value = event.target.value;
 
         this.lineItems = this.lineItems.map(item => {
             if (item.rowId === rowId) {
@@ -513,16 +503,16 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
                 if (field === 'quantity') {
                     updated.quantity = parseFloat(value) || 0;
+                } else if (field === 'unitPrice') {
+                    updated.unitPrice = parseFloat(value) || 0;
                 } else if (field === 'discount') {
                     updated.discount = parseFloat(value) || 0;
-                } else if (field === 'taxType') {
-                    updated.taxType = value;
                 }
 
                 const base = updated.unitPrice * updated.quantity;
                 const discountAmt = base * (updated.discount / 100);
                 const afterDiscount = base - discountAmt;
-                const taxAmt = updated.taxType === 'Exempt' ? 0 : afterDiscount * ((updated.taxPercent || 0) / 100);
+                const taxAmt = afterDiscount * ((updated.taxPercent || 0) / 100);
                 updated.lineTotal = afterDiscount + taxAmt;
 
                 return updated;
