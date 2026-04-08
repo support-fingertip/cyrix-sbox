@@ -22,10 +22,10 @@
         position: running(footer);
         text-align: center;
         font-size: 7pt;
-        color: #ffffff;
+        color: #cc0000;
         font-weight: bold;
         letter-spacing: 1px;
-        padding-bottom: 8mm;
+        padding-bottom: 2mm;
     }
     body {
         font-family: 'Times New Roman', Times, serif;
