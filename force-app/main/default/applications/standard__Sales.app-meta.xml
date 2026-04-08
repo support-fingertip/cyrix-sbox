@@ -26,4 +26,5 @@
     <tabs>General_Settings__c</tabs>
     <tabs>Log__c</tabs>
     <tabs>Asset__c</tabs>
+    <tabs>Branch__c</tabs>
 </CustomApplication>

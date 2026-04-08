@@ -191,9 +191,13 @@
     <tabs>General_Settings__c</tabs>
     <tabs>Log__c</tabs>
     <tabs>Asset__c</tabs>
+    <tabs>Branch__c</tabs>
     <workspaceConfig>
         <mappings>
             <tab>Asset__c</tab>
+        </mappings>
+        <mappings>
+            <tab>Branch__c</tab>
         </mappings>
         <mappings>
             <tab>Daily_Log__c</tab>
