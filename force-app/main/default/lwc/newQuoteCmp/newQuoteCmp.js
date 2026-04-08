@@ -223,6 +223,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                         listPrice: item.listPrice || item.unitPrice,
                         unitPrice: item.unitPrice,
                         discount: item.discount || 0,
+                        maxDiscount: item.maxDiscount || 0,
                         taxPercent: item.taxPercent || 0,
                         taxPercentDisplay: (item.taxPercent || 0) + '%',
                         lineTotal: afterDiscount + taxAmt,
@@ -380,6 +381,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                     discount: item.discount,
                     taxPercent: item.taxPercent || 0,
                     taxAmount: Math.round(taxAmt * 100) / 100,
+                    maxDiscount: item.maxDiscount || 0,
                     lineDescription: item.lineDescription,
                     detailedDescription: item.detailedDescription
                 };
@@ -499,6 +501,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             listPrice: product.unitPrice,
             unitPrice: product.unitPrice,
             discount: 0,
+            maxDiscount: product.maxDiscount || 0,
             taxPercent: product.taxPercent || 0,
             taxPercentDisplay: (product.taxPercent || 0) + '%',
             lineTotal: product.unitPrice,
