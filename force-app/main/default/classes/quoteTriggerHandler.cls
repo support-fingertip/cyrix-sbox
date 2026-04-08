@@ -48,8 +48,8 @@ public with sharing class quoteTriggerHandler {
     
             // Build the name
             String baseName = 'C-' + shortCode +'/'+q.Business_Vertical__c +'/QTN-' + String.format('{0,number,000}', new Object[]{nextNumber}) + '/' + financialYear;
-            if (q.Version_Number__c != null && q.Version_Number__c > 1) {
-                baseName += '-RV' + q.Version_Number__c;
+            if (q.Version_Nmber__c != null && q.Version_Nmber__c > 1) {
+                baseName += '-RV' + q.Version_Nmber__c;
             }
             q.Name = baseName;
             } 
