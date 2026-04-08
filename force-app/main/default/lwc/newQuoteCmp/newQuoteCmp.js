@@ -33,9 +33,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // Default values for new quote (auto-populate Bill To from Account)
     defaultValues = {};
 
-    // Pricebook picklist
-    @track pricebookOptions = [];
-
     // Shipping address picker
     @track shippingAddresses = [];
     selectedShippingAddressId = '';
@@ -252,37 +249,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }
     }
 
-    async loadPricebooks() {
-        try {
-            const pricebooks = await getPricebooks();
-            this.pricebookOptions = (pricebooks || []).map(pb => ({
-                label: pb.pricebookName,
-                value: pb.pricebookId
-            }));
-        } catch (error) {
-            console.warn('Could not load pricebooks:', error);
-            this.pricebookOptions = [];
-        }
-    }
-
-    handlePricebookChange(event) {
-        this.pricebookId = event.detail.value;
-        // Clear existing search results when pricebook changes
-        this.searchResults = [];
-        this.showSearchResults = false;
-    }
-
-    // ===== ADDRESS HANDLERS =====
-
-    handleBillingFieldChange(event) {
-        const field = event.currentTarget.dataset.field;
-        this[field] = event.target.value;
-    }
-
-    handleShippingFieldChange(event) {
-        const field = event.currentTarget.dataset.field;
-        this[field] = event.target.value;
-    }
+    // ===== SHIPPING ADDRESS HANDLER =====
 
     handleShippingAddressSelect(event) {
         this.selectedShippingAddressId = event.detail.value;
