@@ -88,6 +88,9 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     get quoteName() { return this.isEditMode ? undefined : 'Auto'; }
     get saveButtonLabel() { return this.isSaving ? 'Saving...' : (this.isEditMode ? 'Update Quote' : 'Save Quote'); }
     get hasShippingAddresses() { return this.shippingAddresses.length > 0; }
+    // In edit mode, return undefined so an empty defaultValues object can't
+    // interfere with LDS auto-loading the saved Quote address subfields.
+    get formDefaultValues() { return this.isEditMode ? undefined : this.defaultValues; }
 
     // ===== CALCULATIONS =====
 
@@ -248,9 +251,21 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.shippingAddresses = addresses || [];
 
             // === AUTO-SELECT FIRST SHIPPING ADDRESS FOR NEW QUOTES ===
+            // Merge shipping defaults into defaultValues BEFORE the form mounts
+            // (loadOpportunityContext awaits this, and detectModeAndLoad sets
+            // formReady=true only after that returns).
             if (!this.isEditMode && this.shippingAddresses.length > 0) {
-                this.selectedShippingAddressId = this.shippingAddresses[0].addressId;
-                this.applyShippingAddress(this.shippingAddresses[0]);
+                const first = this.shippingAddresses[0];
+                this.selectedShippingAddressId = first.addressId;
+                this.defaultValues = {
+                    ...this.defaultValues,
+                    ShippingName: first.name || '',
+                    ShippingStreet: first.street || '',
+                    ShippingCity: first.city || '',
+                    ShippingState: first.state || '',
+                    ShippingPostalCode: first.postalCode || '',
+                    ShippingCountry: first.country || ''
+                };
             }
         } catch (error) {
             console.warn('Could not load shipping addresses:', error);
@@ -279,23 +294,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         };
 
         for (const [fieldName, value] of Object.entries(fields)) {
-            const fieldElement = this.template.querySelector(`lightning-input-field[field-name="${fieldName}"]`);
-            if (fieldElement) {
-                fieldElement.value = value;
-                fieldElement.dispatchEvent(new CustomEvent('change', { detail: { value } }));
-            }
+            const el = this.template.querySelector(
+                `lightning-input-field[field-name="${fieldName}"]`
+            );
+            if (el) el.value = value;
         }
-
-        setTimeout(() => {
-            const shippingAddressField = this.template.querySelector('lightning-input-field[field-name="ShippingAddress"]');
-            if (shippingAddressField) {
-                const currentValue = shippingAddressField.value;
-                shippingAddressField.value = '';
-                shippingAddressField.dispatchEvent(new CustomEvent('change', { detail: { value: '' } }));
-                shippingAddressField.value = currentValue;
-                shippingAddressField.dispatchEvent(new CustomEvent('change', { detail: { value: currentValue } }));
-            }
-        }, 100);
     }
 
     // ===== FORM HANDLERS =====

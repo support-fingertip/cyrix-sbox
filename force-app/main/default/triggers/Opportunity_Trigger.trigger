@@ -14,7 +14,6 @@ trigger Opportunity_Trigger on Opportunity (before insert, after insert, before 
 
     // ───────────── BEFORE INSERT ─────────────
     if (Trigger.operationType == TriggerOperation.BEFORE_INSERT) {
-        OpportunityTriggerHandler.generateAutoNumber(Trigger.new);
         OpportunityTriggerHandler.setDefaultStage(Trigger.new);
         OpportunityTriggerHandler.setOpportunityName(Trigger.new);
     }
