@@ -14,22 +14,55 @@ export default class SendQuotePDF extends LightningElement {
     @track body = '';
     @track isLoading = true;
     @track isSending = false;
+    @track cacheBuster = Date.now();
+    @track hasLoaded = false;
 
     get pdfPreviewUrl() {
-        return '/apex/ProductQuotation?id=' + this.recordId;
+        return '/apex/ProductQuotation?id=' + this.recordId + '&t=' + this.cacheBuster;
     }
 
     connectedCallback() {
+        this.resetState();
         this.loadQuoteDetails();
     }
 
+    renderedCallback() {
+        // Ensure data loads even if connectedCallback doesn't fire on reopen
+        if (!this.hasLoaded && this.recordId) {
+            this.hasLoaded = true;
+            this.loadQuoteDetails();
+        }
+    }
+
+    disconnectedCallback() {
+        // Reset flag so next open triggers load again
+        this.hasLoaded = false;
+    }
+
+    resetState() {
+        this.toAddress = '';
+        this.ccAddress = '';
+        this.bccAddress = '';
+        this.subject = '';
+        this.body = '';
+        this.isLoading = true;
+        this.isSending = false;
+        this.cacheBuster = Date.now();
+    }
+
     loadQuoteDetails() {
+        if (!this.recordId) {
+            this.isLoading = false;
+            return;
+        }
         this.isLoading = true;
         getQuoteDetails({ quoteId: this.recordId })
             .then(result => {
-                this.toAddress = result.contactEmail || '';
-                this.subject = result.defaultSubject || '';
-                this.body = result.defaultBody || '';
+                if (result) {
+                    this.toAddress = result.contactEmail || '';
+                    this.subject = result.defaultSubject || '';
+                    this.body = result.defaultBody || '';
+                }
                 this.isLoading = false;
             })
             .catch(error => {
