@@ -216,7 +216,7 @@ isLoading =false;
         } else if ((user === finance && status === 'Level 1 Approved') || (!l1 && user === finance && status === 'Pending')) {
             editable = true;
             selectable = true;
-        } else if (this.isOpenedByAdmin && (status === 'Pending' || status === 'Level 1 Approved')) {
+        } else if (this.isOpenedByAdmin && (status === 'Pending' || status === 'Level 1 Approved' || status === 'HR Approved')) {
             if (type !== 'DA') editable = true;
             selectable = true;
         }
