@@ -310,6 +310,7 @@ public with sharing class QuoteBuilderController {
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
                    Product2.QuantityUnitOfMeasure,
                    PricebookEntryId, PricebookEntry.Tax__c, PricebookEntry.Max_Discount_Percentage__c,
+                   PricebookEntry.Pricebook2.Name,
                    Quantity, ListPrice, UnitPrice, Discount,
                    Tax__c, Tax_Amount__c, Source_Pricebook__c,
                    Product_Line_Description__c,
@@ -332,7 +333,13 @@ public with sharing class QuoteBuilderController {
             item.taxPercent = qli.Tax__c != null ? qli.Tax__c : (qli.PricebookEntry.Tax__c != null ? qli.PricebookEntry.Tax__c : 0);
             item.taxAmount = qli.Tax_Amount__c;
             item.maxDiscount = qli.PricebookEntry.Max_Discount_Percentage__c;
-            item.sourcePricebook = qli.Source_Pricebook__c;
+            // Prefer the saved source pricebook; fall back to the PricebookEntry's
+            // actual pricebook name for legacy line items where Source_Pricebook__c is null.
+            item.sourcePricebook = String.isNotBlank(qli.Source_Pricebook__c)
+                ? qli.Source_Pricebook__c
+                : (qli.PricebookEntry != null && qli.PricebookEntry.Pricebook2 != null
+                    ? qli.PricebookEntry.Pricebook2.Name
+                    : null);
             item.lineDescription = qli.Product_Line_Description__c;
             item.detailedDescription = qli.Product_Detailed_Description__c;
             ctx.lineItems.add(item);
