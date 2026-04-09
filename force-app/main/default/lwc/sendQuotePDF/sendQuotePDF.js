@@ -1,4 +1,4 @@
-import { LightningElement, api, track } from 'lwc';
+import { LightningElement, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import getQuoteDetails from '@salesforce/apex/QuotePDFEmailController.getQuoteDetails';
@@ -7,39 +7,31 @@ import sendQuoteEmail from '@salesforce/apex/QuotePDFEmailController.sendQuoteEm
 export default class SendQuotePDF extends LightningElement {
     @api recordId;
 
-    @track toAddress = '';
-    @track ccAddress = '';
-    @track bccAddress = '';
-    @track subject = '';
-    @track body = '';
-    @track isLoading = true;
-    @track isSending = false;
-    @track cacheBuster = Date.now();
-    @track hasLoaded = false;
+    toAddress = '';
+    ccAddress = '';
+    bccAddress = '';
+    subject = '';
+    body = '';
+    isLoading = true;
+    isSending = false;
+    cacheBuster = Date.now();
 
     get pdfPreviewUrl() {
         return '/apex/ProductQuotation?id=' + this.recordId + '&t=' + this.cacheBuster;
     }
 
+    // @api invoke() is called by Salesforce every time the Quick Action is opened
+    // This is the proper way to handle re-opens of Screen Action LWCs
+    @api invoke() {
+        this.resetAndLoad();
+    }
+
     connectedCallback() {
-        this.resetState();
-        this.loadQuoteDetails();
+        this.resetAndLoad();
     }
 
-    renderedCallback() {
-        // Ensure data loads even if connectedCallback doesn't fire on reopen
-        if (!this.hasLoaded && this.recordId) {
-            this.hasLoaded = true;
-            this.loadQuoteDetails();
-        }
-    }
-
-    disconnectedCallback() {
-        // Reset flag so next open triggers load again
-        this.hasLoaded = false;
-    }
-
-    resetState() {
+    resetAndLoad() {
+        // Reset all state on each open
         this.toAddress = '';
         this.ccAddress = '';
         this.bccAddress = '';
@@ -48,6 +40,7 @@ export default class SendQuotePDF extends LightningElement {
         this.isLoading = true;
         this.isSending = false;
         this.cacheBuster = Date.now();
+        this.loadQuoteDetails();
     }
 
     loadQuoteDetails() {
@@ -55,7 +48,6 @@ export default class SendQuotePDF extends LightningElement {
             this.isLoading = false;
             return;
         }
-        this.isLoading = true;
         getQuoteDetails({ quoteId: this.recordId })
             .then(result => {
                 if (result) {
@@ -96,7 +88,6 @@ export default class SendQuotePDF extends LightningElement {
     }
 
     handleSendEmail() {
-        // Validate
         if (!this.toAddress) {
             this.showToast('Error', 'Please enter a To email address', 'error');
             return;
