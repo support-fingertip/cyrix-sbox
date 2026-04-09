@@ -96,6 +96,39 @@ public class OpportunityTriggerHandlerTest {
         System.assertEquals(acc.Name + ' ' + prod.Name, result.Name, 'Opportunity name should be Account + Product');
     }
 
+    /* ────── Opportunity Name = Account + Business Vertical + Product ────── */
+    @isTest
+    static void testOpportunityNameWithVerticalAndProduct() {
+        Account acc = [SELECT Id, Name FROM Account LIMIT 1];
+
+        Product2 prod = new Product2(Name = 'CT Scanner', IsActive = true);
+        insert prod;
+
+        Schema.DescribeFieldResult verticalDescribe =
+            Opportunity.Buisness_Vertical__c.getDescribe();
+        List<Schema.PicklistEntry> verticalEntries = verticalDescribe.getPicklistValues();
+        String verticalValue = verticalEntries.isEmpty() ? null : verticalEntries[0].getValue();
+
+        Opportunity opp = new Opportunity(
+            AccountId = acc.Id,
+            StageName = 'Qualified',
+            CloseDate = Date.today().addDays(30),
+            Product__c = prod.Id,
+            Buisness_Vertical__c = verticalValue
+        );
+
+        Test.startTest();
+        insert opp;
+        Test.stopTest();
+
+        Opportunity result = [SELECT Name FROM Opportunity WHERE Id = :opp.Id];
+        String expected = acc.Name +
+                          (String.isNotBlank(verticalValue) ? ' ' + verticalValue : '') +
+                          ' ' + prod.Name;
+        System.assertEquals(expected, result.Name,
+            'Opportunity name should be Account + Business Vertical + Product');
+    }
+
     /* ────── Stage Change ────── */
     @isTest
     static void testStageChange() {
