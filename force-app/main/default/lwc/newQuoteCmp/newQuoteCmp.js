@@ -18,6 +18,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     isEditMode = false;
     editRecordId = null;
     defaultOpportunityId = null;
+    formReady = false;
 
     // State
     isLoading = false;
@@ -134,22 +135,27 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         if (!this.recordId) return;
 
         this.isLoading = true;
+        this.formReady = false;
 
         const idPrefix = this.recordId.substring(0, 3);
 
         if (idPrefix === '0Q0') {
-            // Edit mode
+            // Edit mode — wait for line items + context BEFORE rendering the form
+            // so lightning-record-edit-form mounts with record-id already set and
+            // properly auto-populates BillingAddress / ShippingAddress / OpportunityId.
             this.isEditMode = true;
             this.editRecordId = this.recordId;
             await this.loadQuoteLineItems();
         } else {
-            // New quote mode
+            // New quote mode — wait for opportunity context (account, default Bill To)
+            // BEFORE rendering the form so default-values are present at first mount.
             this.isEditMode = false;
             this.defaultOpportunityId = this.recordId;
             this.opportunityId = this.recordId;
             await this.loadOpportunityContext();
         }
 
+        this.formReady = true;
         this.isLoading = false;
     }
 
