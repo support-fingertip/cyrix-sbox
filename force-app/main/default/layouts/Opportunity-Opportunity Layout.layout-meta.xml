@@ -8,7 +8,7 @@
         <label>Opportunity Information</label>
         <layoutColumns>
             <layoutItems>
-                <behavior>Required</behavior>
+                <behavior>Edit</behavior>
                 <field>Name</field>
             </layoutItems>
             <layoutItems>
