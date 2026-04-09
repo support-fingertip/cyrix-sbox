@@ -9,6 +9,7 @@ public with sharing class QuotePDFEmailController {
             SELECT Id, Name, QuoteNumber, Quote_Id__c, Vertical__c,
                    AccountId, Account.Name,
                    ContactId, Contact.Name, Contact.Email,
+                   OpportunityId, Opportunity.Email__c,
                    OwnerId, Owner.Name, Owner.Email
             FROM Quote
             WHERE Id = :quoteId
@@ -28,6 +29,7 @@ public with sharing class QuotePDFEmailController {
         wrapper.vertical = q.Vertical__c;
         wrapper.accountName = q.AccountId != null ? q.Account.Name : '';
         wrapper.contactEmail = q.ContactId != null ? q.Contact.Email : '';
+        wrapper.opportunityEmail = q.OpportunityId != null ? q.Opportunity.Email__c : '';
         wrapper.contactName = q.ContactId != null ? q.Contact.Name : '';
         wrapper.ownerEmail = q.OwnerId != null ? q.Owner.Email : '';
         wrapper.defaultSubject = 'Quotation for ' +
@@ -150,5 +152,6 @@ public with sharing class QuotePDFEmailController {
         @AuraEnabled public String ownerEmail;
         @AuraEnabled public String defaultSubject;
         @AuraEnabled public String defaultBody;
+        @AuraEnabled public String opportunityEmail;
     }
 }

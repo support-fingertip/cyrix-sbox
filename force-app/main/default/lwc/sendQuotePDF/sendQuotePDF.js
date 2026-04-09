@@ -1,4 +1,4 @@
-import { LightningElement, api, track } from 'lwc';
+import { LightningElement, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import getQuoteDetails from '@salesforce/apex/QuotePDFEmailController.getQuoteDetails';
@@ -7,52 +7,54 @@ import sendQuoteEmail from '@salesforce/apex/QuotePDFEmailController.sendQuoteEm
 export default class SendQuotePDF extends LightningElement {
     @api recordId;
 
-    @track toAddress = '';
-    @track ccAddress = '';
-    @track bccAddress = '';
-    @track subject = '';
-    @track body = '';
-    @track isLoading = false;
-    @track isSending = false;
-
-    _initialized = false;
-    _previewToken = Date.now();
+    toAddress = '';
+    ccAddress = '';
+    bccAddress = '';
+    subject = '';
+    body = '';
+    isLoading = true;
+    isSending = false;
+    cacheBuster = Date.now();
 
     get pdfPreviewUrl() {
-        return '/apex/ProductQuotation?id=' + this.recordId + '&t=' + this._previewToken;
+        return '/apex/ProductQuotation?id=' + this.recordId + '&t=' + this.cacheBuster;
     }
 
-    get showPreview() {
-        return !!this.recordId && !this.isLoading;
+    // @api invoke() is called by Salesforce every time the Quick Action is opened
+    // This is the proper way to handle re-opens of Screen Action LWCs
+    @api invoke() {
+        this.resetAndLoad();
     }
 
-    renderedCallback() {
-        if (this._initialized || !this.recordId) {
-            return;
-        }
-        this._initialized = true;
-        this.loadQuoteDetails();
+    connectedCallback() {
+        this.resetAndLoad();
     }
 
-    resetState() {
+    resetAndLoad() {
+        // Reset all state on each open
         this.toAddress = '';
         this.ccAddress = '';
         this.bccAddress = '';
         this.subject = '';
         this.body = '';
-        this.isLoading = false;
+        this.isLoading = true;
         this.isSending = false;
-        this._initialized = false;
+        this.cacheBuster = Date.now();
+        this.loadQuoteDetails();
     }
 
     loadQuoteDetails() {
-        this.isLoading = true;
-        this._previewToken = Date.now();
+        if (!this.recordId) {
+            this.isLoading = false;
+            return;
+        }
         getQuoteDetails({ quoteId: this.recordId })
             .then(result => {
-                this.toAddress = result.contactEmail || '';
-                this.subject = result.defaultSubject || '';
-                this.body = result.defaultBody || '';
+                if (result) {
+                    this.toAddress = result.contactEmail || '';
+                    this.subject = result.defaultSubject || '';
+                    this.body = result.defaultBody || '';
+                }
                 this.isLoading = false;
             })
             .catch(error => {
@@ -82,12 +84,10 @@ export default class SendQuotePDF extends LightningElement {
     }
 
     handleCancel() {
-        this.resetState();
         this.dispatchEvent(new CloseActionScreenEvent());
     }
 
     handleSendEmail() {
-        // Validate
         if (!this.toAddress) {
             this.showToast('Error', 'Please enter a To email address', 'error');
             return;
@@ -111,7 +111,6 @@ export default class SendQuotePDF extends LightningElement {
                 this.isSending = false;
                 if (result === 'SUCCESS') {
                     this.showToast('Success', 'Quote PDF sent successfully!', 'success');
-                    this.resetState();
                     this.dispatchEvent(new CloseActionScreenEvent());
                 } else {
                     this.showToast('Error', result, 'error');

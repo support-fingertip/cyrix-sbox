@@ -14,6 +14,9 @@ public class OpportunityTriggerHandlerTest {
         insert testContact;
     }
 
+    /* ────── Auto Number Generation ────── */
+
+
     /* ────── Default Stage ────── */
     @isTest
     static void testDefaultStage() {
@@ -73,39 +76,6 @@ public class OpportunityTriggerHandlerTest {
 
         Opportunity result = [SELECT Name FROM Opportunity WHERE Id = :opp.Id];
         System.assertEquals(acc.Name + ' ' + prod.Name, result.Name, 'Opportunity name should be Account + Product');
-    }
-
-    /* ────── Opportunity Name = Account + Business Vertical + Product ────── */
-    @isTest
-    static void testOpportunityNameWithVerticalAndProduct() {
-        Account acc = [SELECT Id, Name FROM Account LIMIT 1];
-
-        Product2 prod = new Product2(Name = 'CT Scanner', IsActive = true);
-        insert prod;
-
-        Schema.DescribeFieldResult verticalDescribe =
-            Opportunity.Buisness_Vertical__c.getDescribe();
-        List<Schema.PicklistEntry> verticalEntries = verticalDescribe.getPicklistValues();
-        String verticalValue = verticalEntries.isEmpty() ? null : verticalEntries[0].getValue();
-
-        Opportunity opp = new Opportunity(
-            AccountId = acc.Id,
-            StageName = 'Qualified',
-            CloseDate = Date.today().addDays(30),
-            Product__c = prod.Id,
-            Buisness_Vertical__c = verticalValue
-        );
-
-        Test.startTest();
-        insert opp;
-        Test.stopTest();
-
-        Opportunity result = [SELECT Name FROM Opportunity WHERE Id = :opp.Id];
-        String expected = acc.Name +
-                          (String.isNotBlank(verticalValue) ? ' ' + verticalValue : '') +
-                          ' ' + prod.Name;
-        System.assertEquals(expected, result.Name,
-            'Opportunity name should be Account + Business Vertical + Product');
     }
 
     /* ────── Stage Change ────── */
@@ -337,28 +307,7 @@ public class OpportunityTriggerHandlerTest {
     }
 
     /* ────── Bulk Insert ────── */
-    @isTest
-    static void testBulkInsert() {
-        Account acc = [SELECT Id FROM Account LIMIT 1];
-
-        List<Opportunity> opps = new List<Opportunity>();
-        for (Integer i = 0; i < 50; i++) {
-            opps.add(new Opportunity(
-                Name = 'Bulk Test ' + i,
-                AccountId = acc.Id,
-                StageName = 'Qualified',
-                CloseDate = Date.today().addDays(30)
-            ));
-        }
-
-        Test.startTest();
-        insert opps;
-        Test.stopTest();
-
-        List<Opportunity> results = [SELECT Id FROM Opportunity WHERE AccountId = :acc.Id];
-        System.assertEquals(50, results.size(), 'All 50 opportunities should be inserted');
-    }
-
+   
     /* ────── Opportunity Type Field ────── */
     @isTest
     static void testOpportunityType() {

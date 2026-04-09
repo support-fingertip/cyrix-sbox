@@ -2184,6 +2184,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>Opportunity.OpportunityId__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>Opportunity.Opportunity_Date__c</field>
         <readable>true</readable>
@@ -2355,11 +2360,6 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Pricebook2.Price_Book_Type__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
         <field>Pricebook2.Region__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -2416,6 +2416,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>PricebookEntry.Shipping_Charges__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>PricebookEntry.Tax__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -2866,6 +2871,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>QuoteLineItem.Product_Line_Description__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>QuoteLineItem.Tax_Amount__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
