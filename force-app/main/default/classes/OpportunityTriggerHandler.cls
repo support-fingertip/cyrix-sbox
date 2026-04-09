@@ -78,11 +78,14 @@ public class OpportunityTriggerHandler {
         for (Opportunity opp : opps) {
             if (opp.AccountId != null && accountMap.containsKey(opp.AccountId)) {
                 String accName = accountMap.get(opp.AccountId).Name;
+                String vertical = opp.Buisness_Vertical__c;
                 String prodName = '';
                 if (opp.Product__c != null && productMap.containsKey(opp.Product__c)) {
                     prodName = productMap.get(opp.Product__c).Name;
                 }
-                opp.Name = accName + (String.isNotBlank(prodName) ? ' ' + prodName : '');
+                opp.Name = accName +
+                           (String.isNotBlank(vertical) ? ' ' + vertical : '') +
+                           (String.isNotBlank(prodName) ? ' ' + prodName : '');
             }
         }
     }

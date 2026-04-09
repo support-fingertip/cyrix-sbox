@@ -12,19 +12,42 @@ export default class SendQuotePDF extends LightningElement {
     @track bccAddress = '';
     @track subject = '';
     @track body = '';
-    @track isLoading = true;
+    @track isLoading = false;
     @track isSending = false;
 
+    _initialized = false;
+    _previewToken = Date.now();
+
     get pdfPreviewUrl() {
-        return '/apex/ProductQuotation?id=' + this.recordId;
+        return '/apex/ProductQuotation?id=' + this.recordId + '&t=' + this._previewToken;
     }
 
-    connectedCallback() {
+    get showPreview() {
+        return !!this.recordId && !this.isLoading;
+    }
+
+    renderedCallback() {
+        if (this._initialized || !this.recordId) {
+            return;
+        }
+        this._initialized = true;
         this.loadQuoteDetails();
+    }
+
+    resetState() {
+        this.toAddress = '';
+        this.ccAddress = '';
+        this.bccAddress = '';
+        this.subject = '';
+        this.body = '';
+        this.isLoading = false;
+        this.isSending = false;
+        this._initialized = false;
     }
 
     loadQuoteDetails() {
         this.isLoading = true;
+        this._previewToken = Date.now();
         getQuoteDetails({ quoteId: this.recordId })
             .then(result => {
                 this.toAddress = result.contactEmail || '';
@@ -59,6 +82,7 @@ export default class SendQuotePDF extends LightningElement {
     }
 
     handleCancel() {
+        this.resetState();
         this.dispatchEvent(new CloseActionScreenEvent());
     }
 
@@ -87,6 +111,7 @@ export default class SendQuotePDF extends LightningElement {
                 this.isSending = false;
                 if (result === 'SUCCESS') {
                     this.showToast('Success', 'Quote PDF sent successfully!', 'success');
+                    this.resetState();
                     this.dispatchEvent(new CloseActionScreenEvent());
                 } else {
                     this.showToast('Error', result, 'error');

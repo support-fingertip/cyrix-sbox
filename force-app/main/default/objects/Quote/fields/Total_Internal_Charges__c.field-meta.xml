@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Total_Internal_Charges__c</fullName>
+    <description>Sum of all internal charges (packing, transport, warranty, installation, training, insurance) on the quote.</description>
     <externalId>false</externalId>
     <label>Total Internal Charges</label>
     <precision>18</precision>
