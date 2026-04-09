@@ -62,7 +62,7 @@ public with sharing class QuoteBuilderController {
                    Address__CountryCode__s, Same_as_BillingAddress__c
             FROM Shipping_Address__c
             WHERE Account__c = :accountId
-            ORDER BY CreatedDate DESC
+            ORDER BY Same_as_BillingAddress__c DESC, CreatedDate DESC
         ]) {
             ShippingAddressResult sar = new ShippingAddressResult();
             sar.addressId = sa.Id;
@@ -78,7 +78,11 @@ public with sharing class QuoteBuilderController {
             parts.add(sa.Name);
             if (String.isNotBlank(sa.Address__City__s)) parts.add(sa.Address__City__s);
             if (String.isNotBlank(sa.Address__StateCode__s)) parts.add(sa.Address__StateCode__s);
-            sar.displayLabel = String.join(parts, ', ');
+            String label = String.join(parts, ', ');
+            if (sa.Same_as_BillingAddress__c == true) {
+                label += ' (Default)';
+            }
+            sar.displayLabel = label;
 
             results.add(sar);
         }
