@@ -6,7 +6,6 @@ import getOpportunityContext from '@salesforce/apex/QuoteBuilderController.getOp
 import getQuoteForEdit from '@salesforce/apex/QuoteBuilderController.getQuoteForEdit';
 import getShippingAddresses from '@salesforce/apex/QuoteBuilderController.getShippingAddresses';
 import searchProducts from '@salesforce/apex/QuoteBuilderController.searchProducts';
-import getPricebooks from '@salesforce/apex/QuoteBuilderController.getPricebooks';
 import saveQuoteLineItems from '@salesforce/apex/QuoteBuilderController.saveQuoteLineItems';
 import updateQuoteLineItems from '@salesforce/apex/QuoteBuilderController.updateQuoteLineItems';
 
@@ -25,17 +24,14 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     isSaving = false;
 
     // Context
-    pricebookId;
     opportunityId;
+    standardPricebookId;
     currencyCode = 'INR';
     accountId;
     accountName = '';
 
     // Default values for new quote (auto-populate Bill To from Account)
     defaultValues = {};
-
-    // Pricebook picklist
-    @track pricebookOptions = [];
 
     // Shipping address picker
     @track shippingAddresses = [];
@@ -142,19 +138,15 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         const idPrefix = this.recordId.substring(0, 3);
 
         if (idPrefix === '0Q0') {
-            // Edit mode: load quote data first, then pricebooks
+            // Edit mode
             this.isEditMode = true;
             this.editRecordId = this.recordId;
             await this.loadQuoteLineItems();
-            // Load filtered pricebooks using the quote's opportunity (keep existing selection)
-            if (this.opportunityId) {
-                await this.loadPricebooks(this.opportunityId, false);
-            }
         } else {
-            // New quote mode: load pricebooks first (auto-select highest priority), then context
+            // New quote mode
             this.isEditMode = false;
             this.defaultOpportunityId = this.recordId;
-            await this.loadPricebooks(this.recordId, true);
+            this.opportunityId = this.recordId;
             await this.loadOpportunityContext();
         }
 
@@ -164,11 +156,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     async loadOpportunityContext() {
         try {
             const data = await getOpportunityContext({ opportunityId: this.recordId });
-            // pricebookId is already auto-selected by loadPricebooks based on priority
-            // Only use opportunity's pricebook as fallback if none was auto-selected
-            if (!this.pricebookId) {
-                this.pricebookId = data.pricebookId;
-            }
+            this.standardPricebookId = data.standardPricebookId;
             this.currencyCode = data.currencyCode || 'INR';
             this.accountId = data.accountId;
             this.accountName = data.accountName || '';
@@ -181,7 +169,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                     BillingCity: data.billingCity || '',
                     BillingState: data.billingState || '',
                     BillingPostalCode: data.billingPostalCode || '',
-                    BillingCountry: data.billingCountry || ''   // ISO code
+                    BillingCountry: data.billingCountry || ''
                 };
             }
 
@@ -197,8 +185,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     async loadQuoteLineItems() {
         try {
             const data = await getQuoteForEdit({ quoteId: this.editRecordId });
-            this.pricebookId = data.pricebookId;
             this.opportunityId = data.opportunityId;
+            this.standardPricebookId = data.standardPricebookId;
             this.accountId = data.accountId;
 
             // Populate internal charges from saved Quote data
@@ -237,6 +225,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                         taxPercent: item.taxPercent || 0,
                         taxPercentDisplay: (item.taxPercent || 0) + '%',
                         lineTotal: afterDiscount + taxAmt,
+                        pricebookName: item.sourcePricebook || 'Standard',
                         lineDescription: item.lineDescription || '',
                         detailedDescription: item.detailedDescription || ''
                     };
@@ -263,32 +252,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }
     }
 
-    async loadPricebooks(opportunityId, autoSelect) {
-        try {
-            const pricebooks = await getPricebooks({ opportunityId: opportunityId });
-            this.pricebookOptions = (pricebooks || []).map(pb => ({
-                label: pb.pricebookName + (pb.pricebookType ? ' (' + pb.pricebookType + ')' : ''),
-                value: pb.pricebookId
-            }));
-
-            // Auto-select the highest priority pricebook for new quotes
-            // Pricebooks are already sorted by priority from Apex (1=Promotional, 2=Customer, 3=Region, 4=Dealer, 5=Standard)
-            if (autoSelect && pricebooks && pricebooks.length > 0) {
-                this.pricebookId = pricebooks[0].pricebookId;
-            }
-        } catch (error) {
-            console.warn('Could not load pricebooks:', error);
-            this.pricebookOptions = [];
-        }
-    }
-
-    handlePricebookChange(event) {
-        this.pricebookId = event.detail.value;
-        // Clear existing search results when pricebook changes
-        this.searchResults = [];
-        this.showSearchResults = false;
-    }
-
     // ===== SHIPPING ADDRESS HANDLER =====
 
     handleShippingAddressSelect(event) {
@@ -300,17 +263,15 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     }
 
     applyShippingAddress(addr) {
-        // Set the individual components of the compound ShippingAddress field
         const fields = {
             ShippingName: addr.name || '',
             ShippingStreet: addr.street || '',
             ShippingCity: addr.city || '',
             ShippingState: addr.state || '',
             ShippingPostalCode: addr.postalCode || '',
-            ShippingCountry: addr.country || ''   // ISO code
+            ShippingCountry: addr.country || ''
         };
 
-        // Update each field imperatively
         for (const [fieldName, value] of Object.entries(fields)) {
             const fieldElement = this.template.querySelector(`lightning-input-field[field-name="${fieldName}"]`);
             if (fieldElement) {
@@ -319,7 +280,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             }
         }
 
-        // Force the compound ShippingAddress field to refresh
         setTimeout(() => {
             const shippingAddressField = this.template.querySelector('lightning-input-field[field-name="ShippingAddress"]');
             if (shippingAddressField) {
@@ -350,10 +310,10 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             fields.Name = 'Auto';
         }
 
-        // Inject Pricebook2Id
-        fields.Pricebook2Id = this.pricebookId;
+        // Auto-set Pricebook2Id to Standard pricebook (required by Salesforce)
+        fields.Pricebook2Id = this.standardPricebookId;
 
-        // Inject internal charge fields (custom fields on Quote)
+        // Inject internal charge fields
         fields.Packing_Charge__c = this.packingCharges || 0;
         fields.Internal_Transport_Cost__c = this.transportCharges || 0;
         fields.Warrantee_Cost__c = this.warrantyCost || 0;
@@ -364,7 +324,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         // Inject computed totals
         fields.Total_Internal_Charges__c = this.totalCharges || 0;
 
-        // Total pricebook price = sum of (listPrice * quantity) across all line items
         const totalPricebookPrice = this.lineItems.reduce((sum, item) => {
             return sum + ((item.listPrice || 0) * (item.quantity || 0));
         }, 0);
@@ -398,6 +357,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                     taxPercent: item.taxPercent || 0,
                     taxAmount: Math.round(taxAmt * 100) / 100,
                     maxDiscount: item.maxDiscount || 0,
+                    sourcePricebook: item.pricebookName || '',
                     lineDescription: item.lineDescription,
                     detailedDescription: item.detailedDescription
                 };
@@ -417,10 +377,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 this.showSuccess('Quote Created', 'Quote and line items created successfully.');
             }
 
-            // Close the quick action modal
             this.dispatchEvent(new CloseActionScreenEvent());
 
-            // Navigate after modal closes
             setTimeout(() => {
                 this[NavigationMixin.Navigate]({
                     type: 'standard__recordPage',
@@ -438,7 +396,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 'Quote header was saved but line items failed: ' + this.reduceErrors(error) +
                 '. Please add line items from the Quote record page.'
             );
-            // Stay on the form, do not close modal
             this[NavigationMixin.Navigate]({
                 type: 'standard__recordPage',
                 attributes: {
@@ -475,13 +432,14 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         try {
             const results = await searchProducts({
                 searchTerm: this.searchTerm,
-                pricebookId: this.pricebookId,
+                opportunityId: this.opportunityId,
                 category: this.categoryFilter || null
             });
 
             this.searchResults = results.map(r => ({
                 ...r,
                 formattedPrice: this.formatCurrency(r.unitPrice),
+                formattedListPrice: this.formatCurrency(r.listPrice),
                 formattedTax: r.taxPercent != null ? r.taxPercent + '%' : '0%'
             }));
         } catch (error) {
@@ -514,13 +472,14 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             productCode: product.productCode,
             uom: product.uom || 'Nos',
             quantity: 1,
-            listPrice: product.unitPrice,
+            listPrice: product.listPrice || product.unitPrice,
             unitPrice: product.unitPrice,
             discount: 0,
             maxDiscount: product.maxDiscount || 0,
             taxPercent: product.taxPercent || 0,
             taxPercentDisplay: (product.taxPercent || 0) + '%',
             lineTotal: product.unitPrice,
+            pricebookName: product.pricebookName || 'Standard',
             lineDescription: product.lineDescription || '',
             detailedDescription: product.detailedDescription || ''
         };
