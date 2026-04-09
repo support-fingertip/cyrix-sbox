@@ -211,13 +211,13 @@ isLoading =false;
         const user = this.currentUserId;
 
         if (user === l1 && status === 'Pending') {
-            if (type !== 'TA') editable = true;
+            if (type !== 'DA') editable = true;
             selectable = true;
         } else if ((user === finance && status === 'Level 1 Approved') || (!l1 && user === finance && status === 'Pending')) {
             editable = true;
             selectable = true;
         } else if (this.isOpenedByAdmin && (status === 'Pending' || status === 'Level 1 Approved')) {
-            if (type !== 'TA') editable = true;
+            if (type !== 'DA') editable = true;
             selectable = true;
         }
 
