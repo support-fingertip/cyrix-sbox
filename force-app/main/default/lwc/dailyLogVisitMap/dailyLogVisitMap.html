@@ -1,0 +1,39 @@
+<template>
+    <lightning-card title="Visit Locations Map" icon-name="standard:location">
+
+        <!-- Loading spinner -->
+        <template if:true={isLoading}>
+            <div class="slds-p-around_medium">
+                <lightning-spinner alternative-text="Loading visits..." size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- Error -->
+        <template if:true={error}>
+            <div class="slds-p-around_medium slds-text-color_error">
+                {error}
+            </div>
+        </template>
+
+        <!-- Map -->
+        <template if:true={hasLocations}>
+            <div class="slds-p-around_small">
+                <lightning-map
+                    map-markers={mapMarkers}
+                    zoom-level="13"
+                    markers-title="Visit Locations"
+                    list-view="visible">
+                </lightning-map>
+            </div>
+        </template>
+
+        <!-- No locations message -->
+        <template if:true={showNoData}>
+            <div class="slds-p-around_medium slds-text-align_center slds-text-color_weak">
+                <lightning-icon icon-name="utility:info" size="small"></lightning-icon>
+                &nbsp;No visit locations found for this Daily Log.
+            </div>
+        </template>
+
+    </lightning-card>
+</template>
