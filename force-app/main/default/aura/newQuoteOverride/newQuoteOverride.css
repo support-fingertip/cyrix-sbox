@@ -1,0 +1,19 @@
+/* In your parent component's style */
+.THIS {
+    height: 100%;
+    width: 100%;
+}
+
+/* Force the Salesforce quick action modal to be full screen */
+.THIS .slds-modal__container {
+    max-width: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+}
+
+.THIS .slds-modal {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+}

@@ -93,7 +93,7 @@ public with sharing class visitManager {
     public static data getVisitCreateData(){
         
         data db = new data();
-        db.lead = [SELECT Id,Name,phone,MobilePhone,company FROM LEAD where Status!='Qualified'  and isConverted=false];//WHERE  Lead_Status__c != 'Converted' and  Approval_Status__c != 'Submitted'
+        db.lead = [SELECT Id,Name,phone,MobilePhone,company,business_vertical__c,product_name__c FROM LEAD where Status!='Qualified'  and isConverted=false];//WHERE  Lead_Status__c != 'Converted' and  Approval_Status__c != 'Submitted'
         db.Customer = [SELECT Id,Name,Customer_Code__c,phone from account where Status__c != 'Inactive'];
   return db;
     }

@@ -49,4 +49,18 @@
         <shortDescription>Sales Engineer profile id</shortDescription>
         <value>2F00eC4000001FzU1</value>
     </labels>
+    <labels>
+        <fullName>Enable_Logs</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Enable_Logs</shortDescription>
+        <value>TRUE</value>
+    </labels>
+    <labels>
+        <fullName>SAP_API</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SAP API</shortDescription>
+        <value>xkVxXHdLnN62Zk2ZO1HgGvlO9wya46TT</value>
+    </labels>
 </CustomLabels>

@@ -9,10 +9,14 @@
     <navType>Console</navType>
     <tabs>standard-AgentforceStudio</tabs>
     <tabs>Asset__c</tabs>
+    <tabs>Branch__c</tabs>
     <uiType>Lightning</uiType>
     <workspaceConfig>
         <mappings>
             <tab>Asset__c</tab>
+        </mappings>
+        <mappings>
+            <tab>Branch__c</tab>
         </mappings>
         <mappings>
             <tab>standard-AgentforceStudio</tab>

@@ -468,6 +468,13 @@
         <fields>Comments</fields>
         <relatedList>RelatedProcessHistoryList</relatedList>
     </relatedLists>
+    <relatedLists>
+        <fields>PRICEBOOK2.NAME</fields>
+        <fields>PRICEBOOK2.DESCRIPTION</fields>
+        <fields>PRICEBOOK2.LAST_UPDATE</fields>
+        <fields>PRICEBOOK2.IS_ACTIVE</fields>
+        <relatedList>Pricebook2.Customer__c</relatedList>
+    </relatedLists>
     <relatedObjects>ParentId</relatedObjects>
     <showEmailCheckbox>false</showEmailCheckbox>
     <showHighlightsPanel>false</showHighlightsPanel>

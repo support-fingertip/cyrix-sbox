@@ -11,6 +11,7 @@
     <tabs>standard-FlowRecord</tabs>
     <tabs>standard-FlowOrchestration</tabs>
     <tabs>standard-Monitor</tabs>
+    <tabs>standard-EngagementSignal</tabs>
     <tabs>standard-ActionHub</tabs>
     <tabs>Visit__c</tabs>
     <tabs>Daily_Log__c</tabs>
@@ -23,6 +24,7 @@
     <tabs>Log__c</tabs>
     <tabs>Asset__c</tabs>
     <tabs>standard-FlowLogs</tabs>
+    <tabs>Branch__c</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>FlowsApp_UtilityBar</utilityBar>
 </CustomApplication>

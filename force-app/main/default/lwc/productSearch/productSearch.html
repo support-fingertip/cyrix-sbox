@@ -1,0 +1,162 @@
+<!-- Product Product Master Search Component - Module 7 -->
+<template>
+    <lightning-card title="Product Search" icon-name="standard:product">
+        <div class="slds-p-around_medium">
+            <!-- Search Filters -->
+            <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_medium">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-m-bottom_small">
+                    <lightning-input
+                        type="search"
+                        label="Search Products"
+                        placeholder="Search by name, code, make, model..."
+                        value={searchKey}
+                        onchange={handleSearchKeyChange}
+                        onkeyup={handleKeyUp}>
+                    </lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-m-bottom_small">
+                    <lightning-combobox
+                        name="category"
+                        label="Category"
+                        value={selectedCategory}
+                        options={categoryOptions}
+                        onchange={handleCategoryChange}>
+                    </lightning-combobox>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-m-bottom_small">
+                    <lightning-combobox
+                        name="vertical"
+                        label="Vertical"
+                        value={selectedVertical}
+                        options={verticalOptions}
+                        onchange={handleVerticalChange}>
+                    </lightning-combobox>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12 slds-m-bottom_small slds-align-bottom">
+                    <lightning-button
+                        variant="brand"
+                        label="Search"
+                        onclick={handleSearch}
+                        class="slds-m-top_medium">
+                    </lightning-button>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <template if:true={error}>
+                <div class="slds-notify slds-notify_alert slds-alert_error slds-m-bottom_medium" role="alert">
+                    <span class="slds-assistive-text">Error</span>
+                    <h2>{error}</h2>
+                </div>
+            </template>
+
+            <!-- Loading Spinner -->
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </template>
+
+            <!-- Results Count -->
+            <template if:true={hasProducts}>
+                <p class="slds-m-bottom_small slds-text-body_small">
+                    Showing {resultCount} product(s)
+                </p>
+            </template>
+
+            <!-- No Results -->
+            <template if:true={noResults}>
+                <div class="slds-align_absolute-center slds-p-around_large">
+                    <p class="slds-text-body_regular slds-text-color_weak">
+                        No products found matching your search criteria.
+                    </p>
+                </div>
+            </template>
+
+            <!-- Products Table -->
+            <template if:true={hasProducts}>
+                <lightning-datatable
+                    key-field="Id"
+                    data={products}
+                    columns={columns}
+                    max-row-selection="1"
+                    onrowselection={handleRowSelection}
+                    show-row-number-column>
+                </lightning-datatable>
+            </template>
+
+            <!-- Selected Product Details -->
+            <template if:true={selectedProduct}>
+                <div class="slds-m-top_medium slds-box slds-theme_shade">
+                    <div class="slds-grid slds-gutters slds-m-bottom_small">
+                        <div class="slds-col slds-size_1-of-1">
+                            <h3 class="slds-text-heading_small slds-m-bottom_small">
+                                Selected Product: {selectedProduct.Name}
+                            </h3>
+                        </div>
+                    </div>
+                    <!-- Product Image -->
+                    <template if:true={selectedProduct.Product_Image_URL__c}>
+                        <div class="slds-m-bottom_small">
+                            <img src={selectedProduct.Product_Image_URL__c}
+                                 alt={selectedProduct.Name}
+                                 class="product-image"
+                                 onerror={handleImageError} />
+                        </div>
+                    </template>
+                    <div class="slds-grid slds-gutters slds-wrap">
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                            <span class="slds-text-body_small slds-text-color_weak">Item Code: </span>
+                            <span>{selectedProduct.Item_Code__c}</span>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                            <span class="slds-text-body_small slds-text-color_weak">Category: </span>
+                            <span>{selectedProduct.Product_Category__c}</span>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                            <span class="slds-text-body_small slds-text-color_weak">Brand: </span>
+                            <span>{selectedProduct.Brand__c}</span>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                            <span class="slds-text-body_small slds-text-color_weak">Make / Model: </span>
+                            <span>{selectedProduct.Make__c} / {selectedProduct.Model__c}</span>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                            <span class="slds-text-body_small slds-text-color_weak">Price: </span>
+                            <lightning-formatted-number
+                                value={selectedProduct.Standard_Price__c}
+                                format-style="currency"
+                                currency-code="INR">
+                            </lightning-formatted-number>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                            <span class="slds-text-body_small slds-text-color_weak">HSN (Domestic): </span>
+                            <span>{selectedProduct.HSN_Code__c}</span>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                            <span class="slds-text-body_small slds-text-color_weak">HSN (International): </span>
+                            <span>{selectedProduct.HSN_Code_International__c}</span>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                            <span class="slds-text-body_small slds-text-color_weak">Warranty: </span>
+                            <span>{selectedProduct.Default_Warranty_Months__c} months</span>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                            <span class="slds-text-body_small slds-text-color_weak">Installation Required: </span>
+                            <span>{selectedProduct.Is_Installation_Required__c}</span>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-m-bottom_x-small">
+                            <span class="slds-text-body_small slds-text-color_weak">Training Required: </span>
+                            <span>{selectedProduct.Is_Training_Required__c}</span>
+                        </div>
+                    </div>
+                    <div class="slds-m-top_small">
+                        <lightning-button
+                            variant="neutral"
+                            label="Clear Selection"
+                            onclick={handleClearSelection}>
+                        </lightning-button>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

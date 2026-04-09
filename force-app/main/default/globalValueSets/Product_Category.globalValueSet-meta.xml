@@ -280,6 +280,42 @@
         <default>false</default>
         <label>Partnerships</label>
     </customValue>
+    <customValue>
+        <fullName>Critical Care</fullName>
+        <default>false</default>
+        <label>Critical Care</label>
+    </customValue>
+    <customValue>
+        <fullName>Radiology</fullName>
+        <default>false</default>
+        <label>Radiology</label>
+    </customValue>
+    <customValue>
+        <fullName>Neonatal</fullName>
+        <default>false</default>
+        <label>Neonatal</label>
+    </customValue>
+    <customValue>
+        <fullName>Cardiology</fullName>
+        <default>false</default>
+        <label>Cardiology</label>
+    </customValue>
+    <customValue>
+        <fullName>Laboratory</fullName>
+        <default>false</default>
+        <label>Laboratory</label>
+    </customValue>
+    <customValue>
+        <fullName>Respiratory</fullName>
+        <default>false</default>
+        <label>Respiratory</label>
+    </customValue>
+    <customValue>
+        <fullName>General</fullName>
+        <default>false</default>
+        <label>General</label>
+    </customValue>
+    <description>Product Category values</description>
     <masterLabel>Product Category</masterLabel>
     <sorted>false</sorted>
 </GlobalValueSet>

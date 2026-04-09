@@ -1,0 +1,101 @@
+<template>
+    <lightning-card title="Send Quote PDF" icon-name="standard:quotes">
+
+        <!-- Loading Spinner -->
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+        </template>
+
+        <!-- PDF Preview Section -->
+        <div class="slds-p-around_medium">
+
+            <!-- PDF Preview -->
+            <div class="slds-m-bottom_medium">
+                <h2 class="slds-text-heading_small slds-m-bottom_small">PDF Preview</h2>
+                <div class="pdf-preview-container" style="border: 1px solid #d8dde6; border-radius: 4px; overflow: hidden;">
+                    <iframe src={pdfPreviewUrl} width="100%" height="500px" style="border: none;"></iframe>
+                </div>
+            </div>
+
+            <!-- Email Form -->
+            <div class="slds-m-top_medium">
+                <h2 class="slds-text-heading_small slds-m-bottom_small">Send Email</h2>
+
+                <div class="slds-grid slds-wrap slds-gutters">
+                    <!-- To -->
+                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                        <lightning-input
+                            label="To"
+                            type="email"
+                            value={toAddress}
+                            disabled
+                            required>
+                        </lightning-input>
+                    </div>
+
+                    <!-- CC -->
+                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                        <lightning-input
+                            label="CC"
+                            type="text"
+                            value={ccAddress}
+                            onchange={handleCcChange}
+                            placeholder="Separate multiple emails with comma">
+                        </lightning-input>
+                    </div>
+
+                    <!-- BCC -->
+                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                        <lightning-input
+                            label="BCC"
+                            type="text"
+                            value={bccAddress}
+                            onchange={handleBccChange}
+                            placeholder="Separate multiple emails with comma">
+                        </lightning-input>
+                    </div>
+
+                    <!-- Subject -->
+                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                        <lightning-input
+                            label="Subject"
+                            type="text"
+                            value={subject}
+                            onchange={handleSubjectChange}
+                            required>
+                        </lightning-input>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                        <lightning-textarea
+                            label="Email Body"
+                            value={body}
+                            onchange={handleBodyChange}
+                            max-length="32000"
+                            rows="8">
+                        </lightning-textarea>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="slds-m-top_medium slds-text-align_right">
+                    <lightning-button
+                        label="Cancel"
+                        onclick={handleCancel}
+                        class="slds-m-right_small">
+                    </lightning-button>
+                    <lightning-button
+                        label="Send Email"
+                        variant="brand"
+                        onclick={handleSendEmail}
+                        disabled={isSending}
+                        icon-name="utility:email">
+                    </lightning-button>
+                </div>
+            </div>
+
+        </div>
+
+    </lightning-card>
+</template>
