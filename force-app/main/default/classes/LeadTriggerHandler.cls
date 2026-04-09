@@ -300,7 +300,7 @@ public static void sendClosedWonNotification(List<Lead> leads) {
 
     // Get Owner -> Manager mapping
     Map<Id, User> ownerMap = new Map<Id, User>(
-        [SELECT Id, ManagerId FROM User WHERE Id IN :ownerIds]
+        [SELECT Id, Name, ManagerId FROM User WHERE Id IN :ownerIds]
     );
 
     // Get Coordinator Role// Get Coordinator Role safely
@@ -359,8 +359,20 @@ if(!roleList.isEmpty()){
     (l.FirstName != null ? l.FirstName + ' ' : '') +
     (l.LastName != null ? l.LastName : '');
 
+      String ownerName = '';
+      if (ownerMap.containsKey(l.OwnerId)) {
+          ownerName = ownerMap.get(l.OwnerId).Name;
+      }
+
+      String companyName = (l.Company != null ? l.Company : '');
+
+      String notificationBody = 'Lead "' + leadName + '"' +
+          (String.isNotBlank(companyName) ? ' from Company "' + companyName + '"' : '') +
+          (String.isNotBlank(ownerName) ? ' (Owner: ' + ownerName + ')' : '') +
+          ' has been marked Closed Won';
+
 SendEmailCustomNotification.sendNotification(
-    'Lead "' + leadName + '" has been marked Closed Won',
+    notificationBody,
     'Lead Closed Won',
     senderId,
     type.Id,
