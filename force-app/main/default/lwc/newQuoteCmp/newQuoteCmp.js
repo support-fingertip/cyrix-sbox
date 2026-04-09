@@ -19,7 +19,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     isEditMode = false;
     editRecordId = null;
     defaultOpportunityId = null;
-    formReady = false;
 
     // State
     isLoading = false;
@@ -91,9 +90,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     get quoteName() { return this.isEditMode ? undefined : 'Auto'; }
     get saveButtonLabel() { return this.isSaving ? 'Saving...' : (this.isEditMode ? 'Update Quote' : 'Save Quote'); }
     get hasShippingAddresses() { return this.shippingAddresses.length > 0; }
-    // In edit mode, return undefined so an empty defaultValues object can't
-    // interfere with LDS auto-loading the saved Quote address subfields.
-    get formDefaultValues() { return this.isEditMode ? undefined : this.defaultValues; }
 
     // ===== CALCULATIONS =====
 
@@ -141,7 +137,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         if (!this.recordId) return;
 
         this.isLoading = true;
-        this.formReady = false;
 
         // Load pricebook options for the picklist
         await this.loadPricebooks();
@@ -149,21 +144,15 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         const idPrefix = this.recordId.substring(0, 3);
 
         if (idPrefix === '0Q0') {
-            // Edit mode — wait for line items + context BEFORE rendering the form
-            // so lightning-record-edit-form mounts with record-id already set and
-            // properly auto-populates BillingAddress / ShippingAddress / OpportunityId.
             this.isEditMode = true;
             this.editRecordId = this.recordId;
             await this.loadQuoteLineItems();
         } else {
-            // New quote mode — wait for opportunity context (account, default Bill To)
-            // BEFORE rendering the form so default-values are present at first mount.
             this.isEditMode = false;
             this.defaultOpportunityId = this.recordId;
             await this.loadOpportunityContext();
         }
 
-        this.formReady = true;
         this.isLoading = false;
     }
 
@@ -245,21 +234,9 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.shippingAddresses = addresses || [];
 
             // === AUTO-SELECT FIRST SHIPPING ADDRESS FOR NEW QUOTES ===
-            // Merge shipping defaults into defaultValues BEFORE the form mounts
-            // (loadOpportunityContext awaits this, and detectModeAndLoad sets
-            // formReady=true only after that returns).
             if (!this.isEditMode && this.shippingAddresses.length > 0) {
-                const first = this.shippingAddresses[0];
-                this.selectedShippingAddressId = first.addressId;
-                this.defaultValues = {
-                    ...this.defaultValues,
-                    ShippingName: first.name || '',
-                    ShippingStreet: first.street || '',
-                    ShippingCity: first.city || '',
-                    ShippingState: first.state || '',
-                    ShippingPostalCode: first.postalCode || '',
-                    ShippingCountry: first.country || ''
-                };
+                this.selectedShippingAddressId = this.shippingAddresses[0].addressId;
+                this.applyShippingAddress(this.shippingAddresses[0]);
             }
         } catch (error) {
             console.warn('Could not load shipping addresses:', error);
@@ -298,21 +275,36 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     }
 
     applyShippingAddress(addr) {
+        // Set the individual components of the compound ShippingAddress field
         const fields = {
             ShippingName: addr.name || '',
             ShippingStreet: addr.street || '',
             ShippingCity: addr.city || '',
             ShippingState: addr.state || '',
             ShippingPostalCode: addr.postalCode || '',
-            ShippingCountry: addr.country || ''
+            ShippingCountry: addr.country || ''   // ISO code
         };
 
+        // Update each field imperatively
         for (const [fieldName, value] of Object.entries(fields)) {
-            const el = this.template.querySelector(
-                `lightning-input-field[field-name="${fieldName}"]`
-            );
-            if (el) el.value = value;
+            const fieldElement = this.template.querySelector(`lightning-input-field[field-name="${fieldName}"]`);
+            if (fieldElement) {
+                fieldElement.value = value;
+                fieldElement.dispatchEvent(new CustomEvent('change', { detail: { value } }));
+            }
         }
+
+        // Force the compound ShippingAddress field to refresh
+        setTimeout(() => {
+            const shippingAddressField = this.template.querySelector('lightning-input-field[field-name="ShippingAddress"]');
+            if (shippingAddressField) {
+                const currentValue = shippingAddressField.value;
+                shippingAddressField.value = '';
+                shippingAddressField.dispatchEvent(new CustomEvent('change', { detail: { value: '' } }));
+                shippingAddressField.value = currentValue;
+                shippingAddressField.dispatchEvent(new CustomEvent('change', { detail: { value: currentValue } }));
+            }
+        }, 100);
     }
 
     // ===== FORM HANDLERS =====
