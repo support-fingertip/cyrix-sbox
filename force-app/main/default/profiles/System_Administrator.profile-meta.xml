@@ -80,11 +80,6 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <field>Opportunity.Opportunity_Auto_Number__c</field>
-        <editable>true</editable>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
         <field>Opportunity.Product__c</field>
         <editable>true</editable>
         <readable>true</readable>
