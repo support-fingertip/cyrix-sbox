@@ -12,10 +12,26 @@
                         <valueListItems>
                             <value>Opportunity.New_Quote</value>
                             <visibilityRule>
+                                <booleanFilter>1 AND 2 AND 3 AND 4</booleanFilter>
                                 <criteria>
                                     <leftValue>{!Record.StageName}</leftValue>
                                     <operator>NE</operator>
                                     <rightValue>Qualified</rightValue>
+                                </criteria>
+                                <criteria>
+                                    <leftValue>{!Record.StageName}</leftValue>
+                                    <operator>NE</operator>
+                                    <rightValue>Closed Won</rightValue>
+                                </criteria>
+                                <criteria>
+                                    <leftValue>{!Record.StageName}</leftValue>
+                                    <operator>NE</operator>
+                                    <rightValue>Closed Lost</rightValue>
+                                </criteria>
+                                <criteria>
+                                    <leftValue>{!Record.StageName}</leftValue>
+                                    <operator>NE</operator>
+                                    <rightValue>Advance Paid</rightValue>
                                 </criteria>
                             </visibilityRule>
                         </valueListItems>

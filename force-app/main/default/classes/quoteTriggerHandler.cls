@@ -43,13 +43,13 @@ public with sharing class quoteTriggerHandler {
             maxNumberMap.get(key).Last_Quote_Number__c=nextNumber; // increment for next quote in same batch
            string  shortCode =maxNumberMap.get(key).Short_Code__c ;
             // Store the sequential number and financial year on the quote (for future queries)
-            string financialYear =  maxNumberMap.get(key).Name;
+            string financialYear =  maxNumberMap.get(key).Name; 
             
     
             // Build the name
-            String baseName = 'C-' + shortCode + '/' + q.Business_Vertical__c + '/QTN-' + String.valueOf(nextNumber.intValue()).leftPad(3, '0') + '/' + financialYear;
-            if (q.Version_Number__c != null && q.Version_Number__c >= 1) {
-                baseName += '-RV' + q.Version_Number__c;
+            String baseName = 'C-' + shortCode +'/'+q.Business_Vertical__c +'/QTN-' + String.valueOf(nextNumber.intValue()).leftPad(3, '0') + '/' + financialYear;
+            if (q.Version_Nmber__c != null && q.Version_Nmber__c >= 1) {
+                baseName += '-RV' + q.Version_Nmber__c;
             }
             q.Name = baseName;
             } 

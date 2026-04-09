@@ -29,12 +29,11 @@
             </div>
         </div>
 
-        <!-- RECORD EDIT FORM (only mounts after editRecordId / defaultValues are known) -->
-        <template if:true={formReady}>
+        <!-- RECORD EDIT FORM -->
         <lightning-record-edit-form
             object-api-name="Quote"
             record-id={editRecordId}
-            default-values={formDefaultValues}
+            default-values={defaultValues}
             onsubmit={handleFormSubmit}
             onsuccess={handleFormSuccess}
             onerror={handleFormError}
@@ -59,12 +58,7 @@
                             <lightning-input-field field-name="Valid_Till__c"></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <template if:false={isEditMode}>
-                                <lightning-input-field field-name="OpportunityId" value={defaultOpportunityId} required></lightning-input-field>
-                            </template>
-                            <template if:true={isEditMode}>
-                                <lightning-input-field field-name="OpportunityId" required></lightning-input-field>
-                            </template>
+                            <lightning-input-field field-name="OpportunityId" value={defaultOpportunityId} required></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
                             <lightning-input-field field-name="Business_Vertical__c" required></lightning-input-field>
@@ -85,6 +79,16 @@
                             <lightning-input-field field-name="Contract_Period_End_Date__c"></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                            <lightning-combobox
+                                label="Pricebook"
+                                value={pricebookId}
+                                options={pricebookOptions}
+                                onchange={handlePricebookChange}
+                                placeholder="Select a Pricebook..."
+                                required>
+                            </lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
                             <lightning-input-field field-name="is_Active__c"></lightning-input-field>
                         </div>
                         <template if:true={isEditMode}>
@@ -96,7 +100,7 @@
                 </div>
             </div>
 
-            <!-- ===== SECTION: BILL TO / SHIP TO ===== -->
+            <!-- ===== SECTION: BILL TO / SHIP TO (compound address fields) ===== -->
             <div class="section-card">
                 <div class="section-header">
                     <lightning-icon icon-name="utility:location" size="x-small" class="slds-m-right_x-small"></lightning-icon>
@@ -116,19 +120,7 @@
                                         <lightning-input-field field-name="BillingName"></lightning-input-field>
                                     </div>
                                     <div class="slds-col slds-size_1-of-1 slds-p-bottom_xx-small">
-                                        <lightning-input-field field-name="BillingStreet"></lightning-input-field>
-                                    </div>
-                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_xx-small">
-                                        <lightning-input-field field-name="BillingCity"></lightning-input-field>
-                                    </div>
-                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_xx-small">
-                                        <lightning-input-field field-name="BillingState"></lightning-input-field>
-                                    </div>
-                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_xx-small">
-                                        <lightning-input-field field-name="BillingPostalCode"></lightning-input-field>
-                                    </div>
-                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_xx-small">
-                                        <lightning-input-field field-name="BillingCountry"></lightning-input-field>
+                                        <lightning-input-field field-name="BillingAddress"></lightning-input-field>
                                     </div>
                                 </div>
                             </div>
@@ -162,19 +154,7 @@
                                         <lightning-input-field field-name="ShippingName"></lightning-input-field>
                                     </div>
                                     <div class="slds-col slds-size_1-of-1 slds-p-bottom_xx-small">
-                                        <lightning-input-field field-name="ShippingStreet"></lightning-input-field>
-                                    </div>
-                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_xx-small">
-                                        <lightning-input-field field-name="ShippingCity"></lightning-input-field>
-                                    </div>
-                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_xx-small">
-                                        <lightning-input-field field-name="ShippingState"></lightning-input-field>
-                                    </div>
-                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_xx-small">
-                                        <lightning-input-field field-name="ShippingPostalCode"></lightning-input-field>
-                                    </div>
-                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_xx-small">
-                                        <lightning-input-field field-name="ShippingCountry"></lightning-input-field>
+                                        <lightning-input-field field-name="ShippingAddress"></lightning-input-field>
                                     </div>
                                 </div>
                             </div>
@@ -235,9 +215,8 @@
                                                 <th scope="col" style="width:14%"><div class="slds-truncate">Make / Model</div></th>
                                                 <th scope="col" style="width:12%"><div class="slds-truncate">Unit Price</div></th>
                                                 <th scope="col" style="width:8%"><div class="slds-truncate">HSN</div></th>
-                                                <th scope="col" style="width:7%"><div class="slds-truncate">Tax %</div></th>
-                                                <th scope="col" style="width:11%"><div class="slds-truncate">Pricebook</div></th>
-                                                <th scope="col" style="width:7%"><div class="slds-truncate">Action</div></th>
+                                                <th scope="col" style="width:8%"><div class="slds-truncate">Tax %</div></th>
+                                                <th scope="col" style="width:9%"><div class="slds-truncate">Action</div></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -250,7 +229,6 @@
                                                     <td><div class="slds-truncate">{prod.formattedPrice}</div></td>
                                                     <td><div class="slds-truncate">{prod.hsnCode}</div></td>
                                                     <td><div class="slds-truncate">{prod.formattedTax}</div></td>
-                                                    <td><div class="slds-truncate" title={prod.pricebookName}>{prod.pricebookName}</div></td>
                                                     <td>
                                                         <lightning-button-icon
                                                             icon-name="utility:add"
@@ -299,7 +277,6 @@
                                         <th scope="col" style="width:90px"><div class="slds-truncate">Disc. %</div></th>
                                         <th scope="col" style="width:70px"><div class="slds-truncate">Tax %</div></th>
                                         <th scope="col" style="width:115px"><div class="slds-truncate">Line Total</div></th>
-                                        <th scope="col" style="width:120px"><div class="slds-truncate">Pricebook</div></th>
                                         <th scope="col" style="width:45px"><div class="slds-truncate"></div></th>
                                     </tr>
                                 </thead>
@@ -366,9 +343,6 @@
                                                     format-style="currency"
                                                     currency-code={currencyCode}>
                                                 </lightning-formatted-number>
-                                            </td>
-                                            <td>
-                                                <div class="slds-truncate slds-text-body_small" title={item.pricebookName}>{item.pricebookName}</div>
                                             </td>
                                             <td>
                                                 <lightning-button-icon
@@ -512,6 +486,5 @@
             </div>
 
         </lightning-record-edit-form>
-        </template>
     </div>
 </template>
