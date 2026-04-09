@@ -5,7 +5,7 @@ public with sharing class QuoteBuilderController {
         Opportunity opp = [
             SELECT Id, Name, AccountId, Account.Name,
                    Account.BillingStreet, Account.BillingCity,
-                   Account.BillingState, Account.BillingPostalCode,
+                   Account.BillingStateCode, Account.BillingPostalCode,
                    Account.BillingCountryCode,
                    Pricebook2Id, CurrencyIsoCode, Buisness_Vertical__c
             FROM Opportunity
@@ -26,7 +26,7 @@ public with sharing class QuoteBuilderController {
             ctx.billingName = opp.Account.Name;
             ctx.billingStreet = opp.Account.BillingStreet;
             ctx.billingCity = opp.Account.BillingCity;
-            ctx.billingState = opp.Account.BillingState;
+            ctx.billingState = opp.Account.BillingStateCode;
             ctx.billingPostalCode = opp.Account.BillingPostalCode;
             ctx.billingCountry = opp.Account.BillingCountryCode;
         }
