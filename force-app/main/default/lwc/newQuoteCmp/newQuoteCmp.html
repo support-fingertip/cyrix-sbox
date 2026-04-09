@@ -34,7 +34,7 @@
         <lightning-record-edit-form
             object-api-name="Quote"
             record-id={editRecordId}
-            default-values={defaultValues}
+            default-values={formDefaultValues}
             onsubmit={handleFormSubmit}
             onsuccess={handleFormSuccess}
             onerror={handleFormError}
@@ -96,7 +96,7 @@
                 </div>
             </div>
 
-            <!-- ===== SECTION: BILL TO / SHIP TO (compound address fields) ===== -->
+            <!-- ===== SECTION: BILL TO / SHIP TO ===== -->
             <div class="section-card">
                 <div class="section-header">
                     <lightning-icon icon-name="utility:location" size="x-small" class="slds-m-right_x-small"></lightning-icon>
@@ -116,7 +116,19 @@
                                         <lightning-input-field field-name="BillingName"></lightning-input-field>
                                     </div>
                                     <div class="slds-col slds-size_1-of-1 slds-p-bottom_xx-small">
-                                        <lightning-input-field field-name="BillingAddress"></lightning-input-field>
+                                        <lightning-input-field field-name="BillingStreet"></lightning-input-field>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_xx-small">
+                                        <lightning-input-field field-name="BillingCity"></lightning-input-field>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_xx-small">
+                                        <lightning-input-field field-name="BillingState"></lightning-input-field>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_xx-small">
+                                        <lightning-input-field field-name="BillingPostalCode"></lightning-input-field>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_xx-small">
+                                        <lightning-input-field field-name="BillingCountry"></lightning-input-field>
                                     </div>
                                 </div>
                             </div>
@@ -150,7 +162,19 @@
                                         <lightning-input-field field-name="ShippingName"></lightning-input-field>
                                     </div>
                                     <div class="slds-col slds-size_1-of-1 slds-p-bottom_xx-small">
-                                        <lightning-input-field field-name="ShippingAddress"></lightning-input-field>
+                                        <lightning-input-field field-name="ShippingStreet"></lightning-input-field>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_xx-small">
+                                        <lightning-input-field field-name="ShippingCity"></lightning-input-field>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_xx-small">
+                                        <lightning-input-field field-name="ShippingState"></lightning-input-field>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_xx-small">
+                                        <lightning-input-field field-name="ShippingPostalCode"></lightning-input-field>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_xx-small">
+                                        <lightning-input-field field-name="ShippingCountry"></lightning-input-field>
                                     </div>
                                 </div>
                             </div>
