@@ -9,8 +9,10 @@ import searchProducts from '@salesforce/apex/QuoteBuilderController.searchProduc
 import getPricebooks from '@salesforce/apex/QuoteBuilderController.getPricebooks';
 import saveQuoteLineItems from '@salesforce/apex/QuoteBuilderController.saveQuoteLineItems';
 import updateQuoteLineItems from '@salesforce/apex/QuoteBuilderController.updateQuoteLineItems';
+import savePaymentTerms from '@salesforce/apex/QuoteBuilderController.savePaymentTerms';
 
 let rowCounter = 0;
+let ptCounter = 0;
 
 export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -48,6 +50,9 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
     // Line items
     @track lineItems = [];
+
+    // Payment terms
+    @track paymentTerms = [];
 
     // Internal charges
     packingCharges = 0;
@@ -90,6 +95,15 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     get quoteName() { return this.isEditMode ? undefined : 'Auto'; }
     get saveButtonLabel() { return this.isSaving ? 'Saving...' : (this.isEditMode ? 'Update Quote' : 'Save Quote'); }
     get hasShippingAddresses() { return this.shippingAddresses.length > 0; }
+    get hasPaymentTerms() { return this.paymentTerms.length > 0; }
+    get paymentTermCount() { return this.paymentTerms.length; }
+    get totalPercentage() {
+        return this.paymentTerms.reduce((sum, t) => sum + (parseFloat(t.percentage) || 0), 0);
+    }
+    get percentageOverflow() { return this.totalPercentage > 100; }
+    // In edit mode, return undefined so an empty defaultValues object can't
+    // interfere with LDS auto-loading the saved Quote address subfields.
+    get formDefaultValues() { return this.isEditMode ? undefined : this.defaultValues; }
 
     // ===== CALCULATIONS =====
 
@@ -223,6 +237,18 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                     };
                 });
             }
+
+            if (data.paymentTerms && data.paymentTerms.length > 0) {
+                this.paymentTerms = data.paymentTerms.map((t, index) => {
+                    ptCounter++;
+                    return {
+                        ptId: 'pt-' + ptCounter,
+                        rowNumber: index + 1,
+                        paymentTerm: t.paymentTerm || '',
+                        percentage: t.percentage || 0
+                    };
+                });
+            }
         } catch (error) {
             this.showError('Error loading quote', this.reduceErrors(error));
         }
@@ -307,6 +333,47 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }, 100);
     }
 
+    // ===== PAYMENT TERM HANDLERS =====
+
+    handleAddPaymentTerm() {
+        ptCounter++;
+        this.paymentTerms = [
+            ...this.paymentTerms,
+            {
+                ptId: 'pt-' + ptCounter,
+                rowNumber: this.paymentTerms.length + 1,
+                paymentTerm: '',
+                percentage: 0
+            }
+        ];
+    }
+
+    handleRemovePaymentTerm(event) {
+        const ptId = event.currentTarget.dataset.ptId;
+        this.paymentTerms = this.paymentTerms
+            .filter(t => t.ptId !== ptId)
+            .map((t, index) => ({ ...t, rowNumber: index + 1 }));
+    }
+
+    handlePaymentTermChange(event) {
+        const ptId = event.currentTarget.dataset.ptId;
+        const field = event.currentTarget.dataset.field;
+        const value = event.target.value;
+
+        this.paymentTerms = this.paymentTerms.map(t => {
+            if (t.ptId === ptId) {
+                const updated = { ...t };
+                if (field === 'paymentTerm') {
+                    updated.paymentTerm = value;
+                } else if (field === 'percentage') {
+                    updated.percentage = parseFloat(value) || 0;
+                }
+                return updated;
+            }
+            return t;
+        });
+    }
+
     // ===== FORM HANDLERS =====
 
     handleFormSubmit(event) {
@@ -365,14 +432,30 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                     quoteId: quoteId,
                     lineItemsJSON: JSON.stringify(lineItemsPayload)
                 });
-                this.showSuccess('Quote Updated', 'Quote and line items updated successfully.');
             } else {
                 await saveQuoteLineItems({
                     quoteId: quoteId,
                     lineItemsJSON: JSON.stringify(lineItemsPayload)
                 });
-                this.showSuccess('Quote Created', 'Quote and line items created successfully.');
             }
+
+            // Save payment terms (delete existing on edit, then insert current list)
+            const ptPayload = this.paymentTerms
+                .filter(t => t.paymentTerm && t.paymentTerm.trim() !== '')
+                .map(t => ({
+                    paymentTerm: t.paymentTerm,
+                    percentage: t.percentage || 0
+                }));
+            await savePaymentTerms({
+                quoteId: quoteId,
+                paymentTermsJSON: JSON.stringify(ptPayload),
+                deleteExisting: this.isEditMode
+            });
+
+            this.showSuccess(
+                this.isEditMode ? 'Quote Updated' : 'Quote Created',
+                'Quote, line items, and payment terms saved successfully.'
+            );
 
             // Close the quick action modal
             this.dispatchEvent(new CloseActionScreenEvent());

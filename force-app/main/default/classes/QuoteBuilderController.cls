@@ -5,7 +5,7 @@ public with sharing class QuoteBuilderController {
         Opportunity opp = [
             SELECT Id, Name, AccountId, Account.Name,
                    Account.BillingStreet, Account.BillingCity,
-                   Account.BillingState, Account.BillingPostalCode,
+                   Account.BillingStateCode, Account.BillingPostalCode,
                    Account.BillingCountryCode,
                    Pricebook2Id, CurrencyIsoCode, Buisness_Vertical__c
             FROM Opportunity
@@ -26,7 +26,7 @@ public with sharing class QuoteBuilderController {
             ctx.billingName = opp.Account.Name;
             ctx.billingStreet = opp.Account.BillingStreet;
             ctx.billingCity = opp.Account.BillingCity;
-            ctx.billingState = opp.Account.BillingState;
+            ctx.billingState = opp.Account.BillingStateCode;
             ctx.billingPostalCode = opp.Account.BillingPostalCode;
             ctx.billingCountry = opp.Account.BillingCountryCode;
         }
@@ -188,7 +188,49 @@ public with sharing class QuoteBuilderController {
             ctx.lineItems.add(item);
         }
 
+        ctx.paymentTerms = new List<PaymentTermResult>();
+        for (Payment_Term__c pt : [
+            SELECT Id, Payment_Term__c, Percentage__c
+            FROM Payment_Term__c
+            WHERE Quote__c = :quoteId
+            ORDER BY CreatedDate ASC
+        ]) {
+            PaymentTermResult ptr = new PaymentTermResult();
+            ptr.termId = pt.Id;
+            ptr.paymentTerm = pt.Payment_Term__c;
+            ptr.percentage = pt.Percentage__c;
+            ctx.paymentTerms.add(ptr);
+        }
+
         return ctx;
+    }
+
+    @AuraEnabled
+    public static void savePaymentTerms(Id quoteId, String paymentTermsJSON, Boolean deleteExisting) {
+        try {
+            List<PaymentTermInput> terms = (List<PaymentTermInput>) JSON.deserialize(paymentTermsJSON, List<PaymentTermInput>.class);
+
+            if (deleteExisting) {
+                List<Payment_Term__c> oldTerms = [SELECT Id FROM Payment_Term__c WHERE Quote__c = :quoteId];
+                if (!oldTerms.isEmpty()) delete oldTerms;
+            }
+
+            if (terms == null || terms.isEmpty()) return;
+
+            List<Payment_Term__c> ptList = new List<Payment_Term__c>();
+            for (PaymentTermInput t : terms) {
+                Payment_Term__c pt = new Payment_Term__c();
+                pt.Quote__c = quoteId;
+                pt.Payment_Term__c = t.paymentTerm;
+                pt.Percentage__c = t.percentage;
+                ptList.add(pt);
+            }
+            insert ptList;
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new AuraHandledException('Payment terms save failed: ' + e.getMessage());
+        }
     }
 
     @AuraEnabled
@@ -317,6 +359,18 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Id opportunityId;
         @AuraEnabled public Id accountId;
         @AuraEnabled public List<QuoteLineItemResult> lineItems;
+        @AuraEnabled public List<PaymentTermResult> paymentTerms;
+    }
+
+    public class PaymentTermInput {
+        public String paymentTerm;
+        public Decimal percentage;
+    }
+
+    public class PaymentTermResult {
+        @AuraEnabled public Id termId;
+        @AuraEnabled public String paymentTerm;
+        @AuraEnabled public Decimal percentage;
     }
 
     public class PricebookOption {
