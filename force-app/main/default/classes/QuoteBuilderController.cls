@@ -7,7 +7,8 @@ public with sharing class QuoteBuilderController {
                    Account.BillingStreet, Account.BillingCity,
                    Account.BillingStateCode, Account.BillingPostalCode,
                    Account.BillingCountryCode,
-                   Pricebook2Id, CurrencyIsoCode, Buisness_Vertical__c
+                   Pricebook2Id, CurrencyIsoCode, Buisness_Vertical__c,
+                   Region__c
             FROM Opportunity
             WHERE Id = :opportunityId
             LIMIT 1
@@ -21,6 +22,7 @@ public with sharing class QuoteBuilderController {
         ctx.pricebookId = opp.Pricebook2Id;
         ctx.currencyCode = opp.CurrencyIsoCode;
         ctx.vertical = opp.Buisness_Vertical__c;
+        ctx.regionId = opp.Region__c;
 
         if (opp.Account != null) {
             ctx.billingName = opp.Account.Name;
@@ -145,6 +147,178 @@ public with sharing class QuoteBuilderController {
     }
 
     @AuraEnabled
+    public static List<ProductSearchResult> searchProductsWithBestPrice(
+        String searchTerm, Id pricebookId, String category, Id accountId, Id regionId
+    ) {
+        List<ProductSearchResult> results = new List<ProductSearchResult>();
+        if (String.isBlank(searchTerm)) return results;
+
+        String searchKey = '%' + String.escapeSingleQuotes(searchTerm.trim()) + '%';
+
+        Id pbId = pricebookId;
+        if (pbId == null) {
+            List<Pricebook2> stdPb = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
+            if (!stdPb.isEmpty()) pbId = stdPb[0].Id;
+        }
+        if (pbId == null) return results;
+
+        // Search products in the selected pricebook (for PricebookEntry reference)
+        String query = 'SELECT Id, Product2Id, Product2.Name, Product2.ProductCode, ' +
+            'Product2.Product_Category__c, Product2.Make__c, Product2.Model__c, ' +
+            'Product2.Description, Product2.HSN_Code__c, ' +
+            'Product2.Standard_Price__c, Product2.QuantityUnitOfMeasure, ' +
+            'Product2.Line_Description__c, Product2.Detailed_Description__c, ' +
+            'UnitPrice, Tax__c, CurrencyIsoCode ' +
+            'FROM PricebookEntry ' +
+            'WHERE Pricebook2Id = :pbId ' +
+            'AND Product2.IsActive = true ' +
+            'AND (Product2.Name LIKE :searchKey OR Product2.ProductCode LIKE :searchKey)';
+
+        if (String.isNotBlank(category)) {
+            query += ' AND Product2.Product_Category__c = :category';
+        }
+        query += ' ORDER BY Product2.Name ASC LIMIT 20';
+
+        List<PricebookEntry> baseEntries;
+        try {
+            baseEntries = Database.query(query);
+        } catch (Exception e) {
+            throw new AuraHandledException('Search failed: ' + e.getMessage());
+        }
+        if (baseEntries.isEmpty()) return results;
+
+        // Collect product IDs for cross-pricebook lookup
+        Set<Id> productIds = new Set<Id>();
+        for (PricebookEntry pbe : baseEntries) {
+            productIds.add(pbe.Product2Id);
+        }
+
+        // Query prices from ALL active pricebooks for these products
+        Date today = Date.today();
+        List<PricebookEntry> allEntries = [
+            SELECT Id, Product2Id, UnitPrice, Tax__c,
+                   Pricebook2Id, Pricebook2.Name, Pricebook2.Price_Book_Type__c,
+                   Pricebook2.Customer__c, Pricebook2.Region__c,
+                   Pricebook2.Valid_From__c, Pricebook2.Valid_Till__c,
+                   Pricebook2.IsStandard
+            FROM PricebookEntry
+            WHERE Product2Id IN :productIds
+            AND Pricebook2.IsActive = true
+            AND Product2.IsActive = true
+        ];
+
+        // Build product -> pricing options map with priority
+        Map<Id, List<PricingOption>> productPricingMap = new Map<Id, List<PricingOption>>();
+        for (PricebookEntry pbe : allEntries) {
+            Integer priority = getPricebookPriority(pbe, accountId, regionId, today);
+            if (priority == 0) continue;
+
+            PricingOption opt = new PricingOption();
+            opt.pricebookName = pbe.Pricebook2.Name;
+            opt.pricebookType = getPricebookTypeLabel(pbe);
+            opt.price = pbe.UnitPrice;
+            opt.taxPercent = pbe.Tax__c;
+            opt.priority = priority;
+
+            if (!productPricingMap.containsKey(pbe.Product2Id)) {
+                productPricingMap.put(pbe.Product2Id, new List<PricingOption>());
+            }
+            productPricingMap.get(pbe.Product2Id).add(opt);
+        }
+
+        // Build results with auto-selected best pricing
+        for (PricebookEntry pbe : baseEntries) {
+            ProductSearchResult psr = new ProductSearchResult();
+            psr.pricebookEntryId = pbe.Id;
+            psr.productId = pbe.Product2Id;
+            psr.productName = pbe.Product2.Name;
+            psr.productCode = pbe.Product2.ProductCode;
+            psr.category = pbe.Product2.Product_Category__c;
+            psr.make = pbe.Product2.Make__c;
+            psr.model = pbe.Product2.Model__c;
+            psr.description = pbe.Product2.Description;
+            psr.hsnCode = pbe.Product2.HSN_Code__c;
+            psr.standardPrice = pbe.Product2.Standard_Price__c;
+            psr.uom = pbe.Product2.QuantityUnitOfMeasure;
+            psr.lineDescription = pbe.Product2.Line_Description__c;
+            psr.detailedDescription = pbe.Product2.Detailed_Description__c;
+
+            // Default to base entry pricing
+            psr.unitPrice = pbe.UnitPrice;
+            psr.taxPercent = pbe.Tax__c;
+            psr.sourcePricebook = '';
+            psr.sourcePricebookType = '';
+            psr.availablePrices = new List<PriceOption>();
+
+            // Auto-select best price based on priority
+            List<PricingOption> options = productPricingMap.get(pbe.Product2Id);
+            if (options != null && !options.isEmpty()) {
+                PricingOption best = null;
+                for (PricingOption opt : options) {
+                    if (best == null || opt.priority < best.priority) {
+                        best = opt;
+                    }
+                }
+                if (best != null) {
+                    psr.unitPrice = best.price;
+                    psr.taxPercent = best.taxPercent != null ? best.taxPercent : pbe.Tax__c;
+                    psr.sourcePricebook = best.pricebookName;
+                    psr.sourcePricebookType = best.pricebookType;
+                }
+
+                for (PricingOption opt : options) {
+                    PriceOption po = new PriceOption();
+                    po.pricebookName = opt.pricebookName;
+                    po.pricebookType = opt.pricebookType;
+                    po.price = opt.price;
+                    po.isSelected = (best != null && opt.pricebookName == best.pricebookName
+                                     && opt.price == best.price);
+                    psr.availablePrices.add(po);
+                }
+            }
+
+            results.add(psr);
+        }
+
+        return results;
+    }
+
+    // Pricing priority: Promotional(1) > Customer Specific(2) > Region Specific(3) > Dealer(4) > Standard(5)
+    private static Integer getPricebookPriority(PricebookEntry pbe, Id accountId, Id regionId, Date today) {
+        String pbType = pbe.Pricebook2.Price_Book_Type__c;
+
+        // Check date validity
+        Date validFrom = pbe.Pricebook2.Valid_From__c;
+        Date validTill = pbe.Pricebook2.Valid_Till__c;
+        Boolean dateValid = true;
+        if (validFrom != null && today < validFrom) dateValid = false;
+        if (validTill != null && today > validTill) dateValid = false;
+
+        if (pbType == 'Promotional Price') {
+            return dateValid ? 1 : 0;
+        }
+        if (pbType == 'Customer Specific' && accountId != null) {
+            return (pbe.Pricebook2.Customer__c == accountId && dateValid) ? 2 : 0;
+        }
+        if (pbType == 'Region Specific' && regionId != null) {
+            return (pbe.Pricebook2.Region__c == regionId && dateValid) ? 3 : 0;
+        }
+        if (pbType == 'Dealer Price') {
+            return 4;
+        }
+        if (pbe.Pricebook2.IsStandard) {
+            return 5;
+        }
+        return 0;
+    }
+
+    private static String getPricebookTypeLabel(PricebookEntry pbe) {
+        if (pbe.Pricebook2.IsStandard) return 'Standard';
+        String pbType = pbe.Pricebook2.Price_Book_Type__c;
+        return String.isNotBlank(pbType) ? pbType : 'Standard';
+    }
+
+    @AuraEnabled
     public static QuoteEditContext getQuoteForEdit(Id quoteId) {
         Quote q = [
             SELECT Id, Pricebook2Id, OpportunityId, Opportunity.AccountId
@@ -166,7 +340,8 @@ public with sharing class QuoteBuilderController {
                    PricebookEntryId, PricebookEntry.Tax__c,
                    Quantity, ListPrice, UnitPrice, Discount,
                    Product_Line_Description__c,
-                   Product_Detailed_Description__c
+                   Product_Detailed_Description__c,
+                   Source_Pricebook__c
             FROM QuoteLineItem
             WHERE QuoteId = :quoteId
             ORDER BY SortOrder ASC, Id ASC
@@ -185,6 +360,7 @@ public with sharing class QuoteBuilderController {
             item.taxPercent = qli.PricebookEntry.Tax__c != null ? qli.PricebookEntry.Tax__c : 0;
             item.lineDescription = qli.Product_Line_Description__c;
             item.detailedDescription = qli.Product_Detailed_Description__c;
+            item.sourcePricebook = qli.Source_Pricebook__c;
             ctx.lineItems.add(item);
         }
 
@@ -252,6 +428,7 @@ public with sharing class QuoteBuilderController {
                 qli.Discount = item.discount;
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
+                qli.Source_Pricebook__c = item.sourcePricebook;
                 qli.Price_Status__c = 'Not Required';
                 qliList.add(qli);
             }
@@ -285,6 +462,7 @@ public with sharing class QuoteBuilderController {
                 qli.Discount = item.discount;
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
+                qli.Source_Pricebook__c = item.sourcePricebook;
                 qli.Price_Status__c = 'Not Required';
                 qliList.add(qli);
             }
@@ -305,6 +483,7 @@ public with sharing class QuoteBuilderController {
         public Decimal discount;
         public String lineDescription;
         public String detailedDescription;
+        public String sourcePricebook;
     }
 
     public class OpportunityContext {
@@ -315,6 +494,7 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Id pricebookId;
         @AuraEnabled public String currencyCode;
         @AuraEnabled public String vertical;
+        @AuraEnabled public Id regionId;
         @AuraEnabled public String billingName;
         @AuraEnabled public String billingStreet;
         @AuraEnabled public String billingCity;
@@ -351,6 +531,24 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public String uom;
         @AuraEnabled public String lineDescription;
         @AuraEnabled public String detailedDescription;
+        @AuraEnabled public String sourcePricebook;
+        @AuraEnabled public String sourcePricebookType;
+        @AuraEnabled public List<PriceOption> availablePrices;
+    }
+
+    public class PriceOption {
+        @AuraEnabled public String pricebookName;
+        @AuraEnabled public String pricebookType;
+        @AuraEnabled public Decimal price;
+        @AuraEnabled public Boolean isSelected;
+    }
+
+    private class PricingOption {
+        public String pricebookName;
+        public String pricebookType;
+        public Decimal price;
+        public Decimal taxPercent;
+        public Integer priority;
     }
 
     public class QuoteEditContext {
@@ -392,5 +590,6 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Decimal taxPercent;
         @AuraEnabled public String lineDescription;
         @AuraEnabled public String detailedDescription;
+        @AuraEnabled public String sourcePricebook;
     }
 }

@@ -340,6 +340,231 @@ private class QuoteBuilderControllerTest {
     }
 
     @isTest
+    static void testSearchProductsWithBestPriceStandard() {
+        Opportunity opp = [SELECT Id, AccountId, Pricebook2Id FROM Opportunity LIMIT 1];
+
+        Test.startTest();
+        List<QuoteBuilderController.ProductSearchResult> results =
+            QuoteBuilderController.searchProductsWithBestPrice(
+                'Ultrasound', opp.Pricebook2Id, null, opp.AccountId, null
+            );
+        Test.stopTest();
+
+        System.assertEquals(1, results.size(), 'Should find 1 product');
+        System.assertEquals('USG-500', results[0].productCode);
+        System.assertNotEquals(null, results[0].unitPrice, 'Unit price should be set');
+        System.assertNotEquals(null, results[0].availablePrices, 'Available prices should be populated');
+    }
+
+    @isTest
+    static void testSearchProductsWithBestPricePromotional() {
+        Opportunity opp = [SELECT Id, AccountId, Pricebook2Id FROM Opportunity LIMIT 1];
+        Product2 prod = [SELECT Id FROM Product2 WHERE ProductCode = 'USG-500' LIMIT 1];
+
+        // Create a promotional pricebook with a lower price
+        Pricebook2 promoPb = new Pricebook2(
+            Name = 'Summer Promo 2026',
+            IsActive = true,
+            Price_Book_Type__c = 'Promotional Price',
+            Valid_From__c = Date.today().addDays(-10),
+            Valid_Till__c = Date.today().addDays(30)
+        );
+        insert promoPb;
+
+        PricebookEntry promoPbe = new PricebookEntry(
+            Pricebook2Id = promoPb.Id,
+            Product2Id = prod.Id,
+            UnitPrice = 120000,
+            IsActive = true
+        );
+        insert promoPbe;
+
+        Test.startTest();
+        List<QuoteBuilderController.ProductSearchResult> results =
+            QuoteBuilderController.searchProductsWithBestPrice(
+                'Ultrasound', opp.Pricebook2Id, null, opp.AccountId, null
+            );
+        Test.stopTest();
+
+        System.assertEquals(1, results.size(), 'Should find 1 product');
+        System.assertEquals(120000, results[0].unitPrice, 'Should auto-select promotional price');
+        System.assertEquals('Promotional Price', results[0].sourcePricebookType);
+    }
+
+    @isTest
+    static void testSearchProductsWithBestPriceCustomerSpecific() {
+        Opportunity opp = [SELECT Id, AccountId, Pricebook2Id FROM Opportunity LIMIT 1];
+        Product2 prod = [SELECT Id FROM Product2 WHERE ProductCode = 'USG-500' LIMIT 1];
+
+        // Create a customer-specific pricebook
+        Pricebook2 custPb = new Pricebook2(
+            Name = 'Test Hospital Pricebook',
+            IsActive = true,
+            Price_Book_Type__c = 'Customer Specific',
+            Customer__c = opp.AccountId
+        );
+        insert custPb;
+
+        PricebookEntry custPbe = new PricebookEntry(
+            Pricebook2Id = custPb.Id,
+            Product2Id = prod.Id,
+            UnitPrice = 135000,
+            IsActive = true
+        );
+        insert custPbe;
+
+        Test.startTest();
+        List<QuoteBuilderController.ProductSearchResult> results =
+            QuoteBuilderController.searchProductsWithBestPrice(
+                'Ultrasound', opp.Pricebook2Id, null, opp.AccountId, null
+            );
+        Test.stopTest();
+
+        System.assertEquals(1, results.size(), 'Should find 1 product');
+        System.assertEquals(135000, results[0].unitPrice, 'Should auto-select customer-specific price');
+        System.assertEquals('Customer Specific', results[0].sourcePricebookType);
+    }
+
+    @isTest
+    static void testSearchProductsWithBestPricePriorityOrder() {
+        Opportunity opp = [SELECT Id, AccountId, Pricebook2Id FROM Opportunity LIMIT 1];
+        Product2 prod = [SELECT Id FROM Product2 WHERE ProductCode = 'USG-500' LIMIT 1];
+
+        // Create customer-specific pricebook (priority 2)
+        Pricebook2 custPb = new Pricebook2(
+            Name = 'Customer PB',
+            IsActive = true,
+            Price_Book_Type__c = 'Customer Specific',
+            Customer__c = opp.AccountId
+        );
+        insert custPb;
+
+        PricebookEntry custPbe = new PricebookEntry(
+            Pricebook2Id = custPb.Id,
+            Product2Id = prod.Id,
+            UnitPrice = 135000,
+            IsActive = true
+        );
+        insert custPbe;
+
+        // Create promotional pricebook (priority 1 - should win)
+        Pricebook2 promoPb = new Pricebook2(
+            Name = 'Promo PB',
+            IsActive = true,
+            Price_Book_Type__c = 'Promotional Price',
+            Valid_From__c = Date.today().addDays(-5),
+            Valid_Till__c = Date.today().addDays(30)
+        );
+        insert promoPb;
+
+        PricebookEntry promoPbe = new PricebookEntry(
+            Pricebook2Id = promoPb.Id,
+            Product2Id = prod.Id,
+            UnitPrice = 110000,
+            IsActive = true
+        );
+        insert promoPbe;
+
+        Test.startTest();
+        List<QuoteBuilderController.ProductSearchResult> results =
+            QuoteBuilderController.searchProductsWithBestPrice(
+                'Ultrasound', opp.Pricebook2Id, null, opp.AccountId, null
+            );
+        Test.stopTest();
+
+        System.assertEquals(1, results.size());
+        // Promotional should win over customer-specific
+        System.assertEquals(110000, results[0].unitPrice, 'Promotional price should have highest priority');
+        System.assertEquals('Promotional Price', results[0].sourcePricebookType);
+        // Should have multiple available prices
+        System.assert(results[0].availablePrices.size() >= 2, 'Should show multiple price options');
+    }
+
+    @isTest
+    static void testSearchProductsWithBestPriceExpiredPromo() {
+        Opportunity opp = [SELECT Id, AccountId, Pricebook2Id FROM Opportunity LIMIT 1];
+        Product2 prod = [SELECT Id FROM Product2 WHERE ProductCode = 'USG-500' LIMIT 1];
+
+        // Create an expired promotional pricebook
+        Pricebook2 promoPb = new Pricebook2(
+            Name = 'Expired Promo',
+            IsActive = true,
+            Price_Book_Type__c = 'Promotional Price',
+            Valid_From__c = Date.today().addDays(-60),
+            Valid_Till__c = Date.today().addDays(-1)
+        );
+        insert promoPb;
+
+        PricebookEntry promoPbe = new PricebookEntry(
+            Pricebook2Id = promoPb.Id,
+            Product2Id = prod.Id,
+            UnitPrice = 100000,
+            IsActive = true
+        );
+        insert promoPbe;
+
+        Test.startTest();
+        List<QuoteBuilderController.ProductSearchResult> results =
+            QuoteBuilderController.searchProductsWithBestPrice(
+                'Ultrasound', opp.Pricebook2Id, null, opp.AccountId, null
+            );
+        Test.stopTest();
+
+        System.assertEquals(1, results.size());
+        // Expired promo should NOT be selected; should fall back to standard price
+        System.assertNotEquals(100000, results[0].unitPrice, 'Expired promo price should not be selected');
+    }
+
+    @isTest
+    static void testSearchProductsWithBestPriceEmptySearch() {
+        Opportunity opp = [SELECT Id, AccountId, Pricebook2Id FROM Opportunity LIMIT 1];
+
+        Test.startTest();
+        List<QuoteBuilderController.ProductSearchResult> results =
+            QuoteBuilderController.searchProductsWithBestPrice(
+                '', opp.Pricebook2Id, null, opp.AccountId, null
+            );
+        Test.stopTest();
+
+        System.assertEquals(0, results.size(), 'Empty search should return no results');
+    }
+
+    @isTest
+    static void testSaveQuoteLineItemsWithSourcePricebook() {
+        Opportunity opp = [SELECT Id, Pricebook2Id FROM Opportunity LIMIT 1];
+        PricebookEntry pbe = [SELECT Id, Product2Id FROM PricebookEntry WHERE Product2.ProductCode = 'USG-500' LIMIT 1];
+
+        Quote q = new Quote(
+            Name = 'Source PB Test Quote',
+            OpportunityId = opp.Id,
+            Pricebook2Id = opp.Pricebook2Id,
+            Status = 'Draft',
+            Price_Status__c = 'Draft'
+        );
+        insert q;
+
+        String lineItemsJSON = JSON.serialize(new List<Map<String, Object>>{
+            new Map<String, Object>{
+                'productId' => pbe.Product2Id,
+                'pricebookEntryId' => pbe.Id,
+                'quantity' => 1,
+                'unitPrice' => 120000,
+                'discount' => 0,
+                'lineDescription' => 'Promo priced item',
+                'detailedDescription' => 'Auto-selected from promo',
+                'sourcePricebook' => 'Summer Promo 2026'
+            }
+        });
+
+        Test.startTest();
+        QuoteBuilderController.saveQuoteLineItems(q.Id, lineItemsJSON);
+        Test.stopTest();
+
+        QuoteLineItem savedItem = [SELECT Source_Pricebook__c FROM QuoteLineItem WHERE QuoteId = :q.Id LIMIT 1];
+        System.assertEquals('Summer Promo 2026', savedItem.Source_Pricebook__c, 'Source pricebook should be saved');
+    }
+
+    @isTest
     static void testUpdateQuoteLineItemsEmpty() {
         Opportunity opp = [SELECT Id, Pricebook2Id FROM Opportunity LIMIT 1];
 

@@ -217,6 +217,49 @@
     opacity: 0.8;
 }
 
+/* ===== Price Source Badges ===== */
+
+.price-source-badge {
+    display: inline-block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    padding: 0.125rem 0.5rem;
+    border-radius: 10px;
+    margin-top: 0.25rem;
+    white-space: nowrap;
+    line-height: 1.4;
+}
+
+.price-source-promotional {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+}
+
+.price-source-customer {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+}
+
+.price-source-region {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+}
+
+.price-source-dealer {
+    background: #ede9fe;
+    color: #5b21b6;
+    border: 1px solid #c4b5fd;
+}
+
+.price-source-standard {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+
 .empty-state {
     padding: 2.5rem 1rem;
     text-align: center;
