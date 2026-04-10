@@ -7,7 +7,7 @@
     <columns>Sub_Category__c</columns>
     <columns>Brand__c</columns>
     <columns>Make__c</columns>
-    <columns>Family</columns>
+    <columns>PRODUCT2.FAMILY</columns>
     <columns>Standard_Price__c</columns>
     <columns>Product_Status__c</columns>
     <columns>ERP_Sync_Status__c</columns>
