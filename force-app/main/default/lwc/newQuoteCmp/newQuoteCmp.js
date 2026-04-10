@@ -198,8 +198,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     async loadQuoteLineItems() {
         try {
             const data = await getQuoteForEdit({ quoteId: this.editRecordId });
-            this.pricebookId = data.pricebookId;
+            this.pricebookId = data.standardPricebookId || data.pricebookId;
             this.accountId = data.accountId;
+            this.accountName = data.accountName || '';
+            this.regionId = data.regionId;
+            this.defaultOpportunityId = data.opportunityId;
 
             if (this.accountId) {
                 await this.loadShippingAddresses(this.accountId);
@@ -227,6 +230,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                         discount: item.discount || 0,
                         taxPercent: item.taxPercent || 0,
                         taxPercentDisplay: (item.taxPercent || 0) + '%',
+                        maxDiscount: item.maxDiscount,
+                        maxDiscountDisplay: item.maxDiscount != null ? item.maxDiscount + '%' : '',
                         lineTotal: afterDiscount + taxAmt,
                         lineDescription: item.lineDescription || '',
                         detailedDescription: item.detailedDescription || '',
@@ -507,6 +512,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 ...r,
                 formattedPrice: this.formatCurrency(r.unitPrice),
                 formattedTax: r.taxPercent != null ? r.taxPercent + '%' : '0%',
+                maxDiscountDisplay: r.maxDiscount != null ? r.maxDiscount + '%' : '',
                 priceBadgeClass: this.getPriceBadgeClass(r.sourcePricebookType),
                 priceBadgeLabel: this.getPriceBadgeLabel(r.sourcePricebookType),
                 hasPriceSource: !!r.sourcePricebookType
@@ -546,6 +552,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             discount: 0,
             taxPercent: product.taxPercent || 0,
             taxPercentDisplay: (product.taxPercent || 0) + '%',
+            maxDiscount: product.maxDiscount,
+            maxDiscountDisplay: product.maxDiscount != null ? product.maxDiscount + '%' : '',
             lineTotal: product.unitPrice,
             lineDescription: product.lineDescription || '',
             detailedDescription: product.detailedDescription || '',

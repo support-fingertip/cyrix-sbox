@@ -284,6 +284,8 @@ private class QuoteBuilderControllerTest {
         System.assertEquals(opp.Pricebook2Id, ctx.pricebookId);
         System.assertEquals(opp.Id, ctx.opportunityId);
         System.assertEquals(opp.AccountId, ctx.accountId);
+        System.assertEquals('Test Hospital', ctx.accountName, 'Account name should be populated in edit context');
+        System.assertNotEquals(null, ctx.standardPricebookId, 'Standard pricebook ID should be populated');
         System.assertEquals(1, ctx.lineItems.size());
         System.assertEquals(2, ctx.lineItems[0].quantity);
         System.assertEquals(150000, ctx.lineItems[0].unitPrice);
@@ -375,6 +377,7 @@ private class QuoteBuilderControllerTest {
             Pricebook2Id = promoPb.Id,
             Product2Id = prod.Id,
             UnitPrice = 120000,
+            Max_Discount_Percentage__c = 15,
             IsActive = true
         );
         insert promoPbe;
@@ -389,6 +392,7 @@ private class QuoteBuilderControllerTest {
         System.assertEquals(1, results.size(), 'Should find 1 product');
         System.assertEquals(120000, results[0].unitPrice, 'Should auto-select promotional price');
         System.assertEquals('Promotional Price', results[0].sourcePricebookType);
+        System.assertEquals(15, results[0].maxDiscount, 'Max discount should be returned from best price entry');
     }
 
     @isTest
