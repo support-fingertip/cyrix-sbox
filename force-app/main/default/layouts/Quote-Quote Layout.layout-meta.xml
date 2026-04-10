@@ -50,6 +50,10 @@
                 <behavior>Edit</behavior>
                 <field>Bank_Name__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Revised_Date__c</field>
+            </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>

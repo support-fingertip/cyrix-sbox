@@ -628,7 +628,7 @@ handleEnable(e) {
 
         this.isValueSearched = storeData.length > 0;
         this.objData.searchNameData = storeData;
-        console.log('objData>>' + JSON.stringify(objData));
+        console.log('searchData>>' + JSON.stringify(storeData));
     }
     get isCustomer() {
         return this.visitData.Visit_for__c === 'Customer';

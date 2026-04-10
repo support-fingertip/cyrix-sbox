@@ -206,6 +206,10 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>DailyLogVisitMapController</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>DistanceMatrixControllerForVisit</apexClass>
         <enabled>false</enabled>
     </classAccesses>
@@ -2810,6 +2814,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>Quote.Revised_Date__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>Quote.Shipping_Address__c</field>
         <readable>false</readable>
     </fieldPermissions>
@@ -3411,6 +3420,10 @@
     <flowAccesses>
         <enabled>false</enabled>
         <flow>Opportunity_Stage_Change_Notification</flow>
+    </flowAccesses>
+    <flowAccesses>
+        <enabled>false</enabled>
+        <flow>Quote_Approval_Status_Update</flow>
     </flowAccesses>
     <flowAccesses>
         <enabled>false</enabled>
