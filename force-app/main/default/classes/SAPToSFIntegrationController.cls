@@ -82,7 +82,7 @@ global without sharing class SAPToSFIntegrationController {
                 p.Name = getStr(sp, 'Name');
                 p.SAP_Item_Code__c = getStr(sp, 'SAP_Item_Code__c');
                 p.Product_Category__c = getStr(sp, 'Product_Category__c');
-                p.Product_Vertical__c = getStr(sp, 'Product_Vertical__c');
+                p.Family = getStr(sp, 'Product_Vertical__c');
                 p.Product_Type__c = getStr(sp, 'Product_Type__c');
                 p.Source__c = getStr(sp, 'Source__c');
                 p.Equipment_Name__c = getStr(sp, 'Equipment_Name__c');
