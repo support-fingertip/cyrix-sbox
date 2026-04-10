@@ -5,9 +5,7 @@ import { CloseActionScreenEvent } from 'lightning/actions';
 import getOpportunityContext from '@salesforce/apex/QuoteBuilderController.getOpportunityContext';
 import getQuoteForEdit from '@salesforce/apex/QuoteBuilderController.getQuoteForEdit';
 import getShippingAddresses from '@salesforce/apex/QuoteBuilderController.getShippingAddresses';
-import searchProducts from '@salesforce/apex/QuoteBuilderController.searchProducts';
 import searchProductsWithBestPrice from '@salesforce/apex/QuoteBuilderController.searchProductsWithBestPrice';
-import getPricebooks from '@salesforce/apex/QuoteBuilderController.getPricebooks';
 import saveQuoteLineItems from '@salesforce/apex/QuoteBuilderController.saveQuoteLineItems';
 import updateQuoteLineItems from '@salesforce/apex/QuoteBuilderController.updateQuoteLineItems';
 import savePaymentTerms from '@salesforce/apex/QuoteBuilderController.savePaymentTerms';
@@ -36,9 +34,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
     // Default values for new quote (auto-populate Bill To from Account)
     defaultValues = {};
-
-    // Pricebook picklist
-    @track pricebookOptions = [];
 
     // Shipping address picker
     @track shippingAddresses = [];
@@ -154,9 +149,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
         this.isLoading = true;
 
-        // Load pricebook options for the picklist
-        await this.loadPricebooks();
-
         const idPrefix = this.recordId.substring(0, 3);
 
         if (idPrefix === '0Q0') {
@@ -175,7 +167,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     async loadOpportunityContext() {
         try {
             const data = await getOpportunityContext({ opportunityId: this.recordId });
-            this.pricebookId = data.pricebookId;
+            // Use Standard Pricebook for quote (auto-pricing selects best price per line item)
+            this.pricebookId = data.standardPricebookId || data.pricebookId;
             this.currencyCode = data.currencyCode || 'INR';
             this.accountId = data.accountId;
             this.accountName = data.accountName || '';
@@ -278,25 +271,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }
     }
 
-    async loadPricebooks() {
-        try {
-            const pricebooks = await getPricebooks();
-            this.pricebookOptions = (pricebooks || []).map(pb => ({
-                label: pb.pricebookName,
-                value: pb.pricebookId
-            }));
-        } catch (error) {
-            console.warn('Could not load pricebooks:', error);
-            this.pricebookOptions = [];
-        }
-    }
-
-    handlePricebookChange(event) {
-        this.pricebookId = event.detail.value;
-        // Clear existing search results when pricebook changes
-        this.searchResults = [];
-        this.showSearchResults = false;
-    }
 
     // ===== SHIPPING ADDRESS HANDLER =====
 
@@ -524,7 +498,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         try {
             const results = await searchProductsWithBestPrice({
                 searchTerm: this.searchTerm,
-                pricebookId: this.pricebookId,
                 category: this.categoryFilter || null,
                 accountId: this.accountId || null,
                 regionId: this.regionId || null

@@ -24,6 +24,12 @@ public with sharing class QuoteBuilderController {
         ctx.vertical = opp.Buisness_Vertical__c;
         ctx.regionId = opp.Region__c;
 
+        // Always provide the Standard Pricebook ID for auto-pricing
+        List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
+        if (!stdPbs.isEmpty()) {
+            ctx.standardPricebookId = stdPbs[0].Id;
+        }
+
         if (opp.Account != null) {
             ctx.billingName = opp.Account.Name;
             ctx.billingStreet = opp.Account.BillingStreet;
@@ -148,49 +154,53 @@ public with sharing class QuoteBuilderController {
 
     @AuraEnabled
     public static List<ProductSearchResult> searchProductsWithBestPrice(
-        String searchTerm, Id pricebookId, String category, Id accountId, Id regionId
+        String searchTerm, String category, Id accountId, Id regionId
     ) {
         List<ProductSearchResult> results = new List<ProductSearchResult>();
         if (String.isBlank(searchTerm)) return results;
 
         String searchKey = '%' + String.escapeSingleQuotes(searchTerm.trim()) + '%';
 
-        Id pbId = pricebookId;
-        if (pbId == null) {
-            List<Pricebook2> stdPb = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
-            if (!stdPb.isEmpty()) pbId = stdPb[0].Id;
-        }
-        if (pbId == null) return results;
-
-        // Search products in the selected pricebook (for PricebookEntry reference)
-        String query = 'SELECT Id, Product2Id, Product2.Name, Product2.ProductCode, ' +
-            'Product2.Product_Category__c, Product2.Make__c, Product2.Model__c, ' +
-            'Product2.Description, Product2.HSN_Code__c, ' +
-            'Product2.Standard_Price__c, Product2.QuantityUnitOfMeasure, ' +
-            'Product2.Line_Description__c, Product2.Detailed_Description__c, ' +
-            'UnitPrice, Tax__c, CurrencyIsoCode ' +
-            'FROM PricebookEntry ' +
-            'WHERE Pricebook2Id = :pbId ' +
-            'AND Product2.IsActive = true ' +
-            'AND (Product2.Name LIKE :searchKey OR Product2.ProductCode LIKE :searchKey)';
+        // Search products directly - not restricted by pricebook
+        String prodQuery = 'SELECT Id, Name, ProductCode, Product_Category__c, Make__c, Model__c, ' +
+            'Description, HSN_Code__c, Standard_Price__c, QuantityUnitOfMeasure, ' +
+            'Line_Description__c, Detailed_Description__c ' +
+            'FROM Product2 ' +
+            'WHERE IsActive = true ' +
+            'AND (Name LIKE :searchKey OR ProductCode LIKE :searchKey)';
 
         if (String.isNotBlank(category)) {
-            query += ' AND Product2.Product_Category__c = :category';
+            prodQuery += ' AND Product_Category__c = :category';
         }
-        query += ' ORDER BY Product2.Name ASC LIMIT 20';
+        prodQuery += ' ORDER BY Name ASC LIMIT 20';
 
-        List<PricebookEntry> baseEntries;
+        List<Product2> products;
         try {
-            baseEntries = Database.query(query);
+            products = Database.query(prodQuery);
         } catch (Exception e) {
             throw new AuraHandledException('Search failed: ' + e.getMessage());
         }
-        if (baseEntries.isEmpty()) return results;
+        if (products.isEmpty()) return results;
 
-        // Collect product IDs for cross-pricebook lookup
         Set<Id> productIds = new Set<Id>();
-        for (PricebookEntry pbe : baseEntries) {
-            productIds.add(pbe.Product2Id);
+        for (Product2 p : products) {
+            productIds.add(p.Id);
+        }
+
+        // Get Standard Pricebook entries (needed for QuoteLineItem.PricebookEntryId)
+        List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
+        if (stdPbs.isEmpty()) return results;
+        Id stdPbId = stdPbs[0].Id;
+
+        Map<Id, PricebookEntry> stdEntryMap = new Map<Id, PricebookEntry>();
+        for (PricebookEntry pbe : [
+            SELECT Id, Product2Id, UnitPrice, Tax__c
+            FROM PricebookEntry
+            WHERE Pricebook2Id = :stdPbId
+            AND Product2Id IN :productIds
+            AND IsActive = true
+        ]) {
+            stdEntryMap.put(pbe.Product2Id, pbe);
         }
 
         // Query prices from ALL active pricebooks for these products
@@ -227,31 +237,35 @@ public with sharing class QuoteBuilderController {
         }
 
         // Build results with auto-selected best pricing
-        for (PricebookEntry pbe : baseEntries) {
-            ProductSearchResult psr = new ProductSearchResult();
-            psr.pricebookEntryId = pbe.Id;
-            psr.productId = pbe.Product2Id;
-            psr.productName = pbe.Product2.Name;
-            psr.productCode = pbe.Product2.ProductCode;
-            psr.category = pbe.Product2.Product_Category__c;
-            psr.make = pbe.Product2.Make__c;
-            psr.model = pbe.Product2.Model__c;
-            psr.description = pbe.Product2.Description;
-            psr.hsnCode = pbe.Product2.HSN_Code__c;
-            psr.standardPrice = pbe.Product2.Standard_Price__c;
-            psr.uom = pbe.Product2.QuantityUnitOfMeasure;
-            psr.lineDescription = pbe.Product2.Line_Description__c;
-            psr.detailedDescription = pbe.Product2.Detailed_Description__c;
+        for (Product2 prod : products) {
+            // Must have a Standard Pricebook entry to be added to a quote
+            PricebookEntry stdEntry = stdEntryMap.get(prod.Id);
+            if (stdEntry == null) continue;
 
-            // Default to base entry pricing
-            psr.unitPrice = pbe.UnitPrice;
-            psr.taxPercent = pbe.Tax__c;
+            ProductSearchResult psr = new ProductSearchResult();
+            psr.pricebookEntryId = stdEntry.Id;
+            psr.productId = prod.Id;
+            psr.productName = prod.Name;
+            psr.productCode = prod.ProductCode;
+            psr.category = prod.Product_Category__c;
+            psr.make = prod.Make__c;
+            psr.model = prod.Model__c;
+            psr.description = prod.Description;
+            psr.hsnCode = prod.HSN_Code__c;
+            psr.standardPrice = prod.Standard_Price__c;
+            psr.uom = prod.QuantityUnitOfMeasure;
+            psr.lineDescription = prod.Line_Description__c;
+            psr.detailedDescription = prod.Detailed_Description__c;
+
+            // Default to standard pricebook pricing
+            psr.unitPrice = stdEntry.UnitPrice;
+            psr.taxPercent = stdEntry.Tax__c;
             psr.sourcePricebook = '';
             psr.sourcePricebookType = '';
             psr.availablePrices = new List<PriceOption>();
 
             // Auto-select best price based on priority
-            List<PricingOption> options = productPricingMap.get(pbe.Product2Id);
+            List<PricingOption> options = productPricingMap.get(prod.Id);
             if (options != null && !options.isEmpty()) {
                 PricingOption best = null;
                 for (PricingOption opt : options) {
@@ -261,7 +275,7 @@ public with sharing class QuoteBuilderController {
                 }
                 if (best != null) {
                     psr.unitPrice = best.price;
-                    psr.taxPercent = best.taxPercent != null ? best.taxPercent : pbe.Tax__c;
+                    psr.taxPercent = best.taxPercent != null ? best.taxPercent : stdEntry.Tax__c;
                     psr.sourcePricebook = best.pricebookName;
                     psr.sourcePricebookType = best.pricebookType;
                 }
@@ -492,6 +506,7 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Id accountId;
         @AuraEnabled public String accountName;
         @AuraEnabled public Id pricebookId;
+        @AuraEnabled public Id standardPricebookId;
         @AuraEnabled public String currencyCode;
         @AuraEnabled public String vertical;
         @AuraEnabled public Id regionId;

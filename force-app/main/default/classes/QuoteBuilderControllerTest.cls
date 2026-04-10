@@ -346,7 +346,7 @@ private class QuoteBuilderControllerTest {
         Test.startTest();
         List<QuoteBuilderController.ProductSearchResult> results =
             QuoteBuilderController.searchProductsWithBestPrice(
-                'Ultrasound', opp.Pricebook2Id, null, opp.AccountId, null
+                'Ultrasound', null, opp.AccountId, null
             );
         Test.stopTest();
 
@@ -382,7 +382,7 @@ private class QuoteBuilderControllerTest {
         Test.startTest();
         List<QuoteBuilderController.ProductSearchResult> results =
             QuoteBuilderController.searchProductsWithBestPrice(
-                'Ultrasound', opp.Pricebook2Id, null, opp.AccountId, null
+                'Ultrasound', null, opp.AccountId, null
             );
         Test.stopTest();
 
@@ -416,7 +416,7 @@ private class QuoteBuilderControllerTest {
         Test.startTest();
         List<QuoteBuilderController.ProductSearchResult> results =
             QuoteBuilderController.searchProductsWithBestPrice(
-                'Ultrasound', opp.Pricebook2Id, null, opp.AccountId, null
+                'Ultrasound', null, opp.AccountId, null
             );
         Test.stopTest();
 
@@ -468,7 +468,7 @@ private class QuoteBuilderControllerTest {
         Test.startTest();
         List<QuoteBuilderController.ProductSearchResult> results =
             QuoteBuilderController.searchProductsWithBestPrice(
-                'Ultrasound', opp.Pricebook2Id, null, opp.AccountId, null
+                'Ultrasound', null, opp.AccountId, null
             );
         Test.stopTest();
 
@@ -506,7 +506,7 @@ private class QuoteBuilderControllerTest {
         Test.startTest();
         List<QuoteBuilderController.ProductSearchResult> results =
             QuoteBuilderController.searchProductsWithBestPrice(
-                'Ultrasound', opp.Pricebook2Id, null, opp.AccountId, null
+                'Ultrasound', null, opp.AccountId, null
             );
         Test.stopTest();
 
@@ -522,7 +522,7 @@ private class QuoteBuilderControllerTest {
         Test.startTest();
         List<QuoteBuilderController.ProductSearchResult> results =
             QuoteBuilderController.searchProductsWithBestPrice(
-                '', opp.Pricebook2Id, null, opp.AccountId, null
+                '', null, opp.AccountId, null
             );
         Test.stopTest();
 
