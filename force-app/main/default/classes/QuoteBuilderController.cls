@@ -207,6 +207,7 @@ public with sharing class QuoteBuilderController {
         Date today = Date.today();
         List<PricebookEntry> allEntries = [
             SELECT Id, Product2Id, UnitPrice, Tax__c,
+                   Max_Discount_Percentage__c,
                    Pricebook2Id, Pricebook2.Name, Pricebook2.Price_Book_Type__c,
                    Pricebook2.Customer__c, Pricebook2.Region__c,
                    Pricebook2.Valid_From__c, Pricebook2.Valid_Till__c,
@@ -228,6 +229,7 @@ public with sharing class QuoteBuilderController {
             opt.pricebookType = getPricebookTypeLabel(pbe);
             opt.price = pbe.UnitPrice;
             opt.taxPercent = pbe.Tax__c;
+            opt.maxDiscount = pbe.Max_Discount_Percentage__c;
             opt.priority = priority;
 
             if (!productPricingMap.containsKey(pbe.Product2Id)) {
@@ -276,6 +278,7 @@ public with sharing class QuoteBuilderController {
                 if (best != null) {
                     psr.unitPrice = best.price;
                     psr.taxPercent = best.taxPercent != null ? best.taxPercent : stdEntry.Tax__c;
+                    psr.maxDiscount = best.maxDiscount;
                     psr.sourcePricebook = best.pricebookName;
                     psr.sourcePricebookType = best.pricebookType;
                 }
@@ -335,7 +338,9 @@ public with sharing class QuoteBuilderController {
     @AuraEnabled
     public static QuoteEditContext getQuoteForEdit(Id quoteId) {
         Quote q = [
-            SELECT Id, Pricebook2Id, OpportunityId, Opportunity.AccountId
+            SELECT Id, Pricebook2Id, OpportunityId,
+                   Opportunity.AccountId, Opportunity.Account.Name,
+                   Opportunity.Region__c
             FROM Quote
             WHERE Id = :quoteId
             LIMIT 1
@@ -346,12 +351,22 @@ public with sharing class QuoteBuilderController {
         ctx.pricebookId = q.Pricebook2Id;
         ctx.opportunityId = q.OpportunityId;
         ctx.accountId = q.Opportunity != null ? q.Opportunity.AccountId : null;
+        ctx.accountName = (q.Opportunity != null && q.Opportunity.Account != null)
+            ? q.Opportunity.Account.Name : '';
+        ctx.regionId = q.Opportunity != null ? q.Opportunity.Region__c : null;
+
+        // Provide Standard Pricebook ID for auto-pricing
+        List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
+        if (!stdPbs.isEmpty()) {
+            ctx.standardPricebookId = stdPbs[0].Id;
+        }
 
         ctx.lineItems = new List<QuoteLineItemResult>();
         for (QuoteLineItem qli : [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
                    Product2.QuantityUnitOfMeasure,
                    PricebookEntryId, PricebookEntry.Tax__c,
+                   PricebookEntry.Max_Discount_Percentage__c,
                    Quantity, ListPrice, UnitPrice, Discount,
                    Product_Line_Description__c,
                    Product_Detailed_Description__c,
@@ -372,6 +387,7 @@ public with sharing class QuoteBuilderController {
             item.unitPrice = qli.UnitPrice;
             item.discount = qli.Discount != null ? qli.Discount : 0;
             item.taxPercent = qli.PricebookEntry.Tax__c != null ? qli.PricebookEntry.Tax__c : 0;
+            item.maxDiscount = qli.PricebookEntry.Max_Discount_Percentage__c;
             item.lineDescription = qli.Product_Line_Description__c;
             item.detailedDescription = qli.Product_Detailed_Description__c;
             item.sourcePricebook = qli.Source_Pricebook__c;
@@ -546,6 +562,7 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public String uom;
         @AuraEnabled public String lineDescription;
         @AuraEnabled public String detailedDescription;
+        @AuraEnabled public Decimal maxDiscount;
         @AuraEnabled public String sourcePricebook;
         @AuraEnabled public String sourcePricebookType;
         @AuraEnabled public List<PriceOption> availablePrices;
@@ -563,6 +580,7 @@ public with sharing class QuoteBuilderController {
         public String pricebookType;
         public Decimal price;
         public Decimal taxPercent;
+        public Decimal maxDiscount;
         public Integer priority;
     }
 
@@ -571,6 +589,9 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Id pricebookId;
         @AuraEnabled public Id opportunityId;
         @AuraEnabled public Id accountId;
+        @AuraEnabled public String accountName;
+        @AuraEnabled public Id regionId;
+        @AuraEnabled public Id standardPricebookId;
         @AuraEnabled public List<QuoteLineItemResult> lineItems;
         @AuraEnabled public List<PaymentTermResult> paymentTerms;
     }
@@ -603,6 +624,7 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Decimal unitPrice;
         @AuraEnabled public Decimal discount;
         @AuraEnabled public Decimal taxPercent;
+        @AuraEnabled public Decimal maxDiscount;
         @AuraEnabled public String lineDescription;
         @AuraEnabled public String detailedDescription;
         @AuraEnabled public String sourcePricebook;
