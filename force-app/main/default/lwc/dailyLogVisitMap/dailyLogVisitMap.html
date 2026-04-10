@@ -1,37 +1,115 @@
 <template>
-    <lightning-card title="Visit Locations Map" icon-name="standard:location">
+    <lightning-card title="Visit Route Map" icon-name="standard:location">
+
+        <!-- TAB MODE: Executive + Date picker -->
+        <template if:false={recordId}>
+            <div class="slds-p-around_medium slds-grid slds-wrap slds-gutters">
+                <div class="slds-col slds-size_1-of-3">
+                    <lightning-record-picker
+                        label="Executive Name"
+                        placeholder="Search Executive..."
+                        object-api-name="User"
+                        value={selectedUserId}
+                        onchange={handleUserChange}>
+                    </lightning-record-picker>
+                </div>
+                <div class="slds-col slds-size_1-of-3">
+                    <lightning-input
+                        type="date"
+                        label="Visit Date"
+                        value={selectedDate}
+                        onchange={handleDateChange}>
+                    </lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-3 slds-grid slds-grid_vertical-align-end">
+                    <lightning-button
+                        label="Show Route"
+                        variant="brand"
+                        icon-name="utility:routing_offline"
+                        onclick={handleShowRoute}
+                        disabled={isSearchDisabled}>
+                    </lightning-button>
+                </div>
+            </div>
+        </template>
 
         <!-- Loading spinner -->
         <template if:true={isLoading}>
-            <div class="slds-p-around_medium">
-                <lightning-spinner alternative-text="Loading visits..." size="small"></lightning-spinner>
+            <div class="slds-p-around_medium slds-text-align_center">
+                <lightning-spinner alternative-text="Loading visits..." size="medium"></lightning-spinner>
             </div>
         </template>
 
         <!-- Error -->
         <template if:true={error}>
-            <div class="slds-p-around_medium slds-text-color_error">
-                {error}
+            <div class="slds-p-around_medium slds-text-color_error slds-text-align_center">
+                <lightning-icon icon-name="utility:error" variant="error" size="small"></lightning-icon>
+                &nbsp;{error}
             </div>
         </template>
 
-        <!-- Map -->
+        <!-- Map + Visit List -->
         <template if:true={hasLocations}>
             <div class="slds-p-around_small">
-                <lightning-map
-                    map-markers={mapMarkers}
-                    zoom-level="13"
-                    markers-title="Visit Locations"
-                    list-view="visible">
-                </lightning-map>
+
+                <!-- Map -->
+                <div class="map-container">
+                    <lightning-map
+                        map-markers={mapMarkers}
+                        zoom-level={zoomLevel}
+                        markers-title="Visit Route"
+                        list-view="hidden"
+                        center={mapCenter}>
+                    </lightning-map>
+                </div>
+
+                <!-- Visit Route List -->
+                <div class="slds-m-top_medium">
+                    <h2 class="slds-text-heading_small slds-p-left_small slds-m-bottom_small">
+                        <lightning-icon icon-name="utility:routing_offline" size="small"></lightning-icon>
+                        &nbsp;Visit Route ({visitCount} visits)
+                    </h2>
+                    <div class="route-timeline">
+                        <template for:each={visitList} for:item="visit">
+                            <div key={visit.id} class="route-item slds-grid slds-p-around_small slds-border_bottom">
+                                <div class="route-number">
+                                    <span class="number-badge">{visit.visitNumber}</span>
+                                </div>
+                                <div class="slds-col slds-p-left_small">
+                                    <p class="slds-text-title_bold">{visit.customerName}</p>
+                                    <p class="slds-text-body_small slds-text-color_weak">
+                                        <lightning-icon icon-name="utility:clock" size="xx-small"></lightning-icon>
+                                        &nbsp;Check-In: {visit.checkInTime}
+                                        <template if:true={visit.checkOutTime}>
+                                            &nbsp;|&nbsp;Check-Out: {visit.checkOutTime}
+                                        </template>
+                                    </p>
+                                    <template if:true={visit.purpose}>
+                                        <p class="slds-text-body_small">Purpose: {visit.purpose}</p>
+                                    </template>
+                                    <template if:true={visit.address}>
+                                        <p class="slds-text-body_small slds-text-color_weak">
+                                            <lightning-icon icon-name="utility:location" size="xx-small"></lightning-icon>
+                                            &nbsp;{visit.address}
+                                        </p>
+                                    </template>
+                                </div>
+                                <div class="slds-col_bump-left">
+                                    <lightning-badge label={visit.status}></lightning-badge>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
             </div>
         </template>
 
         <!-- No locations message -->
         <template if:true={showNoData}>
-            <div class="slds-p-around_medium slds-text-align_center slds-text-color_weak">
+            <div class="slds-p-around_large slds-text-align_center slds-text-color_weak">
                 <lightning-icon icon-name="utility:info" size="small"></lightning-icon>
-                &nbsp;No visit locations found for this Daily Log.
+                &nbsp;No visit locations found. Please select an executive and date.
             </div>
         </template>
 
