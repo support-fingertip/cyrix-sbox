@@ -8,7 +8,7 @@
     <columns>Brand__c</columns>
     <columns>Make__c</columns>
     <columns>Model__c</columns>
-    <columns>Family</columns>
+    <columns>PRODUCT2.FAMILY</columns>
     <columns>Standard_Price__c</columns>
     <columns>HSN_Code__c</columns>
     <columns>Product_Status__c</columns>
