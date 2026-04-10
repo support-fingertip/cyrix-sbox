@@ -22,7 +22,7 @@ public with sharing class ProductSearchController {
      * Model, Equipment Name, and Description fields.
      * @param searchKey Search keyword (minimum 2 characters)
      * @param category Optional category filter
-     * @param vertical Optional vertical filter
+     * @param vertical Optional product family filter
      * @param limitVal Maximum number of results (default 50)
      * @return List of matching active Product2 records
      */
@@ -33,7 +33,7 @@ public with sharing class ProductSearchController {
         }
 
         String query = 'SELECT Id, Name, ProductCode, Item_Code__c, ' +
-            'Product_Category__c, Sub_Category__c, Product_Type__c, Product_Vertical__c, ' +
+            'Product_Category__c, Sub_Category__c, Product_Type__c, Family, ' +
             'Brand__c, Model__c, Equipment_Name__c, Line_Description__c, ' +
             'Standard_Price__c, Tax__c, Standard_Price_with_Tax__c, ' +
             'HSN_Code__c, HSN_Code_International__c, ' +
@@ -51,7 +51,7 @@ public with sharing class ProductSearchController {
             query += ' AND Product_Category__c = :category';
         }
         if (String.isNotBlank(vertical)) {
-            query += ' AND Product_Vertical__c = :vertical';
+            query += ' AND Family = :vertical';
         }
 
         query += ' ORDER BY Name ASC LIMIT :limitVal';
@@ -67,7 +67,7 @@ public with sharing class ProductSearchController {
     public static Product2 getProductDetails(Id productId) {
         return [
             SELECT Id, Name, ProductCode, Item_Code__c, SAP_Item_Code__c,
-                   Product_Category__c, Sub_Category__c, Product_Type__c, Product_Vertical__c,
+                   Product_Category__c, Sub_Category__c, Product_Type__c, Family,
                    Brand__c, Make__c, Model__c, Equipment_Name__c, Line_Description__c,
                    Standard_Price__c, Tax__c, Standard_Price_with_Tax__c,
                    HSN_Code__c, HSN_Code_International__c, Source__c,
@@ -102,20 +102,20 @@ public with sharing class ProductSearchController {
     }
 
     /**
-     * Gets distinct vertical values for filter picklist.
+     * Gets distinct product family values for filter picklist.
      */
     @AuraEnabled(cacheable=true)
-    public static List<String> getProductVerticals() {
-        List<String> verticals = new List<String>();
+    public static List<String> getProductFamilies() {
+        List<String> families = new List<String>();
         for (AggregateResult ar : [
-            SELECT Product_Vertical__c vert
+            SELECT Family fam
             FROM Product2
-            WHERE IsActive = true AND Product_Vertical__c != null
-            GROUP BY Product_Vertical__c
-            ORDER BY Product_Vertical__c
+            WHERE IsActive = true AND Family != null
+            GROUP BY Family
+            ORDER BY Family
         ]) {
-            verticals.add((String) ar.get('vert'));
+            families.add((String) ar.get('fam'));
         }
-        return verticals;
+        return families;
     }
 }

@@ -94,10 +94,6 @@
                 <behavior>Edit</behavior>
                 <field>Remarks__c</field>
             </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Product_Vertical__c</field>
-            </layoutItems>
         </layoutColumns>
         <style>TwoColumnsTopToBottom</style>
     </layoutSections>
