@@ -6,6 +6,7 @@ import getOpportunityContext from '@salesforce/apex/QuoteBuilderController.getOp
 import getQuoteForEdit from '@salesforce/apex/QuoteBuilderController.getQuoteForEdit';
 import getShippingAddresses from '@salesforce/apex/QuoteBuilderController.getShippingAddresses';
 import searchProducts from '@salesforce/apex/QuoteBuilderController.searchProducts';
+import searchProductsWithBestPrice from '@salesforce/apex/QuoteBuilderController.searchProductsWithBestPrice';
 import getPricebooks from '@salesforce/apex/QuoteBuilderController.getPricebooks';
 import saveQuoteLineItems from '@salesforce/apex/QuoteBuilderController.saveQuoteLineItems';
 import updateQuoteLineItems from '@salesforce/apex/QuoteBuilderController.updateQuoteLineItems';
@@ -31,6 +32,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     currencyCode = 'INR';
     accountId;
     accountName = '';
+    regionId;
 
     // Default values for new quote (auto-populate Bill To from Account)
     defaultValues = {};
@@ -177,6 +179,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.currencyCode = data.currencyCode || 'INR';
             this.accountId = data.accountId;
             this.accountName = data.accountName || '';
+            this.regionId = data.regionId;
 
             // === AUTO-POPULATE BILL TO ADDRESS FROM ACCOUNT ===
             if (!this.isEditMode && this.accountId) {
@@ -233,7 +236,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                         taxPercentDisplay: (item.taxPercent || 0) + '%',
                         lineTotal: afterDiscount + taxAmt,
                         lineDescription: item.lineDescription || '',
-                        detailedDescription: item.detailedDescription || ''
+                        detailedDescription: item.detailedDescription || '',
+                        sourcePricebook: item.sourcePricebook || '',
+                        sourcePricebookType: '',
+                        priceBadgeClass: this.getPriceBadgeClass(item.sourcePricebook),
+                        priceBadgeLabel: item.sourcePricebook || '',
+                        hasPriceSource: !!item.sourcePricebook
                     };
                 });
             }
@@ -424,7 +432,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 unitPrice: item.unitPrice,
                 discount: item.discount,
                 lineDescription: item.lineDescription,
-                detailedDescription: item.detailedDescription
+                detailedDescription: item.detailedDescription,
+                sourcePricebook: item.sourcePricebook || ''
             }));
 
             if (this.isEditMode) {
@@ -513,16 +522,21 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         this.showSearchResults = true;
 
         try {
-            const results = await searchProducts({
+            const results = await searchProductsWithBestPrice({
                 searchTerm: this.searchTerm,
                 pricebookId: this.pricebookId,
-                category: this.categoryFilter || null
+                category: this.categoryFilter || null,
+                accountId: this.accountId || null,
+                regionId: this.regionId || null
             });
 
             this.searchResults = results.map(r => ({
                 ...r,
                 formattedPrice: this.formatCurrency(r.unitPrice),
-                formattedTax: r.taxPercent != null ? r.taxPercent + '%' : '0%'
+                formattedTax: r.taxPercent != null ? r.taxPercent + '%' : '0%',
+                priceBadgeClass: this.getPriceBadgeClass(r.sourcePricebookType),
+                priceBadgeLabel: this.getPriceBadgeLabel(r.sourcePricebookType),
+                hasPriceSource: !!r.sourcePricebookType
             }));
         } catch (error) {
             this.showError('Search failed', this.reduceErrors(error));
@@ -561,7 +575,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             taxPercentDisplay: (product.taxPercent || 0) + '%',
             lineTotal: product.unitPrice,
             lineDescription: product.lineDescription || '',
-            detailedDescription: product.detailedDescription || ''
+            detailedDescription: product.detailedDescription || '',
+            sourcePricebook: product.sourcePricebook || '',
+            sourcePricebookType: product.sourcePricebookType || '',
+            priceBadgeClass: this.getPriceBadgeClass(product.sourcePricebookType),
+            priceBadgeLabel: this.getPriceBadgeLabel(product.sourcePricebookType),
+            hasPriceSource: !!product.sourcePricebookType
         };
 
         this.lineItems = [...this.lineItems, newItem];
@@ -661,6 +680,32 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }
 
         return errors;
+    }
+
+    // ===== PRICING BADGE HELPERS =====
+
+    getPriceBadgeClass(pricebookType) {
+        const base = 'price-source-badge';
+        if (!pricebookType) return base + ' price-source-standard';
+        switch (pricebookType) {
+            case 'Promotional Price': return base + ' price-source-promotional';
+            case 'Customer Specific': return base + ' price-source-customer';
+            case 'Region Specific': return base + ' price-source-region';
+            case 'Dealer Price': return base + ' price-source-dealer';
+            default: return base + ' price-source-standard';
+        }
+    }
+
+    getPriceBadgeLabel(pricebookType) {
+        if (!pricebookType) return '';
+        switch (pricebookType) {
+            case 'Promotional Price': return 'Promotional';
+            case 'Customer Specific': return 'Customer Price';
+            case 'Region Specific': return 'Region Price';
+            case 'Dealer Price': return 'Dealer Price';
+            case 'Standard': return 'Standard';
+            default: return pricebookType;
+        }
     }
 
     // ===== UTILITY =====
