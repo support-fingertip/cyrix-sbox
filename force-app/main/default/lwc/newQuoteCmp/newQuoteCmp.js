@@ -32,8 +32,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     accountName = '';
     regionId;
 
-    // Default values for new quote (auto-populate Bill To from Account)
+    // Default values for new quote
     defaultValues = {};
+
+    // Address objects for custom address input
+    @track billingAddress = { name: '', street: '', city: '', state: '', postalCode: '', country: 'IN' };
+    @track shippingAddress = { name: '', street: '', city: '', state: '', postalCode: '', country: 'IN' };
 
     // Shipping address picker
     @track shippingAddresses = [];
@@ -176,13 +180,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
             // === AUTO-POPULATE BILL TO ADDRESS FROM ACCOUNT ===
             if (!this.isEditMode && this.accountId) {
-                this.defaultValues = {
-                    BillingName: data.billingName || '',
-                    BillingStreet: data.billingStreet || '',
-                    BillingCity: data.billingCity || '',
-                    BillingState: data.billingState || '',
-                    BillingPostalCode: data.billingPostalCode || '',
-                    BillingCountry: data.billingCountry || ''   // ISO code
+                this.billingAddress = {
+                    name: data.billingName || '',
+                    street: data.billingStreet || '',
+                    city: data.billingCity || '',
+                    state: data.billingState || '',
+                    postalCode: data.billingPostalCode || '',
+                    country: data.billingCountry || 'IN'
                 };
             }
 
@@ -203,6 +207,24 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.accountName = data.accountName || '';
             this.regionId = data.regionId;
             this.defaultOpportunityId = data.opportunityId;
+
+            // Populate address objects from saved quote
+            this.billingAddress = {
+                name: data.billingName || '',
+                street: data.billingStreet || '',
+                city: data.billingCity || '',
+                state: data.billingState || '',
+                postalCode: data.billingPostalCode || '',
+                country: data.billingCountry || 'IN'
+            };
+            this.shippingAddress = {
+                name: data.shippingName || '',
+                street: data.shippingStreet || '',
+                city: data.shippingCity || '',
+                state: data.shippingState || '',
+                postalCode: data.shippingPostalCode || '',
+                country: data.shippingCountry || 'IN'
+            };
 
             if (this.accountId) {
                 await this.loadShippingAddresses(this.accountId);
@@ -294,36 +316,24 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     }
 
     applyShippingAddress(addr) {
-        // Set the individual components of the compound ShippingAddress field
-        const fields = {
-            ShippingName: addr.name || '',
-            ShippingStreet: addr.street || '',
-            ShippingCity: addr.city || '',
-            ShippingState: addr.state || '',
-            ShippingPostalCode: addr.postalCode || '',
-            ShippingCountry: addr.country || ''   // ISO code
+        this.shippingAddress = {
+            name: addr.name || '',
+            street: addr.street || '',
+            city: addr.city || '',
+            state: addr.state || '',
+            postalCode: addr.postalCode || '',
+            country: addr.country || 'IN'
         };
+    }
 
-        // Update each field imperatively
-        for (const [fieldName, value] of Object.entries(fields)) {
-            const fieldElement = this.template.querySelector(`lightning-input-field[field-name="${fieldName}"]`);
-            if (fieldElement) {
-                fieldElement.value = value;
-                fieldElement.dispatchEvent(new CustomEvent('change', { detail: { value } }));
-            }
-        }
+    // ===== ADDRESS CHANGE HANDLERS =====
 
-        // Force the compound ShippingAddress field to refresh
-        setTimeout(() => {
-            const shippingAddressField = this.template.querySelector('lightning-input-field[field-name="ShippingAddress"]');
-            if (shippingAddressField) {
-                const currentValue = shippingAddressField.value;
-                shippingAddressField.value = '';
-                shippingAddressField.dispatchEvent(new CustomEvent('change', { detail: { value: '' } }));
-                shippingAddressField.value = currentValue;
-                shippingAddressField.dispatchEvent(new CustomEvent('change', { detail: { value: currentValue } }));
-            }
-        }, 100);
+    handleBillingAddressChange(event) {
+        this.billingAddress = { ...event.detail };
+    }
+
+    handleShippingAddressChange(event) {
+        this.shippingAddress = { ...event.detail };
     }
 
     // ===== PAYMENT TERM HANDLERS =====
@@ -387,6 +397,22 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
         // Inject Pricebook2Id
         fields.Pricebook2Id = this.pricebookId;
+
+        // Inject Billing Address
+        fields.BillingName = this.billingAddress.name || '';
+        fields.BillingStreet = this.billingAddress.street || '';
+        fields.BillingCity = this.billingAddress.city || '';
+        fields.BillingStateCode = this.billingAddress.state || '';
+        fields.BillingPostalCode = this.billingAddress.postalCode || '';
+        fields.BillingCountryCode = this.billingAddress.country || '';
+
+        // Inject Shipping Address
+        fields.ShippingName = this.shippingAddress.name || '';
+        fields.ShippingStreet = this.shippingAddress.street || '';
+        fields.ShippingCity = this.shippingAddress.city || '';
+        fields.ShippingStateCode = this.shippingAddress.state || '';
+        fields.ShippingPostalCode = this.shippingAddress.postalCode || '';
+        fields.ShippingCountryCode = this.shippingAddress.country || '';
 
         // Inject internal charge fields (custom fields on Quote)
         fields.Packing_Charge__c = this.packingCharges || 0;

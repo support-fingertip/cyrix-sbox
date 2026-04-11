@@ -343,7 +343,11 @@ public with sharing class QuoteBuilderController {
         Quote q = [
             SELECT Id, Pricebook2Id, OpportunityId,
                    Opportunity.AccountId, Opportunity.Account.Name,
-                   Opportunity.Region__c
+                   Opportunity.Region__c,
+                   BillingName, BillingStreet, BillingCity,
+                   BillingStateCode, BillingPostalCode, BillingCountryCode,
+                   ShippingName, ShippingStreet, ShippingCity,
+                   ShippingStateCode, ShippingPostalCode, ShippingCountryCode
             FROM Quote
             WHERE Id = :quoteId
             LIMIT 1
@@ -357,6 +361,20 @@ public with sharing class QuoteBuilderController {
         ctx.accountName = (q.Opportunity != null && q.Opportunity.Account != null)
             ? q.Opportunity.Account.Name : '';
         ctx.regionId = q.Opportunity != null ? q.Opportunity.Region__c : null;
+
+        // Address fields
+        ctx.billingName = q.BillingName;
+        ctx.billingStreet = q.BillingStreet;
+        ctx.billingCity = q.BillingCity;
+        ctx.billingState = q.BillingStateCode;
+        ctx.billingPostalCode = q.BillingPostalCode;
+        ctx.billingCountry = q.BillingCountryCode;
+        ctx.shippingName = q.ShippingName;
+        ctx.shippingStreet = q.ShippingStreet;
+        ctx.shippingCity = q.ShippingCity;
+        ctx.shippingState = q.ShippingStateCode;
+        ctx.shippingPostalCode = q.ShippingPostalCode;
+        ctx.shippingCountry = q.ShippingCountryCode;
 
         // Provide Standard Pricebook ID for auto-pricing
         List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
@@ -609,6 +627,18 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public String accountName;
         @AuraEnabled public Id regionId;
         @AuraEnabled public Id standardPricebookId;
+        @AuraEnabled public String billingName;
+        @AuraEnabled public String billingStreet;
+        @AuraEnabled public String billingCity;
+        @AuraEnabled public String billingState;
+        @AuraEnabled public String billingPostalCode;
+        @AuraEnabled public String billingCountry;
+        @AuraEnabled public String shippingName;
+        @AuraEnabled public String shippingStreet;
+        @AuraEnabled public String shippingCity;
+        @AuraEnabled public String shippingState;
+        @AuraEnabled public String shippingPostalCode;
+        @AuraEnabled public String shippingCountry;
         @AuraEnabled public List<QuoteLineItemResult> lineItems;
         @AuraEnabled public List<PaymentTermResult> paymentTerms;
     }
