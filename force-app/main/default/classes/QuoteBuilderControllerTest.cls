@@ -554,9 +554,10 @@ private class QuoteBuilderControllerTest {
                 'quantity' => 1,
                 'unitPrice' => 120000,
                 'discount' => 0,
+                'maxDiscount' => 10,
                 'lineDescription' => 'Promo priced item',
                 'detailedDescription' => 'Auto-selected from promo',
-                'sourcePricebook' => 'Summer Promo 2026'
+                'sourcePricebookId' => opp.Pricebook2Id
             }
         });
 
@@ -564,8 +565,47 @@ private class QuoteBuilderControllerTest {
         QuoteBuilderController.saveQuoteLineItems(q.Id, lineItemsJSON);
         Test.stopTest();
 
-        QuoteLineItem savedItem = [SELECT Source_Pricebook__c FROM QuoteLineItem WHERE QuoteId = :q.Id LIMIT 1];
-        System.assertEquals('Summer Promo 2026', savedItem.Source_Pricebook__c, 'Source pricebook should be saved');
+        QuoteLineItem savedItem = [SELECT Source_Pricebook__c, Price_Status__c FROM QuoteLineItem WHERE QuoteId = :q.Id LIMIT 1];
+        System.assertEquals(opp.Pricebook2Id, savedItem.Source_Pricebook__c, 'Source pricebook lookup should be saved');
+        System.assertEquals('Standard', savedItem.Price_Status__c, 'Price status should be Standard when discount <= max');
+    }
+
+    @isTest
+    static void testPriceStatusApprovalRequired() {
+        Opportunity opp = [SELECT Id, Pricebook2Id FROM Opportunity LIMIT 1];
+        PricebookEntry pbe = [SELECT Id, Product2Id FROM PricebookEntry WHERE Product2.ProductCode = 'USG-500' LIMIT 1];
+
+        Quote q = new Quote(
+            Name = 'Price Status Test Quote',
+            OpportunityId = opp.Id,
+            Pricebook2Id = opp.Pricebook2Id,
+            Status = 'Draft',
+            Price_Status__c = 'Draft'
+        );
+        insert q;
+
+        // Discount (15) exceeds max discount (10) -> Approval Required
+        String lineItemsJSON = JSON.serialize(new List<Map<String, Object>>{
+            new Map<String, Object>{
+                'productId' => pbe.Product2Id,
+                'pricebookEntryId' => pbe.Id,
+                'quantity' => 1,
+                'unitPrice' => 120000,
+                'discount' => 15,
+                'maxDiscount' => 10,
+                'lineDescription' => 'Over-discounted item',
+                'detailedDescription' => 'Needs approval',
+                'sourcePricebookId' => opp.Pricebook2Id
+            }
+        });
+
+        Test.startTest();
+        QuoteBuilderController.saveQuoteLineItems(q.Id, lineItemsJSON);
+        Test.stopTest();
+
+        QuoteLineItem savedItem = [SELECT Price_Status__c FROM QuoteLineItem WHERE QuoteId = :q.Id LIMIT 1];
+        System.assertEquals('Approval Required', savedItem.Price_Status__c,
+            'Price status should be Approval Required when discount > max discount');
     }
 
     @isTest

@@ -225,6 +225,7 @@ public with sharing class QuoteBuilderController {
             if (priority == 0) continue;
 
             PricingOption opt = new PricingOption();
+            opt.pricebookId = pbe.Pricebook2Id;
             opt.pricebookName = pbe.Pricebook2.Name;
             opt.pricebookType = getPricebookTypeLabel(pbe);
             opt.price = pbe.UnitPrice;
@@ -262,6 +263,7 @@ public with sharing class QuoteBuilderController {
             // Default to standard pricebook pricing
             psr.unitPrice = stdEntry.UnitPrice;
             psr.taxPercent = stdEntry.Tax__c;
+            psr.sourcePricebookId = stdPbId;
             psr.sourcePricebook = '';
             psr.sourcePricebookType = '';
             psr.availablePrices = new List<PriceOption>();
@@ -279,6 +281,7 @@ public with sharing class QuoteBuilderController {
                     psr.unitPrice = best.price;
                     psr.taxPercent = best.taxPercent != null ? best.taxPercent : stdEntry.Tax__c;
                     psr.maxDiscount = best.maxDiscount;
+                    psr.sourcePricebookId = best.pricebookId;
                     psr.sourcePricebook = best.pricebookName;
                     psr.sourcePricebookType = best.pricebookType;
                 }
@@ -370,7 +373,8 @@ public with sharing class QuoteBuilderController {
                    Quantity, ListPrice, UnitPrice, Discount,
                    Product_Line_Description__c,
                    Product_Detailed_Description__c,
-                   Source_Pricebook__c
+                   Price_Status__c,
+                   Source_Pricebook__c, Source_Pricebook__r.Name
             FROM QuoteLineItem
             WHERE QuoteId = :quoteId
             ORDER BY SortOrder ASC, Id ASC
@@ -388,9 +392,11 @@ public with sharing class QuoteBuilderController {
             item.discount = qli.Discount != null ? qli.Discount : 0;
             item.taxPercent = qli.PricebookEntry.Tax__c != null ? qli.PricebookEntry.Tax__c : 0;
             item.maxDiscount = qli.PricebookEntry.Max_Discount_Percentage__c;
+            item.priceStatus = qli.Price_Status__c;
             item.lineDescription = qli.Product_Line_Description__c;
             item.detailedDescription = qli.Product_Detailed_Description__c;
-            item.sourcePricebook = qli.Source_Pricebook__c;
+            item.sourcePricebookId = qli.Source_Pricebook__c;
+            item.sourcePricebookName = qli.Source_Pricebook__r != null ? qli.Source_Pricebook__r.Name : '';
             ctx.lineItems.add(item);
         }
 
@@ -458,8 +464,8 @@ public with sharing class QuoteBuilderController {
                 qli.Discount = item.discount;
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
-                qli.Source_Pricebook__c = item.sourcePricebook;
-                qli.Price_Status__c = 'Not Required';
+                qli.Source_Pricebook__c = item.sourcePricebookId;
+                qli.Price_Status__c = getPriceStatus(item.discount, item.maxDiscount);
                 qliList.add(qli);
             }
             insert qliList;
@@ -492,8 +498,8 @@ public with sharing class QuoteBuilderController {
                 qli.Discount = item.discount;
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
-                qli.Source_Pricebook__c = item.sourcePricebook;
-                qli.Price_Status__c = 'Not Required';
+                qli.Source_Pricebook__c = item.sourcePricebookId;
+                qli.Price_Status__c = getPriceStatus(item.discount, item.maxDiscount);
                 qliList.add(qli);
             }
             insert qliList;
@@ -504,6 +510,14 @@ public with sharing class QuoteBuilderController {
         }
     }
 
+    // Determine Price Status based on discount vs max discount
+    private static String getPriceStatus(Decimal discount, Decimal maxDiscount) {
+        if (discount != null && maxDiscount != null && discount > maxDiscount) {
+            return 'Approval Required';
+        }
+        return 'Standard';
+    }
+
     // ===== Inner Classes =====
     public class LineItemInput {
         public Id productId;
@@ -511,9 +525,10 @@ public with sharing class QuoteBuilderController {
         public Decimal quantity;
         public Decimal unitPrice;
         public Decimal discount;
+        public Decimal maxDiscount;
         public String lineDescription;
         public String detailedDescription;
-        public String sourcePricebook;
+        public Id sourcePricebookId;
     }
 
     public class OpportunityContext {
@@ -563,6 +578,7 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public String lineDescription;
         @AuraEnabled public String detailedDescription;
         @AuraEnabled public Decimal maxDiscount;
+        @AuraEnabled public Id sourcePricebookId;
         @AuraEnabled public String sourcePricebook;
         @AuraEnabled public String sourcePricebookType;
         @AuraEnabled public List<PriceOption> availablePrices;
@@ -578,6 +594,7 @@ public with sharing class QuoteBuilderController {
     private class PricingOption {
         public String pricebookName;
         public String pricebookType;
+        public Id pricebookId;
         public Decimal price;
         public Decimal taxPercent;
         public Decimal maxDiscount;
@@ -625,8 +642,10 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Decimal discount;
         @AuraEnabled public Decimal taxPercent;
         @AuraEnabled public Decimal maxDiscount;
+        @AuraEnabled public String priceStatus;
         @AuraEnabled public String lineDescription;
         @AuraEnabled public String detailedDescription;
-        @AuraEnabled public String sourcePricebook;
+        @AuraEnabled public Id sourcePricebookId;
+        @AuraEnabled public String sourcePricebookName;
     }
 }

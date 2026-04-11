@@ -216,6 +216,10 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                     const afterDiscount = base - discountAmt;
                     const taxAmt = afterDiscount * ((item.taxPercent || 0) / 100);
 
+                    const disc = item.discount || 0;
+                    const maxDisc = item.maxDiscount;
+                    const priceStatus = item.priceStatus || this.computePriceStatus(disc, maxDisc);
+
                     return {
                         rowId: 'row-' + rowCounter,
                         rowNumber: index + 1,
@@ -227,19 +231,21 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                         quantity: item.quantity,
                         listPrice: item.listPrice || item.unitPrice,
                         unitPrice: item.unitPrice,
-                        discount: item.discount || 0,
+                        discount: disc,
                         taxPercent: item.taxPercent || 0,
                         taxPercentDisplay: (item.taxPercent || 0) + '%',
-                        maxDiscount: item.maxDiscount,
-                        maxDiscountDisplay: item.maxDiscount != null ? item.maxDiscount + '%' : '',
+                        maxDiscount: maxDisc,
+                        maxDiscountDisplay: maxDisc != null ? maxDisc + '%' : '',
+                        priceStatus: priceStatus,
+                        isApprovalRequired: priceStatus === 'Approval Required',
                         lineTotal: afterDiscount + taxAmt,
                         lineDescription: item.lineDescription || '',
                         detailedDescription: item.detailedDescription || '',
-                        sourcePricebook: item.sourcePricebook || '',
-                        sourcePricebookType: '',
-                        priceBadgeClass: this.getPriceBadgeClass(item.sourcePricebook),
-                        priceBadgeLabel: item.sourcePricebook || '',
-                        hasPriceSource: !!item.sourcePricebook
+                        sourcePricebookId: item.sourcePricebookId || null,
+                        sourcePricebookName: item.sourcePricebookName || '',
+                        priceBadgeClass: this.getPriceBadgeClass(item.sourcePricebookName),
+                        priceBadgeLabel: item.sourcePricebookName || '',
+                        hasPriceSource: !!item.sourcePricebookName
                     };
                 });
             }
@@ -410,9 +416,10 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 quantity: item.quantity,
                 unitPrice: item.unitPrice,
                 discount: item.discount,
+                maxDiscount: item.maxDiscount,
                 lineDescription: item.lineDescription,
                 detailedDescription: item.detailedDescription,
-                sourcePricebook: item.sourcePricebook || ''
+                sourcePricebookId: item.sourcePricebookId || null
             }));
 
             if (this.isEditMode) {
@@ -538,6 +545,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }
 
         rowCounter++;
+        const priceStatus = this.computePriceStatus(0, product.maxDiscount);
         const newItem = {
             rowId: 'row-' + rowCounter,
             rowNumber: this.lineItems.length + 1,
@@ -554,11 +562,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             taxPercentDisplay: (product.taxPercent || 0) + '%',
             maxDiscount: product.maxDiscount,
             maxDiscountDisplay: product.maxDiscount != null ? product.maxDiscount + '%' : '',
+            priceStatus: priceStatus,
+            isApprovalRequired: priceStatus === 'Approval Required',
             lineTotal: product.unitPrice,
             lineDescription: product.lineDescription || '',
             detailedDescription: product.detailedDescription || '',
-            sourcePricebook: product.sourcePricebook || '',
-            sourcePricebookType: product.sourcePricebookType || '',
+            sourcePricebookId: product.sourcePricebookId || null,
+            sourcePricebookName: product.sourcePricebook || '',
             priceBadgeClass: this.getPriceBadgeClass(product.sourcePricebookType),
             priceBadgeLabel: this.getPriceBadgeLabel(product.sourcePricebookType),
             hasPriceSource: !!product.sourcePricebookType
@@ -597,6 +607,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 const afterDiscount = base - discountAmt;
                 const taxAmt = afterDiscount * ((updated.taxPercent || 0) / 100);
                 updated.lineTotal = afterDiscount + taxAmt;
+
+                // Recompute price status when discount changes
+                const ps = this.computePriceStatus(updated.discount, updated.maxDiscount);
+                updated.priceStatus = ps;
+                updated.isApprovalRequired = ps === 'Approval Required';
 
                 return updated;
             }
@@ -661,6 +676,15 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }
 
         return errors;
+    }
+
+    // ===== PRICE STATUS =====
+
+    computePriceStatus(discount, maxDiscount) {
+        if (discount != null && maxDiscount != null && discount > maxDiscount) {
+            return 'Approval Required';
+        }
+        return 'Standard';
     }
 
     // ===== PRICING BADGE HELPERS =====

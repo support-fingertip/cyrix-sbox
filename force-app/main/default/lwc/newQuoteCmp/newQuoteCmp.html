@@ -275,6 +275,7 @@
                                         <th scope="col" style="width:90px"><div class="slds-truncate">Disc. %</div></th>
                                         <th scope="col" style="width:80px"><div class="slds-truncate">Max Disc %</div></th>
                                         <th scope="col" style="width:70px"><div class="slds-truncate">Tax %</div></th>
+                                        <th scope="col" style="width:100px"><div class="slds-truncate">Price Status</div></th>
                                         <th scope="col" style="width:115px"><div class="slds-truncate">Line Total</div></th>
                                         <th scope="col" style="width:45px"><div class="slds-truncate"></div></th>
                                     </tr>
@@ -340,6 +341,14 @@
                                             </td>
                                             <td class="slds-text-align_center">{item.maxDiscountDisplay}</td>
                                             <td class="slds-text-align_center">{item.taxPercentDisplay}</td>
+                                            <td class="slds-text-align_center">
+                                                <template if:true={item.isApprovalRequired}>
+                                                    <span class="slds-badge slds-theme_error">Approval Required</span>
+                                                </template>
+                                                <template if:false={item.isApprovalRequired}>
+                                                    <span class="slds-badge slds-theme_success">Standard</span>
+                                                </template>
+                                            </td>
                                             <td class="line-total-cell">
                                                 <lightning-formatted-number
                                                     value={item.lineTotal}
