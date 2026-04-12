@@ -105,17 +105,31 @@
                                     <lightning-icon icon-name="utility:company" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
                                     Bill To
                                 </h3>
-                                <c-address-input
-                                    label="Billing Address"
-                                    name={billingAddress.name}
+                                <div class="slds-p-bottom_xx-small">
+                                    <lightning-input
+                                        label="Billing Name"
+                                        value={billingAddress.name}
+                                        onchange={handleBillingNameChange}
+                                        data-id="billing">
+                                    </lightning-input>
+                                </div>
+                                <lightning-input-address
+                                    address-label="Billing Address"
+                                    street-label="Street"
+                                    city-label="City"
+                                    country-label="Country"
+                                    province-label="State"
+                                    postal-code-label="Postal Code"
                                     street={billingAddress.street}
                                     city={billingAddress.city}
-                                    state={billingAddress.state}
-                                    postal-code={billingAddress.postalCode}
                                     country={billingAddress.country}
-                                    onaddresschange={handleBillingAddressChange}
-                                    data-id="billing">
-                                </c-address-input>
+                                    province={billingAddress.state}
+                                    postal-code={billingAddress.postalCode}
+                                    country-options={countryOptions}
+                                    province-options={billingStateOptions}
+                                    show-address-lookup
+                                    onchange={handleBillingAddressChange}>
+                                </lightning-input-address>
                             </div>
                         </div>
 
@@ -142,17 +156,31 @@
                                         No shipping addresses found for this customer. Enter manually below.
                                     </div>
                                 </template>
-                                <c-address-input
-                                    label="Shipping Address"
-                                    name={shippingAddress.name}
+                                <div class="slds-p-bottom_xx-small">
+                                    <lightning-input
+                                        label="Shipping Name"
+                                        value={shippingAddress.name}
+                                        onchange={handleShippingNameChange}
+                                        data-id="shipping">
+                                    </lightning-input>
+                                </div>
+                                <lightning-input-address
+                                    address-label="Shipping Address"
+                                    street-label="Street"
+                                    city-label="City"
+                                    country-label="Country"
+                                    province-label="State"
+                                    postal-code-label="Postal Code"
                                     street={shippingAddress.street}
                                     city={shippingAddress.city}
-                                    state={shippingAddress.state}
-                                    postal-code={shippingAddress.postalCode}
                                     country={shippingAddress.country}
-                                    onaddresschange={handleShippingAddressChange}
-                                    data-id="shipping">
-                                </c-address-input>
+                                    province={shippingAddress.state}
+                                    postal-code={shippingAddress.postalCode}
+                                    country-options={countryOptions}
+                                    province-options={shippingStateOptions}
+                                    show-address-lookup
+                                    onchange={handleShippingAddressChange}>
+                                </lightning-input-address>
                             </div>
                         </div>
                     </div>
