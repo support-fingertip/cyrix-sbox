@@ -462,7 +462,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 maxDiscount: item.maxDiscount,
                 lineDescription: item.lineDescription,
                 detailedDescription: item.detailedDescription,
-                sourcePricebookId: item.sourcePricebookId || null
+                sourcePricebookId: item.sourcePricebookId || null,
+                priceStatus: item.priceStatus || null
             }));
 
             if (this.isEditMode) {
@@ -652,11 +653,18 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 const taxAmt = afterDiscount * ((updated.taxPercent || 0) / 100);
                 updated.lineTotal = afterDiscount + taxAmt;
 
-                // Recompute price status when discount changes
-                const ps = this.computePriceStatus(updated.discount, updated.maxDiscount);
-                updated.priceStatus = ps;
-                updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(ps);
-                updated.isApprovalRequired = ps === 'Approval Required';
+                // Only escalate the price status when the discount now exceeds the
+                // max discount. Never downgrade an already Approval Required /
+                // Approved line item just because other fields changed.
+                if (field === 'discount'
+                    && updated.maxDiscount != null
+                    && updated.discount > updated.maxDiscount
+                    && updated.priceStatus !== 'Approval Required'
+                    && updated.priceStatus !== 'Approved') {
+                    updated.priceStatus = 'Approval Required';
+                    updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass('Approval Required');
+                    updated.isApprovalRequired = true;
+                }
 
                 return updated;
             }

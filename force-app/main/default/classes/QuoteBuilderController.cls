@@ -483,7 +483,9 @@ public with sharing class QuoteBuilderController {
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
                 qli.Source_Pricebook_Ref__c = item.sourcePricebookId;
-                qli.Price_Status__c = getPriceStatus(item.discount, item.maxDiscount);
+                qli.Price_Status__c = String.isNotBlank(item.priceStatus)
+                    ? item.priceStatus
+                    : getPriceStatus(item.discount, item.maxDiscount);
                 qliList.add(qli);
             }
             insert qliList;
@@ -518,7 +520,9 @@ public with sharing class QuoteBuilderController {
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
                 qli.Source_Pricebook_Ref__c = item.sourcePricebookId;
-                qli.Price_Status__c = getPriceStatus(item.discount, item.maxDiscount);
+                qli.Price_Status__c = String.isNotBlank(item.priceStatus)
+                    ? item.priceStatus
+                    : getPriceStatus(item.discount, item.maxDiscount);
                 qliList.add(qli);
             }
             insert qliList;
@@ -577,6 +581,7 @@ public with sharing class QuoteBuilderController {
         public String lineDescription;
         public String detailedDescription;
         public Id sourcePricebookId;
+        public String priceStatus;
     }
 
     public class OpportunityContext {
