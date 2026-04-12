@@ -265,7 +265,15 @@ handleEnable(e) {
 
         VisitData({})
             .then(result => {
-                this.objData.Lead = result.lead;
+                this.objData.Lead = result.lead.map(lead => ({
+                    Id: lead.Id,
+                    Name: lead.Name,
+                    Phone: lead.Phone,
+                    MobilePhone: lead.MobilePhone,
+                    Company: lead.Company,
+                    Business_Vertical__c: lead.Business_Vertical__c,
+                    ProductName: lead.Product__r ? lead.Product__r.Name : ''
+                }));
                 this.objData.Customer = result.Customer;
                 this.objData.searchItems = this.objData.Lead;
                 this.isSearchValueSelected = true;

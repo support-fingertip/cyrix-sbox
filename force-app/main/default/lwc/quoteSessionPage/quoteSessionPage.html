@@ -1,0 +1,189 @@
+<template>
+    <div class="quote-session">
+
+        <!-- Loading overlay -->
+        <template if:true={isLoading}>
+            <div class="loading-overlay">
+                <lightning-spinner alternative-text="Loading quotes" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- Quote builder view (reuses newQuoteCmp) -->
+        <template if:true={showBuilder}>
+            <div class="builder-wrapper">
+                <div class="builder-toolbar">
+                    <lightning-button
+                        label="Back to Quote List"
+                        icon-name="utility:back"
+                        variant="neutral"
+                        onclick={handleCloseBuilder}>
+                    </lightning-button>
+                </div>
+                <c-new-quote-cmp record-id={builderRecordId}></c-new-quote-cmp>
+            </div>
+        </template>
+
+        <!-- Quote list view -->
+        <template if:false={showBuilder}>
+
+            <!-- Header -->
+            <div class="session-header">
+                <div class="header-left">
+                    <lightning-button-icon
+                        icon-name="utility:chevronleft"
+                        alternative-text="Back"
+                        variant="border-filled"
+                        class="back-btn"
+                        onclick={handleBack}>
+                    </lightning-button-icon>
+                    <div class="header-text">
+                        <h1 class="session-title">Quote Session</h1>
+                        <p class="session-subtitle">{headerSubtitle}</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <span class="quote-count-pill">
+                        <lightning-icon icon-name="standard:quotes" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                        {quoteCount} Quote(s)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Create controls -->
+            <div class="create-bar">
+                <template if:true={hasOpportunities}>
+                    <div class="create-bar-inner">
+                        <lightning-combobox
+                            class="opp-picker"
+                            label="Opportunity"
+                            value={selectedOpportunityId}
+                            placeholder="Select opportunity"
+                            options={opportunityOptions}
+                            onchange={handleOpportunityChange}
+                            variant="label-hidden">
+                        </lightning-combobox>
+                        <lightning-button
+                            label="Create Quote"
+                            variant="brand"
+                            icon-name="utility:add"
+                            disabled={createDisabled}
+                            onclick={handleCreateQuote}
+                            class="create-btn">
+                        </lightning-button>
+                    </div>
+                </template>
+                <template if:false={hasOpportunities}>
+                    <div class="no-opp-msg">
+                        <lightning-icon icon-name="utility:info_alt" size="x-small" class="slds-m-right_xx-small"></lightning-icon>
+                        No opportunities exist for this customer yet. Create an opportunity before adding a quote.
+                    </div>
+                </template>
+            </div>
+
+            <!-- Quote list -->
+            <template if:true={hasQuotes}>
+                <!-- Desktop table -->
+                <div class="desktop-view">
+                    <div class="table-wrapper">
+                        <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_striped quote-table">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th scope="col" style="width:40px"><div class="slds-truncate">#</div></th>
+                                    <th scope="col"><div class="slds-truncate">Quote #</div></th>
+                                    <th scope="col"><div class="slds-truncate">Name</div></th>
+                                    <th scope="col"><div class="slds-truncate">Opportunity</div></th>
+                                    <th scope="col"><div class="slds-truncate">Status</div></th>
+                                    <th scope="col"><div class="slds-truncate">Grand Total</div></th>
+                                    <th scope="col"><div class="slds-truncate">Valid Till</div></th>
+                                    <th scope="col"><div class="slds-truncate">Created On</div></th>
+                                    <th scope="col" style="width:90px"><div class="slds-truncate slds-text-align_center">Action</div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={quotes} for:item="q">
+                                    <tr key={q.quoteId}>
+                                        <td class="row-number">{q.rowNumber}</td>
+                                        <td><div class="slds-truncate" title={q.quoteNumber}>{q.quoteNumber}</div></td>
+                                        <td><div class="slds-truncate" title={q.name}>{q.name}</div></td>
+                                        <td><div class="slds-truncate" title={q.opportunityName}>{q.opportunityName}</div></td>
+                                        <td><span class={q.statusClass}>{q.status}</span></td>
+                                        <td class="amount-cell">{q.formattedAmount}</td>
+                                        <td>{q.formattedExpiry}</td>
+                                        <td>{q.formattedCreatedDate}</td>
+                                        <td class="slds-text-align_center">
+                                            <lightning-button-icon
+                                                icon-name="utility:edit"
+                                                alternative-text="Edit"
+                                                variant="border-filled"
+                                                data-quote-id={q.quoteId}
+                                                onclick={handleEditQuote}
+                                                class="edit-btn">
+                                            </lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Mobile / small-screen card list -->
+                <div class="mobile-view">
+                    <template for:each={quotes} for:item="q">
+                        <div key={q.quoteId} class="quote-card">
+                            <div class="quote-card-top">
+                                <div class="quote-card-id">
+                                    <div class="quote-number">{q.quoteNumber}</div>
+                                    <div class="quote-name">{q.name}</div>
+                                </div>
+                                <span class={q.statusClass}>{q.status}</span>
+                            </div>
+                            <div class="quote-card-body">
+                                <div class="card-row">
+                                    <span class="card-label">Opportunity</span>
+                                    <span class="card-value">{q.opportunityName}</span>
+                                </div>
+                                <div class="card-row">
+                                    <span class="card-label">Grand Total</span>
+                                    <span class="card-value amount-cell">{q.formattedAmount}</span>
+                                </div>
+                                <div class="card-row">
+                                    <span class="card-label">Valid Till</span>
+                                    <span class="card-value">{q.formattedExpiry}</span>
+                                </div>
+                                <div class="card-row">
+                                    <span class="card-label">Created</span>
+                                    <span class="card-value">{q.formattedCreatedDate}</span>
+                                </div>
+                            </div>
+                            <div class="quote-card-actions">
+                                <lightning-button
+                                    label="Edit Quote"
+                                    icon-name="utility:edit"
+                                    variant="brand-outline"
+                                    data-quote-id={q.quoteId}
+                                    onclick={handleEditQuote}>
+                                </lightning-button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <!-- Empty state -->
+            <template if:false={hasQuotes}>
+                <div class="empty-state">
+                    <lightning-icon icon-name="standard:quotes" size="large" class="empty-icon"></lightning-icon>
+                    <h3 class="empty-title">No quotes yet</h3>
+                    <p class="empty-text">
+                        No quotes have been created during this visit session.
+                        <template if:true={hasOpportunities}>
+                            Use the <b>Create Quote</b> button above to add one.
+                        </template>
+                    </p>
+                </div>
+            </template>
+
+        </template>
+    </div>
+</template>
