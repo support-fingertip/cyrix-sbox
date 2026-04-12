@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Source_Pricebook__c</fullName>
-    <deleteConstraint>SetNull</deleteConstraint>
-    <description>Tracks which pricebook provided the auto-selected price for this line item</description>
+    <description>Deprecated. Use Source_Pricebook_Ref__c lookup instead.</description>
     <externalId>false</externalId>
-    <label>Source Pricebook</label>
-    <referenceTo>Pricebook2</referenceTo>
-    <relationshipName>Quote_Line_Items</relationshipName>
+    <label>Source Pricebook (Legacy)</label>
+    <length>255</length>
     <required>false</required>
-    <type>Lookup</type>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
 </CustomField>
