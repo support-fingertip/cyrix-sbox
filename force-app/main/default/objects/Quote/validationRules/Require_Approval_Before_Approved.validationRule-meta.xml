@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Require_Approval_Before_Approved</fullName>
+    <active>true</active>
+    <description>Prevents marking a Quote as Approved while any of its line items still require pricing approval. The quote must be submitted for approval first.</description>
+    <errorConditionFormula>AND(
+    ISPICKVAL(Status, 'Approved'),
+    ISPICKVAL(Price_Status__c, 'Approval Required')
+)</errorConditionFormula>
+    <errorDisplayField>Status</errorDisplayField>
+    <errorMessage>This quote has line items that require pricing approval. Please submit the quote for approval before marking it as Approved.</errorMessage>
+</ValidationRule>
