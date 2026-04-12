@@ -392,7 +392,7 @@ public with sharing class QuoteBuilderController {
                    Product_Line_Description__c,
                    Product_Detailed_Description__c,
                    Price_Status__c,
-                   Source_Pricebook__c, Source_Pricebook__r.Name
+                   Source_Pricebook_Ref__c, Source_Pricebook_Ref__r.Name
             FROM QuoteLineItem
             WHERE QuoteId = :quoteId
             ORDER BY SortOrder ASC, Id ASC
@@ -413,8 +413,8 @@ public with sharing class QuoteBuilderController {
             item.priceStatus = qli.Price_Status__c;
             item.lineDescription = qli.Product_Line_Description__c;
             item.detailedDescription = qli.Product_Detailed_Description__c;
-            item.sourcePricebookId = qli.Source_Pricebook__c;
-            item.sourcePricebookName = qli.Source_Pricebook__r != null ? qli.Source_Pricebook__r.Name : '';
+            item.sourcePricebookId = qli.Source_Pricebook_Ref__c;
+            item.sourcePricebookName = qli.Source_Pricebook_Ref__r != null ? qli.Source_Pricebook_Ref__r.Name : '';
             ctx.lineItems.add(item);
         }
 
@@ -482,7 +482,7 @@ public with sharing class QuoteBuilderController {
                 qli.Discount = item.discount;
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
-                qli.Source_Pricebook__c = item.sourcePricebookId;
+                qli.Source_Pricebook_Ref__c = item.sourcePricebookId;
                 qli.Price_Status__c = getPriceStatus(item.discount, item.maxDiscount);
                 qliList.add(qli);
             }
@@ -516,7 +516,7 @@ public with sharing class QuoteBuilderController {
                 qli.Discount = item.discount;
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
-                qli.Source_Pricebook__c = item.sourcePricebookId;
+                qli.Source_Pricebook_Ref__c = item.sourcePricebookId;
                 qli.Price_Status__c = getPriceStatus(item.discount, item.maxDiscount);
                 qliList.add(qli);
             }
