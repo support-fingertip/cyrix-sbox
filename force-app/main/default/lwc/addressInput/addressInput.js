@@ -44,6 +44,13 @@ export default class AddressInput extends LightningElement {
     isSearching = false;
     _searchTimer;
 
+    disconnectedCallback() {
+        if (this._searchTimer) {
+            clearTimeout(this._searchTimer);
+            this._searchTimer = null;
+        }
+    }
+
     // Expose current values
     get nameValue() { return this._name; }
     get streetValue() { return this._street; }
