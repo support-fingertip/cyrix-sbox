@@ -1,6 +1,6 @@
 public with sharing class AddressSearchController {
 
-    @AuraEnabled
+    @AuraEnabled(cacheable=false)
     public static List<AddressSuggestion> searchAddress(String input) {
         List<AddressSuggestion> suggestions = new List<AddressSuggestion>();
         if (String.isBlank(input) || input.length() < 3) return suggestions;
@@ -43,7 +43,7 @@ public with sharing class AddressSearchController {
         return suggestions;
     }
 
-    @AuraEnabled
+    @AuraEnabled(cacheable=false)
     public static AddressDetail getPlaceDetails(String placeId) {
         AddressDetail detail = new AddressDetail();
         if (String.isBlank(placeId)) return detail;

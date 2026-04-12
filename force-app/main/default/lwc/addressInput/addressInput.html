@@ -16,7 +16,7 @@
                 </div>
             </template>
             <template if:true={showSuggestions}>
-                <div class="suggestions-dropdown" role="listbox">
+                <div class="suggestions-dropdown" role="listbox" aria-label="Address suggestions">
                     <template for:each={suggestions} for:item="sug">
                         <div key={sug.placeId}
                              class="suggestion-item slds-p-around_x-small"
