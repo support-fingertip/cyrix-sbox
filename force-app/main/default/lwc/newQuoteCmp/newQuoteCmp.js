@@ -32,8 +32,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     accountName = '';
     regionId;
 
-    // Default values for new quote (auto-populate Bill To from Account)
+    // Default values for new quote
     defaultValues = {};
+
+    // Address objects for custom address input
+    @track billingAddress = { name: '', street: '', city: '', state: '', postalCode: '', country: 'IN' };
+    @track shippingAddress = { name: '', street: '', city: '', state: '', postalCode: '', country: 'IN' };
 
     // Shipping address picker
     @track shippingAddresses = [];
@@ -176,13 +180,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
             // === AUTO-POPULATE BILL TO ADDRESS FROM ACCOUNT ===
             if (!this.isEditMode && this.accountId) {
-                this.defaultValues = {
-                    BillingName: data.billingName || '',
-                    BillingStreet: data.billingStreet || '',
-                    BillingCity: data.billingCity || '',
-                    BillingState: data.billingState || '',
-                    BillingPostalCode: data.billingPostalCode || '',
-                    BillingCountry: data.billingCountry || ''   // ISO code
+                this.billingAddress = {
+                    name: data.billingName || '',
+                    street: data.billingStreet || '',
+                    city: data.billingCity || '',
+                    state: data.billingState || '',
+                    postalCode: data.billingPostalCode || '',
+                    country: data.billingCountry || 'IN'
                 };
             }
 
@@ -204,6 +208,24 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.regionId = data.regionId;
             this.defaultOpportunityId = data.opportunityId;
 
+            // Populate address objects from saved quote
+            this.billingAddress = {
+                name: data.billingName || '',
+                street: data.billingStreet || '',
+                city: data.billingCity || '',
+                state: data.billingState || '',
+                postalCode: data.billingPostalCode || '',
+                country: data.billingCountry || 'IN'
+            };
+            this.shippingAddress = {
+                name: data.shippingName || '',
+                street: data.shippingStreet || '',
+                city: data.shippingCity || '',
+                state: data.shippingState || '',
+                postalCode: data.shippingPostalCode || '',
+                country: data.shippingCountry || 'IN'
+            };
+
             if (this.accountId) {
                 await this.loadShippingAddresses(this.accountId);
             }
@@ -216,6 +238,10 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                     const afterDiscount = base - discountAmt;
                     const taxAmt = afterDiscount * ((item.taxPercent || 0) / 100);
 
+                    const disc = item.discount || 0;
+                    const maxDisc = item.maxDiscount;
+                    const priceStatus = item.priceStatus || this.computePriceStatus(disc, maxDisc);
+
                     return {
                         rowId: 'row-' + rowCounter,
                         rowNumber: index + 1,
@@ -227,19 +253,21 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                         quantity: item.quantity,
                         listPrice: item.listPrice || item.unitPrice,
                         unitPrice: item.unitPrice,
-                        discount: item.discount || 0,
+                        discount: disc,
                         taxPercent: item.taxPercent || 0,
                         taxPercentDisplay: (item.taxPercent || 0) + '%',
-                        maxDiscount: item.maxDiscount,
-                        maxDiscountDisplay: item.maxDiscount != null ? item.maxDiscount + '%' : '',
+                        maxDiscount: maxDisc,
+                        maxDiscountDisplay: maxDisc != null ? maxDisc + '%' : '',
+                        priceStatus: priceStatus,
+                        isApprovalRequired: priceStatus === 'Approval Required',
                         lineTotal: afterDiscount + taxAmt,
                         lineDescription: item.lineDescription || '',
                         detailedDescription: item.detailedDescription || '',
-                        sourcePricebook: item.sourcePricebook || '',
-                        sourcePricebookType: '',
-                        priceBadgeClass: this.getPriceBadgeClass(item.sourcePricebook),
-                        priceBadgeLabel: item.sourcePricebook || '',
-                        hasPriceSource: !!item.sourcePricebook
+                        sourcePricebookId: item.sourcePricebookId || null,
+                        sourcePricebookName: item.sourcePricebookName || '',
+                        priceBadgeClass: this.getPriceBadgeClass(item.sourcePricebookName),
+                        priceBadgeLabel: item.sourcePricebookName || '',
+                        hasPriceSource: !!item.sourcePricebookName
                     };
                 });
             }
@@ -288,36 +316,138 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     }
 
     applyShippingAddress(addr) {
-        // Set the individual components of the compound ShippingAddress field
-        const fields = {
-            ShippingName: addr.name || '',
-            ShippingStreet: addr.street || '',
-            ShippingCity: addr.city || '',
-            ShippingState: addr.state || '',
-            ShippingPostalCode: addr.postalCode || '',
-            ShippingCountry: addr.country || ''   // ISO code
+        this.shippingAddress = {
+            name: addr.name || '',
+            street: addr.street || '',
+            city: addr.city || '',
+            state: addr.state || '',
+            postalCode: addr.postalCode || '',
+            country: addr.country || 'IN'
         };
+    }
 
-        // Update each field imperatively
-        for (const [fieldName, value] of Object.entries(fields)) {
-            const fieldElement = this.template.querySelector(`lightning-input-field[field-name="${fieldName}"]`);
-            if (fieldElement) {
-                fieldElement.value = value;
-                fieldElement.dispatchEvent(new CustomEvent('change', { detail: { value } }));
-            }
-        }
+    // ===== ADDRESS CHANGE HANDLERS =====
 
-        // Force the compound ShippingAddress field to refresh
-        setTimeout(() => {
-            const shippingAddressField = this.template.querySelector('lightning-input-field[field-name="ShippingAddress"]');
-            if (shippingAddressField) {
-                const currentValue = shippingAddressField.value;
-                shippingAddressField.value = '';
-                shippingAddressField.dispatchEvent(new CustomEvent('change', { detail: { value: '' } }));
-                shippingAddressField.value = currentValue;
-                shippingAddressField.dispatchEvent(new CustomEvent('change', { detail: { value: currentValue } }));
-            }
-        }, 100);
+    handleBillingAddressChange(event) {
+        const d = event.detail;
+        this.billingAddress = {
+            ...this.billingAddress,
+            street: d.street || '',
+            city: d.city || '',
+            state: d.province || '',
+            postalCode: d.postalCode || '',
+            country: d.country || ''
+        };
+    }
+
+    handleShippingAddressChange(event) {
+        const d = event.detail;
+        this.shippingAddress = {
+            ...this.shippingAddress,
+            street: d.street || '',
+            city: d.city || '',
+            state: d.province || '',
+            postalCode: d.postalCode || '',
+            country: d.country || ''
+        };
+    }
+
+    handleBillingNameChange(event) {
+        this.billingAddress = {
+            ...this.billingAddress,
+            name: event.target.value || ''
+        };
+    }
+
+    handleShippingNameChange(event) {
+        this.shippingAddress = {
+            ...this.shippingAddress,
+            name: event.target.value || ''
+        };
+    }
+
+    // ===== ADDRESS PICKLIST OPTIONS =====
+
+    get countryOptions() {
+        return [
+            { label: 'India', value: 'IN' },
+            { label: 'United States', value: 'US' },
+            { label: 'United Kingdom', value: 'GB' },
+            { label: 'United Arab Emirates', value: 'AE' },
+            { label: 'Singapore', value: 'SG' },
+            { label: 'Australia', value: 'AU' },
+            { label: 'Canada', value: 'CA' },
+            { label: 'Germany', value: 'DE' },
+            { label: 'France', value: 'FR' },
+            { label: 'Japan', value: 'JP' },
+            { label: 'China', value: 'CN' },
+            { label: 'Malaysia', value: 'MY' },
+            { label: 'Thailand', value: 'TH' },
+            { label: 'Indonesia', value: 'ID' },
+            { label: 'Bangladesh', value: 'BD' },
+            { label: 'Sri Lanka', value: 'LK' },
+            { label: 'Nepal', value: 'NP' },
+            { label: 'Saudi Arabia', value: 'SA' },
+            { label: 'Qatar', value: 'QA' },
+            { label: 'Kuwait', value: 'KW' },
+            { label: 'Oman', value: 'OM' },
+            { label: 'Bahrain', value: 'BH' },
+            { label: 'South Africa', value: 'ZA' },
+            { label: 'Brazil', value: 'BR' },
+            { label: 'Italy', value: 'IT' },
+            { label: 'Spain', value: 'ES' },
+            { label: 'Netherlands', value: 'NL' },
+            { label: 'New Zealand', value: 'NZ' }
+        ];
+    }
+
+    get indianStateOptions() {
+        return [
+            { label: 'Andaman and Nicobar Islands', value: 'AN' },
+            { label: 'Andhra Pradesh', value: 'AP' },
+            { label: 'Arunachal Pradesh', value: 'AR' },
+            { label: 'Assam', value: 'AS' },
+            { label: 'Bihar', value: 'BR' },
+            { label: 'Chandigarh', value: 'CH' },
+            { label: 'Chhattisgarh', value: 'CT' },
+            { label: 'Dadra and Nagar Haveli and Daman and Diu', value: 'DN' },
+            { label: 'Delhi', value: 'DL' },
+            { label: 'Goa', value: 'GA' },
+            { label: 'Gujarat', value: 'GJ' },
+            { label: 'Haryana', value: 'HR' },
+            { label: 'Himachal Pradesh', value: 'HP' },
+            { label: 'Jammu and Kashmir', value: 'JK' },
+            { label: 'Jharkhand', value: 'JH' },
+            { label: 'Karnataka', value: 'KA' },
+            { label: 'Kerala', value: 'KL' },
+            { label: 'Ladakh', value: 'LA' },
+            { label: 'Lakshadweep', value: 'LD' },
+            { label: 'Madhya Pradesh', value: 'MP' },
+            { label: 'Maharashtra', value: 'MH' },
+            { label: 'Manipur', value: 'MN' },
+            { label: 'Meghalaya', value: 'ML' },
+            { label: 'Mizoram', value: 'MZ' },
+            { label: 'Nagaland', value: 'NL' },
+            { label: 'Odisha', value: 'OD' },
+            { label: 'Puducherry', value: 'PY' },
+            { label: 'Punjab', value: 'PB' },
+            { label: 'Rajasthan', value: 'RJ' },
+            { label: 'Sikkim', value: 'SK' },
+            { label: 'Tamil Nadu', value: 'TN' },
+            { label: 'Telangana', value: 'TG' },
+            { label: 'Tripura', value: 'TR' },
+            { label: 'Uttar Pradesh', value: 'UP' },
+            { label: 'Uttarakhand', value: 'UT' },
+            { label: 'West Bengal', value: 'WB' }
+        ];
+    }
+
+    get billingStateOptions() {
+        return this.billingAddress.country === 'IN' ? this.indianStateOptions : [];
+    }
+
+    get shippingStateOptions() {
+        return this.shippingAddress.country === 'IN' ? this.indianStateOptions : [];
     }
 
     // ===== PAYMENT TERM HANDLERS =====
@@ -382,6 +512,22 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         // Inject Pricebook2Id
         fields.Pricebook2Id = this.pricebookId;
 
+        // Inject Billing Address
+        fields.BillingName = this.billingAddress.name || '';
+        fields.BillingStreet = this.billingAddress.street || '';
+        fields.BillingCity = this.billingAddress.city || '';
+        fields.BillingStateCode = this.billingAddress.state || '';
+        fields.BillingPostalCode = this.billingAddress.postalCode || '';
+        fields.BillingCountryCode = this.billingAddress.country || '';
+
+        // Inject Shipping Address
+        fields.ShippingName = this.shippingAddress.name || '';
+        fields.ShippingStreet = this.shippingAddress.street || '';
+        fields.ShippingCity = this.shippingAddress.city || '';
+        fields.ShippingStateCode = this.shippingAddress.state || '';
+        fields.ShippingPostalCode = this.shippingAddress.postalCode || '';
+        fields.ShippingCountryCode = this.shippingAddress.country || '';
+
         // Inject internal charge fields (custom fields on Quote)
         fields.Packing_Charge__c = this.packingCharges || 0;
         fields.Internal_Transport_Cost__c = this.transportCharges || 0;
@@ -410,9 +556,10 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 quantity: item.quantity,
                 unitPrice: item.unitPrice,
                 discount: item.discount,
+                maxDiscount: item.maxDiscount,
                 lineDescription: item.lineDescription,
                 detailedDescription: item.detailedDescription,
-                sourcePricebook: item.sourcePricebook || ''
+                sourcePricebookId: item.sourcePricebookId || null
             }));
 
             if (this.isEditMode) {
@@ -538,6 +685,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }
 
         rowCounter++;
+        const priceStatus = this.computePriceStatus(0, product.maxDiscount);
         const newItem = {
             rowId: 'row-' + rowCounter,
             rowNumber: this.lineItems.length + 1,
@@ -554,11 +702,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             taxPercentDisplay: (product.taxPercent || 0) + '%',
             maxDiscount: product.maxDiscount,
             maxDiscountDisplay: product.maxDiscount != null ? product.maxDiscount + '%' : '',
+            priceStatus: priceStatus,
+            isApprovalRequired: priceStatus === 'Approval Required',
             lineTotal: product.unitPrice,
             lineDescription: product.lineDescription || '',
             detailedDescription: product.detailedDescription || '',
-            sourcePricebook: product.sourcePricebook || '',
-            sourcePricebookType: product.sourcePricebookType || '',
+            sourcePricebookId: product.sourcePricebookId || null,
+            sourcePricebookName: product.sourcePricebook || '',
             priceBadgeClass: this.getPriceBadgeClass(product.sourcePricebookType),
             priceBadgeLabel: this.getPriceBadgeLabel(product.sourcePricebookType),
             hasPriceSource: !!product.sourcePricebookType
@@ -597,6 +747,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 const afterDiscount = base - discountAmt;
                 const taxAmt = afterDiscount * ((updated.taxPercent || 0) / 100);
                 updated.lineTotal = afterDiscount + taxAmt;
+
+                // Recompute price status when discount changes
+                const ps = this.computePriceStatus(updated.discount, updated.maxDiscount);
+                updated.priceStatus = ps;
+                updated.isApprovalRequired = ps === 'Approval Required';
 
                 return updated;
             }
@@ -661,6 +816,15 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }
 
         return errors;
+    }
+
+    // ===== PRICE STATUS =====
+
+    computePriceStatus(discount, maxDiscount) {
+        if (discount != null && maxDiscount != null && discount > maxDiscount) {
+            return 'Approval Required';
+        }
+        return 'Standard';
     }
 
     // ===== PRICING BADGE HELPERS =====
