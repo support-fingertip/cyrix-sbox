@@ -329,125 +329,27 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // ===== ADDRESS CHANGE HANDLERS =====
 
     handleBillingAddressChange(event) {
-        const d = event.detail;
+        const d = event.detail || {};
         this.billingAddress = {
-            ...this.billingAddress,
+            name: d.name || '',
             street: d.street || '',
             city: d.city || '',
-            state: d.province || '',
+            state: d.state || '',
             postalCode: d.postalCode || '',
-            country: d.country || ''
+            country: d.country || 'IN'
         };
     }
 
     handleShippingAddressChange(event) {
-        const d = event.detail;
+        const d = event.detail || {};
         this.shippingAddress = {
-            ...this.shippingAddress,
+            name: d.name || '',
             street: d.street || '',
             city: d.city || '',
-            state: d.province || '',
+            state: d.state || '',
             postalCode: d.postalCode || '',
-            country: d.country || ''
+            country: d.country || 'IN'
         };
-    }
-
-    handleBillingNameChange(event) {
-        this.billingAddress = {
-            ...this.billingAddress,
-            name: event.target.value || ''
-        };
-    }
-
-    handleShippingNameChange(event) {
-        this.shippingAddress = {
-            ...this.shippingAddress,
-            name: event.target.value || ''
-        };
-    }
-
-    // ===== ADDRESS PICKLIST OPTIONS =====
-
-    get countryOptions() {
-        return [
-            { label: 'India', value: 'IN' },
-            { label: 'United States', value: 'US' },
-            { label: 'United Kingdom', value: 'GB' },
-            { label: 'United Arab Emirates', value: 'AE' },
-            { label: 'Singapore', value: 'SG' },
-            { label: 'Australia', value: 'AU' },
-            { label: 'Canada', value: 'CA' },
-            { label: 'Germany', value: 'DE' },
-            { label: 'France', value: 'FR' },
-            { label: 'Japan', value: 'JP' },
-            { label: 'China', value: 'CN' },
-            { label: 'Malaysia', value: 'MY' },
-            { label: 'Thailand', value: 'TH' },
-            { label: 'Indonesia', value: 'ID' },
-            { label: 'Bangladesh', value: 'BD' },
-            { label: 'Sri Lanka', value: 'LK' },
-            { label: 'Nepal', value: 'NP' },
-            { label: 'Saudi Arabia', value: 'SA' },
-            { label: 'Qatar', value: 'QA' },
-            { label: 'Kuwait', value: 'KW' },
-            { label: 'Oman', value: 'OM' },
-            { label: 'Bahrain', value: 'BH' },
-            { label: 'South Africa', value: 'ZA' },
-            { label: 'Brazil', value: 'BR' },
-            { label: 'Italy', value: 'IT' },
-            { label: 'Spain', value: 'ES' },
-            { label: 'Netherlands', value: 'NL' },
-            { label: 'New Zealand', value: 'NZ' }
-        ];
-    }
-
-    get indianStateOptions() {
-        return [
-            { label: 'Andaman and Nicobar Islands', value: 'AN' },
-            { label: 'Andhra Pradesh', value: 'AP' },
-            { label: 'Arunachal Pradesh', value: 'AR' },
-            { label: 'Assam', value: 'AS' },
-            { label: 'Bihar', value: 'BR' },
-            { label: 'Chandigarh', value: 'CH' },
-            { label: 'Chhattisgarh', value: 'CT' },
-            { label: 'Dadra and Nagar Haveli and Daman and Diu', value: 'DN' },
-            { label: 'Delhi', value: 'DL' },
-            { label: 'Goa', value: 'GA' },
-            { label: 'Gujarat', value: 'GJ' },
-            { label: 'Haryana', value: 'HR' },
-            { label: 'Himachal Pradesh', value: 'HP' },
-            { label: 'Jammu and Kashmir', value: 'JK' },
-            { label: 'Jharkhand', value: 'JH' },
-            { label: 'Karnataka', value: 'KA' },
-            { label: 'Kerala', value: 'KL' },
-            { label: 'Ladakh', value: 'LA' },
-            { label: 'Lakshadweep', value: 'LD' },
-            { label: 'Madhya Pradesh', value: 'MP' },
-            { label: 'Maharashtra', value: 'MH' },
-            { label: 'Manipur', value: 'MN' },
-            { label: 'Meghalaya', value: 'ML' },
-            { label: 'Mizoram', value: 'MZ' },
-            { label: 'Nagaland', value: 'NL' },
-            { label: 'Odisha', value: 'OD' },
-            { label: 'Puducherry', value: 'PY' },
-            { label: 'Punjab', value: 'PB' },
-            { label: 'Rajasthan', value: 'RJ' },
-            { label: 'Sikkim', value: 'SK' },
-            { label: 'Tamil Nadu', value: 'TN' },
-            { label: 'Telangana', value: 'TG' },
-            { label: 'Tripura', value: 'TR' },
-            { label: 'Uttar Pradesh', value: 'UP' },
-            { label: 'Uttarakhand', value: 'UT' },
-            { label: 'West Bengal', value: 'WB' }
-        ];
-    }
-
-    get billingStateOptions() {
-        return this.billingAddress.country === 'IN' ? this.indianStateOptions : [];
-    }
-
-    get shippingStateOptions() {
-        return this.shippingAddress.country === 'IN' ? this.indianStateOptions : [];
     }
 
     // ===== PAYMENT TERM HANDLERS =====
