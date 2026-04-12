@@ -47,6 +47,8 @@ public class DailyLogVisitMapControllerTest {
             Daily_Log__c = dailyLog.Id,
             Account__c = testAccount.Id,
             Visit_for__c = 'Customer',
+            Visit_Date__c = Date.today(),
+            Planned_Start_Time__c = Datetime.now().addHours(-3),
             Visit_Start__c = Datetime.now().addHours(-3),
             Visit_End__c = Datetime.now().addHours(-2),
             Address__c = 'Test Address 1',
@@ -61,6 +63,8 @@ public class DailyLogVisitMapControllerTest {
             Daily_Log__c = dailyLog.Id,
             Lead__c = testLead.Id,
             Visit_for__c = 'Lead',
+            Visit_Date__c = Date.today(),
+            Planned_Start_Time__c = Datetime.now().addHours(-1),
             Visit_Start__c = Datetime.now().addHours(-1),
             Check_In_Location__Latitude__s = 13.0827,
             Check_In_Location__Longitude__s = 80.2707
