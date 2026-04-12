@@ -259,6 +259,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                         maxDiscount: maxDisc,
                         maxDiscountDisplay: maxDisc != null ? maxDisc + '%' : '',
                         priceStatus: priceStatus,
+                        priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
                         isApprovalRequired: priceStatus === 'Approval Required',
                         lineTotal: afterDiscount + taxAmt,
                         lineDescription: item.lineDescription || '',
@@ -605,6 +606,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             maxDiscount: product.maxDiscount,
             maxDiscountDisplay: product.maxDiscount != null ? product.maxDiscount + '%' : '',
             priceStatus: priceStatus,
+            priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
             isApprovalRequired: priceStatus === 'Approval Required',
             lineTotal: product.unitPrice,
             lineDescription: product.lineDescription || '',
@@ -653,6 +655,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 // Recompute price status when discount changes
                 const ps = this.computePriceStatus(updated.discount, updated.maxDiscount);
                 updated.priceStatus = ps;
+                updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(ps);
                 updated.isApprovalRequired = ps === 'Approval Required';
 
                 return updated;
@@ -726,7 +729,17 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         if (discount != null && maxDiscount != null && discount > maxDiscount) {
             return 'Approval Required';
         }
-        return 'Standard';
+        return 'Not Required';
+    }
+
+    getPriceStatusBadgeClass(priceStatus) {
+        const base = 'slds-badge';
+        switch (priceStatus) {
+            case 'Approval Required': return base + ' slds-theme_error';
+            case 'Approved': return base + ' slds-theme_success';
+            case 'Not Required':
+            default: return base + ' slds-theme_shade';
+        }
     }
 
     // ===== PRICING BADGE HELPERS =====

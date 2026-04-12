@@ -346,12 +346,7 @@
                                             <td class="slds-text-align_center">{item.maxDiscountDisplay}</td>
                                             <td class="slds-text-align_center">{item.taxPercentDisplay}</td>
                                             <td class="slds-text-align_center">
-                                                <template if:true={item.isApprovalRequired}>
-                                                    <span class="slds-badge slds-theme_error">Approval Required</span>
-                                                </template>
-                                                <template if:false={item.isApprovalRequired}>
-                                                    <span class="slds-badge slds-theme_success">Standard</span>
-                                                </template>
+                                                <span class={item.priceStatusBadgeClass}>{item.priceStatus}</span>
                                             </td>
                                             <td class="line-total-cell">
                                                 <lightning-formatted-number
