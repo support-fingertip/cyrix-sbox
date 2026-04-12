@@ -33,9 +33,9 @@ public with sharing class QuotePDFEmailController {
             : (q.ContactId != null ? q.Contact.Email : '');
         wrapper.contactName = q.ContactId != null ? q.Contact.Name : '';
         wrapper.ownerEmail = q.OwnerId != null ? q.Owner.Email : '';
-        wrapper.defaultSubject = 'Quotation for ' +
-            (q.Vertical__c != null ? q.Vertical__c : '') +
-            ' - ' + q.Name;
+        wrapper.defaultSubject = 'Cyrix Healthcare - Quotation' +
+            (q.AccountId != null && q.Account.Name != null ? ' for ' + q.Account.Name : '') +
+            ' (' + q.Name + ')';
         wrapper.defaultBody = 'Dear Sir/Madam,\n\n' +
             'Please find attached the quotation for your kind consideration.\n\n' +
             'Should you require any further clarification or technical discussion, ' +
