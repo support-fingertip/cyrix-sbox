@@ -54,20 +54,13 @@
         <filterLogic>and</filterLogic>
         <filters>
             <field>Price_Status__c</field>
-            <operator>IsChanged</operator>
-            <value>
-                <booleanValue>true</booleanValue>
-            </value>
-        </filters>
-        <filters>
-            <field>Price_Status__c</field>
             <operator>EqualTo</operator>
             <value>
                 <stringValue>Approval Required</stringValue>
             </value>
         </filters>
         <object>QuoteLineItem</object>
-        <recordTriggerType>Update</recordTriggerType>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
         <triggerType>RecordAfterSave</triggerType>
     </start>
     <status>Active</status>

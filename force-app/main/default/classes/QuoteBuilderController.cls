@@ -487,6 +487,7 @@ public with sharing class QuoteBuilderController {
                 qliList.add(qli);
             }
             insert qliList;
+            updateQuotePriceStatus(quoteId);
         } catch (AuraHandledException e) {
             throw e;
         } catch (Exception e) {
@@ -521,6 +522,7 @@ public with sharing class QuoteBuilderController {
                 qliList.add(qli);
             }
             insert qliList;
+            updateQuotePriceStatus(quoteId);
         } catch (AuraHandledException e) {
             throw e;
         } catch (Exception e) {
@@ -534,6 +536,34 @@ public with sharing class QuoteBuilderController {
             return 'Approval Required';
         }
         return 'Standard';
+    }
+
+    // Roll up line item price status to the parent Quote.
+    // - If any line item requires approval, Quote.Price_Status__c = 'Approval Required'
+    // - Preserves 'Approved' state (do not regress an already-approved quote)
+    // - Otherwise resets to 'Draft'
+    private static void updateQuotePriceStatus(Id quoteId) {
+        if (quoteId == null) return;
+
+        List<Quote> quotes = [SELECT Id, Price_Status__c FROM Quote WHERE Id = :quoteId LIMIT 1];
+        if (quotes.isEmpty()) return;
+        Quote q = quotes[0];
+
+        if (q.Price_Status__c == 'Approved') return;
+
+        Integer approvalCount = [
+            SELECT COUNT()
+            FROM QuoteLineItem
+            WHERE QuoteId = :quoteId
+            AND Price_Status__c = 'Approval Required'
+        ];
+
+        String newStatus = approvalCount > 0 ? 'Approval Required' : 'Draft';
+
+        if (q.Price_Status__c != newStatus) {
+            q.Price_Status__c = newStatus;
+            update q;
+        }
     }
 
     // ===== Inner Classes =====

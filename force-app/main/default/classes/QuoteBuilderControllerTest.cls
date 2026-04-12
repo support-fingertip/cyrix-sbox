@@ -606,6 +606,48 @@ private class QuoteBuilderControllerTest {
         QuoteLineItem savedItem = [SELECT Price_Status__c FROM QuoteLineItem WHERE QuoteId = :q.Id LIMIT 1];
         System.assertEquals('Approval Required', savedItem.Price_Status__c,
             'Price status should be Approval Required when discount > max discount');
+
+        Quote savedQuote = [SELECT Price_Status__c FROM Quote WHERE Id = :q.Id];
+        System.assertEquals('Approval Required', savedQuote.Price_Status__c,
+            'Quote price status should roll up to Approval Required when any line item needs approval');
+    }
+
+    @isTest
+    static void testQuotePriceStatusPreservesApproved() {
+        Opportunity opp = [SELECT Id, Pricebook2Id FROM Opportunity LIMIT 1];
+        PricebookEntry pbe = [SELECT Id, Product2Id FROM PricebookEntry WHERE Product2.ProductCode = 'USG-500' LIMIT 1];
+
+        Quote q = new Quote(
+            Name = 'Approved Quote',
+            OpportunityId = opp.Id,
+            Pricebook2Id = opp.Pricebook2Id,
+            Status = 'Draft',
+            Price_Status__c = 'Approved'
+        );
+        insert q;
+
+        // Save a normal (non-approval) line item. Quote should stay 'Approved'.
+        String lineItemsJSON = JSON.serialize(new List<Map<String, Object>>{
+            new Map<String, Object>{
+                'productId' => pbe.Product2Id,
+                'pricebookEntryId' => pbe.Id,
+                'quantity' => 1,
+                'unitPrice' => 100000,
+                'discount' => 5,
+                'maxDiscount' => 10,
+                'lineDescription' => 'Within limit',
+                'detailedDescription' => '',
+                'sourcePricebookId' => opp.Pricebook2Id
+            }
+        });
+
+        Test.startTest();
+        QuoteBuilderController.saveQuoteLineItems(q.Id, lineItemsJSON);
+        Test.stopTest();
+
+        Quote savedQuote = [SELECT Price_Status__c FROM Quote WHERE Id = :q.Id];
+        System.assertEquals('Approved', savedQuote.Price_Status__c,
+            'Approved quotes should not regress to Draft or Approval Required on line-item save');
     }
 
     @isTest
