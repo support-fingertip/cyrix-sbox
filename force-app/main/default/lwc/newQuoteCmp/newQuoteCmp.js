@@ -194,6 +194,20 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             if (this.accountId) {
                 await this.loadShippingAddresses(this.accountId);
             }
+
+            // === AUTO-POPULATE PAYMENT TERMS FROM MASTER ===
+            // Match on Opportunity vertical vs Payment_Terms_Master.Type; blank Type acts as fallback.
+            if (!this.isEditMode && data.defaultPaymentTerms && data.defaultPaymentTerms.length > 0) {
+                this.paymentTerms = data.defaultPaymentTerms.map((t, index) => {
+                    ptCounter++;
+                    return {
+                        ptId: 'pt-' + ptCounter,
+                        rowNumber: index + 1,
+                        paymentTerm: t.paymentTerm || '',
+                        percentage: t.percentage || 0
+                    };
+                });
+            }
         } catch (error) {
             this.showError('Error loading opportunity', this.reduceErrors(error));
         }

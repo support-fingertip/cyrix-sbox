@@ -39,7 +39,41 @@ public with sharing class QuoteBuilderController {
             ctx.billingCountry = opp.Account.BillingCountryCode;
         }
 
+        ctx.defaultPaymentTerms = getDefaultPaymentTerms(opp.Buisness_Vertical__c);
+
         return ctx;
+    }
+
+    private static List<PaymentTermResult> getDefaultPaymentTerms(String vertical) {
+        List<PaymentTermResult> results = new List<PaymentTermResult>();
+
+        List<Payment_Terms_Master__c> matched = new List<Payment_Terms_Master__c>();
+        if (String.isNotBlank(vertical)) {
+            matched = [
+                SELECT Id, Payment_Term__c, Percentage__c, Type__c
+                FROM Payment_Terms_Master__c
+                WHERE Type__c = :vertical
+                ORDER BY CreatedDate ASC
+            ];
+        }
+
+        // Fall back to records with blank Type when no vertical match
+        if (matched.isEmpty()) {
+            matched = [
+                SELECT Id, Payment_Term__c, Percentage__c, Type__c
+                FROM Payment_Terms_Master__c
+                WHERE Type__c = null
+                ORDER BY CreatedDate ASC
+            ];
+        }
+
+        for (Payment_Terms_Master__c pt : matched) {
+            PaymentTermResult ptr = new PaymentTermResult();
+            ptr.paymentTerm = pt.Payment_Term__c;
+            ptr.percentage = pt.Percentage__c;
+            results.add(ptr);
+        }
+        return results;
     }
 
     @AuraEnabled(cacheable=true)
@@ -600,6 +634,7 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public String billingState;
         @AuraEnabled public String billingPostalCode;
         @AuraEnabled public String billingCountry;
+        @AuraEnabled public List<PaymentTermResult> defaultPaymentTerms;
     }
 
     public class ShippingAddressResult {
