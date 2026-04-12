@@ -229,7 +229,7 @@ private class QuoteBuilderControllerTest {
         System.assertEquals(150000, items[0].UnitPrice);
         System.assertEquals(5, items[0].Discount);
         System.assertEquals('GST', items[0].Tax_Type__c);
-        System.assertEquals('Standard', items[0].Price_Status__c);
+        System.assertEquals('Not Required', items[0].Price_Status__c);
     }
 
     @isTest
@@ -567,7 +567,7 @@ private class QuoteBuilderControllerTest {
 
         QuoteLineItem savedItem = [SELECT Source_Pricebook_Ref__c, Price_Status__c FROM QuoteLineItem WHERE QuoteId = :q.Id LIMIT 1];
         System.assertEquals(opp.Pricebook2Id, savedItem.Source_Pricebook_Ref__c, 'Source pricebook lookup should be saved');
-        System.assertEquals('Standard', savedItem.Price_Status__c, 'Price status should be Standard when discount <= max');
+        System.assertEquals('Not Required', savedItem.Price_Status__c, 'Price status should be Not Required when discount <= max');
     }
 
     @isTest

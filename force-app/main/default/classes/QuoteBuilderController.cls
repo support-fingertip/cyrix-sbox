@@ -535,7 +535,7 @@ public with sharing class QuoteBuilderController {
         if (discount != null && maxDiscount != null && discount > maxDiscount) {
             return 'Approval Required';
         }
-        return 'Standard';
+        return 'Not Required';
     }
 
     // Roll up line item price status to the parent Quote.

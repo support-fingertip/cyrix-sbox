@@ -108,7 +108,7 @@ public with sharing class QuoteApprovalController {
             FROM QuoteLineItem
             WHERE QuoteId = :quoteId
             AND Price_Status__c != 'Approved'
-            AND Price_Status__c != 'Standard'
+            AND Price_Status__c != 'Not Required'
         ];
 
         Quote qt = [
@@ -137,7 +137,8 @@ public with sharing class QuoteApprovalController {
 
     /**
      * Rejects selected quote line items.
-     * Sets Price_Status__c to 'Rejected' and updates parent Quote.
+     * Reverts their Price_Status__c to 'Approval Required' (so they can be
+     * resubmitted) and flips the parent Quote to 'Rejected'.
      */
     @AuraEnabled
     public static void rejectLineItems(List<Id> lineItemIds, Id quoteId, String comments) {
@@ -148,7 +149,7 @@ public with sharing class QuoteApprovalController {
         ];
 
         for (QuoteLineItem item : itemsToReject) {
-            item.Price_Status__c = 'Rejected';
+            item.Price_Status__c = 'Approval Required';
         }
         update itemsToReject;
 
@@ -205,7 +206,7 @@ public with sharing class QuoteApprovalController {
             } else if (discount > managerLimit && managerLimit > 0) {
                 qli.Price_Status__c = 'Approval Required';
             } else {
-                qli.Price_Status__c = 'Standard';
+                qli.Price_Status__c = 'Not Required';
             }
         }
         update lineItems;
