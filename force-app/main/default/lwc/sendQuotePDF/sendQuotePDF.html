@@ -6,19 +6,32 @@
             <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
         </template>
 
-        <!-- PDF Preview Section -->
         <div class="slds-p-around_medium">
 
-            <!-- PDF Preview -->
-            <div class="slds-m-bottom_medium">
+            <!-- STEP 1: PDF Preview -->
+            <template if:true={showPreview}>
                 <h2 class="slds-text-heading_small slds-m-bottom_small">PDF Preview</h2>
                 <div class="pdf-preview-container" style="border: 1px solid #d8dde6; border-radius: 4px; overflow: hidden;">
                     <iframe src={pdfPreviewUrl} width="100%" height="500px" style="border: none;"></iframe>
                 </div>
-            </div>
 
-            <!-- Email Form -->
-            <div class="slds-m-top_medium">
+                <div class="slds-m-top_medium slds-text-align_right">
+                    <lightning-button
+                        label="Cancel"
+                        onclick={handleCancel}
+                        class="slds-m-right_small">
+                    </lightning-button>
+                    <lightning-button
+                        label="Send Email"
+                        variant="brand"
+                        onclick={handleShowEmailForm}
+                        icon-name="utility:email">
+                    </lightning-button>
+                </div>
+            </template>
+
+            <!-- STEP 2: Email Form -->
+            <template if:true={showEmailForm}>
                 <h2 class="slds-text-heading_small slds-m-bottom_small">Send Email</h2>
 
                 <div class="slds-grid slds-wrap slds-gutters">
@@ -81,6 +94,12 @@
                 <!-- Buttons -->
                 <div class="slds-m-top_medium slds-text-align_right">
                     <lightning-button
+                        label="Back"
+                        onclick={handleBackToPreview}
+                        icon-name="utility:back"
+                        class="slds-m-right_small">
+                    </lightning-button>
+                    <lightning-button
                         label="Cancel"
                         onclick={handleCancel}
                         class="slds-m-right_small">
@@ -93,7 +112,7 @@
                         icon-name="utility:email">
                     </lightning-button>
                 </div>
-            </div>
+            </template>
 
         </div>
 

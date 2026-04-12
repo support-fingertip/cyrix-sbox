@@ -16,12 +16,15 @@ export default class SendQuotePDF extends LightningElement {
     isSending = false;
     cacheBuster = Date.now();
 
+    // Step flags
+    showPreview = true;
+    showEmailForm = false;
+
     get pdfPreviewUrl() {
         return '/apex/ProductQuotation?id=' + this.recordId + '&t=' + this.cacheBuster;
     }
 
     // @api invoke() is called by Salesforce every time the Quick Action is opened
-    // This is the proper way to handle re-opens of Screen Action LWCs
     @api invoke() {
         this.resetAndLoad();
     }
@@ -40,6 +43,9 @@ export default class SendQuotePDF extends LightningElement {
         this.isLoading = true;
         this.isSending = false;
         this.cacheBuster = Date.now();
+        // Reset to Step 1 (PDF Preview)
+        this.showPreview = true;
+        this.showEmailForm = false;
         this.loadQuoteDetails();
     }
 
@@ -61,6 +67,16 @@ export default class SendQuotePDF extends LightningElement {
                 this.showToast('Error', 'Failed to load quote details: ' + (error.body ? error.body.message : error.message), 'error');
                 this.isLoading = false;
             });
+    }
+
+    handleShowEmailForm() {
+        this.showPreview = false;
+        this.showEmailForm = true;
+    }
+
+    handleBackToPreview() {
+        this.showPreview = true;
+        this.showEmailForm = false;
     }
 
     handleToChange(event) {
