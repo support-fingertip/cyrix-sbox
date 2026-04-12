@@ -569,7 +569,14 @@ openCollectionScreen(){
 
 }
 openQuoteScreen(){
-
+    const  message = {
+        message: 'quoteScreen' ,
+        recordID : this.recordId,
+        index : this.index,
+        screen : 3.6,
+        accId : this.accId
+    };
+    this.genericDispatchEvent(message);
 }
 // Toggle dropdowns
 
