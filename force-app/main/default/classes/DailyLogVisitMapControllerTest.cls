@@ -20,7 +20,7 @@ public class DailyLogVisitMapControllerTest {
 
         // Create Daily Log
         Daily_Log__c dailyLog = new Daily_Log__c(
-            Date__c = Date.today(),
+            Day_started_Time__c = Datetime.newInstance(Date.today(), Time.newInstance(9, 0, 0, 0)),
             OwnerId = testUser.Id
         );
         insert dailyLog;
