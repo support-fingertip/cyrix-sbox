@@ -31,7 +31,8 @@ public with sharing class DailyLogVisitMapController {
                    AccountName__c, Lead_Name__c, Visit_for__c,
                    Visit_Start__c, Visit_End__c, Visit_Purpose__c, Status__c,
                    Check_In_Location__Latitude__s, Check_In_Location__Longitude__s,
-                   Check_Out_Location__Latitude__s, Check_Out_Location__Longitude__s
+                   Check_Out_Location__Latitude__s, Check_Out_Location__Longitude__s,
+                   Address__c
             FROM Visit__c
             WHERE Daily_Log__c = :dailyLogId
             ORDER BY Visit_Start__c ASC
@@ -53,7 +54,8 @@ public with sharing class DailyLogVisitMapController {
                     '\nPurpose: ' + (v.Visit_Purpose__c != null ? v.Visit_Purpose__c : 'N/A') +
                     '\nCheck-In: ' + (v.Visit_Start__c != null ? v.Visit_Start__c.format() : 'N/A') +
                     '\nCheck-Out: ' + (v.Visit_End__c != null ? v.Visit_End__c.format() : 'N/A') +
-                    '\nStatus: ' + (v.Status__c != null ? v.Status__c : 'N/A');
+                    '\nStatus: ' + (v.Status__c != null ? v.Status__c : 'N/A') +
+                    '\nAddress: ' + (v.Address__c != null ? v.Address__c : 'N/A');
                 w.latitude = v.Check_In_Location__Latitude__s;
                 w.longitude = v.Check_In_Location__Longitude__s;
                 w.icon = 'standard:location';
@@ -62,6 +64,7 @@ public with sharing class DailyLogVisitMapController {
                 w.checkOutTime = v.Visit_End__c != null ? v.Visit_End__c.format() : '';
                 w.purpose = v.Visit_Purpose__c;
                 w.status = v.Status__c;
+                w.address = v.Address__c;
                 results.add(w);
             }
 
