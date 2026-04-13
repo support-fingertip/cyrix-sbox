@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Layout xmlns="http://soap.sforce.com/2006/04/metadata">
-    <excludeButtons>CreateContract</excludeButtons>
-    <excludeButtons>CreateOrder</excludeButtons>
     <excludeButtons>CreatePdf</excludeButtons>
-    <excludeButtons>DeepCloneAction</excludeButtons>
     <excludeButtons>GenerateQuoteDocument</excludeButtons>
     <excludeButtons>MediaSpotCalendar</excludeButtons>
-    <excludeButtons>OpenSlackRecordChannel</excludeButtons>
     <excludeButtons>QuoteAdjustment</excludeButtons>
     <layoutSections>
         <customLabel>false</customLabel>
@@ -136,6 +132,10 @@
             <layoutItems>
                 <behavior>Edit</behavior>
                 <field>Asset_Digital_Inventory__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Price_Status__c</field>
             </layoutItems>
         </layoutColumns>
         <layoutColumns>

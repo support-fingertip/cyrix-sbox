@@ -18,7 +18,6 @@
     <tabs>standard-Campaign</tabs>
     <tabs>standard-Lead</tabs>
     <tabs>standard-Account</tabs>
-    <tabs>Visit_Plans</tabs>
     <tabs>standard-Contact</tabs>
     <tabs>standard-Opportunity</tabs>
     <tabs>Daily_Log__c</tabs>
@@ -35,7 +34,7 @@
     <tabs>Log__c</tabs>
     <tabs>Asset__c</tabs>
     <tabs>General_Settings__c</tabs>
-    <tabs>TestVisit</tabs>
+    <tabs>Visit_Plans</tabs>
     <tabs>Bank__c</tabs>
     <tabs>Payment_Term__c</tabs>
     <tabs>Branch__c</tabs>

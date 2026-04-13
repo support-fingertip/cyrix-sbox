@@ -759,4 +759,100 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Id sourcePricebookId;
         @AuraEnabled public String sourcePricebookName;
     }
+
+    // ===== Quote Session (per-Visit) =====
+
+    @AuraEnabled(cacheable=false)
+    public static VisitQuoteSession getQuotesForVisit(Id visitId) {
+        VisitQuoteSession session = new VisitQuoteSession();
+
+        if (visitId == null) {
+            session.quotes = new List<QuoteSummary>();
+            session.opportunities = new List<OpportunityOption>();
+            return session;
+        }
+
+        Visit__c v = [
+            SELECT Id, Name, Account__c, Account__r.Name, Lead__c, Visit_for__c
+            FROM Visit__c
+            WHERE Id = :visitId
+            LIMIT 1
+        ];
+
+        session.visitId = v.Id;
+        session.visitName = v.Name;
+        session.accountId = v.Account__c;
+        session.accountName = v.Account__r != null ? v.Account__r.Name : '';
+
+        List<QuoteSummary> quotes = new List<QuoteSummary>();
+        List<OpportunityOption> oppOptions = new List<OpportunityOption>();
+
+        if (v.Account__c != null) {
+            for (Opportunity opp : [
+                SELECT Id, Name, StageName
+                FROM Opportunity
+                WHERE AccountId = :v.Account__c
+                ORDER BY CreatedDate DESC
+            ]) {
+                OpportunityOption opt = new OpportunityOption();
+                opt.opportunityId = opp.Id;
+                opt.opportunityName = opp.Name;
+                opt.stage = opp.StageName;
+                oppOptions.add(opt);
+            }
+
+            for (Quote q : [
+                SELECT Id, Name, QuoteNumber, Status, ExpirationDate,
+                       GrandTotal, TotalPrice, CreatedDate,
+                       OpportunityId, Opportunity.Name,
+                       Opportunity.AccountId, Opportunity.Account.Name
+                FROM Quote
+                WHERE Opportunity.AccountId = :v.Account__c
+                ORDER BY CreatedDate DESC
+            ]) {
+                QuoteSummary qs = new QuoteSummary();
+                qs.quoteId = q.Id;
+                qs.name = q.Name;
+                qs.quoteNumber = q.QuoteNumber;
+                qs.status = q.Status;
+                qs.expirationDate = q.ExpirationDate;
+                qs.grandTotal = q.GrandTotal != null ? q.GrandTotal : q.TotalPrice;
+                qs.createdDate = q.CreatedDate;
+                qs.opportunityId = q.OpportunityId;
+                qs.opportunityName = q.Opportunity != null ? q.Opportunity.Name : '';
+                quotes.add(qs);
+            }
+        }
+
+        session.quotes = quotes;
+        session.opportunities = oppOptions;
+        return session;
+    }
+
+    public class VisitQuoteSession {
+        @AuraEnabled public Id visitId;
+        @AuraEnabled public String visitName;
+        @AuraEnabled public Id accountId;
+        @AuraEnabled public String accountName;
+        @AuraEnabled public List<QuoteSummary> quotes;
+        @AuraEnabled public List<OpportunityOption> opportunities;
+    }
+
+    public class QuoteSummary {
+        @AuraEnabled public Id quoteId;
+        @AuraEnabled public String name;
+        @AuraEnabled public String quoteNumber;
+        @AuraEnabled public String status;
+        @AuraEnabled public Date expirationDate;
+        @AuraEnabled public Decimal grandTotal;
+        @AuraEnabled public Datetime createdDate;
+        @AuraEnabled public Id opportunityId;
+        @AuraEnabled public String opportunityName;
+    }
+
+    public class OpportunityOption {
+        @AuraEnabled public Id opportunityId;
+        @AuraEnabled public String opportunityName;
+        @AuraEnabled public String stage;
+    }
 }

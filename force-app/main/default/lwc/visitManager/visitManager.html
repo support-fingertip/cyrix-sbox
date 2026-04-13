@@ -149,6 +149,16 @@
                                 </div>
                             </template>
                         </template>
+
+                        <!-- Quote session screen -->
+                        <template lwc:if={isQuoteScreen}>
+                            <template lwc:if={recordId}>
+                                <div>
+                                    <c-quote-session-page record-id={recordId} is-desktop={isDesktop}
+                                        onbacktovisit={handleQuoteBackToVisit}></c-quote-session-page>
+                                </div>
+                            </template>
+                        </template>
                     </div>
 
                 </template>
