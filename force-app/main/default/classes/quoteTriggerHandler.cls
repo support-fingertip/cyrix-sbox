@@ -160,6 +160,9 @@ public with sharing class quoteTriggerHandler {
                 if (oldQ == null) continue;
                 Quote snap = oldQ.clone(false, true, false, false);
                 snap.is_Active__c = false;
+                // Link the snapshot back to the quote record that now carries
+                // the new revision, so users can navigate from history to current.
+                snap.Revised_Quote__c = origId;
                 snapshots.add(snap);
                 orderedOrigIds.add(origId);
             }
