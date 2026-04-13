@@ -1,17 +1,20 @@
 trigger QuoteTrigger on Quote (before insert, before update, after insert, after update) {
     if(trigger.isBefore && trigger.isInsert ){
 
-        Branch__c b =[select Id from Branch__c limit 1 ];
-        for(Quote q :trigger.New){
-            q.branch__c=b.Id;
-            q.Version_Nmber__c=0;
-            integer numberofDays =integer.valueof(q.Quote_Valid_Till_in_days__c);
-            date todayDate =system.today();
-            q.Valid_Till__c = todayDate.addDays(numberofDays);
-            q.ExpirationDate =todayDate.addDays(numberofDays);
+        // Skip default stamping for clone-inserts coming from the snapshot logic.
+        if (!quoteTriggerHandler.bypassInsertDefaults) {
+            Branch__c b =[select Id from Branch__c limit 1 ];
+            for(Quote q :trigger.New){
+                q.branch__c=b.Id;
+                q.Version_Nmber__c=0;
+                integer numberofDays =integer.valueof(q.Quote_Valid_Till_in_days__c);
+                date todayDate =system.today();
+                q.Valid_Till__c = todayDate.addDays(numberofDays);
+                q.ExpirationDate =todayDate.addDays(numberofDays);
+            }
+            // Generate names for new quotes and for quotes where Branch or Revision_Number changed
+            quoteTriggerHandler.generateQuoteNames(Trigger.new);
         }
-        // Generate names for new quotes and for quotes where Branch or Revision_Number changed
-        quoteTriggerHandler.generateQuoteNames(Trigger.new);
     }
     if(trigger.isBefore && trigger.isUpdate){
          for(Quote q :trigger.New){
@@ -22,6 +25,11 @@ trigger QuoteTrigger on Quote (before insert, before update, after insert, after
                  q.is_Active__c = false;
              }
              if(q.Status =='Revision' &&q.Status  !=trigger.oldMap.get(q.Id).Status){
+                 // Queue this record so after-update can create a historical
+                 // snapshot clone (quote + all child records) before the
+                 // in-place version bump overwrites the original name.
+                 quoteTriggerHandler.quotesPendingSnapshot.add(q.Id);
+
                  q.Version_Nmber__c =q.Version_Nmber__c ==null?0 :(q.Version_Nmber__c+1);
                      q.Status='Draft';
                  q.Revised_Date__c =system.today();
@@ -41,5 +49,10 @@ trigger QuoteTrigger on Quote (before insert, before update, after insert, after
     // and sync this quote to the opportunity (sets Opportunity.SyncedQuoteId).
     if (trigger.isAfter && (trigger.isInsert || trigger.isUpdate)) {
         quoteTriggerHandler.syncActiveQuote(trigger.new, trigger.oldMap);
+    }
+
+    // Clone quote + children as a historical snapshot when Status flipped to 'Revision'.
+    if (trigger.isAfter && trigger.isUpdate) {
+        quoteTriggerHandler.snapshotQuotesOnRevision(trigger.oldMap);
     }
 }
