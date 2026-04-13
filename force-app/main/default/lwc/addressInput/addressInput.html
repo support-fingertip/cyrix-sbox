@@ -2,14 +2,16 @@
     <div class="address-input-container">
         <!-- Google Maps Search -->
         <div class="search-wrapper slds-m-bottom_x-small">
-            <lightning-input
-                label={searchLabel}
-                placeholder="Search address on Google Maps..."
-                value={searchValue}
-                onchange={handleSearchInput}
-                type="search"
-                icon-name="utility:search">
-            </lightning-input>
+            <label class="slds-form-element__label">{searchLabel}</label>
+            <div class="slds-input-has-icon slds-input-has-icon_left">
+                <lightning-icon icon-name="utility:search" size="x-small" class="slds-input__icon slds-input__icon_left"></lightning-icon>
+                <input class="slds-input"
+                       type="search"
+                       placeholder="Search address on Google Maps..."
+                       value={searchValue}
+                       oninput={handleSearchInput}
+                       onfocus={handleSearchFocus} />
+            </div>
             <template if:true={isSearching}>
                 <div class="search-spinner">
                     <lightning-spinner alternative-text="Searching" size="small"></lightning-spinner>
@@ -22,7 +24,7 @@
                              class="suggestion-item slds-p-around_x-small"
                              role="option"
                              data-place-id={sug.placeId}
-                             onclick={handleSelectSuggestion}>
+                             onmousedown={handleSelectSuggestion}>
                             <lightning-icon icon-name="utility:location" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
                             <span>{sug.description}</span>
                         </div>
