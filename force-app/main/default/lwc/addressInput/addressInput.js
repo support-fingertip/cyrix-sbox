@@ -108,6 +108,13 @@ export default class AddressInput extends LightningElement {
         }, 350);
     }
 
+    handleSearchFocus() {
+        // Re-open the dropdown if the user refocuses and we already have results.
+        if (this.suggestions && this.suggestions.length > 0) {
+            this.showSuggestions = true;
+        }
+    }
+
     async doSearch(input) {
         this.isSearching = true;
         try {
@@ -124,10 +131,15 @@ export default class AddressInput extends LightningElement {
     }
 
     async handleSelectSuggestion(event) {
+        // onmousedown fires before the input's blur, so preventDefault keeps
+        // focus management predictable across browsers.
+        if (event && event.preventDefault) event.preventDefault();
         const placeId = event.currentTarget.dataset.placeId;
         this.showSuggestions = false;
         this.suggestions = [];
         this.searchValue = '';
+        const searchInput = this.template.querySelector('input[type="search"]');
+        if (searchInput) searchInput.value = '';
         this.isSearching = true;
 
         try {
