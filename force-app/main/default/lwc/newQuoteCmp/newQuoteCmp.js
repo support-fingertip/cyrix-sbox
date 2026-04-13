@@ -1,6 +1,6 @@
-import { LightningElement, api, track } from 'lwc';
+import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { NavigationMixin } from 'lightning/navigation';
+import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import getOpportunityContext from '@salesforce/apex/QuoteBuilderController.getOpportunityContext';
 import getQuoteForEdit from '@salesforce/apex/QuoteBuilderController.getQuoteForEdit';
@@ -15,6 +15,15 @@ let ptCounter = 0;
 
 export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     @api recordId;
+
+    // Picks up recordId when launched from the "New Quote" Lightning Component Tab
+    // (the record-home override navigates here with state.c__recordId set).
+    @wire(CurrentPageReference)
+    wiredPageRef(pageRef) {
+        if (pageRef && pageRef.state && pageRef.state.c__recordId && !this.recordId) {
+            this.recordId = pageRef.state.c__recordId;
+        }
+    }
 
     // Mode
     isEditMode = false;
