@@ -517,9 +517,7 @@ public with sharing class QuoteBuilderController {
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
                 qli.Source_Pricebook_Ref__c = item.sourcePricebookId;
-                qli.Price_Status__c = String.isNotBlank(item.priceStatus)
-                    ? item.priceStatus
-                    : getPriceStatus(item.discount, item.maxDiscount);
+                qli.Price_Status__c = normalizeLinePriceStatus(item.priceStatus, item.discount, item.maxDiscount);
                 qliList.add(qli);
             }
             insert qliList;
@@ -554,9 +552,7 @@ public with sharing class QuoteBuilderController {
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
                 qli.Source_Pricebook_Ref__c = item.sourcePricebookId;
-                qli.Price_Status__c = String.isNotBlank(item.priceStatus)
-                    ? item.priceStatus
-                    : getPriceStatus(item.discount, item.maxDiscount);
+                qli.Price_Status__c = normalizeLinePriceStatus(item.priceStatus, item.discount, item.maxDiscount);
                 qliList.add(qli);
             }
             insert qliList;
@@ -574,6 +570,21 @@ public with sharing class QuoteBuilderController {
             return 'Approval Required';
         }
         return 'Not Required';
+    }
+
+    // QuoteLineItem.Price_Status__c is a restricted picklist of
+    // 'Not Required', 'Approval Required', 'Approved'. Legacy payloads
+    // may carry 'Draft' or other values from the Quote-level status
+    // field; coerce those into 'Not Required' or a recomputed value.
+    private static final Set<String> VALID_LINE_PRICE_STATUSES = new Set<String>{
+        'Not Required', 'Approval Required', 'Approved'
+    };
+
+    private static String normalizeLinePriceStatus(String requested, Decimal discount, Decimal maxDiscount) {
+        if (String.isNotBlank(requested) && VALID_LINE_PRICE_STATUSES.contains(requested)) {
+            return requested;
+        }
+        return getPriceStatus(discount, maxDiscount);
     }
 
     // Roll up line item price status to the parent Quote.

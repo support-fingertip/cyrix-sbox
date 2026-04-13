@@ -263,7 +263,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
                     const disc = item.discount || 0;
                     const maxDisc = item.maxDiscount;
-                    const priceStatus = item.priceStatus || this.computePriceStatus(disc, maxDisc);
+                    // Legacy QLIs may still carry Quote-level values like 'Draft' or
+                    // 'Rejected' that aren't valid on the restricted line-item picklist.
+                    const VALID_LINE_STATUSES = ['Not Required', 'Approval Required', 'Approved'];
+                    const priceStatus = VALID_LINE_STATUSES.includes(item.priceStatus)
+                        ? item.priceStatus
+                        : this.computePriceStatus(disc, maxDisc);
 
                     return {
                         rowId: 'row-' + rowCounter,
