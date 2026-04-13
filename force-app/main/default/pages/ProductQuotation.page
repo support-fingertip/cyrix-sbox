@@ -592,6 +592,13 @@
                 Pending or non-functional equipment due to customer related issues shall not be a reason to withhold
                 payment for completed services.
             </li>
+
+            <!-- Dynamic Terms & Conditions from related records -->
+            <apex:repeat value="{!termsConditions}" var="tc">
+                <li style="margin-bottom: 8px;">
+                    <apex:outputPanel rendered="{!tc.Titile__c != null}"><strong>{!tc.Titile__c}:</strong>&nbsp;</apex:outputPanel>{!tc.T_C__c}
+                </li>
+            </apex:repeat>
         </ol>
 
     </div>

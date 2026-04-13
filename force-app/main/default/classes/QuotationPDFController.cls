@@ -78,6 +78,7 @@ public with sharing class QuotationPDFController {
     public String gstDisplayRate { get; set; }
     public String warrantyExtra { get; set; }
     public List<Payment_Term__c> paymentTerms { get; set; }
+    public List<Terms_Condition__c> termsConditions { get; set; }
 
     public String companyName { get { return COMPANY_NAME; } }
     public String companyAddress { get { return COMPANY_ADDRESS; } }
@@ -124,6 +125,7 @@ public with sharing class QuotationPDFController {
         gstDisplayRate = '';
         warrantyExtra = '';
         paymentTerms = new List<Payment_Term__c>();
+        termsConditions = new List<Terms_Condition__c>();
 
         // Initialize bank details with defaults
         bankName = BANK_NAME;
@@ -252,6 +254,14 @@ public with sharing class QuotationPDFController {
         paymentTerms = [
             SELECT Id, Name, Payment_Term__c, Percentage__c
             FROM Payment_Term__c
+            WHERE Quote__c = :quoteId
+            ORDER BY CreatedDate ASC
+        ];
+
+        // Query Terms & Conditions for this Quote
+        termsConditions = [
+            SELECT Id, Name, Titile__c, T_C__c
+            FROM Terms_Condition__c
             WHERE Quote__c = :quoteId
             ORDER BY CreatedDate ASC
         ];
