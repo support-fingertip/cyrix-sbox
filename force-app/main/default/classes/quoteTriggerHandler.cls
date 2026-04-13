@@ -49,15 +49,27 @@ public with sharing class quoteTriggerHandler {
                 update siblings;
             }
 
-            // Sync the active quote to the opportunity.
-            List<Opportunity> oppsToSync = new List<Opportunity>();
-            for (Id oppId : oppToActiveQuote.keySet()) {
-                oppsToSync.add(new Opportunity(Id = oppId, SyncedQuoteId = oppToActiveQuote.get(oppId)));
+            // Opportunity.SyncedQuoteId is read-only inside the triggering
+            // transaction, so push the sync out to an async job.
+            if (!System.isFuture() && !System.isBatch() && !System.isQueueable()) {
+                syncOpportunityToQuoteFuture(
+                    new List<Id>(oppToActiveQuote.keySet()),
+                    new List<Id>(oppToActiveQuote.values())
+                );
             }
-            update oppsToSync;
         } finally {
             isSyncingActiveQuote = false;
         }
+    }
+
+    @future
+    public static void syncOpportunityToQuoteFuture(List<Id> oppIds, List<Id> quoteIds) {
+        if (oppIds == null || quoteIds == null || oppIds.size() != quoteIds.size()) return;
+        List<Opportunity> opps = new List<Opportunity>();
+        for (Integer i = 0; i < oppIds.size(); i++) {
+            opps.add(new Opportunity(Id = oppIds[i], SyncedQuoteId = quoteIds[i]));
+        }
+        if (!opps.isEmpty()) update opps;
     }
 
     /**
