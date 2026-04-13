@@ -15,6 +15,12 @@ trigger QuoteTrigger on Quote (before insert, before update, after insert, after
     }
     if(trigger.isBefore && trigger.isUpdate){
          for(Quote q :trigger.New){
+             // If the quote's sync link to the opportunity was turned off,
+             // it is no longer the active quote.
+             Quote oldQ = trigger.oldMap.get(q.Id);
+             if (oldQ != null && oldQ.IsSyncing == true && q.IsSyncing == false && q.is_Active__c == true) {
+                 q.is_Active__c = false;
+             }
              if(q.Status =='Revision' &&q.Status  !=trigger.oldMap.get(q.Id).Status){
                  q.Version_Nmber__c =q.Version_Nmber__c ==null?0 :(q.Version_Nmber__c+1);
                      q.Status='Draft';
