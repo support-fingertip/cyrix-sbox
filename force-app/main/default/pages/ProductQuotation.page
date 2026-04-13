@@ -23,23 +23,28 @@
         padding: 0;
     }
 
-    /* ---------- LETTERHEAD BACKGROUND ---------- */
-    .page-bg {
+    /* ---------- PAGE HEADER (logo + quote name + date) ---------- */
+    .page-header {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 210mm;
-        height: 297mm;
-        z-index: -1;
+        top: 8mm;
+        left: 18mm;
+        right: 18mm;
+        width: 174mm;
+        border-bottom: 1px solid #cc0000;
+        padding-bottom: 3mm;
     }
-    .page-bg img {
-        width: 210mm;
-        height: 297mm;
+    .page-header .hdr-logo {
+        width: 28mm;
+        height: auto;
+    }
+    .page-header td {
+        vertical-align: middle;
+        font-size: 9pt;
     }
 
     /* ---------- CONTENT AREA ---------- */
     .content {
-        padding: 45mm 18mm 15mm 18mm;
+        padding: 32mm 18mm 15mm 18mm;
     }
 
     /* ---------- PAGE BREAK ---------- */
@@ -50,27 +55,28 @@
 </head>
 <body>
 
-    <!-- LETTERHEAD BACKGROUND (fixed on every page) -->
-    <div class="page-bg">
-        <apex:image url="{!URLFOR($Resource.Letter_Head)}" style="width: 100%; height: 100%;" />
+    <!-- PAGE HEADER: logo + quote name + date (fixed on every page) -->
+    <div class="page-header">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="width: 30%; text-align: left;">
+                    <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="hdr-logo" />
+                </td>
+                <td style="width: 45%; text-align: center; font-weight: bold; color: #cc0000;">
+                    {!quote.Name}
+                </td>
+                <td style="width: 25%; text-align: right; font-weight: bold;">
+                    <span style="color: #000000;">DATE:</span>
+                    <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
+                </td>
+            </tr>
+        </table>
     </div>
 
     <!-- ====================================================================== -->
     <!-- PAGE 1: COVER LETTER                                                   -->
     <!-- ====================================================================== -->
     <div class="content">
-
-        <!-- QUOTE REFERENCE LINE -->
-        <table style="width: 100%; margin-bottom: 10px; font-size: 9pt; color: #cc0000; font-weight: bold;">
-            <tr>
-                <td style="text-align: left; width: 70%;">
-                    <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/{!IF(quote.Quote_Id__c != null, quote.Quote_Id__c, quote.QuoteNumber)}/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
-                </td>
-                <td style="text-align: right; width: 30%;">
-                    <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
-                </td>
-            </tr>
-        </table>
 
         <!-- TO SECTION -->
         <p>To,</p>
