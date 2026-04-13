@@ -11,10 +11,9 @@ trigger Opportunity_Trigger on Opportunity (before insert, after insert, before 
     * 1.0 |   Claude AI     |  2026-03-25   |   Initial version
     * -------------------------------------------------------------------
     **************************************************************** */
-
+ 
     // ───────────── BEFORE INSERT ─────────────
     if (Trigger.operationType == TriggerOperation.BEFORE_INSERT) {
-        OpportunityTriggerHandler.generateAutoNumber(Trigger.new);
         OpportunityTriggerHandler.setDefaultStage(Trigger.new);
         OpportunityTriggerHandler.setOpportunityName(Trigger.new);
     }

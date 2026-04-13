@@ -64,7 +64,7 @@
         <table style="width: 100%; margin-bottom: 10px; font-size: 9pt; color: #cc0000; font-weight: bold;">
             <tr>
                 <td style="text-align: left; width: 70%;">
-                    <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/{!IF(quote.Quote_Id__c != null, quote.Quote_Id__c, quote.QuoteNumber)}/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
+                    <span style="color: #000000;"> rr{!Quote.Name}</span>
                 </td>
                 <td style="text-align: right; width: 30%;">
                     <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>

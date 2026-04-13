@@ -15,25 +15,7 @@ public class OpportunityTriggerHandlerTest {
     }
 
     /* ────── Auto Number Generation ────── */
-    @isTest
-    static void testAutoNumberGeneration() {
-        Account acc = [SELECT Id FROM Account LIMIT 1];
 
-        Opportunity opp = new Opportunity(
-            Name = 'Test Opportunity',
-            AccountId = acc.Id,
-            StageName = 'Qualified',
-            CloseDate = Date.today().addDays(30)
-        );
-
-        Test.startTest();
-        insert opp;
-        Test.stopTest();
-
-        Opportunity result = [SELECT Opportunity_Auto_Number__c FROM Opportunity WHERE Id = :opp.Id];
-        System.assertNotEquals(null, result.Opportunity_Auto_Number__c, 'Auto number should be generated');
-        System.assert(result.Opportunity_Auto_Number__c.startsWith('OPP-'), 'Auto number should start with OPP-');
-    }
 
     /* ────── Default Stage ────── */
     @isTest
@@ -325,32 +307,7 @@ public class OpportunityTriggerHandlerTest {
     }
 
     /* ────── Bulk Insert ────── */
-    @isTest
-    static void testBulkInsert() {
-        Account acc = [SELECT Id FROM Account LIMIT 1];
-
-        List<Opportunity> opps = new List<Opportunity>();
-        for (Integer i = 0; i < 50; i++) {
-            opps.add(new Opportunity(
-                Name = 'Bulk Test ' + i,
-                AccountId = acc.Id,
-                StageName = 'Qualified',
-                CloseDate = Date.today().addDays(30)
-            ));
-        }
-
-        Test.startTest();
-        insert opps;
-        Test.stopTest();
-
-        List<Opportunity> results = [
-            SELECT Opportunity_Auto_Number__c
-            FROM Opportunity
-            WHERE Opportunity_Auto_Number__c != null
-        ];
-        System.assertEquals(50, results.size(), 'All 50 opportunities should have auto numbers');
-    }
-
+   
     /* ────── Opportunity Type Field ────── */
     @isTest
     static void testOpportunityType() {

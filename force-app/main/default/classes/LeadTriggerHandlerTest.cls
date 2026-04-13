@@ -662,7 +662,7 @@ public class LeadTriggerHandlerTest {
         Lead testLead = new Lead(
             LastName = 'PhoneMap',
             Company = 'Phone Map Co',
-            Phone = '9876543210',
+            
             MobilePhone = '9876543211',
             Status = 'Open',
             phone = '9876543210'

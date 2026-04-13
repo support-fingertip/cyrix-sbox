@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>5 Years</fullName>
+        <default>false</default>
+        <label>5 Years</label>
+    </customValue>
+    <masterLabel>Renewable Up To</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

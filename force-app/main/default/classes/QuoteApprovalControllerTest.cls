@@ -51,7 +51,7 @@ private class QuoteApprovalControllerTest {
             Quantity = 2,
             UnitPrice = 90000,
             Discount = 10,
-            Price_Status__c = 'Standard'
+            Price_Status__c = 'Not Required'
         );
         insert qli;
     }
@@ -68,7 +68,7 @@ private class QuoteApprovalControllerTest {
         System.assertNotEquals(null, result);
         System.assertNotEquals(null, result.quote);
         System.assertEquals(1, result.lineItems.size());
-        System.assertEquals('Standard', result.lineItems[0].priceStatus);
+        System.assertEquals('Not Required', result.lineItems[0].priceStatus);
     }
 
     @isTest
@@ -120,7 +120,8 @@ private class QuoteApprovalControllerTest {
         Test.stopTest();
 
         QuoteLineItem updated = [SELECT Price_Status__c FROM QuoteLineItem WHERE Id = :qli.Id];
-        System.assertEquals('Rejected', updated.Price_Status__c);
+        System.assertEquals('Approval Required', updated.Price_Status__c,
+            'Rejected line items revert to Approval Required so they can be resubmitted');
 
         Quote updatedQt = [SELECT Price_Status__c FROM Quote WHERE Id = :qt.Id];
         System.assertEquals('Rejected', updatedQt.Price_Status__c);

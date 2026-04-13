@@ -1,37 +1,6 @@
 public class OpportunityTriggerHandler {
 
-    /* ────────────────────────────────────────────
-       Auto-Number Generation
-       BRD: Opportunity ID = unique auto-generated number
-       Format: OPP-00001, OPP-00002, etc.
-    ──────────────────────────────────────────── */
-    public static void generateAutoNumber(List<Opportunity> opps) {
-        // Get the current max number
-        Integer maxNum = 0;
-        List<Opportunity> existing = [
-            SELECT Opportunity_Auto_Number__c
-            FROM Opportunity
-            WHERE Opportunity_Auto_Number__c != null
-            ORDER BY CreatedDate DESC
-            LIMIT 1
-        ];
 
-        if (!existing.isEmpty() && existing[0].Opportunity_Auto_Number__c != null) {
-            String numPart = existing[0].Opportunity_Auto_Number__c.replace('OPP-', '');
-            try {
-                maxNum = Integer.valueOf(numPart);
-            } catch (Exception e) {
-                maxNum = 0;
-            }
-        }
-
-        for (Opportunity opp : opps) {
-            if (opp.Opportunity_Auto_Number__c == null) {
-                maxNum++;
-                opp.Opportunity_Auto_Number__c = 'OPP-' + String.valueOf(maxNum).leftPad(5, '0');
-            }
-        }
-    }
 
     /* ────────────────────────────────────────────
        Default Stage
@@ -82,7 +51,15 @@ public class OpportunityTriggerHandler {
                 if (opp.Product__c != null && productMap.containsKey(opp.Product__c)) {
                     prodName = productMap.get(opp.Product__c).Name;
                 }
-                opp.Name = accName + (String.isNotBlank(prodName) ? ' ' + prodName : '');
+                opp.Name='';
+             opp.Name =accName;
+                if(opp.Buisness_Vertical__c!=null ){
+                   opp.Name+=' ' +opp.Buisness_Vertical__c;
+                }
+                if(prodName !=null){
+                    opp.Name+=' ' +prodName;  
+                }
+      opp.Name =opp.Name.left(120);
             }
         }
     }

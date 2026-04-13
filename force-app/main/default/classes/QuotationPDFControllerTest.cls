@@ -96,7 +96,7 @@ private class QuotationPDFControllerTest {
             Quantity = 2,
             UnitPrice = 150000,
             Tax_Type__c = 'GST',
-            Price_Status__c = 'Standard',
+            Price_Status__c = 'Not Required',
             Product_Line_Description__c = 'Portable Ultrasound Scanner',
             Product_Detailed_Description__c = 'Advanced imaging with 3 probes included'
         );
@@ -125,7 +125,7 @@ private class QuotationPDFControllerTest {
             Quantity = 1,
             UnitPrice = 150000,
             Tax_Type__c = 'IGST',
-            Price_Status__c = 'Standard',
+            Price_Status__c = 'Not Required',
             Product_Line_Description__c = 'Lab Ultrasound'
         );
         insert qli2;
@@ -165,7 +165,7 @@ private class QuotationPDFControllerTest {
             Quantity = 1,
             UnitPrice = 50000,
             Tax_Type__c = 'Exempt',
-            Price_Status__c = 'Standard'
+            Price_Status__c = 'Not Required'
         );
         insert qli4;
     }

@@ -1,0 +1,101 @@
+<template>
+    <div class="address-input-container">
+        <!-- Google Maps Search -->
+        <div class="search-wrapper slds-m-bottom_x-small">
+            <lightning-input
+                label={searchLabel}
+                placeholder="Search address on Google Maps..."
+                value={searchValue}
+                onchange={handleSearchInput}
+                type="search"
+                icon-name="utility:search">
+            </lightning-input>
+            <template if:true={isSearching}>
+                <div class="search-spinner">
+                    <lightning-spinner alternative-text="Searching" size="small"></lightning-spinner>
+                </div>
+            </template>
+            <template if:true={showSuggestions}>
+                <div class="suggestions-dropdown" role="listbox" aria-label="Address suggestions">
+                    <template for:each={suggestions} for:item="sug">
+                        <div key={sug.placeId}
+                             class="suggestion-item slds-p-around_x-small"
+                             role="option"
+                             data-place-id={sug.placeId}
+                             onclick={handleSelectSuggestion}>
+                            <lightning-icon icon-name="utility:location" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                            <span>{sug.description}</span>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
+
+        <!-- Address Fields -->
+        <div class="slds-grid slds-wrap slds-gutters_xx-small">
+            <div class="slds-col slds-size_1-of-1 slds-p-bottom_xx-small">
+                <lightning-input
+                    label="Name"
+                    value={nameValue}
+                    onchange={handleFieldChange}
+                    data-field="name">
+                </lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-1 slds-p-bottom_xx-small">
+                <lightning-textarea
+                    label="Street"
+                    value={streetValue}
+                    onchange={handleFieldChange}
+                    data-field="street"
+                    max-length="255">
+                </lightning-textarea>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">
+                <lightning-input
+                    label="City"
+                    value={cityValue}
+                    onchange={handleFieldChange}
+                    data-field="city">
+                </lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">
+                <template if:true={showStatePicklist}>
+                    <lightning-combobox
+                        label="State"
+                        value={stateValue}
+                        options={stateOptions}
+                        onchange={handleFieldChange}
+                        data-field="state"
+                        placeholder="Select State...">
+                    </lightning-combobox>
+                </template>
+                <template if:false={showStatePicklist}>
+                    <lightning-input
+                        label="State"
+                        value={stateValue}
+                        onchange={handleFieldChange}
+                        data-field="state">
+                    </lightning-input>
+                </template>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">
+                <lightning-input
+                    label="Postal Code"
+                    value={postalCodeValue}
+                    onchange={handleFieldChange}
+                    data-field="postalCode">
+                </lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-2 slds-p-bottom_xx-small">
+                <lightning-combobox
+                    label="Country"
+                    value={countryValue}
+                    options={countryOptions}
+                    onchange={handleFieldChange}
+                    data-field="country"
+                    placeholder="Select Country...">
+                </lightning-combobox>
+            </div>
+        </div>
+    </div>
+</template>

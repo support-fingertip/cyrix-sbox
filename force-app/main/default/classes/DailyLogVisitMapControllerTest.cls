@@ -51,6 +51,7 @@ public class DailyLogVisitMapControllerTest {
             Planned_Start_Time__c = Datetime.now().addHours(-3),
             Visit_Start__c = Datetime.now().addHours(-3),
             Visit_End__c = Datetime.now().addHours(-2),
+            Address__c = 'Test Address 1',
             Check_In_Location__Latitude__s = 12.9716,
             Check_In_Location__Longitude__s = 77.5946,
             Check_Out_Location__Latitude__s = 12.9720,
