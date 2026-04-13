@@ -1,6 +1,6 @@
-trigger QuoteTrigger on Quote (before insert, before update) {
-    if(trigger.isInsert ){
-        
+trigger QuoteTrigger on Quote (before insert, before update, after insert, after update) {
+    if(trigger.isBefore && trigger.isInsert ){
+
         Branch__c b =[select Id from Branch__c limit 1 ];
         for(Quote q :trigger.New){
             q.branch__c=b.Id;
@@ -13,7 +13,7 @@ trigger QuoteTrigger on Quote (before insert, before update) {
         // Generate names for new quotes and for quotes where Branch or Revision_Number changed
         quoteTriggerHandler.generateQuoteNames(Trigger.new);
     }
-    if(trigger.isUpdate){
+    if(trigger.isBefore && trigger.isUpdate){
          for(Quote q :trigger.New){
              if(q.Status =='Revision' &&q.Status  !=trigger.oldMap.get(q.Id).Status){
                  q.Version_Nmber__c =q.Version_Nmber__c ==null?0 :(q.Version_Nmber__c+1);
@@ -21,15 +21,19 @@ trigger QuoteTrigger on Quote (before insert, before update) {
                  q.Revised_Date__c =system.today();
                  integer VersionNmber = integer.valueof(q.Version_Nmber__c);
                  if(VersionNmber != null && VersionNmber == 1){
-                       q.Name= q.Name+'-RV'+ VersionNmber; 
+                       q.Name= q.Name+'-RV'+ VersionNmber;
                    }else if (VersionNmber != null && VersionNmber > 1) {
                  string oldversionNumber ='-RV'+trigger.oldMap.get(q.Id).Version_Nmber__c;
                    string newversionNumber ='-RV'+ VersionNmber;
                  q.Name = q.Name.replace(oldversionNumber,newversionNumber);
                    }
              }
-        } 
+        }
     }
-       
-  
+
+    // When a quote is marked active, deactivate all siblings on the same opportunity
+    // and sync this quote to the opportunity (sets Opportunity.SyncedQuoteId).
+    if (trigger.isAfter && (trigger.isInsert || trigger.isUpdate)) {
+        quoteTriggerHandler.syncActiveQuote(trigger.new, trigger.oldMap);
+    }
 }

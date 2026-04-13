@@ -1,5 +1,55 @@
 public with sharing class quoteTriggerHandler {
-    
+
+    // Prevents recursion when the sibling-deactivation DML re-fires the after update trigger.
+    private static Boolean isSyncingActiveQuote = false;
+
+    /**
+     * When a Quote flips is_Active__c to true, mark every other quote on the
+     * same Opportunity as inactive and sync the current quote to the
+     * Opportunity (Opportunity.SyncedQuoteId -> this Quote). Salesforce then
+     * sets Quote.IsSyncing = true automatically on the synced quote.
+     */
+    public static void syncActiveQuote(List<Quote> newQuotes, Map<Id, Quote> oldMap) {
+        if (isSyncingActiveQuote) return;
+
+        Map<Id, Id> oppToActiveQuote = new Map<Id, Id>();
+        for (Quote q : newQuotes) {
+            if (q.OpportunityId == null || q.is_Active__c != true) continue;
+            Boolean justActivated = (oldMap == null)
+                || (oldMap.get(q.Id) != null && oldMap.get(q.Id).is_Active__c != true);
+            if (justActivated) {
+                // Last write wins if multiple quotes on the same opp are activated in one DML.
+                oppToActiveQuote.put(q.OpportunityId, q.Id);
+            }
+        }
+        if (oppToActiveQuote.isEmpty()) return;
+
+        isSyncingActiveQuote = true;
+        try {
+            // Deactivate every other active quote on the impacted opportunities.
+            List<Quote> siblings = [
+                SELECT Id, OpportunityId, is_Active__c
+                FROM Quote
+                WHERE OpportunityId IN :oppToActiveQuote.keySet()
+                AND Id NOT IN :oppToActiveQuote.values()
+                AND is_Active__c = true
+            ];
+            if (!siblings.isEmpty()) {
+                for (Quote s : siblings) s.is_Active__c = false;
+                update siblings;
+            }
+
+            // Sync the active quote to the opportunity.
+            List<Opportunity> oppsToSync = new List<Opportunity>();
+            for (Id oppId : oppToActiveQuote.keySet()) {
+                oppsToSync.add(new Opportunity(Id = oppId, SyncedQuoteId = oppToActiveQuote.get(oppId)));
+            }
+            update oppsToSync;
+        } finally {
+            isSyncingActiveQuote = false;
+        }
+    }
+
     /**
      * Generates the auto quote name for a list of Quote records.
      * Called from before insert and before update triggers.
