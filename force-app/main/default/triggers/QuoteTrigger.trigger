@@ -25,6 +25,11 @@ trigger QuoteTrigger on Quote (before insert, before update, after insert, after
                  q.is_Active__c = false;
              }
              if(q.Status =='Revision' &&q.Status  !=trigger.oldMap.get(q.Id).Status){
+                 // Reason for Revision is mandatory when moving a quote into Revision.
+                 if (String.isBlank(q.Reason_for_Revision__c)) {
+                     q.addError('Reason for Revision is required when marking a quote as Revised.');
+                     continue;
+                 }
                  // Queue this record so after-update can create a historical
                  // snapshot clone (quote + all child records) before the
                  // in-place version bump overwrites the original name.
