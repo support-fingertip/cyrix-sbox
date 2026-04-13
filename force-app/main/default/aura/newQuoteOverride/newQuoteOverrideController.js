@@ -1,38 +1,24 @@
 ({
     doInit : function(component, event, helper) {
-        var recordId = component.get("v.recordId");
-        var overlayLib = component.find("overlayLib");
-        
-        // Dynamically create the LWC component
-        $A.createComponent(
-            "c:newQuoteCmp",
-            {
-                "recordId": recordId,
-                // Optional: pass a close callback
-                "onclosepopup": component.getReference("c.closeModal")
+        // Navigate to the "New Quote" Lightning Component Tab (hosts newQuoteCmp)
+        // instead of opening the builder inside a modal.
+        var navService = component.find("navService");
+        var pageRef = {
+            type: "standard__navItemPage",
+            attributes: {
+                apiName: "New_Quote"
             },
-            function(newCmp, status, errorMsg) {
-                if (status === "SUCCESS") {
-                    // Show full-screen modal
-                    overlayLib.showCustomModal({
-                        header: "Quote Builder",
-                        body: newCmp,
-                        showCloseButton: true,
-                        cssClass: "slds-modal_full",  // 👈 Full screen
-                        closeCallback: function() {
-                            // Optional: cleanup or refresh parent
-                            console.log("Modal closed");
-                        }
-                    });
-                } else {
-                    console.error("Failed to create component: " + errorMsg);
-                }
+            state: {
+                c__recordId: component.get("v.recordId")
             }
-        );
+        };
+        navService.navigate(pageRef);
     },
-    
+
     closeModal : function(component, event, helper) {
         var overlayLib = component.find("overlayLib");
-        overlayLib.closeCustomModal();  // Close the modal if needed
+        if (overlayLib) {
+            overlayLib.closeCustomModal();
+        }
     }
 })
