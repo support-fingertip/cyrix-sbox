@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Cancellation_Reason__c</fullName>
-    <description>Free-text explanation entered by the Sales Executive when cancelling an Order. Merged into the cancellation notification email.</description>
+    <description>Free-text explanation entered by the Sales Executive when cancelling an Order. Included in the Order Cancellation in-app notification.</description>
     <externalId>false</externalId>
     <label>Cancellation Reason</label>
     <length>500</length>
