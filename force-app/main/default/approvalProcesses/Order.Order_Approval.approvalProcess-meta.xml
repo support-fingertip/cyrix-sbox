@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApprovalProcess xmlns="http://soap.sforce.com/2006/04/metadata">
+    <active>true</active>
+    <allowRecall>true</allowRecall>
+    <allowedSubmitters>
+        <type>owner</type>
+    </allowedSubmitters>
+    <allowedSubmitters>
+        <type>allInternalUsers</type>
+    </allowedSubmitters>
+    <approvalPageFields>
+        <field>OrderNumber</field>
+        <field>AccountId</field>
+        <field>Owner</field>
+        <field>TotalAmount</field>
+        <field>QuoteId</field>
+        <field>Price_Status__c</field>
+        <field>Approval_Status__c</field>
+        <field>EffectiveDate</field>
+        <field>Branch__c</field>
+    </approvalPageFields>
+    <approvalStep>
+        <allowDelegate>true</allowDelegate>
+        <assignedApprover>
+            <approver>
+                <name>admin@cyrix.com</name>
+                <type>user</type>
+            </approver>
+        </assignedApprover>
+        <description>Step 1 - Initial Price Approver. Mirrors the Quote approval process.</description>
+        <label>Initial Price Approver</label>
+        <name>Initial_Price_Approver</name>
+    </approvalStep>
+    <approvalStep>
+        <allowDelegate>true</allowDelegate>
+        <assignedApprover>
+            <approver>
+                <name>admin@cyrix.com</name>
+                <type>user</type>
+            </approver>
+        </assignedApprover>
+        <description>Step 2 - Warehouse / ERP User. Mirrors the Quote approval process.</description>
+        <label>Warehouse / ERP User</label>
+        <name>Warehouse_ERP_User</name>
+    </approvalStep>
+    <approvalStep>
+        <allowDelegate>true</allowDelegate>
+        <assignedApprover>
+            <approver>
+                <name>admin@cyrix.com</name>
+                <type>user</type>
+            </approver>
+        </assignedApprover>
+        <description>Step 3 - Order Acceptance Approver. Final step before the Order is activated.</description>
+        <label>Order Acceptance Approver</label>
+        <name>Order_Acceptance_Approver</name>
+    </approvalStep>
+    <description>Price-based approval for Sales Orders. Mirrors the Quote Approval process and adds the Order Acceptance Approver as the final step.</description>
+    <enableMobileDeviceAccess>true</enableMobileDeviceAccess>
+    <entryCriteria>
+        <criteriaItems>
+            <field>Order.Price_Status__c</field>
+            <operation>equals</operation>
+            <value>Approval Required</value>
+        </criteriaItems>
+    </entryCriteria>
+    <finalApprovalActions>
+        <action>
+            <name>Order_Activated</name>
+            <type>FieldUpdate</type>
+        </action>
+        <action>
+            <name>Order_Approved</name>
+            <type>FieldUpdate</type>
+        </action>
+        <action>
+            <name>Order_Approved_Date_Time</name>
+            <type>FieldUpdate</type>
+        </action>
+        <action>
+            <name>Order_Price_Status_Not_Required</name>
+            <type>FieldUpdate</type>
+        </action>
+    </finalApprovalActions>
+    <finalApprovalRecordLock>true</finalApprovalRecordLock>
+    <finalRejectionActions>
+        <action>
+            <name>Order_Rejected</name>
+            <type>FieldUpdate</type>
+        </action>
+    </finalRejectionActions>
+    <finalRejectionRecordLock>false</finalRejectionRecordLock>
+    <initialSubmissionActions>
+        <action>
+            <name>Order_Submitted</name>
+            <type>FieldUpdate</type>
+        </action>
+    </initialSubmissionActions>
+    <label>Order Approval</label>
+    <recordEditability>AdminOnly</recordEditability>
+    <showApprovalHistory>true</showApprovalHistory>
+</ApprovalProcess>
