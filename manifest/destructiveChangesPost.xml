@@ -5,5 +5,24 @@
         <members>SAPIntegrationControllerTest</members>
         <name>ApexClass</name>
     </types>
+    <types>
+        <members>Quote.Shipping_Address__c</members>
+        <members>Quote.Vertical__c</members>
+        <members>Quote.Billing_Address__c</members>
+        <members>Quote.Valid_Till__c</members>
+        <members>Product2.Warranty_Terms_Description__c</members>
+        <members>Product2.Warranty_Cost_Percent__c</members>
+        <members>Product2.Training_Cost_Percent__c</members>
+        <members>Product2.Standard_Price_with_Tax__c</members>
+        <members>Product2.Is_Installation_Required__c</members>
+        <members>Product2.Is_Training_Required__c</members>
+        <members>Product2.Shipping_Charges_Percent__c</members>
+        <members>Product2.Promotional_Cost_Percent__c</members>
+        <members>Product2.Tax__c</members>
+        <members>QuoteLineItem.Tax_Type__c</members>
+        <members>QuoteLineItem.Product_Line_Description__c</members>
+        <members>QuoteLineItem.Product_Detailed_Description__c</members>
+        <name>CustomField</name>
+    </types>
     <version>62.0</version>
 </Package>
