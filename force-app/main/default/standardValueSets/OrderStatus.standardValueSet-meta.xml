@@ -4,18 +4,21 @@
     <standardValue>
         <fullName>Draft</fullName>
         <default>true</default>
+        <groupingString>Draft</groupingString>
         <isActive>true</isActive>
         <label>Draft</label>
     </standardValue>
     <standardValue>
         <fullName>Activated</fullName>
         <default>false</default>
+        <groupingString>Activated</groupingString>
         <isActive>true</isActive>
         <label>Activated</label>
     </standardValue>
     <standardValue>
         <fullName>Cancelled</fullName>
         <default>false</default>
+        <groupingString>Activated</groupingString>
         <isActive>true</isActive>
         <label>Cancelled</label>
     </standardValue>
