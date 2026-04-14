@@ -74,28 +74,27 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     }
 
     get confirmDisabled() {
-        return (
-            this.isSaving ||
-            !this.form.deliveryCommittedDate ||
-            !this.form.warehouseId ||
-            !this.displayItems.some((i) => i.selected)
-        );
+        // Only gate on isSaving here. Required-field validation is performed
+        // in handleConfirm using live DOM values to avoid stale-state lockouts.
+        return this.isSaving;
     }
 
     handleInputChange(event) {
-        const field = event.currentTarget.dataset.field;
-        const value = (event.detail && event.detail.value !== undefined)
+        const src = event.currentTarget || event.target;
+        const field = src && src.dataset ? src.dataset.field : null;
+        const value = (event.detail && event.detail.value !== undefined && event.detail.value !== null)
             ? event.detail.value
-            : event.target.value;
+            : (src ? src.value : undefined);
         if (!field) return;
         this.form = { ...this.form, [field]: value };
     }
 
     handleToggleChange(event) {
-        const field = event.currentTarget.dataset.field;
+        const src = event.currentTarget || event.target;
+        const field = src && src.dataset ? src.dataset.field : null;
         const checked = (event.detail && event.detail.checked !== undefined)
             ? event.detail.checked
-            : event.target.checked;
+            : (src ? src.checked : false);
         if (!field) return;
         this.form = { ...this.form, [field]: checked };
     }
@@ -124,7 +123,42 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     }
 
     async handleConfirm() {
-        if (this.confirmDisabled) return;
+        // Pull the current values directly from the DOM as the source of
+        // truth. Relying on @track state alone has proven unreliable for
+        // lightning-input type="date" — under some timing/retargeting
+        // conditions the change handler does not update state even though
+        // the input visibly holds a value, which caused the server-side
+        // "Delivery Committed Date is required" error.
+        const dateInput = this.template.querySelector('lightning-input[data-field="deliveryCommittedDate"]');
+        const warehouseInput = this.template.querySelector('lightning-combobox[data-field="warehouseId"]');
+        const remarksInput = this.template.querySelector('lightning-textarea[data-field="remarks"]');
+        const creditToggle = this.template.querySelector('lightning-input[data-field="creditOrder"]');
+
+        const deliveryCommittedDate = dateInput ? dateInput.value : this.form.deliveryCommittedDate;
+        const warehouseId = warehouseInput ? warehouseInput.value : this.form.warehouseId;
+        const remarks = remarksInput ? remarksInput.value : this.form.remarks;
+        const creditOrder = creditToggle ? creditToggle.checked : this.form.creditOrder;
+
+        // Keep the tracked state in sync so reactive getters are accurate.
+        this.form = {
+            ...this.form,
+            deliveryCommittedDate,
+            warehouseId,
+            remarks,
+            creditOrder
+        };
+
+        if (this.isSaving) return;
+
+        if (!deliveryCommittedDate) {
+            this.showToast('Missing date', 'Please select a Delivery Committed Date.', 'warning');
+            if (dateInput && dateInput.focus) dateInput.focus();
+            return;
+        }
+        if (!warehouseId) {
+            this.showToast('Missing warehouse', 'Please select a Warehouse.', 'warning');
+            return;
+        }
 
         const selected = this.displayItems.filter((i) => i.selected);
         if (selected.length === 0) {
@@ -135,10 +169,10 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         this.isSaving = true;
         try {
             const input = {
-                deliveryCommittedDate: this.form.deliveryCommittedDate,
-                warehouseId: this.form.warehouseId,
-                remarks: this.form.remarks,
-                creditOrder: this.form.creditOrder,
+                deliveryCommittedDate: deliveryCommittedDate,
+                warehouseId: warehouseId,
+                remarks: remarks,
+                creditOrder: creditOrder === true,
                 selectedItems: selected.map((i) => ({
                     lineId: i.lineId,
                     quantity: i.quantity
