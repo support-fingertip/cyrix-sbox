@@ -82,6 +82,8 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
 
     handleDeliveryDateChange(event) {
         this.deliveryCommittedDate = event.detail.value;
+        // eslint-disable-next-line no-console
+        console.log('[CreateSalesOrder] date change ->', JSON.stringify(event.detail.value), typeof event.detail.value);
     }
 
     handleWarehouseChange(event) {
@@ -122,12 +124,20 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     async handleConfirm() {
         if (this.isSaving) return;
 
+        // eslint-disable-next-line no-console
+        console.log('[CreateSalesOrder] handleConfirm state:', {
+            deliveryCommittedDate: this.deliveryCommittedDate,
+            typeofDate: typeof this.deliveryCommittedDate,
+            warehouseId: this.warehouseId,
+            selectedCount: this.displayItems.filter((i) => i.selected).length
+        });
+
         if (!this.warehouseId) {
             this.showToast('Error', 'Please select a Warehouse', 'error');
             return;
         }
 
-        if (!this.deliveryCommittedDate) {
+        if (!this.deliveryCommittedDate || !String(this.deliveryCommittedDate).trim()) {
             this.showToast('Error', 'Delivery Committed Date is required', 'error');
             return;
         }
