@@ -28,6 +28,9 @@
             </approver>
             <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
+        <rejectBehavior>
+            <type>RejectRequest</type>
+        </rejectBehavior>
         <description>Step 1 - Initial Price Approver. Mirrors the Quote approval process.</description>
         <label>Initial Price Approver</label>
         <name>Initial_Price_Approver</name>
@@ -41,6 +44,9 @@
             </approver>
             <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
+        <rejectBehavior>
+            <type>RejectRequest</type>
+        </rejectBehavior>
         <description>Step 2 - Warehouse / ERP User. Mirrors the Quote approval process.</description>
         <label>Warehouse / ERP User</label>
         <name>Warehouse_ERP_User</name>
@@ -54,6 +60,9 @@
             </approver>
             <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
+        <rejectBehavior>
+            <type>RejectRequest</type>
+        </rejectBehavior>
         <description>Step 3 - Order Acceptance Approver. Final step before the Order is activated.</description>
         <label>Order Acceptance Approver</label>
         <name>Order_Acceptance_Approver</name>
