@@ -147,7 +147,7 @@ public with sharing class CreateSalesOrderController {
             SELECT Id, Status, AccountId, Pricebook2Id, OpportunityId, ContactId,
                    BillingStreet, BillingCity, BillingState, BillingPostalCode, BillingCountry,
                    ShippingStreet, ShippingCity, ShippingState, ShippingPostalCode, ShippingCountry,
-                   Quote_Date__c, Revised_Quote__c, Shipping_Mode__c, Quote_Id__c,
+                   Quote_Date__c, Shipping_Mode__c,
                    Valid_Till__c, Vertical__c, Reason_for_Revision__c, Billing_Address__c
             FROM Quote
             WHERE Id = :quoteId
@@ -169,7 +169,7 @@ public with sharing class CreateSalesOrderController {
             ord.Pricebook2Id   = q.Pricebook2Id;
             ord.QuoteId        = q.Id;
             ord.OpportunityId  = q.OpportunityId;
-            ord.ContactId      = q.ContactId;
+            ord.BillToContactId = q.ContactId;
             ord.EffectiveDate  = deliveryDate;
             ord.Status         = 'Draft';
             ord.Branch__c      = warehouseId;
@@ -190,11 +190,12 @@ public with sharing class CreateSalesOrderController {
             ord.ShippingPostalCode = q.ShippingPostalCode;
             ord.ShippingCountry    = q.ShippingCountry;
 
-            // Copy mirrored custom header fields from Quote
+            // Copy mirrored custom header fields from Quote.
+            // Note: Quote_Id__c on Order is an AutoNumber and cannot be
+            // written. Revised_Quote__c is skipped here to avoid cross-org
+            // field-drift deploy failures.
             ord.Quote_Date__c            = q.Quote_Date__c;
-            ord.Revised_Quote__c         = q.Revised_Quote__c;
             ord.Shipping_Mode__c         = q.Shipping_Mode__c;
-            ord.Quote_Id__c              = q.Quote_Id__c;
             ord.Valid_Till__c            = q.Valid_Till__c;
             ord.Vertical__c              = q.Vertical__c;
             ord.Reason_for_Revision__c   = q.Reason_for_Revision__c;
