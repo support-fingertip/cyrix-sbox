@@ -20,7 +20,7 @@ private class ProductSearchControllerTest {
             HSN_Code_International__c = '901819',
             Product_Category__c = 'Equipment',
             Sub_Category__c = 'Diagnostic Imaging',
-            Family = 'Product Sales',
+            Product_Vertical__c = 'Product Sales',
             Brand__c = 'Mindray',
             Make__c = 'Mindray',
             Model__c = 'DC80',
@@ -30,7 +30,7 @@ private class ProductSearchControllerTest {
             Product_Status__c = 'Active',
             Default_Warranty_Months__c = 12,
             Is_Installation_Required__c = 'Yes',
-            Is_Training_Required__c = 'Yes',
+           
             IsActive = true
         ));
 
@@ -42,7 +42,7 @@ private class ProductSearchControllerTest {
             HSN_Code_International__c = '481100',
             Product_Category__c = 'Consumables',
             Sub_Category__c = 'Consumables',
-            Family = 'Ciyan',
+            Product_Vertical__c = 'Ciyan',
             Brand__c = 'Ciyan',
             Make__c = 'Ciyan',
             Model__c = 'CY110S 5R',
@@ -126,11 +126,11 @@ private class ProductSearchControllerTest {
     }
 
     @isTest
-    static void testGetProductFamilies() {
+    static void testGetProductVerticals() {
         Test.startTest();
-        List<String> families = ProductSearchController.getProductFamilies();
+        List<String> verticals = ProductSearchController.getProductVerticals();
         Test.stopTest();
 
-        System.assert(families.size() > 0, 'Should have product families');
+        System.assert(verticals.size() > 0, 'Should have verticals');
     }
 }

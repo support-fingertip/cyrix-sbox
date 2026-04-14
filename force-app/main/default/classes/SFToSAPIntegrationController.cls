@@ -72,7 +72,7 @@ public without sharing class SFToSAPIntegrationController {
     public static SAPResponse sendProductToSAP(Id productId) {
         Product2 prod = [
             SELECT Id, Name, ProductCode, Item_Code__c, SAP_Item_Code__c,
-                Product_Category__c, Family, Product_Type__c,
+                Product_Category__c, Product_Vertical__c, Product_Type__c,
                 Make__c, Model__c, OEM_Part_Number__c, HSN_Code__c,
                 Tax__c, IsActive, Description, QuantityUnitOfMeasure
             FROM Product2
@@ -86,7 +86,7 @@ public without sharing class SFToSAPIntegrationController {
         payload.put('SAP_Item_Code', prod.SAP_Item_Code__c);
         payload.put('Name', prod.Name);
         payload.put('Product_Category', prod.Product_Category__c);
-        payload.put('Product_Vertical', prod.Family);
+        payload.put('Product_Vertical', prod.Product_Vertical__c);
         payload.put('Product_Type', prod.Product_Type__c);
         payload.put('Make', prod.Make__c);
         payload.put('Model', prod.Model__c);

@@ -78,6 +78,7 @@ public with sharing class QuotationPDFController {
     public String gstDisplayRate { get; set; }
     public String warrantyExtra { get; set; }
     public List<Payment_Term__c> paymentTerms { get; set; }
+    public List<Terms_Condition__c> termsConditions { get; set; }
 
     public String companyName { get { return COMPANY_NAME; } }
     public String companyAddress { get { return COMPANY_ADDRESS; } }
@@ -124,6 +125,7 @@ public with sharing class QuotationPDFController {
         gstDisplayRate = '';
         warrantyExtra = '';
         paymentTerms = new List<Payment_Term__c>();
+        termsConditions = new List<Terms_Condition__c>();
 
         // Initialize bank details with defaults
         bankName = BANK_NAME;
@@ -142,7 +144,7 @@ public with sharing class QuotationPDFController {
         List<Quote> quotes = [
             SELECT Id, Name, QuoteNumber, Quote_Id__c, Quote_Date__c, Valid_Till__c,
                    Status, Price_Status__c, is_Active__c, Vertical__c,
-                   Billing_Address__c, Shipping_Address__c, Shipping_Mode__c,
+                   Billing_Address__c, Shipping_Mode__c,
                    Quote_Valid_Till_in_days__c,
                    Delivery__c,
                    Subtotal, TotalPrice, GrandTotal, Discount, Tax, ShippingHandling,
@@ -154,6 +156,7 @@ public with sharing class QuotationPDFController {
                    Account.GST_Number__c, Account.PAN_Number__c,
                    Account.BillingStreet, Account.BillingCity, Account.BillingState,
                    Account.BillingPostalCode, Account.BillingCountry,
+            BillingCity,BillingAddress,BillingCountry,BillingState,Business_Vertical__c,
                    Account.Payment_Terms__c,
                    Bank_Name__c, Bank_Name__r.Name,
                    Bank_Name__r.Account_No__c, Bank_Name__r.Bank_Name__c,
@@ -252,6 +255,14 @@ public with sharing class QuotationPDFController {
         paymentTerms = [
             SELECT Id, Name, Payment_Term__c, Percentage__c
             FROM Payment_Term__c
+            WHERE Quote__c = :quoteId
+            ORDER BY CreatedDate ASC
+        ];
+
+        // Query Terms & Conditions for this Quote
+        termsConditions = [
+            SELECT Id, Name, Titile__c, T_C__c
+            FROM Terms_Condition__c
             WHERE Quote__c = :quoteId
             ORDER BY CreatedDate ASC
         ];
@@ -472,7 +483,7 @@ public with sharing class QuotationPDFController {
                     words += ' ' + ones[(Integer)Math.mod(num, 10)];
                 }
             }
-        }
+        } 
 
         return words.trim();
     }

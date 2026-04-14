@@ -389,7 +389,7 @@ SendEmailCustomNotification.sendNotification(
             if (l.ConvertedOpportunityId != null && (l.Phone != null || l.MobilePhone != null)) {
                 Opportunity opp = new Opportunity(Id = l.ConvertedOpportunityId);
                 opp.Phone__c = l.Phone;
-                opp.Mobile_Phone__c = l.MobilePhone;
+                opp.MobilePhone__c = l.MobilePhone;
                 oppsToUpdate.add(opp);
             }
         }

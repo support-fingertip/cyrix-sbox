@@ -1,90 +1,100 @@
-<apex:page standardController="Quote"
-           extensions="QuotationPDFController"
-           renderAs="pdf"
-           showHeader="false"
-           sidebar="false"
-           applyHtmlTag="false"
-           applyBodyTag="false"
-           standardStylesheets="false">
+<apex:page standardController="Quote"  extensions="QuotationPDFController" renderAs="pdf" showHeader="false"   sidebar="false"   applyHtmlTag="false"     applyBodyTag="false"   standardStylesheets="false">
 <html>
-<head>
-<style type="text/css">
-    @page {
-        size: A4;
-        margin: 0;
-    }
-
-    body {
-        font-family: 'Times New Roman', Times, serif;
-        font-size: 9pt;
-        color: #000000;
-        line-height: 1.5;
-        margin: 0;
-        padding: 0;
-    }
-
-    /* ---------- PAGE HEADER (logo + quote name + date) ---------- */
-    .page-header {
-        position: fixed;
-        top: 8mm;
-        left: 18mm;
-        right: 18mm;
-        width: 174mm;
-        border-bottom: 1px solid #cc0000;
-        padding-bottom: 3mm;
-    }
-    .page-header .hdr-logo {
-        width: 28mm;
-        height: auto;
-    }
-    .page-header td {
-        vertical-align: middle;
-        font-size: 9pt;
-    }
-
-    /* ---------- CONTENT AREA ---------- */
-    .content {
-        padding: 32mm 18mm 15mm 18mm;
-    }
-
-    /* ---------- PAGE BREAK ---------- */
-    .page-break {
-        page-break-before: always;
-    }
-</style>
+    <head>
+        <style type="text/css" media="print">
+            @page {
+            size: A4;
+            margin: 10mm 10mm 10mm 10mm;
+            
+            @top-center {
+            content: element(header);
+            }
+            }
+            
+            @media print {
+            thead {display: table-header-group;} 
+            tfoot {display: table-footer-group;}
+            button {display: none;}
+            body {margin: 0;}
+            * {-webkit-print-color-adjust:exact;}
+            }
+            
+            div.header {
+            display: block;
+            position: running(header);
+             font-family: Times New Roman, Times, serif;
+            }
+            
+            div.content.header {
+            display: block;
+            position: running(header);
+           font-family: Times New Roman, Times, serif;
+            text-align: center;
+            }
+            
+          
+            
+            div.content {
+            font-family: Serif, Arial Unicode MS, sans-serif;
+            font-size: 10.5px;
+            line-height:1.1;
+            }
+            
+            .textCenter {
+            text-align:center;
+            }
+            
+            table, tr {
+            border-collapse: collapse;
+            }
+            
+            .border {
+            border: 1px solid black;
+            border-collapse: collapse;
+            }
+            .page-bg img {
+            width: 210mm;
+            height: 297mm;
+            }
+            
+        </style> 
 </head>
 <body>
 
-    <!-- PAGE HEADER: logo + quote name + date (fixed on every page) -->
-    <div class="page-header">
-        <table style="width: 100%; border-collapse: collapse;">
-            <tr>
-                <td style="width: 30%; text-align: left;">
-                    <apex:image url="{!URLFOR($Resource.Cyrix_Logo)}" styleClass="hdr-logo" />
-                </td>
-                <td style="width: 45%; text-align: center; font-weight: bold; color: #cc0000;">
-                    {!quote.Name}
-                </td>
-                <td style="width: 25%; text-align: right; font-weight: bold;">
-                    <span style="color: #000000;">DATE:</span>
-                    <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
-                </td>
-            </tr>
-        </table>
-    </div>
+  
 
     <!-- ====================================================================== -->
     <!-- PAGE 1: COVER LETTER                                                   -->
     <!-- ====================================================================== -->
+    
+    <div class="header">
+      
+          <!-- LETTERHEAD BACKGROUND (fixed on every page) -->
+    <div class="page-bg">
+        <apex:image url="{!URLFOR($Resource.Letter_Head)}" style="width: 100%; height: 100%;" />
+    </div>
+                 <table style="width: 100%; margin-bottom: 10px; font-size: 9pt; color: #cc0000; font-weight: bold;">
+            <tr>
+                <td style="text-align: left; width: 70%;">
+                    <span style="color: #000000;"> {!quote.Name}</span>
+                </td>
+                <td style="text-align: right; width: 30%;">
+                    <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
+                </td>
+            </tr>
+        </table>
+    </div>
     <div class="content">
+
+        <!-- QUOTE REFERENCE LINE -->
+
 
         <!-- TO SECTION -->
         <p>To,</p>
         <p>
             <strong>{!account.Name}</strong><br/>
-            <apex:outputPanel rendered="{!quote.Billing_Address__c != null}">
-                {!quote.Billing_Address__c}<br/>
-            </apex:outputPanel>
+                {!quote.BillingCity} ,
+                {!quote.BillingState}  <br/>
             <apex:outputPanel rendered="{!account.GST_Number__c != null}">
                 <strong>GST:</strong> {!account.GST_Number__c}<br/>
             </apex:outputPanel>
@@ -95,7 +105,7 @@
 
         <!-- SUBJECT -->
         <p style="text-align: center; font-weight: bold; margin: 10px 0;">
-            SUBJECT: QUOTATION FOR &ldquo;{!quote.Vertical__c}&rdquo;
+            SUBJECT: QUOTATION FOR &ldquo;{!quote.Business_Vertical__c}&rdquo;
         </p>
 
         <!-- LETTER BODY -->
@@ -104,7 +114,7 @@
         <p>Greetings from Cyrix Healthcare Pvt Ltd!!!</p>
 
         <p>We sincerely appreciate your continued trust in our products and services. As per your requirement, we are pleased
-           to submit our proposal for <strong>{!quote.Vertical__c}</strong> for your kind consideration.</p>
+           to submit our proposal for <strong>{!quote.Business_Vertical__c}</strong> for your kind consideration.</p>
 
         <!-- Numbered Product List -->
         <apex:variable var="pIdx" value="{!1}" />
@@ -160,7 +170,7 @@
         <table style="width: 100%; margin-bottom: 5px; font-size: 9pt; color: #cc0000; font-weight: bold;">
             <tr>
                 <td style="text-align: left; width: 70%;">
-                    <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/{!IF(quote.Quote_Id__c != null, quote.Quote_Id__c, quote.QuoteNumber)}/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
+                    <span style="color: #000000;">C-KL/</span> {!quote.Business_Vertical__c}<span style="color: #000000;">/{!IF(quote.Quote_Id__c != null, quote.Quote_Id__c, quote.QuoteNumber)}/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
                 </td>
                 <td style="text-align: right; width: 30%;">
                     <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
@@ -170,7 +180,7 @@
 
         <!-- QUOTATION TITLE -->
         <div style="text-align: center; font-size: 9pt; font-weight: bold; margin: 5px 0 8px 0; text-decoration: underline;">
-            QUOTATION FOR CYRIX {!productNamesList}<apex:outputPanel rendered="{!quote.Vertical__c != null}"> &amp; {!quote.Vertical__c}</apex:outputPanel>
+            QUOTATION FOR CYRIX {!productNamesList}<apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> &amp; {!quote.Business_Vertical__c}</apex:outputPanel>
         </div>
 
         <!-- PRICING TABLE -->
@@ -302,7 +312,7 @@
         <table style="width: 100%; margin-bottom: 5px; font-size: 9pt; color: #cc0000; font-weight: bold;">
             <tr>
                 <td style="text-align: left; width: 70%;">
-                    <span style="color: #000000;">C-KL/</span> {!quote.Vertical__c}<span style="color: #000000;">/{!IF(quote.Quote_Id__c != null, quote.Quote_Id__c, quote.QuoteNumber)}/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
+                    <span style="color: #000000;">C-KL/</span> {!quote.Business_Vertical__c}<span style="color: #000000;">/{!IF(quote.Quote_Id__c != null, quote.Quote_Id__c, quote.QuoteNumber)}/2026-27-</span>&lt;if Revised&#8220;RV1&#8221;&gt;
                 </td>
                 <td style="text-align: right; width: 30%;">
                     <span style="color: #000000;">DATE:</span> <apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText>
@@ -598,6 +608,13 @@
                 Pending or non-functional equipment due to customer related issues shall not be a reason to withhold
                 payment for completed services.
             </li>
+
+            <!-- Dynamic Terms & Conditions from related records -->
+            <apex:repeat value="{!termsConditions}" var="tc">
+                <li style="margin-bottom: 8px;">
+                    <apex:outputPanel rendered="{!tc.Titile__c != null}"><strong>{!tc.Titile__c}:</strong>&nbsp;</apex:outputPanel>{!tc.T_C__c}
+                </li>
+            </apex:repeat>
         </ol>
 
     </div>
@@ -961,7 +978,7 @@
                 <tr>
                     <td colspan="6" style="text-align: center; font-size: 8pt; border: 1px solid #000; padding: 4px;">
                         <strong>Contract Period: - 01/01/2026 to 31/12/2026</strong>
-                    </td>
+                    </td> 
                 </tr>
             </tbody>
         </table>

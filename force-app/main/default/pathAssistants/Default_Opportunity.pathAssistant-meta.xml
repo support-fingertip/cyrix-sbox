@@ -30,8 +30,8 @@
     <pathAssistantSteps>
         <fieldNames>Amount</fieldNames>
         <fieldNames>CloseDate</fieldNames>
-        <fieldNames>ROI_Analysis_Completed__c</fieldNames>
-        <info>&lt;p&gt;&lt;b style=&quot;font-family: Arial; font-size: 10pt;&quot;&gt;Deliver your solution to stakeholders.&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;span style=&quot;font-family: Arial; font-size: 10pt;&quot;&gt;Communicate the value of your solutions&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;span style=&quot;font-family: Arial; font-size: 10pt;&quot;&gt;Solidify the timeline and budget&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;span style=&quot;font-family: Arial; font-size: 10pt;&quot;&gt;Establish a plan with the customer for when and how you&amp;#39;ll close the deal&lt;/span&gt;&lt;/li&gt;&lt;/ul&gt;</info>
+        <fieldNames>Opportunity_Type__c</fieldNames>
+        <fieldNames>Next_Step_Action__c</fieldNames>
         <picklistValueName>Proposal</picklistValueName>
     </pathAssistantSteps>
     <pathAssistantSteps>
