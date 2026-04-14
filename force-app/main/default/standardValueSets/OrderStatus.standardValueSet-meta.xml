@@ -6,20 +6,17 @@
         <default>true</default>
         <isActive>true</isActive>
         <label>Draft</label>
-        <statusCode>Draft</statusCode>
     </standardValue>
     <standardValue>
         <fullName>Activated</fullName>
         <default>false</default>
         <isActive>true</isActive>
         <label>Activated</label>
-        <statusCode>Activated</statusCode>
     </standardValue>
     <standardValue>
         <fullName>Cancelled</fullName>
         <default>false</default>
         <isActive>true</isActive>
         <label>Cancelled</label>
-        <statusCode>Activated</statusCode>
     </standardValue>
 </StandardValueSet>
