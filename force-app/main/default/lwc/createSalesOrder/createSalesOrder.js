@@ -16,12 +16,10 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     @track warehouseOptions = [];
     @track displayItems = [];
 
-    @track form = {
-        deliveryCommittedDate: null,
-        warehouseId: '',
-        remarks: '',
-        creditOrder: false
-    };
+    @track deliveryCommittedDate;
+    @track warehouseId = '';
+    @track remarks = '';
+    @track creditOrder = false;
 
     @wire(getQuoteDetails, { quoteId: '$recordId' })
     wiredQuote({ error, data }) {
@@ -73,30 +71,29 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         return this.quoteContext.billingAddress || 'N/A';
     }
 
-    get confirmDisabled() {
-        // Only gate on isSaving here. Required-field validation is performed
-        // in handleConfirm using live DOM values to avoid stale-state lockouts.
-        return this.isSaving;
+    get isConfirmDisabled() {
+        return (
+            this.isSaving ||
+            !this.warehouseId ||
+            !this.deliveryCommittedDate ||
+            !this.displayItems.some((i) => i.selected)
+        );
     }
 
-    handleInputChange(event) {
-        const src = event.currentTarget || event.target;
-        const field = src && src.dataset ? src.dataset.field : null;
-        const value = (event.detail && event.detail.value !== undefined && event.detail.value !== null)
-            ? event.detail.value
-            : (src ? src.value : undefined);
-        if (!field) return;
-        this.form = { ...this.form, [field]: value };
+    handleDeliveryDateChange(event) {
+        this.deliveryCommittedDate = event.detail.value;
     }
 
-    handleToggleChange(event) {
-        const src = event.currentTarget || event.target;
-        const field = src && src.dataset ? src.dataset.field : null;
-        const checked = (event.detail && event.detail.checked !== undefined)
-            ? event.detail.checked
-            : (src ? src.checked : false);
-        if (!field) return;
-        this.form = { ...this.form, [field]: checked };
+    handleWarehouseChange(event) {
+        this.warehouseId = event.detail.value;
+    }
+
+    handleRemarksChange(event) {
+        this.remarks = event.target.value;
+    }
+
+    handleCreditToggle(event) {
+        this.creditOrder = event.target.checked;
     }
 
     handleItemSelect(event) {
@@ -123,68 +120,39 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     }
 
     async handleConfirm() {
-        // Pull the current values directly from the DOM as the source of
-        // truth. Relying on @track state alone has proven unreliable for
-        // lightning-input type="date" — under some timing/retargeting
-        // conditions the change handler does not update state even though
-        // the input visibly holds a value, which caused the server-side
-        // "Delivery Committed Date is required" error.
-        const dateInput = this.template.querySelector('lightning-input[data-field="deliveryCommittedDate"]');
-        const warehouseInput = this.template.querySelector('lightning-combobox[data-field="warehouseId"]');
-        const remarksInput = this.template.querySelector('lightning-textarea[data-field="remarks"]');
-        const creditToggle = this.template.querySelector('lightning-input[data-field="creditOrder"]');
-
-        const rawDate = dateInput ? dateInput.value : this.form.deliveryCommittedDate;
-        // Trim to catch whitespace/unparsed-placeholder values that are truthy
-        // in JS but blank on the Apex side (String.isBlank), which would
-        // otherwise surface as the server-side "Delivery Committed Date is
-        // required" error despite this handler running.
-        const deliveryCommittedDate = (rawDate == null ? '' : String(rawDate)).trim();
-        const warehouseId = warehouseInput ? warehouseInput.value : this.form.warehouseId;
-        const remarks = remarksInput ? remarksInput.value : this.form.remarks;
-        const creditOrder = creditToggle ? creditToggle.checked : this.form.creditOrder;
-
-        // Keep the tracked state in sync so reactive getters are accurate.
-        this.form = {
-            ...this.form,
-            deliveryCommittedDate: deliveryCommittedDate || null,
-            warehouseId,
-            remarks,
-            creditOrder
-        };
-
         if (this.isSaving) return;
 
-        // Require a non-blank ISO date string (YYYY-MM-DD). Also ask the input
-        // to run its own validity check so the user sees the inline field
-        // error, not just a toast.
-        const isoDateOk = /^\d{4}-\d{2}-\d{2}$/.test(deliveryCommittedDate);
-        const inputValid = dateInput && typeof dateInput.reportValidity === 'function'
-            ? dateInput.reportValidity()
-            : true;
-        if (!deliveryCommittedDate || !isoDateOk || !inputValid) {
-            this.showToast('Missing date', 'Please select a Delivery Committed Date.', 'warning');
-            if (dateInput && dateInput.focus) dateInput.focus();
+        if (!this.warehouseId) {
+            this.showToast('Error', 'Please select a Warehouse', 'error');
             return;
         }
-        if (!warehouseId) {
-            this.showToast('Missing warehouse', 'Please select a Warehouse.', 'warning');
+
+        if (!this.deliveryCommittedDate) {
+            this.showToast('Error', 'Delivery Committed Date is required', 'error');
+            return;
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const selectedDate = new Date(this.deliveryCommittedDate + 'T00:00:00');
+        if (selectedDate < today) {
+            this.showToast('Error', 'Delivery Committed Date cannot be in the past', 'error');
             return;
         }
 
         const selected = this.displayItems.filter((i) => i.selected);
         if (selected.length === 0) {
-            this.showToast('Missing items', 'Please select at least one quote item.', 'warning');
+            this.showToast('Error', 'Please select at least one quote item', 'error');
             return;
         }
 
         this.isSaving = true;
         try {
             const input = {
-                deliveryCommittedDate: deliveryCommittedDate,
-                warehouseId: warehouseId,
-                remarks: remarks,
-                creditOrder: creditOrder === true,
+                deliveryCommittedDate: this.deliveryCommittedDate,
+                warehouseId: this.warehouseId,
+                remarks: this.remarks,
+                creditOrder: this.creditOrder === true,
                 selectedItems: selected.map((i) => ({
                     lineId: i.lineId,
                     quantity: i.quantity

@@ -50,9 +50,9 @@
                         <lightning-input
                             type="date"
                             label="Delivery Committed Date"
-                            value={form.deliveryCommittedDate}
+                            value={deliveryCommittedDate}
                             data-field="deliveryCommittedDate"
-                            onchange={handleInputChange}
+                            onchange={handleDeliveryDateChange}
                             required>
                         </lightning-input>
                     </div>
@@ -63,11 +63,11 @@
                                 type="toggle"
                                 variant="label-hidden"
                                 label="Credit Order"
-                                checked={form.creditOrder}
+                                checked={creditOrder}
                                 message-toggle-active="Active"
                                 message-toggle-inactive="Inactive"
                                 data-field="creditOrder"
-                                onchange={handleToggleChange}>
+                                onchange={handleCreditToggle}>
                             </lightning-input>
                         </div>
                     </div>
@@ -77,11 +77,11 @@
                     <lightning-combobox
                         name="warehouse"
                         label="Warehouse"
-                        value={form.warehouseId}
+                        value={warehouseId}
                         placeholder="Select Warehouse"
                         options={warehouseOptions}
                         data-field="warehouseId"
-                        onchange={handleInputChange}
+                        onchange={handleWarehouseChange}
                         required>
                     </lightning-combobox>
                 </div>
@@ -89,10 +89,10 @@
                 <div class="slds-m-bottom_medium">
                     <lightning-textarea
                         label="Remarks"
-                        value={form.remarks}
+                        value={remarks}
                         placeholder="Enter remarks"
                         data-field="remarks"
-                        onchange={handleInputChange}>
+                        onchange={handleRemarksChange}>
                     </lightning-textarea>
                 </div>
 
@@ -176,7 +176,7 @@
                     label="Confirm Sale"
                     variant="brand"
                     onclick={handleConfirm}
-                    disabled={confirmDisabled}
+                    disabled={isConfirmDisabled}
                     icon-name="utility:success"
                     class="cso-footer-btn">
                 </lightning-button>
