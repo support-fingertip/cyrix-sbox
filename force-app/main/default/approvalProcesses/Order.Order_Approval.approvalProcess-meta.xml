@@ -102,12 +102,6 @@
         </action>
     </finalRejectionActions>
     <finalRejectionRecordLock>false</finalRejectionRecordLock>
-    <initialSubmissionActions>
-        <action>
-            <name>Order_Submitted</name>
-            <type>FieldUpdate</type>
-        </action>
-    </initialSubmissionActions>
     <label>Order Approval</label>
     <recordEditability>AdminOnly</recordEditability>
     <showApprovalHistory>true</showApprovalHistory>
