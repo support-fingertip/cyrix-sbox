@@ -9,6 +9,9 @@ public with sharing class CreateSalesOrderController {
     /**
      * Returns the Quote header info (customer, owner, addresses) plus its line items
      * so the LWC can render the Sales Order modal.
+     *
+     * Blocks the load if the Quote is not in 'Approved' status — Sales Orders
+     * may only be created from a finalized/approved Quote.
      */
     @AuraEnabled(cacheable=true)
     public static QuoteContext getQuoteDetails(Id quoteId) {
@@ -29,6 +32,13 @@ public with sharing class CreateSalesOrderController {
             WHERE Id = :quoteId
             LIMIT 1
         ];
+
+        if (q.Status != 'Approved') {
+            throw new AuraHandledException(
+                'Sales Order can only be created from an Approved Quote. ' +
+                'Current Quote status: ' + (q.Status == null ? 'None' : q.Status) + '.'
+            );
+        }
 
         List<QuoteLineItem> items = [
             SELECT Id, Product2Id, Product2.Name, PricebookEntryId,
@@ -134,13 +144,23 @@ public with sharing class CreateSalesOrderController {
         }
 
         Quote q = [
-            SELECT Id, AccountId, Pricebook2Id, OpportunityId, ContactId,
+            SELECT Id, Status, AccountId, Pricebook2Id, OpportunityId, ContactId,
                    BillingStreet, BillingCity, BillingState, BillingPostalCode, BillingCountry,
-                   ShippingStreet, ShippingCity, ShippingState, ShippingPostalCode, ShippingCountry
+                   ShippingStreet, ShippingCity, ShippingState, ShippingPostalCode, ShippingCountry,
+                   Quote_Date__c, Revised_Quote__c, Shipping_Mode__c, Quote_Id__c,
+                   Valid_Till__c, Vertical__c, Reason_for_Revision__c, Billing_Address__c
             FROM Quote
             WHERE Id = :quoteId
             LIMIT 1
         ];
+
+        // Gate: only Approved Quotes can be converted to Sales Orders.
+        if (q.Status != 'Approved') {
+            throw new AuraHandledException(
+                'Sales Order can only be created from an Approved Quote. ' +
+                'Current Quote status: ' + (q.Status == null ? 'None' : q.Status) + '.'
+            );
+        }
 
         Savepoint sp = Database.setSavepoint();
         try {
@@ -149,11 +169,14 @@ public with sharing class CreateSalesOrderController {
             ord.Pricebook2Id   = q.Pricebook2Id;
             ord.QuoteId        = q.Id;
             ord.OpportunityId  = q.OpportunityId;
+            ord.ContactId      = q.ContactId;
             ord.EffectiveDate  = deliveryDate;
             ord.Status         = 'Draft';
             ord.Branch__c      = warehouseId;
             ord.Description    = remarks;
             ord.is_Active__c   = creditOrder == true;
+            ord.Approval_Status__c = 'Pending';
+            ord.Quote_Approved_Date_Time__c = System.now();
 
             // Copy addresses
             ord.BillingStreet     = q.BillingStreet;
@@ -166,6 +189,16 @@ public with sharing class CreateSalesOrderController {
             ord.ShippingState      = q.ShippingState;
             ord.ShippingPostalCode = q.ShippingPostalCode;
             ord.ShippingCountry    = q.ShippingCountry;
+
+            // Copy mirrored custom header fields from Quote
+            ord.Quote_Date__c            = q.Quote_Date__c;
+            ord.Revised_Quote__c         = q.Revised_Quote__c;
+            ord.Shipping_Mode__c         = q.Shipping_Mode__c;
+            ord.Quote_Id__c              = q.Quote_Id__c;
+            ord.Valid_Till__c            = q.Valid_Till__c;
+            ord.Vertical__c              = q.Vertical__c;
+            ord.Reason_for_Revision__c   = q.Reason_for_Revision__c;
+            ord.Billing_Address__c       = q.Billing_Address__c;
 
             insert ord;
 
