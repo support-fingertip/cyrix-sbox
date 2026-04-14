@@ -76,7 +76,7 @@
     <formulas>
         <name>bodyText</name>
         <dataType>String</dataType>
-        <expression>&quot;Order &quot; &amp; TEXT({!$Record.OrderNumber}) &amp; &quot; for &quot; &amp; {!$Record.Account.Name} &amp; &quot; has been cancelled.&quot; &amp; IF(ISBLANK({!$Record.Cancellation_Reason__c}), &quot;&quot;, &quot; Reason: &quot; &amp; {!$Record.Cancellation_Reason__c})</expression>
+        <expression>&quot;Order &quot; &amp; {!$Record.OrderNumber} &amp; &quot; for &quot; &amp; {!$Record.Account.Name} &amp; &quot; has been cancelled.&quot; &amp; IF(ISBLANK({!$Record.Cancellation_Reason__c}), &quot;&quot;, &quot; Reason: &quot; &amp; {!$Record.Cancellation_Reason__c})</expression>
     </formulas>
     <interviewLabel>Order Cancellation Notifier {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Order Cancellation Notifier</label>
