@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Lock_Quote_Copied_Fields</fullName>
+    <active>true</active>
+    <description>Prevents editing of header fields that were copied from the source Quote when the Sales Order was created. System Administrators are exempt so they can correct data issues.</description>
+    <errorConditionFormula>AND(
+    $Profile.Name &lt;&gt; &apos;System Administrator&apos;,
+    OR(
+        ISCHANGED(AccountId),
+        ISCHANGED(ContactId),
+        ISCHANGED(OpportunityId),
+        ISCHANGED(Pricebook2Id),
+        ISCHANGED(QuoteId),
+        ISCHANGED(BillingStreet),
+        ISCHANGED(BillingCity),
+        ISCHANGED(BillingState),
+        ISCHANGED(BillingPostalCode),
+        ISCHANGED(BillingCountry),
+        ISCHANGED(ShippingStreet),
+        ISCHANGED(ShippingCity),
+        ISCHANGED(ShippingState),
+        ISCHANGED(ShippingPostalCode),
+        ISCHANGED(ShippingCountry),
+        ISCHANGED(Quote_Date__c),
+        ISCHANGED(Revised_Quote__c),
+        ISCHANGED(Shipping_Mode__c),
+        ISCHANGED(Quote_Id__c),
+        ISCHANGED(Valid_Till__c),
+        ISCHANGED(Vertical__c),
+        ISCHANGED(Reason_for_Revision__c),
+        ISCHANGED(Billing_Address__c)
+    )
+)</errorConditionFormula>
+    <errorMessage>Fields copied from the source Quote cannot be edited on the Sales Order. Contact your System Administrator if a correction is needed.</errorMessage>
+</ValidationRule>
