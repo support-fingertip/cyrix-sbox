@@ -1,0 +1,17 @@
+Hello {!Order.Owner.FirstName},
+
+Sales Order {!Order.OrderNumber} for {!Order.Account.Name} has been marked as Cancelled.
+
+Order details:
+  Order Number:  {!Order.OrderNumber}
+  Account:       {!Order.Account.Name}
+  Total Amount:  {!Order.TotalAmount}
+  Effective Date:{!Order.EffectiveDate}
+
+Cancellation reason:
+{!Order.Cancellation_Reason__c}
+
+View the record: {!Order.Link}
+
+--
+This is an automated notification. If this cancellation was made in error, please contact your administrator.
