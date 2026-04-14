@@ -1,0 +1,17 @@
+.header-bar {
+    background: linear-gradient(90deg, #1a73e8 0%, #4285f4 100%);
+    color: #ffffff;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+}
+
+.header-bar h2 {
+    color: #ffffff;
+    font-weight: 600;
+    margin: 0;
+}
+
+.slds-box {
+    background-color: #f4f6f9;
+    border: 1px solid #dddbda;
+}
