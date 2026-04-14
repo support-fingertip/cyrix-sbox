@@ -145,12 +145,11 @@
                                         <td class="cso-col-price">{item.totalPriceDisplay}</td>
                                         <td class="cso-col-sync">
                                             <lightning-button
-                                                label="Sync Stock"
+                                                label="Check Stock"
                                                 variant="neutral"
                                                 data-line-id={item.lineId}
-                                                onclick={handleSyncStock}
-                                                icon-name="utility:refresh"
-                                                disabled={item.syncing}>
+                                                onclick={handleCheckStock}
+                                                icon-name="utility:refresh">
                                             </lightning-button>
                                         </td>
                                     </tr>
