@@ -72,18 +72,44 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     }
 
     get isConfirmDisabled() {
-        return (
-            this.isSaving ||
-            !this.warehouseId ||
-            !this.deliveryCommittedDate ||
-            !this.displayItems.some((i) => i.selected)
-        );
+        // Only gate on isSaving. Field-level validation (and DOM fallback
+        // for the date input) is handled inside handleConfirm.
+        return this.isSaving;
+    }
+
+    // Coerce any value coming back from lightning-input type="date"
+    // (string, Date object, locale-formatted text) into a strict
+    // YYYY-MM-DD ISO string, or null if it can't be parsed.
+    toIsoDate(raw) {
+        if (raw == null) return null;
+        if (raw instanceof Date && !isNaN(raw.getTime())) {
+            const y = raw.getFullYear();
+            const m = String(raw.getMonth() + 1).padStart(2, '0');
+            const d = String(raw.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+        const s = String(raw).trim();
+        if (!s) return null;
+        // Already ISO: accept the date portion.
+        const isoMatch = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (isoMatch) return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
+        // Try native Date parse (covers locale formats like "19-Apr-2026").
+        const d = new Date(s);
+        if (!isNaN(d.getTime())) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+        return null;
     }
 
     handleDeliveryDateChange(event) {
-        this.deliveryCommittedDate = event.detail.value;
+        const raw = event.detail.value;
+        const iso = this.toIsoDate(raw);
+        this.deliveryCommittedDate = iso;
         // eslint-disable-next-line no-console
-        console.log('[CreateSalesOrder] date change ->', JSON.stringify(event.detail.value), typeof event.detail.value);
+        console.log('[CreateSalesOrder] date change raw=', raw, 'typeof=', typeof raw, 'iso=', iso);
     }
 
     handleWarehouseChange(event) {
@@ -124,10 +150,24 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     async handleConfirm() {
         if (this.isSaving) return;
 
+        // DOM fallback: re-read the date straight from lightning-input in
+        // case the @track state missed the change event for any reason.
+        const dateEl = this.template.querySelector('lightning-input[data-field="deliveryCommittedDate"]');
+        const domRaw = dateEl ? dateEl.value : null;
+        const domIso = this.toIsoDate(domRaw);
+        const stateIso = this.toIsoDate(this.deliveryCommittedDate);
+        const finalIso = stateIso || domIso;
+        if (finalIso && finalIso !== this.deliveryCommittedDate) {
+            this.deliveryCommittedDate = finalIso;
+        }
+
         // eslint-disable-next-line no-console
         console.log('[CreateSalesOrder] handleConfirm state:', {
-            deliveryCommittedDate: this.deliveryCommittedDate,
-            typeofDate: typeof this.deliveryCommittedDate,
+            stateRaw: this.deliveryCommittedDate,
+            domRaw: domRaw,
+            stateIso: stateIso,
+            domIso: domIso,
+            finalIso: finalIso,
             warehouseId: this.warehouseId,
             selectedCount: this.displayItems.filter((i) => i.selected).length
         });
@@ -137,14 +177,15 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
             return;
         }
 
-        if (!this.deliveryCommittedDate || !String(this.deliveryCommittedDate).trim()) {
+        if (!finalIso) {
             this.showToast('Error', 'Delivery Committed Date is required', 'error');
+            if (dateEl && dateEl.focus) dateEl.focus();
             return;
         }
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const selectedDate = new Date(this.deliveryCommittedDate + 'T00:00:00');
+        const selectedDate = new Date(finalIso + 'T00:00:00');
         if (selectedDate < today) {
             this.showToast('Error', 'Delivery Committed Date cannot be in the past', 'error');
             return;
@@ -159,7 +200,7 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         this.isSaving = true;
         try {
             const input = {
-                deliveryCommittedDate: this.deliveryCommittedDate,
+                deliveryCommittedDate: finalIso,
                 warehouseId: this.warehouseId,
                 remarks: this.remarks,
                 creditOrder: this.creditOrder === true,
