@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Shipping_Mode__c</fullName>
+    <externalId>false</externalId>
+    <label>Shipping Mode</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>By Road</fullName>
+                <default>false</default>
+                <label>By Road</label>
+            </value>
+            <value>
+                <fullName>By Air</fullName>
+                <default>false</default>
+                <label>By Air</label>
+            </value>
+            <value>
+                <fullName>By Sea</fullName>
+                <default>false</default>
+                <label>By Sea</label>
+            </value>
+            <value>
+                <fullName>By Rail</fullName>
+                <default>false</default>
+                <label>By Rail</label>
+            </value>
+            <value>
+                <fullName>Courier</fullName>
+                <default>false</default>
+                <label>Courier</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
