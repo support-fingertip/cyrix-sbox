@@ -87,6 +87,8 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         const value = (event.detail && event.detail.value !== undefined)
             ? event.detail.value
             : event.target.value;
+        // eslint-disable-next-line no-console
+        console.log('[CreateSalesOrder] handleInputChange', field, '=', value);
         if (!field) return;
         this.form = { ...this.form, [field]: value };
     }
@@ -132,10 +134,24 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
             return;
         }
 
+        // Fallback: read the date directly from the DOM in case the onchange
+        // handler never captured it (e.g., user typed but did not blur).
+        let deliveryDate = this.form.deliveryCommittedDate;
+        if (!deliveryDate) {
+            const dateInput = this.template.querySelector('[data-field="deliveryCommittedDate"]');
+            if (dateInput && dateInput.value) {
+                deliveryDate = dateInput.value;
+            }
+        }
+        if (!deliveryDate) {
+            this.showToast('Missing info', 'Please select a Delivery Committed Date.', 'warning');
+            return;
+        }
+
         this.isSaving = true;
         try {
             const input = {
-                deliveryCommittedDate: this.form.deliveryCommittedDate,
+                deliveryCommittedDate: deliveryDate,
                 warehouseId: this.form.warehouseId,
                 remarks: this.form.remarks,
                 creditOrder: this.form.creditOrder,
@@ -144,6 +160,8 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
                     quantity: i.quantity
                 }))
             };
+            // eslint-disable-next-line no-console
+            console.log('[CreateSalesOrder] Sending to Apex:', JSON.stringify(input));
 
             const orderId = await createSalesOrder({
                 quoteId: this.recordId,
