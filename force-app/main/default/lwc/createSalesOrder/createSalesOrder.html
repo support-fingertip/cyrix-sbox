@@ -106,8 +106,10 @@
                                     <th scope="col" class="cso-col-select"></th>
                                     <th scope="col" class="cso-col-product"><span class="slds-truncate">Product</span></th>
                                     <th scope="col" class="cso-col-qty"><span class="slds-truncate">Quantity</span></th>
+                                    <th scope="col" class="cso-col-qty"><span class="slds-truncate">Stock Qty</span></th>
                                     <th scope="col" class="cso-col-price"><span class="slds-truncate">Unit Price</span></th>
                                     <th scope="col" class="cso-col-price"><span class="slds-truncate">Total Price</span></th>
+                                    <th scope="col" class="cso-col-sync"><span class="slds-truncate">Sync</span></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -138,8 +140,19 @@
                                                 onchange={handleQuantityChange}>
                                             </lightning-input>
                                         </td>
+                                        <td class="cso-col-qty">{item.stockQtyDisplay}</td>
                                         <td class="cso-col-price">{item.unitPriceDisplay}</td>
                                         <td class="cso-col-price">{item.totalPriceDisplay}</td>
+                                        <td class="cso-col-sync">
+                                            <lightning-button
+                                                label="Sync Stock"
+                                                variant="neutral"
+                                                data-line-id={item.lineId}
+                                                onclick={handleSyncStock}
+                                                icon-name="utility:refresh"
+                                                disabled={item.syncing}>
+                                            </lightning-button>
+                                        </td>
                                     </tr>
                                 </template>
                             </tbody>

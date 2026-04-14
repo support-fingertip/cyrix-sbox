@@ -45,13 +45,14 @@
 
 .cso-items-table {
     width: 100%;
-    min-width: 560px; /* keeps columns readable; wrapper scrolls on mobile */
+    min-width: 860px; /* keeps 7 columns readable; wrapper scrolls on mobile */
 }
 
 .cso-col-select  { width: 40px; }
-.cso-col-qty     { width: 110px; }
+.cso-col-qty     { width: 100px; }
 .cso-col-price   { width: 120px; white-space: nowrap; }
-.cso-col-product { min-width: 160px; }
+.cso-col-product { min-width: 180px; }
+.cso-col-sync    { width: 140px; white-space: nowrap; }
 
 /* =========================================
    Footer

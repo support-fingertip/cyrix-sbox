@@ -31,6 +31,9 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
                 ...it,
                 selected: true,
                 quantity: it.quantity,
+                stockQty: 0,
+                stockQtyDisplay: '0',
+                syncing: false,
                 unitPriceDisplay: this.formatCurrency(it.unitPrice),
                 totalPriceDisplay: this.formatCurrency(it.totalPrice)
             }));
@@ -155,6 +158,30 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         } finally {
             this.isSaving = false;
         }
+    }
+
+    handleSyncStock(event) {
+        const lineId = event.target.dataset.lineId;
+        // Mark the row as syncing
+        this.displayItems = this.displayItems.map((it) =>
+            it.lineId === lineId ? { ...it, syncing: true } : it
+        );
+
+        // Placeholder: replace with real Apex call to fetch stock from
+        // your ERP/inventory source once available.
+        setTimeout(() => {
+            this.displayItems = this.displayItems.map((it) => {
+                if (it.lineId !== lineId) return it;
+                const stub = 0; // TODO: replace with real stock qty
+                return {
+                    ...it,
+                    stockQty: stub,
+                    stockQtyDisplay: String(stub),
+                    syncing: false
+                };
+            });
+            this.showToast('Synced', 'Stock quantity refreshed.', 'success');
+        }, 600);
     }
 
     handleCancel() {

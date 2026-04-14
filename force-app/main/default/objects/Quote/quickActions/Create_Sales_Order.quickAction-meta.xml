@@ -4,5 +4,5 @@
     <lightningComponent>createSalesOrder</lightningComponent>
     <optionsCreateFeedItem>false</optionsCreateFeedItem>
     <type>LightningComponent</type>
-    <width>80</width>
+    <width>100</width>
 </QuickAction>
