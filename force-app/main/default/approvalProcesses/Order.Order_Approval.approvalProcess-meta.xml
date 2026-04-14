@@ -10,10 +10,8 @@
     </allowedSubmitters>
     <approvalPageFields>
         <field>OrderNumber</field>
-        <field>AccountId</field>
         <field>Owner</field>
         <field>TotalAmount</field>
-        <field>QuoteId</field>
         <field>Price_Status__c</field>
         <field>Approval_Status__c</field>
         <field>EffectiveDate</field>
