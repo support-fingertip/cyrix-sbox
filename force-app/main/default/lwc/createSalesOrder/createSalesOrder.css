@@ -1,3 +1,19 @@
+/* =========================================
+   Container
+========================================= */
+.cso-container {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.cso-body {
+    box-sizing: border-box;
+}
+
+/* =========================================
+   Header
+========================================= */
 .header-bar {
     background: linear-gradient(90deg, #1a73e8 0%, #4285f4 100%);
     color: #ffffff;
@@ -11,7 +27,85 @@
     margin: 0;
 }
 
+/* =========================================
+   Info box
+========================================= */
 .slds-box {
     background-color: #f4f6f9;
     border: 1px solid #dddbda;
+}
+
+/* =========================================
+   Items table — horizontal scroll on narrow screens
+========================================= */
+.cso-table-wrapper {
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+}
+
+.cso-items-table {
+    width: 100%;
+    min-width: 560px; /* keeps columns readable; wrapper scrolls on mobile */
+}
+
+.cso-col-select  { width: 40px; }
+.cso-col-qty     { width: 110px; }
+.cso-col-price   { width: 120px; white-space: nowrap; }
+.cso-col-product { min-width: 160px; }
+
+/* =========================================
+   Footer
+========================================= */
+.cso-footer {
+    text-align: right;
+}
+
+/* =========================================
+   Tablet (≤ 768px)
+========================================= */
+@media (max-width: 768px) {
+    .header-bar h2 {
+        font-size: 1rem;
+    }
+
+    .cso-body {
+        padding: 0.75rem !important;
+    }
+}
+
+/* =========================================
+   Mobile (≤ 480px)
+========================================= */
+@media (max-width: 480px) {
+    .header-bar {
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+
+    .header-bar h2 {
+        font-size: 0.95rem;
+    }
+
+    .cso-body {
+        padding: 0.5rem !important;
+    }
+
+    .slds-box {
+        padding: 0.75rem !important;
+    }
+
+    /* Footer: stack buttons full-width on phones */
+    .cso-footer {
+        text-align: center;
+    }
+
+    .cso-footer-btn {
+        display: block;
+        width: 100%;
+        margin: 0 0 0.5rem 0 !important;
+    }
+
+    .cso-footer-btn:last-child {
+        margin-bottom: 0 !important;
+    }
 }

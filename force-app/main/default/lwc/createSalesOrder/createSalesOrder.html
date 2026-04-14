@@ -6,38 +6,38 @@
     </template>
 
     <template if:false={isLoading}>
-        <div class="slds-card">
+        <div class="slds-card cso-container">
             <!-- Header -->
             <div class="header-bar slds-p-vertical_medium slds-text-align_center">
                 <h2 class="slds-text-heading_medium slds-text-color_inverse">Sales Order</h2>
             </div>
 
-            <div class="slds-p-around_medium">
+            <div class="slds-p-around_medium cso-body">
                 <!-- Customer Information (read-only) -->
                 <div class="slds-box slds-m-bottom_medium">
                     <h3 class="slds-text-heading_small slds-m-bottom_small">Customer Information</h3>
                     <div class="slds-grid slds-wrap slds-gutters">
-                        <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-vertical_xx-small">
                             <p class="slds-text-color_weak slds-text-body_small">Customer Name</p>
-                            <p class="slds-text-body_regular">{quoteContext.customerName}</p>
+                            <p class="slds-text-body_regular slds-truncate" title={quoteContext.customerName}>{quoteContext.customerName}</p>
                         </div>
-                        <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-vertical_xx-small">
                             <p class="slds-text-color_weak slds-text-body_small">Email</p>
-                            <p class="slds-text-body_regular">{emailDisplay}</p>
+                            <p class="slds-text-body_regular slds-truncate" title={emailDisplay}>{emailDisplay}</p>
                         </div>
-                        <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-vertical_xx-small">
                             <p class="slds-text-color_weak slds-text-body_small">Phone</p>
                             <p class="slds-text-body_regular">{phoneDisplay}</p>
                         </div>
-                        <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-vertical_xx-small">
                             <p class="slds-text-color_weak slds-text-body_small">Shipping Address</p>
                             <p class="slds-text-body_regular">{shippingDisplay}</p>
                         </div>
-                        <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-vertical_xx-small">
                             <p class="slds-text-color_weak slds-text-body_small">Executive Assigned</p>
-                            <p class="slds-text-body_regular">{quoteContext.executiveAssigned}</p>
+                            <p class="slds-text-body_regular slds-truncate" title={quoteContext.executiveAssigned}>{quoteContext.executiveAssigned}</p>
                         </div>
-                        <div class="slds-col slds-size_1-of-2 slds-p-vertical_xx-small">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-vertical_xx-small">
                             <p class="slds-text-color_weak slds-text-body_small">Address</p>
                             <p class="slds-text-body_regular">{billingDisplay}</p>
                         </div>
@@ -46,7 +46,7 @@
 
                 <!-- Order Form Fields -->
                 <div class="slds-grid slds-wrap slds-gutters slds-m-bottom_medium">
-                    <div class="slds-col slds-size_1-of-2">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_small">
                         <lightning-input
                             type="date"
                             label="Delivery Committed Date"
@@ -56,7 +56,7 @@
                             required>
                         </lightning-input>
                     </div>
-                    <div class="slds-col slds-size_1-of-2 slds-align_absolute-center">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-bottom_small slds-align-middle">
                         <div class="slds-form-element">
                             <label class="slds-form-element__label">Credit Order :</label>
                             <lightning-input
@@ -99,48 +99,52 @@
                 <!-- Quote Items Table -->
                 <h3 class="slds-text-heading_small slds-m-bottom_small">Quote Items</h3>
                 <template if:true={hasItems}>
-                    <table class="slds-table slds-table_cell-buffer slds-table_bordered">
-                        <thead>
-                            <tr class="slds-line-height_reset">
-                                <th scope="col" style="width:40px"></th>
-                                <th scope="col"><span class="slds-truncate">Product</span></th>
-                                <th scope="col"><span class="slds-truncate">Quantity</span></th>
-                                <th scope="col"><span class="slds-truncate">Unit Price</span></th>
-                                <th scope="col"><span class="slds-truncate">Total Price</span></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <template for:each={displayItems} for:item="item">
-                                <tr key={item.lineId}>
-                                    <td>
-                                        <lightning-input
-                                            type="checkbox"
-                                            variant="label-hidden"
-                                            label="Select"
-                                            checked={item.selected}
-                                            data-line-id={item.lineId}
-                                            onchange={handleItemSelect}>
-                                        </lightning-input>
-                                    </td>
-                                    <td>{item.productName}</td>
-                                    <td>
-                                        <lightning-input
-                                            type="number"
-                                            variant="label-hidden"
-                                            label="Quantity"
-                                            value={item.quantity}
-                                            min="1"
-                                            step="1"
-                                            data-line-id={item.lineId}
-                                            onchange={handleQuantityChange}>
-                                        </lightning-input>
-                                    </td>
-                                    <td>{item.unitPriceDisplay}</td>
-                                    <td>{item.totalPriceDisplay}</td>
+                    <div class="slds-scrollable_x cso-table-wrapper">
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered cso-items-table">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th scope="col" class="cso-col-select"></th>
+                                    <th scope="col" class="cso-col-product"><span class="slds-truncate">Product</span></th>
+                                    <th scope="col" class="cso-col-qty"><span class="slds-truncate">Quantity</span></th>
+                                    <th scope="col" class="cso-col-price"><span class="slds-truncate">Unit Price</span></th>
+                                    <th scope="col" class="cso-col-price"><span class="slds-truncate">Total Price</span></th>
                                 </tr>
-                            </template>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <template for:each={displayItems} for:item="item">
+                                    <tr key={item.lineId}>
+                                        <td class="cso-col-select">
+                                            <lightning-input
+                                                type="checkbox"
+                                                variant="label-hidden"
+                                                label="Select"
+                                                checked={item.selected}
+                                                data-line-id={item.lineId}
+                                                onchange={handleItemSelect}>
+                                            </lightning-input>
+                                        </td>
+                                        <td class="cso-col-product">
+                                            <span class="slds-truncate" title={item.productName}>{item.productName}</span>
+                                        </td>
+                                        <td class="cso-col-qty">
+                                            <lightning-input
+                                                type="number"
+                                                variant="label-hidden"
+                                                label="Quantity"
+                                                value={item.quantity}
+                                                min="1"
+                                                step="1"
+                                                data-line-id={item.lineId}
+                                                onchange={handleQuantityChange}>
+                                            </lightning-input>
+                                        </td>
+                                        <td class="cso-col-price">{item.unitPriceDisplay}</td>
+                                        <td class="cso-col-price">{item.totalPriceDisplay}</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
                 </template>
                 <template if:false={hasItems}>
                     <p class="slds-text-color_weak slds-p-vertical_small">No line items on this Quote.</p>
@@ -148,12 +152,12 @@
             </div>
 
             <!-- Footer -->
-            <footer class="slds-modal__footer slds-p-around_small slds-text-align_right">
+            <footer class="slds-modal__footer slds-p-around_small cso-footer">
                 <lightning-button
                     label="Cancel"
                     variant="neutral"
                     onclick={handleCancel}
-                    class="slds-m-right_x-small"
+                    class="slds-m-right_x-small cso-footer-btn"
                     disabled={isSaving}>
                 </lightning-button>
                 <lightning-button
@@ -161,7 +165,8 @@
                     variant="brand"
                     onclick={handleConfirm}
                     disabled={confirmDisabled}
-                    icon-name="utility:success">
+                    icon-name="utility:success"
+                    class="cso-footer-btn">
                 </lightning-button>
             </footer>
         </div>
