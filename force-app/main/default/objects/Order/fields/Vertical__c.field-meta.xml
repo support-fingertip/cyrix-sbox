@@ -3,9 +3,11 @@
     <fullName>Vertical__c</fullName>
     <externalId>false</externalId>
     <label>Vertical</label>
-    <length>100</length>
     <required>false</required>
-    <trackTrending>false</trackTrending>
-    <type>Text</type>
-    <unique>false</unique>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetName>Business_Vertical</valueSetName>
+    </valueSet>
 </CustomField>
