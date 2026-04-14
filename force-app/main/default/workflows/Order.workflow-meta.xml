@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Workflow field updates used by the Order_Approval process.
-    See approvalProcesses/Order.Order_Approval.approvalProcess-meta.xml.
+    Workflow field updates used by Order automations.
+    Approval process: approvalProcesses/Order.Order_Approval.approvalProcess-meta.xml
 -->
 <Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
     <fieldUpdates>
