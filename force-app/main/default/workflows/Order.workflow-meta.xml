@@ -1,20 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Workflow field updates and email alerts used by Order automations.
-    Approval process:         approvalProcesses/Order.Order_Approval.approvalProcess-meta.xml
-    Cancellation notifier:    flows/Order_Cancellation_Notifier.flow-meta.xml
+    Workflow field updates used by Order automations.
+    Approval process: approvalProcesses/Order.Order_Approval.approvalProcess-meta.xml
 -->
 <Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
-    <alerts>
-        <fullName>Order_Cancelled_Owner_Notification</fullName>
-        <description>Notifies the Order Owner that the Order has been cancelled.</description>
-        <protected>false</protected>
-        <recipients>
-            <type>owner</type>
-        </recipients>
-        <senderType>CurrentUser</senderType>
-        <template>Order_Notifications/Order_Cancellation_Notification</template>
-    </alerts>
     <fieldUpdates>
         <fullName>Order_Approved_Date_Time</fullName>
         <field>Quote_Approved_Date_Time__c</field>

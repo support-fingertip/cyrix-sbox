@@ -1,24 +1,83 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <actionCalls>
-        <name>Send_Order_Cancellation_Email</name>
-        <label>Send Order Cancellation Email</label>
+        <name>Send_Order_Cancellation_Notification</name>
+        <label>Send Order Cancellation Notification</label>
         <locationX>0</locationX>
         <locationY>0</locationY>
-        <actionName>Order.Order_Cancelled_Owner_Notification</actionName>
-        <actionType>emailAlert</actionType>
+        <actionName>customNotificationAction</actionName>
+        <actionType>customNotificationAction</actionType>
         <flowTransactionModel>CurrentTransaction</flowTransactionModel>
         <inputParameters>
-            <name>SObjectRowId</name>
+            <name>customNotifTypeId</name>
+            <value>
+                <elementReference>Get_Notification_Type.Id</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>recipientIds</name>
+            <value>
+                <elementReference>recipientIds</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>title</name>
+            <value>
+                <elementReference>notificationTitle</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>body</name>
+            <value>
+                <elementReference>notificationBody</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>targetId</name>
             <value>
                 <elementReference>$Record.Id</elementReference>
             </value>
         </inputParameters>
-        <nameSegment>Order.Order_Cancelled_Owner_Notification</nameSegment>
+        <nameSegment>customNotificationAction</nameSegment>
     </actionCalls>
     <apiVersion>62.0</apiVersion>
-    <description>Sends an email to the Order Owner when the Order is marked Cancelled (Status transitions to Cancelled).</description>
+    <assignments>
+        <name>Build_Notification_Payload</name>
+        <label>Build Notification Payload</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>notificationTitle</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Order Cancelled</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>notificationBody</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>bodyText</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>recipientIds</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>$Record.OwnerId</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Send_Order_Cancellation_Notification</targetReference>
+        </connector>
+    </assignments>
+    <description>Sends an in-app custom notification to the Order Owner when Order.Status transitions to Cancelled.</description>
     <environments>Default</environments>
+    <formulas>
+        <name>bodyText</name>
+        <dataType>String</dataType>
+        <expression>&quot;Order &quot; &amp; TEXT({!$Record.OrderNumber}) &amp; &quot; for &quot; &amp; {!$Record.Account.Name} &amp; &quot; has been cancelled.&quot; &amp; IF(ISBLANK({!$Record.Cancellation_Reason__c}), &quot;&quot;, &quot; Reason: &quot; &amp; {!$Record.Cancellation_Reason__c})</expression>
+    </formulas>
     <interviewLabel>Order Cancellation Notifier {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Order Cancellation Notifier</label>
     <processMetadataValues>
@@ -40,11 +99,32 @@
         </value>
     </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
+    <recordLookups>
+        <name>Get_Notification_Type</name>
+        <label>Get Notification Type</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Build_Notification_Payload</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>DeveloperName</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Order_Cancellation_Notification</stringValue>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>CustomNotificationType</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
     <start>
         <locationX>0</locationX>
         <locationY>0</locationY>
         <connector>
-            <targetReference>Send_Order_Cancellation_Email</targetReference>
+            <targetReference>Get_Notification_Type</targetReference>
         </connector>
         <filterFormula>AND(ISPICKVAL({!$Record.Status}, &apos;Cancelled&apos;), OR(ISNEW(), ISCHANGED({!$Record.Status})))</filterFormula>
         <object>Order</object>
@@ -52,4 +132,25 @@
         <triggerType>RecordAfterSave</triggerType>
     </start>
     <status>Active</status>
+    <variables>
+        <name>notificationBody</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>notificationTitle</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>recipientIds</name>
+        <dataType>String</dataType>
+        <isCollection>true</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
 </Flow>
