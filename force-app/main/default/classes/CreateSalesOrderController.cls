@@ -108,7 +108,7 @@ public with sharing class CreateSalesOrderController {
         if (input == null) {
             throw new AuraHandledException('Order input is required.');
         }
-        if (input.deliveryCommittedDate == null) {
+        if (String.isBlank(input.deliveryCommittedDate)) {
             throw new AuraHandledException('Delivery Committed Date is required.');
         }
         if (String.isBlank(input.warehouseId)) {
@@ -116,6 +116,13 @@ public with sharing class CreateSalesOrderController {
         }
         if (input.selectedItems == null || input.selectedItems.isEmpty()) {
             throw new AuraHandledException('Please select at least one quote item.');
+        }
+
+        Date deliveryDate;
+        try {
+            deliveryDate = Date.valueOf(input.deliveryCommittedDate);
+        } catch (Exception ex) {
+            throw new AuraHandledException('Invalid Delivery Committed Date: ' + input.deliveryCommittedDate);
         }
 
         Quote q = [
@@ -134,7 +141,7 @@ public with sharing class CreateSalesOrderController {
             ord.Pricebook2Id   = q.Pricebook2Id;
             ord.QuoteId        = q.Id;
             ord.OpportunityId  = q.OpportunityId;
-            ord.EffectiveDate  = input.deliveryCommittedDate;
+            ord.EffectiveDate  = deliveryDate;
             ord.Status         = 'Draft';
             ord.Branch__c      = input.warehouseId;
             ord.Description    = input.remarks;
@@ -244,7 +251,9 @@ public with sharing class CreateSalesOrderController {
     }
 
     public class SalesOrderInput {
-        @AuraEnabled public Date deliveryCommittedDate;
+        // Kept as String to avoid JSON deserialization edge cases;
+        // parsed to Date in createSalesOrder.
+        @AuraEnabled public String deliveryCommittedDate;
         @AuraEnabled public String warehouseId;
         @AuraEnabled public String remarks;
         @AuraEnabled public Boolean creditOrder;

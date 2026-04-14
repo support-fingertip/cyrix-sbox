@@ -128,7 +128,7 @@ private class CreateSalesOrderControllerTest {
 
         CreateSalesOrderController.SalesOrderInput input =
             new CreateSalesOrderController.SalesOrderInput();
-        input.deliveryCommittedDate = Date.today().addDays(7);
+        input.deliveryCommittedDate = String.valueOf(Date.today().addDays(7));
         input.warehouseId = br.Id;
         input.remarks = 'Test remarks';
         input.creditOrder = true;
@@ -188,7 +188,7 @@ private class CreateSalesOrderControllerTest {
         try {
             CreateSalesOrderController.SalesOrderInput inp =
                 new CreateSalesOrderController.SalesOrderInput();
-            inp.deliveryCommittedDate = Date.today();
+            inp.deliveryCommittedDate = String.valueOf(Date.today());
             CreateSalesOrderController.createSalesOrder(q.Id, inp);
             System.assert(false, 'Expected exception for missing warehouse');
         } catch (AuraHandledException e) { System.assert(true); }
@@ -198,7 +198,7 @@ private class CreateSalesOrderControllerTest {
             Branch__c br = [SELECT Id FROM Branch__c LIMIT 1];
             CreateSalesOrderController.SalesOrderInput inp =
                 new CreateSalesOrderController.SalesOrderInput();
-            inp.deliveryCommittedDate = Date.today();
+            inp.deliveryCommittedDate = String.valueOf(Date.today());
             inp.warehouseId = br.Id;
             inp.selectedItems = new List<CreateSalesOrderController.SelectedItem>();
             CreateSalesOrderController.createSalesOrder(q.Id, inp);

@@ -83,13 +83,21 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     }
 
     handleInputChange(event) {
-        const field = event.target.dataset.field;
-        this.form = { ...this.form, [field]: event.target.value };
+        const field = event.currentTarget.dataset.field;
+        const value = (event.detail && event.detail.value !== undefined)
+            ? event.detail.value
+            : event.target.value;
+        if (!field) return;
+        this.form = { ...this.form, [field]: value };
     }
 
     handleToggleChange(event) {
-        const field = event.target.dataset.field;
-        this.form = { ...this.form, [field]: event.target.checked };
+        const field = event.currentTarget.dataset.field;
+        const checked = (event.detail && event.detail.checked !== undefined)
+            ? event.detail.checked
+            : event.target.checked;
+        if (!field) return;
+        this.form = { ...this.form, [field]: checked };
     }
 
     handleItemSelect(event) {
