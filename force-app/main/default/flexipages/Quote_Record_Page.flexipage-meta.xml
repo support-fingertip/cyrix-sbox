@@ -57,6 +57,9 @@
                         <valueListItems>
                             <value>CustomButton.Quote.Send_Quote_PDF</value>
                         </valueListItems>
+                        <valueListItems>
+                            <value>Quote.Create_Sales_Order</value>
+                        </valueListItems>
                     </valueList>
                 </componentInstanceProperties>
                 <componentInstanceProperties>
