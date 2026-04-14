@@ -205,20 +205,20 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
 
         this.isSaving = true;
         try {
-            const input = {
+            const selectedLineIds = selected.map((i) => i.lineId);
+            const quantityByLineId = {};
+            selected.forEach((i) => {
+                quantityByLineId[i.lineId] = i.quantity;
+            });
+
+            const orderId = await createSalesOrder({
+                quoteId: this.recordId,
                 deliveryCommittedDate: finalIso,
                 warehouseId: this.warehouseId,
                 remarks: this.remarks,
                 creditOrder: this.creditOrder === true,
-                selectedItems: selected.map((i) => ({
-                    lineId: i.lineId,
-                    quantity: i.quantity
-                }))
-            };
-
-            const orderId = await createSalesOrder({
-                quoteId: this.recordId,
-                input: input
+                selectedLineIds: selectedLineIds,
+                quantityByLineId: quantityByLineId
             });
 
             this.showToast('Success', 'Sales Order created.', 'success');

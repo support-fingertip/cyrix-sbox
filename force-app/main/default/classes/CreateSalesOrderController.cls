@@ -99,30 +99,38 @@ public with sharing class CreateSalesOrderController {
     /**
      * Creates an Order and its OrderItems from the given Quote and form inputs.
      * Returns the newly created Order Id so the LWC can navigate to it.
+     *
+     * Flat parameters are used instead of a wrapper class so LWC → Apex
+     * deserialization is fully deterministic.
      */
     @AuraEnabled
-    public static Id createSalesOrder(Id quoteId, SalesOrderInput input) {
+    public static Id createSalesOrder(
+        Id quoteId,
+        String deliveryCommittedDate,
+        Id warehouseId,
+        String remarks,
+        Boolean creditOrder,
+        List<Id> selectedLineIds,
+        Map<Id, Decimal> quantityByLineId
+    ) {
         if (quoteId == null) {
             throw new AuraHandledException('Quote Id is required.');
         }
-        if (input == null) {
-            throw new AuraHandledException('Order input is required.');
-        }
-        if (String.isBlank(input.deliveryCommittedDate)) {
+        if (String.isBlank(deliveryCommittedDate)) {
             throw new AuraHandledException('Delivery Committed Date is required.');
         }
-        if (String.isBlank(input.warehouseId)) {
+        if (warehouseId == null) {
             throw new AuraHandledException('Warehouse is required.');
         }
-        if (input.selectedItems == null || input.selectedItems.isEmpty()) {
+        if (selectedLineIds == null || selectedLineIds.isEmpty()) {
             throw new AuraHandledException('Please select at least one quote item.');
         }
 
         Date deliveryDate;
         try {
-            deliveryDate = Date.valueOf(input.deliveryCommittedDate);
+            deliveryDate = Date.valueOf(deliveryCommittedDate);
         } catch (Exception ex) {
-            throw new AuraHandledException('Invalid Delivery Committed Date: ' + input.deliveryCommittedDate);
+            throw new AuraHandledException('Invalid Delivery Committed Date: ' + deliveryCommittedDate);
         }
 
         Quote q = [
@@ -143,9 +151,9 @@ public with sharing class CreateSalesOrderController {
             ord.OpportunityId  = q.OpportunityId;
             ord.EffectiveDate  = deliveryDate;
             ord.Status         = 'Draft';
-            ord.Branch__c      = input.warehouseId;
-            ord.Description    = input.remarks;
-            ord.is_Active__c   = input.creditOrder == true;
+            ord.Branch__c      = warehouseId;
+            ord.Description    = remarks;
+            ord.is_Active__c   = creditOrder == true;
 
             // Copy addresses
             ord.BillingStreet     = q.BillingStreet;
@@ -171,11 +179,13 @@ public with sharing class CreateSalesOrderController {
             ]);
 
             List<OrderItem> orderItems = new List<OrderItem>();
-            for (SelectedItem si : input.selectedItems) {
-                QuoteLineItem src = quoteLinesById.get(si.lineId);
+            for (Id lineId : selectedLineIds) {
+                QuoteLineItem src = quoteLinesById.get(lineId);
                 if (src == null) continue;
 
-                Decimal qty = si.quantity != null ? si.quantity : src.Quantity;
+                Decimal qty = (quantityByLineId != null && quantityByLineId.get(lineId) != null)
+                    ? quantityByLineId.get(lineId)
+                    : src.Quantity;
 
                 OrderItem oi = new OrderItem();
                 oi.OrderId             = ord.Id;
@@ -250,18 +260,4 @@ public with sharing class CreateSalesOrderController {
         @AuraEnabled public String value;
     }
 
-    public class SalesOrderInput {
-        // Kept as String to avoid JSON deserialization edge cases;
-        // parsed to Date in createSalesOrder.
-        @AuraEnabled public String deliveryCommittedDate;
-        @AuraEnabled public String warehouseId;
-        @AuraEnabled public String remarks;
-        @AuraEnabled public Boolean creditOrder;
-        @AuraEnabled public List<SelectedItem> selectedItems;
-    }
-
-    public class SelectedItem {
-        @AuraEnabled public Id lineId;
-        @AuraEnabled public Decimal quantity;
-    }
 }
