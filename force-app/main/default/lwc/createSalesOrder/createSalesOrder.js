@@ -161,16 +161,22 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
             this.deliveryCommittedDate = finalIso;
         }
 
+        // Log as a JSON string so LWS proxies don't hide the values.
         // eslint-disable-next-line no-console
-        console.log('[CreateSalesOrder] handleConfirm state:', {
-            stateRaw: this.deliveryCommittedDate,
-            domRaw: domRaw,
-            stateIso: stateIso,
-            domIso: domIso,
-            finalIso: finalIso,
-            warehouseId: this.warehouseId,
-            selectedCount: this.displayItems.filter((i) => i.selected).length
-        });
+        console.log(
+            '[CreateSalesOrder] handleConfirm state: ' +
+                JSON.stringify({
+                    stateRaw: this.deliveryCommittedDate,
+                    stateType: typeof this.deliveryCommittedDate,
+                    domRaw: domRaw,
+                    domType: typeof domRaw,
+                    stateIso: stateIso,
+                    domIso: domIso,
+                    finalIso: finalIso,
+                    warehouseId: this.warehouseId,
+                    selectedCount: this.displayItems.filter((i) => i.selected).length
+                })
+        );
 
         if (!this.warehouseId) {
             this.showToast('Error', 'Please select a Warehouse', 'error');
@@ -199,20 +205,20 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
 
         this.isSaving = true;
         try {
-            const input = {
+            const selectedLineIds = selected.map((i) => i.lineId);
+            const quantityByLineId = {};
+            selected.forEach((i) => {
+                quantityByLineId[i.lineId] = i.quantity;
+            });
+
+            const orderId = await createSalesOrder({
+                quoteId: this.recordId,
                 deliveryCommittedDate: finalIso,
                 warehouseId: this.warehouseId,
                 remarks: this.remarks,
                 creditOrder: this.creditOrder === true,
-                selectedItems: selected.map((i) => ({
-                    lineId: i.lineId,
-                    quantity: i.quantity
-                }))
-            };
-
-            const orderId = await createSalesOrder({
-                quoteId: this.recordId,
-                input: input
+                selectedLineIds: selectedLineIds,
+                quantityByLineId: quantityByLineId
             });
 
             this.showToast('Success', 'Sales Order created.', 'success');
