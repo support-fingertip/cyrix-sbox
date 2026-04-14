@@ -51,10 +51,10 @@
         <reevaluateOnChange>false</reevaluateOnChange>
     </fieldUpdates>
     <fieldUpdates>
-        <fullName>Order_Price_Status_Not_Required</fullName>
+        <fullName>Order_Price_Status_Approved</fullName>
         <field>Price_Status__c</field>
-        <literalValue>Not Required</literalValue>
-        <name>Order Price Status Not Required</name>
+        <literalValue>Approved</literalValue>
+        <name>Order Price Status Approved</name>
         <notifyAssignee>false</notifyAssignee>
         <operation>Literal</operation>
         <protected>false</protected>
