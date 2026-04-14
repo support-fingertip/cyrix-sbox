@@ -65,7 +65,7 @@
         <label>Order Acceptance Approver</label>
         <name>Order_Acceptance_Approver</name>
     </approvalStep>
-    <description>Price-based approval for Sales Orders. Mirrors the Quote Approval process and adds the Order Acceptance Approver as the final step.</description>
+    <description>Price-based approval for Sales Orders. Mirrors the Quote Approval process with three sequential steps: Initial Price Approver, Warehouse/ERP User, and Order Acceptance Approver (final).</description>
     <enableMobileDeviceAccess>true</enableMobileDeviceAccess>
     <entryCriteria>
         <criteriaItems>
