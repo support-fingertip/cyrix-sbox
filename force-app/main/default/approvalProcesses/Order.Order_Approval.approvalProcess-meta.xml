@@ -26,6 +26,7 @@
                 <name>admin@cyrix.com</name>
                 <type>user</type>
             </approver>
+            <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
         <description>Step 1 - Initial Price Approver. Mirrors the Quote approval process.</description>
         <label>Initial Price Approver</label>
@@ -38,6 +39,7 @@
                 <name>admin@cyrix.com</name>
                 <type>user</type>
             </approver>
+            <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
         <description>Step 2 - Warehouse / ERP User. Mirrors the Quote approval process.</description>
         <label>Warehouse / ERP User</label>
@@ -50,6 +52,7 @@
                 <name>admin@cyrix.com</name>
                 <type>user</type>
             </approver>
+            <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
         <description>Step 3 - Order Acceptance Approver. Final step before the Order is activated.</description>
         <label>Order Acceptance Approver</label>
@@ -78,7 +81,7 @@
             <type>FieldUpdate</type>
         </action>
         <action>
-            <name>Order_Price_Status_Not_Required</name>
+            <name>Order_Price_Status_Approved</name>
             <type>FieldUpdate</type>
         </action>
     </finalApprovalActions>
