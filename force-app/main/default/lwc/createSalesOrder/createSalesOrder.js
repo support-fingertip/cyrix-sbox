@@ -134,7 +134,12 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         const remarksInput = this.template.querySelector('lightning-textarea[data-field="remarks"]');
         const creditToggle = this.template.querySelector('lightning-input[data-field="creditOrder"]');
 
-        const deliveryCommittedDate = dateInput ? dateInput.value : this.form.deliveryCommittedDate;
+        const rawDate = dateInput ? dateInput.value : this.form.deliveryCommittedDate;
+        // Trim to catch whitespace/unparsed-placeholder values that are truthy
+        // in JS but blank on the Apex side (String.isBlank), which would
+        // otherwise surface as the server-side "Delivery Committed Date is
+        // required" error despite this handler running.
+        const deliveryCommittedDate = (rawDate == null ? '' : String(rawDate)).trim();
         const warehouseId = warehouseInput ? warehouseInput.value : this.form.warehouseId;
         const remarks = remarksInput ? remarksInput.value : this.form.remarks;
         const creditOrder = creditToggle ? creditToggle.checked : this.form.creditOrder;
@@ -142,7 +147,7 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         // Keep the tracked state in sync so reactive getters are accurate.
         this.form = {
             ...this.form,
-            deliveryCommittedDate,
+            deliveryCommittedDate: deliveryCommittedDate || null,
             warehouseId,
             remarks,
             creditOrder
@@ -150,7 +155,14 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
 
         if (this.isSaving) return;
 
-        if (!deliveryCommittedDate) {
+        // Require a non-blank ISO date string (YYYY-MM-DD). Also ask the input
+        // to run its own validity check so the user sees the inline field
+        // error, not just a toast.
+        const isoDateOk = /^\d{4}-\d{2}-\d{2}$/.test(deliveryCommittedDate);
+        const inputValid = dateInput && typeof dateInput.reportValidity === 'function'
+            ? dateInput.reportValidity()
+            : true;
+        if (!deliveryCommittedDate || !isoDateOk || !inputValid) {
             this.showToast('Missing date', 'Please select a Delivery Committed Date.', 'warning');
             if (dateInput && dateInput.focus) dateInput.focus();
             return;
