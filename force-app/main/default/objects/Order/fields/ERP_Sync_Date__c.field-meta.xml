@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ERP_Sync_Date__c</fullName>
+    <description>Timestamp of the most recent successful push to ERP.</description>
+    <externalId>false</externalId>
+    <label>ERP Sync Date</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>DateTime</type>
+</CustomField>
