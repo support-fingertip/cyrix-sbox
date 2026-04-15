@@ -64,8 +64,4 @@
     <showDetails>true</showDetails>
     <showGrandTotal>true</showGrandTotal>
     <showSubTotals>true</showSubTotals>
-    <timeFrameFilter>
-        <dateColumn>ORDER.CREATED_DATE</dateColumn>
-        <interval>INTERVAL_CURRENT_AND_PREV_FY</interval>
-    </timeFrameFilter>
 </Report>
