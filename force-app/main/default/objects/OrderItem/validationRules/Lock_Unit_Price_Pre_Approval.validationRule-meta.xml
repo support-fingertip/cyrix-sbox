@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Lock_Unit_Price_Pre_Approval</fullName>
+    <active>true</active>
+    <description>Prevents editing of OrderItem.UnitPrice while the parent Order is still in Draft (pre-approval). Once the Order is submitted for approval the SF approval lock takes over. System Administrators are exempt so data corrections remain possible.</description>
+    <errorConditionFormula>AND(
+    $Profile.Name &lt;&gt; &apos;System Administrator&apos;,
+    ISCHANGED(UnitPrice),
+    TEXT(Order.Status) = &apos;Draft&apos;
+)</errorConditionFormula>
+    <errorDisplayField>UnitPrice</errorDisplayField>
+    <errorMessage>Unit Price cannot be changed on this Sales Order while it is in Draft. Submit for approval first, or contact your System Administrator.</errorMessage>
+</ValidationRule>

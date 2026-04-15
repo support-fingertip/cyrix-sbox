@@ -107,6 +107,49 @@ public with sharing class CreateSalesOrderController {
     }
 
     /**
+     * Returns PricebookEntries (products) available in the Quote's Pricebook,
+     * so the LWC can render an "Add Product" picker. Each option carries the
+     * unit price and tax so the UI can render a row without an extra callout.
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<ProductOption> getPricebookProducts(Id quoteId) {
+        if (quoteId == null) {
+            throw new AuraHandledException('Quote Id is required.');
+        }
+        Quote q = [
+            SELECT Id, Pricebook2Id
+            FROM Quote
+            WHERE Id = :quoteId
+            LIMIT 1
+        ];
+        if (q.Pricebook2Id == null) {
+            return new List<ProductOption>();
+        }
+
+        List<ProductOption> result = new List<ProductOption>();
+        for (PricebookEntry pbe : [
+            SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
+                   Product2.Tax__c, UnitPrice
+            FROM PricebookEntry
+            WHERE Pricebook2Id = :q.Pricebook2Id
+              AND IsActive = true
+              AND Product2.IsActive = true
+            ORDER BY Product2.Name ASC
+            LIMIT 1000
+        ]) {
+            ProductOption opt = new ProductOption();
+            opt.value = pbe.Id;
+            opt.label = pbe.Product2.Name;
+            opt.productId = pbe.Product2Id;
+            opt.productName = pbe.Product2.Name;
+            opt.unitPrice = pbe.UnitPrice;
+            opt.tax = pbe.Product2.Tax__c;
+            result.add(opt);
+        }
+        return result;
+    }
+
+    /**
      * Creates an Order and its OrderItems from the given Quote and form inputs.
      * Returns the newly created Order Id so the LWC can navigate to it.
      *
@@ -121,7 +164,11 @@ public with sharing class CreateSalesOrderController {
         String remarks,
         Boolean creditOrder,
         List<Id> selectedLineIds,
-        Map<Id, Decimal> quantityByLineId
+        Map<Id, Decimal> quantityByLineId,
+        Map<Id, Decimal> discountByLineId,
+        List<Id> manualPricebookEntryIds,
+        Map<Id, Decimal> manualQuantityByPbeId,
+        Map<Id, Decimal> manualDiscountByPbeId
     ) {
         if (quoteId == null) {
             throw new AuraHandledException('Quote Id is required.');
@@ -132,8 +179,10 @@ public with sharing class CreateSalesOrderController {
         if (warehouseId == null) {
             throw new AuraHandledException('Warehouse is required.');
         }
-        if (selectedLineIds == null || selectedLineIds.isEmpty()) {
-            throw new AuraHandledException('Please select at least one quote item.');
+        Boolean hasQuoteLines = selectedLineIds != null && !selectedLineIds.isEmpty();
+        Boolean hasManualLines = manualPricebookEntryIds != null && !manualPricebookEntryIds.isEmpty();
+        if (!hasQuoteLines && !hasManualLines) {
+            throw new AuraHandledException('Please add at least one product to the Sales Order.');
         }
 
         Date deliveryDate;
@@ -203,36 +252,87 @@ public with sharing class CreateSalesOrderController {
 
             insert ord;
 
-            // Build OrderItems from selected quote lines
-            Map<Id, QuoteLineItem> quoteLinesById = new Map<Id, QuoteLineItem>([
-                SELECT Id, Product2Id, PricebookEntryId, Quantity, UnitPrice,
-                       Discount, Description, Tax__c, Tax_Amount__c,
-                       Source_Pricebook_Ref__c, Source_Pricebook__c
-                FROM QuoteLineItem
-                WHERE QuoteId = :quoteId
-            ]);
-
             List<OrderItem> orderItems = new List<OrderItem>();
-            for (Id lineId : selectedLineIds) {
-                QuoteLineItem src = quoteLinesById.get(lineId);
-                if (src == null) continue;
 
-                Decimal qty = (quantityByLineId != null && quantityByLineId.get(lineId) != null)
-                    ? quantityByLineId.get(lineId)
-                    : src.Quantity;
+            // Build OrderItems from selected Quote lines.
+            if (hasQuoteLines) {
+                Map<Id, QuoteLineItem> quoteLinesById = new Map<Id, QuoteLineItem>([
+                    SELECT Id, Product2Id, PricebookEntryId, Quantity, UnitPrice,
+                           Discount, Description, Tax__c, Tax_Amount__c,
+                           Source_Pricebook_Ref__c, Source_Pricebook__c
+                    FROM QuoteLineItem
+                    WHERE QuoteId = :quoteId
+                ]);
 
-                OrderItem oi = new OrderItem();
-                oi.OrderId             = ord.Id;
-                oi.Product2Id          = src.Product2Id;
-                oi.PricebookEntryId    = src.PricebookEntryId;
-                oi.Quantity            = qty;
-                oi.UnitPrice           = src.UnitPrice;
-                oi.Description         = src.Description;
-                oi.Tax__c              = src.Tax__c;
-                oi.Tax_Amount__c       = src.Tax_Amount__c;
-                oi.Source_Pricebook_Ref__c = src.Source_Pricebook_Ref__c;
-                oi.Source_Pricebook__c     = src.Source_Pricebook__c;
-                orderItems.add(oi);
+                for (Id lineId : selectedLineIds) {
+                    QuoteLineItem src = quoteLinesById.get(lineId);
+                    if (src == null) continue;
+
+                    Decimal qty = (quantityByLineId != null && quantityByLineId.get(lineId) != null)
+                        ? quantityByLineId.get(lineId)
+                        : src.Quantity;
+                    Decimal disc = (discountByLineId != null && discountByLineId.get(lineId) != null)
+                        ? discountByLineId.get(lineId)
+                        : src.Discount;
+
+                    OrderItem oi = new OrderItem();
+                    oi.OrderId                 = ord.Id;
+                    oi.Product2Id              = src.Product2Id;
+                    oi.PricebookEntryId        = src.PricebookEntryId;
+                    oi.Quantity                = qty;
+                    oi.UnitPrice               = src.UnitPrice;
+                    oi.Description             = src.Description;
+                    oi.Tax__c                  = src.Tax__c;
+                    oi.Tax_Amount__c           = src.Tax_Amount__c;
+                    oi.Source_Pricebook_Ref__c = src.Source_Pricebook_Ref__c;
+                    oi.Source_Pricebook__c     = src.Source_Pricebook__c;
+                    if (disc != null) {
+                        oi.Discount__c = disc;
+                    }
+                    orderItems.add(oi);
+                }
+            }
+
+            // Build OrderItems from manually-added products.
+            if (hasManualLines) {
+                // Validate manual PricebookEntries belong to the Quote's Pricebook.
+                Map<Id, PricebookEntry> pbeById = new Map<Id, PricebookEntry>([
+                    SELECT Id, Product2Id, Pricebook2Id, UnitPrice, IsActive,
+                           Product2.Tax__c
+                    FROM PricebookEntry
+                    WHERE Id IN :manualPricebookEntryIds
+                ]);
+                for (Id pbeId : manualPricebookEntryIds) {
+                    PricebookEntry pbe = pbeById.get(pbeId);
+                    if (pbe == null) continue;
+                    if (pbe.Pricebook2Id != q.Pricebook2Id) {
+                        throw new AuraHandledException(
+                            'Manually added product must belong to the Quote\'s Pricebook.'
+                        );
+                    }
+                    if (pbe.IsActive != true) continue;
+
+                    Decimal qty = (manualQuantityByPbeId != null && manualQuantityByPbeId.get(pbeId) != null)
+                        ? manualQuantityByPbeId.get(pbeId)
+                        : 1;
+                    Decimal disc = (manualDiscountByPbeId != null && manualDiscountByPbeId.get(pbeId) != null)
+                        ? manualDiscountByPbeId.get(pbeId)
+                        : 0;
+
+                    OrderItem oi = new OrderItem();
+                    oi.OrderId          = ord.Id;
+                    oi.Product2Id       = pbe.Product2Id;
+                    oi.PricebookEntryId = pbe.Id;
+                    oi.Quantity         = qty;
+                    oi.UnitPrice        = pbe.UnitPrice;
+                    if (pbe.Product2 != null && pbe.Product2.Tax__c != null) {
+                        oi.Tax__c = pbe.Product2.Tax__c;
+                    }
+                    if (disc != null) {
+                        oi.Discount__c = disc;
+                    }
+                    orderItems.add(oi);
+                }
             }
 
             if (!orderItems.isEmpty()) {
@@ -292,6 +392,15 @@ public with sharing class CreateSalesOrderController {
     public class WarehouseOption {
         @AuraEnabled public String label;
         @AuraEnabled public String value;
+    }
+
+    public class ProductOption {
+        @AuraEnabled public String label;
+        @AuraEnabled public String value;        // PricebookEntry Id
+        @AuraEnabled public Id productId;
+        @AuraEnabled public String productName;
+        @AuraEnabled public Decimal unitPrice;
+        @AuraEnabled public Decimal tax;
     }
 
 }

@@ -96,35 +96,36 @@
                     </lightning-textarea>
                 </div>
 
-                <!-- Quote Items Table -->
-                <h3 class="slds-text-heading_small slds-m-bottom_small">Quote Items</h3>
+                <!-- Order Items Table -->
+                <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_small">
+                    <h3 class="slds-text-heading_small slds-col slds-grow">Order Items</h3>
+                    <lightning-button
+                        label="Add Product"
+                        variant="neutral"
+                        icon-name="utility:add"
+                        onclick={handleOpenAddProduct}
+                        class="slds-col_bump-right">
+                    </lightning-button>
+                </div>
+
                 <template if:true={hasItems}>
                     <div class="slds-scrollable_x cso-table-wrapper">
                         <table class="slds-table slds-table_cell-buffer slds-table_bordered cso-items-table">
                             <thead>
                                 <tr class="slds-line-height_reset">
-                                    <th scope="col" class="cso-col-select"></th>
                                     <th scope="col" class="cso-col-product"><span class="slds-truncate">Product</span></th>
                                     <th scope="col" class="cso-col-qty"><span class="slds-truncate">Quantity</span></th>
                                     <th scope="col" class="cso-col-qty"><span class="slds-truncate">Stock Qty</span></th>
                                     <th scope="col" class="cso-col-price"><span class="slds-truncate">Unit Price</span></th>
+                                    <th scope="col" class="cso-col-qty"><span class="slds-truncate">Discount (%)</span></th>
                                     <th scope="col" class="cso-col-price"><span class="slds-truncate">Total Price</span></th>
                                     <th scope="col" class="cso-col-sync"><span class="slds-truncate">Sync</span></th>
+                                    <th scope="col" class="cso-col-delete"><span class="slds-truncate">Delete</span></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <template for:each={displayItems} for:item="item">
-                                    <tr key={item.lineId}>
-                                        <td class="cso-col-select">
-                                            <lightning-input
-                                                type="checkbox"
-                                                variant="label-hidden"
-                                                label="Select"
-                                                checked={item.selected}
-                                                data-line-id={item.lineId}
-                                                onchange={handleItemSelect}>
-                                            </lightning-input>
-                                        </td>
+                                    <tr key={item.rowKey}>
                                         <td class="cso-col-product">
                                             <span class="slds-truncate" title={item.productName}>{item.productName}</span>
                                         </td>
@@ -136,21 +137,44 @@
                                                 value={item.quantity}
                                                 min="1"
                                                 step="1"
-                                                data-line-id={item.lineId}
+                                                data-row-key={item.rowKey}
                                                 onchange={handleQuantityChange}>
                                             </lightning-input>
                                         </td>
                                         <td class="cso-col-qty">{item.stockQtyDisplay}</td>
                                         <td class="cso-col-price">{item.unitPriceDisplay}</td>
+                                        <td class="cso-col-qty">
+                                            <lightning-input
+                                                type="number"
+                                                variant="label-hidden"
+                                                label="Discount"
+                                                value={item.discount}
+                                                min="0"
+                                                max="100"
+                                                step="0.01"
+                                                data-row-key={item.rowKey}
+                                                onchange={handleDiscountChange}>
+                                            </lightning-input>
+                                        </td>
                                         <td class="cso-col-price">{item.totalPriceDisplay}</td>
                                         <td class="cso-col-sync">
                                             <lightning-button
                                                 label="Check Stock"
                                                 variant="neutral"
-                                                data-line-id={item.lineId}
+                                                data-row-key={item.rowKey}
                                                 onclick={handleCheckStock}
                                                 icon-name="utility:refresh">
                                             </lightning-button>
+                                        </td>
+                                        <td class="cso-col-delete slds-text-align_center">
+                                            <lightning-button-icon
+                                                icon-name="utility:delete"
+                                                alternative-text="Delete row"
+                                                title="Delete row"
+                                                variant="bare"
+                                                data-row-key={item.rowKey}
+                                                onclick={handleDeleteRow}>
+                                            </lightning-button-icon>
                                         </td>
                                     </tr>
                                 </template>
@@ -159,7 +183,7 @@
                     </div>
                 </template>
                 <template if:false={hasItems}>
-                    <p class="slds-text-color_weak slds-p-vertical_small">No line items on this Quote.</p>
+                    <p class="slds-text-color_weak slds-p-vertical_small">No products on the order. Click "Add Product" to add one.</p>
                 </template>
             </div>
 
@@ -182,6 +206,66 @@
                 </lightning-button>
             </footer>
         </div>
+    </template>
+
+    <!-- Add Product sub-modal -->
+    <template if:true={isAddProductOpen}>
+        <section role="dialog" tabindex="-1" aria-modal="true"
+                 class="slds-modal slds-fade-in-open slds-modal_small">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close"
+                            title="Close" onclick={handleCloseAddProduct}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Close"
+                                        size="small"></lightning-icon>
+                    </button>
+                    <h2 class="slds-modal__title slds-hyphenate">Add Product</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-combobox
+                        label="Product"
+                        value={newPricebookEntryId}
+                        placeholder="Select a product"
+                        options={productOptions}
+                        onchange={handleNewProductChange}
+                        required>
+                    </lightning-combobox>
+                    <lightning-input
+                        type="number"
+                        label="Quantity"
+                        value={newQuantity}
+                        min="1"
+                        step="1"
+                        onchange={handleNewQuantityChange}
+                        class="slds-m-top_small">
+                    </lightning-input>
+                    <lightning-input
+                        type="number"
+                        label="Discount (%)"
+                        value={newDiscount}
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        onchange={handleNewDiscountChange}
+                        class="slds-m-top_small">
+                    </lightning-input>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button
+                        label="Cancel"
+                        variant="neutral"
+                        onclick={handleCloseAddProduct}
+                        class="slds-m-right_x-small">
+                    </lightning-button>
+                    <lightning-button
+                        label="Add"
+                        variant="brand"
+                        onclick={handleAddProduct}>
+                    </lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
     </template>
 
     <template if:true={isSaving}>
