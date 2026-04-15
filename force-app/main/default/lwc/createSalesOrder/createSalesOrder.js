@@ -106,6 +106,10 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         return this.isSaving;
     }
 
+    get backgroundClass() {
+        return this.isAddProductOpen ? 'blur-background' : '';
+    }
+
     toIsoDate(raw) {
         if (raw == null) return null;
         if (raw instanceof Date && !isNaN(raw.getTime())) {
