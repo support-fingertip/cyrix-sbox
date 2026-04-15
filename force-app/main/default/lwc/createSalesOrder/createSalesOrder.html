@@ -1,7 +1,7 @@
 <template>
     <!-- ================= MAIN CONTENT ================= -->
     <template if:false={isLoading}>
-        <div class={backgroundClass}>
+        <div>
             <div class="cso-container">
 
                 <!-- Gradient Header -->
@@ -106,9 +106,69 @@
                             label="Add Product"
                             variant="brand-outline"
                             icon-name="utility:add"
-                            onclick={handleOpenAddProduct}>
+                            onclick={handleToggleAddProduct}>
                         </lightning-button>
                     </div>
+
+                    <!-- Inline Add Product panel -->
+                    <template if:true={isAddProductOpen}>
+                        <div class="cso-add-product-panel slds-m-bottom_medium">
+                            <div class="cso-add-product-title">
+                                <lightning-icon
+                                    icon-name="utility:add"
+                                    size="x-small"
+                                    class="slds-m-right_x-small">
+                                </lightning-icon>
+                                Add Product
+                            </div>
+                            <div class="slds-grid slds-wrap slds-gutters_small cso-add-product-fields">
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                    <lightning-combobox
+                                        label="Product"
+                                        value={newPricebookEntryId}
+                                        placeholder="Select a product"
+                                        options={productOptions}
+                                        onchange={handleNewProductChange}
+                                        required>
+                                    </lightning-combobox>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+                                    <lightning-input
+                                        type="number"
+                                        label="Quantity"
+                                        value={newQuantity}
+                                        min="1"
+                                        step="1"
+                                        onchange={handleNewQuantityChange}>
+                                    </lightning-input>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+                                    <lightning-input
+                                        type="number"
+                                        label="Discount (%)"
+                                        value={newDiscount}
+                                        min="0"
+                                        max="100"
+                                        step="0.01"
+                                        onchange={handleNewDiscountChange}>
+                                    </lightning-input>
+                                </div>
+                            </div>
+                            <div class="cso-add-product-actions">
+                                <button class="cancel-button" onclick={handleCloseAddProduct}>
+                                    Cancel
+                                </button>
+                                <button class="confirm-button" onclick={handleAddProduct}>
+                                    <lightning-icon
+                                        icon-name="utility:add"
+                                        size="x-small"
+                                        class="slds-m-right_x-small">
+                                    </lightning-icon>
+                                    Add
+                                </button>
+                            </div>
+                        </div>
+                    </template>
 
                     <template if:true={hasItems}>
                         <div class="table-scroll-wrapper">
@@ -216,61 +276,6 @@
                 </div>
             </div>
         </div>
-    </template>
-
-    <!-- ================= ADD PRODUCT SUB-MODAL ================= -->
-    <template if:true={isAddProductOpen}>
-        <section role="dialog" tabindex="-1" aria-modal="true"
-                 class="slds-modal slds-fade-in-open slds-modal_small">
-            <div class="slds-modal__container">
-                <div class="gradient-header">
-                    <h2 class="cso-title">Add Product</h2>
-                </div>
-                <div class="slds-p-around_medium">
-                    <lightning-combobox
-                        label="Product"
-                        value={newPricebookEntryId}
-                        placeholder="Select a product"
-                        options={productOptions}
-                        onchange={handleNewProductChange}
-                        required>
-                    </lightning-combobox>
-                    <lightning-input
-                        type="number"
-                        label="Quantity"
-                        value={newQuantity}
-                        min="1"
-                        step="1"
-                        onchange={handleNewQuantityChange}
-                        class="slds-m-top_small">
-                    </lightning-input>
-                    <lightning-input
-                        type="number"
-                        label="Discount (%)"
-                        value={newDiscount}
-                        min="0"
-                        max="100"
-                        step="0.01"
-                        onchange={handleNewDiscountChange}
-                        class="slds-m-top_small">
-                    </lightning-input>
-                </div>
-                <div class="gradient-footer">
-                    <button class="cancel-button" onclick={handleCloseAddProduct}>
-                        Cancel
-                    </button>
-                    <button class="confirm-button" onclick={handleAddProduct}>
-                        <lightning-icon
-                            icon-name="utility:add"
-                            size="x-small"
-                            class="slds-m-right_x-small">
-                        </lightning-icon>
-                        Add
-                    </button>
-                </div>
-            </div>
-        </section>
-        <div class="slds-backdrop slds-backdrop_open"></div>
     </template>
 
     <!-- ================= LOADING / SAVING ================= -->
