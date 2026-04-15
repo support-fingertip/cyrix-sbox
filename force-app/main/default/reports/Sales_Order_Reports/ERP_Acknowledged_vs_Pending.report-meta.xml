@@ -1,37 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Report xmlns="http://soap.sforce.com/2006/04/metadata">
-    <columns>
-        <field>Order.OrderNumber</field>
-    </columns>
-    <columns>
-        <field>Order.Status</field>
-    </columns>
-    <columns>
-        <field>Order.ERP_Ack_Number__c</field>
-    </columns>
-    <columns>
-        <field>Order.TotalAmount</field>
-    </columns>
-    <columns>
-        <field>Order.EffectiveDate</field>
-    </columns>
-    <columns>
-        <field>Order.CreatedDate</field>
-    </columns>
-    <format>Summary</format>
-    <groupingsDown>
-        <dateGranularity>Day</dateGranularity>
-        <field>Order.Status</field>
-        <sortOrder>Asc</sortOrder>
-    </groupingsDown>
+    <format>Tabular</format>
     <name>ERP Acknowledged vs Pending Orders</name>
-    <reportType>Sales_Orders</reportType>
-    <scope>organization</scope>
-    <showDetails>true</showDetails>
-    <showGrandTotal>true</showGrandTotal>
-    <showSubTotals>true</showSubTotals>
+    <reportType>AccountList</reportType>
 </Report>
-
-
-
-

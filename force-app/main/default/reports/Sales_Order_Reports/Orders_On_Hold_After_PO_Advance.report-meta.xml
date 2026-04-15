@@ -1,66 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Report xmlns="http://soap.sforce.com/2006/04/metadata">
-    <columns>
-        <field>Order.OrderNumber</field>
-    </columns>
-    <columns>
-        <field>Order.Hold_Status__c</field>
-    </columns>
-    <columns>
-        <field>Order.PO_Received__c</field>
-    </columns>
-    <columns>
-        <field>Order.PO_Received_Date__c</field>
-    </columns>
-    <columns>
-        <field>Order.Advance_Received__c</field>
-    </columns>
-    <columns>
-        <field>Order.Advance_Amount__c</field>
-    </columns>
-    <columns>
-        <field>Order.Advance_Received_Date__c</field>
-    </columns>
-    <columns>
-        <field>Order.CreatedDate</field>
-    </columns>
-    <filter>
-        <booleanFilter>1 AND 2 AND 3</booleanFilter>
-        <criteriaItems>
-            <column>Order.PO_Received__c</column>
-            <operator>equals</operator>
-            <value>1</value>
-        </criteriaItems>
-        <criteriaItems>
-            <column>Order.Advance_Received__c</column>
-            <operator>equals</operator>
-            <value>1</value>
-        </criteriaItems>
-        <criteriaItems>
-            <column>Order.Hold_Status__c</column>
-            <operator>notEqual</operator>
-            <value>Active</value>
-        </criteriaItems>
-    </filter>
-    <format>Summary</format>
-    <groupingsDown>
-        <dateGranularity>Day</dateGranularity>
-        <field>Order.Hold_Status__c</field>
-        <sortOrder>Asc</sortOrder>
-    </groupingsDown>
-    <groupingsDown>
-        <dateGranularity>Month</dateGranularity>
-        <field>Order.CreatedDate</field>
-        <sortOrder>Asc</sortOrder>
-    </groupingsDown>
-    <name>Orders on Hold/Delayed (After PO &amp; Advance)</name>
-    <reportType>Sales_Orders</reportType>
-    <scope>organization</scope>
-    <showDetails>true</showDetails>
-    <showGrandTotal>true</showGrandTotal>
-    <showSubTotals>true</showSubTotals>
+    <format>Tabular</format>
+    <name>Orders on Hold or Delayed</name>
+    <reportType>AccountList</reportType>
 </Report>
-
-
-
-

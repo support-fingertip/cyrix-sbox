@@ -1,61 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Report xmlns="http://soap.sforce.com/2006/04/metadata">
-    <columns>
-        <field>Order.OrderNumber</field>
-    </columns>
-    <columns>
-        <field>Order.Delay_Reason__c</field>
-    </columns>
-    <columns>
-        <field>Order.Hold_Status__c</field>
-    </columns>
-    <columns>
-        <field>Order.PO_Received__c</field>
-    </columns>
-    <columns>
-        <field>Order.Advance_Received__c</field>
-    </columns>
-    <columns>
-        <field>Order.Advance_Amount__c</field>
-    </columns>
-    <columns>
-        <field>Order.TotalAmount</field>
-    </columns>
-    <columns>
-        <field>Order.CreatedDate</field>
-    </columns>
-    <filter>
-        <booleanFilter>1 AND 2 AND 3</booleanFilter>
-        <criteriaItems>
-            <column>Order.PO_Received__c</column>
-            <operator>equals</operator>
-            <value>1</value>
-        </criteriaItems>
-        <criteriaItems>
-            <column>Order.Advance_Received__c</column>
-            <operator>equals</operator>
-            <value>1</value>
-        </criteriaItems>
-        <criteriaItems>
-            <column>Order.Delay_Reason__c</column>
-            <operator>notEqual</operator>
-            <value></value>
-        </criteriaItems>
-    </filter>
-    <format>Summary</format>
-    <groupingsDown>
-        <dateGranularity>Day</dateGranularity>
-        <field>Order.Delay_Reason__c</field>
-        <sortOrder>Asc</sortOrder>
-    </groupingsDown>
+    <format>Tabular</format>
     <name>Delayed Orders by Reason</name>
-    <reportType>Sales_Orders</reportType>
-    <scope>organization</scope>
-    <showDetails>true</showDetails>
-    <showGrandTotal>true</showGrandTotal>
-    <showSubTotals>true</showSubTotals>
+    <reportType>AccountList</reportType>
 </Report>
-
-
-
-
