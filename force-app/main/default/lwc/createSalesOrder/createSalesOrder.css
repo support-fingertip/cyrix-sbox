@@ -1,20 +1,27 @@
 /* =========================================
-   Host — fill the entire quick action modal
+   Host — expand the quick action modal to near-full-screen
 ========================================= */
 :host {
     display: block;
     width: 100%;
     height: 100%;
-    min-height: 85vh;
+    min-height: 90vh;
+
+    /* SLDS styling hooks that widen the parent modal container. */
+    --slds-c-modal-sizing-width: 95vw;
+    --slds-c-modal-sizing-max-width: 1600px;
+    --slds-c-modal-sizing-min-width: 320px;
+    --slds-c-modal-sizing-height: 90vh;
+    --slds-c-modal-sizing-max-height: 95vh;
 }
 
 /* =========================================
-   Container — full screen layout
+   Container — fills the widened modal
 ========================================= */
 .cso-container {
     width: 100%;
     max-width: 100%;
-    min-height: 85vh;
+    min-height: 90vh;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -60,14 +67,14 @@
 
 .cso-items-table {
     width: 100%;
-    min-width: 860px; /* keeps 7 columns readable; wrapper scrolls on mobile */
+    min-width: 960px; /* keeps 8 columns readable; wrapper scrolls on mobile */
 }
 
-.cso-col-select  { width: 40px; }
 .cso-col-qty     { width: 100px; }
-.cso-col-price   { width: 120px; white-space: nowrap; }
-.cso-col-product { min-width: 180px; }
+.cso-col-price   { width: 130px; white-space: nowrap; }
+.cso-col-product { min-width: 220px; }
 .cso-col-sync    { width: 140px; white-space: nowrap; }
+.cso-col-delete  { width: 60px; }
 
 /* =========================================
    Footer
