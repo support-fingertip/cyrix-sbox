@@ -8,27 +8,12 @@
     <sections>
         <columns>
             <checkedByDefault>true</checkedByDefault>
-            <field>Id</field>
-            <table>Order</table>
-        </columns>
-        <columns>
-            <checkedByDefault>true</checkedByDefault>
             <field>OrderNumber</field>
             <table>Order</table>
         </columns>
         <columns>
             <checkedByDefault>true</checkedByDefault>
-            <field>AccountId</field>
-            <table>Order</table>
-        </columns>
-        <columns>
-            <checkedByDefault>true</checkedByDefault>
             <field>Status</field>
-            <table>Order</table>
-        </columns>
-        <columns>
-            <checkedByDefault>true</checkedByDefault>
-            <field>OwnerId</field>
             <table>Order</table>
         </columns>
         <columns>

@@ -4,13 +4,7 @@
         <field>Order.OrderNumber</field>
     </columns>
     <columns>
-        <field>Order.AccountId</field>
-    </columns>
-    <columns>
         <field>Order.Status</field>
-    </columns>
-    <columns>
-        <field>Order.OwnerId</field>
     </columns>
     <columns>
         <field>Order.TotalAmount</field>
@@ -28,11 +22,6 @@
         <field>Order.Branch__c</field>
     </columns>
     <format>Summary</format>
-    <groupingsDown>
-        <dateGranularity>Day</dateGranularity>
-        <field>Order.AccountId</field>
-        <sortOrder>Asc</sortOrder>
-    </groupingsDown>
     <groupingsDown>
         <dateGranularity>Day</dateGranularity>
         <field>Order.Status</field>
