@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Report xmlns="http://soap.sforce.com/2006/04/metadata">
     <columns>
-        <field>ORDER.ORDER_NUMBER</field>
+        <field>Order.OrderNumber</field>
     </columns>
     <columns>
-        <field>ACCOUNT.NAME</field>
+        <field>Order.AccountId</field>
     </columns>
     <columns>
-        <field>ORDER.OWNER_NAME</field>
+        <field>Order.OwnerId</field>
     </columns>
     <columns>
         <field>Order.Hold_Status__c</field>
@@ -28,7 +28,7 @@
         <field>Order.Advance_Received_Date__c</field>
     </columns>
     <columns>
-        <field>ORDER.CREATED_DATE</field>
+        <field>Order.CreatedDate</field>
     </columns>
     <filter>
         <booleanFilter>1 AND 2 AND 3</booleanFilter>
@@ -50,24 +50,19 @@
     </filter>
     <format>Summary</format>
     <groupingsDown>
-        <dateGranularity>Month</dateGranularity>
+        <dateGranularity>Day</dateGranularity>
         <field>Order.Hold_Status__c</field>
         <sortOrder>Asc</sortOrder>
     </groupingsDown>
     <groupingsDown>
         <dateGranularity>Month</dateGranularity>
-        <field>ORDER.CREATED_DATE</field>
+        <field>Order.CreatedDate</field>
         <sortOrder>Asc</sortOrder>
     </groupingsDown>
     <name>Orders on Hold/Delayed (After PO &amp; Advance)</name>
-    <params>
-        <name>co</name>
-        <value>0</value>
-    </params>
-    <reportType>Orders</reportType>
+    <reportType>Sales_Orders</reportType>
     <scope>organization</scope>
     <showDetails>true</showDetails>
     <showGrandTotal>true</showGrandTotal>
     <showSubTotals>true</showSubTotals>
 </Report>
-
