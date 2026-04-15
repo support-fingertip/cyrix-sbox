@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Advance_Received__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>True when the customer has paid the advance amount for this Sales Order.</description>
+    <externalId>false</externalId>
+    <label>Advance Received</label>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>
