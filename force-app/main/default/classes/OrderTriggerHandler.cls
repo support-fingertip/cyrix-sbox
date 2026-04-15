@@ -30,6 +30,63 @@ public with sharing class OrderTriggerHandler {
         sendCancellationNotifications(cancelledIds);
     }
 
+    /**
+     * Blocks the Cancelled status transition when any Invoice record
+     * already references the Order.
+     *
+     * Standard Invoice.ReferenceEntityId is polymorphic, so we check every
+     * Invoice whose ReferenceEntityId is in the cancelling Order Ids.
+     *
+     * Dynamic SOQL + getGlobalDescribe used so the class still compiles
+     * even in orgs where the Invoice standard object is not enabled.
+     */
+    public static void handleBeforeUpdate(List<Order> newList, Map<Id, Order> oldMap) {
+        if (newList == null || oldMap == null) return;
+
+        // Orders transitioning to Cancelled right now.
+        Map<Id, Order> cancellingById = new Map<Id, Order>();
+        for (Order o : newList) {
+            Order prev = oldMap.get(o.Id);
+            if (prev == null) continue;
+            if (o.Status == CANCELLED_STATUS && prev.Status != CANCELLED_STATUS) {
+                cancellingById.put(o.Id, o);
+            }
+        }
+        if (cancellingById.isEmpty()) return;
+
+        // Abort if the Invoice object isn't present in this org.
+        if (!Schema.getGlobalDescribe().containsKey('Invoice')) return;
+
+        Set<Id> orderIds = cancellingById.keySet();
+        List<SObject> invoices;
+        try {
+            invoices = Database.query(
+                'SELECT Id, ReferenceEntityId FROM Invoice ' +
+                'WHERE ReferenceEntityId IN :orderIds LIMIT 200'
+            );
+        } catch (Exception e) {
+            System.debug(LoggingLevel.WARN,
+                'OrderTriggerHandler: could not query Invoice: ' + e.getMessage());
+            return;
+        }
+        if (invoices == null || invoices.isEmpty()) return;
+
+        Set<Id> blockedOrderIds = new Set<Id>();
+        for (SObject inv : invoices) {
+            Id refId = (Id) inv.get('ReferenceEntityId');
+            if (refId != null) blockedOrderIds.add(refId);
+        }
+        if (blockedOrderIds.isEmpty()) return;
+
+        for (Id oid : blockedOrderIds) {
+            Order o = cancellingById.get(oid);
+            if (o == null) continue;
+            o.addError(
+                'This Order cannot be cancelled because an Invoice has already been created for it.'
+            );
+        }
+    }
+
     private static void sendCancellationNotifications(Set<Id> orderIds) {
         // Re-query to pull Account.Name + cancellation reason fresh (trigger.new
         // fields may not include related parent fields reliably).
