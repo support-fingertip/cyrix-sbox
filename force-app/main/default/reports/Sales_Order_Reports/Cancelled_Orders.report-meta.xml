@@ -1,38 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Report xmlns="http://soap.sforce.com/2006/04/metadata">
-    <columns>
-        <field>Order.OrderNumber</field>
-    </columns>
-    <columns>
-        <field>Order.TotalAmount</field>
-    </columns>
-    <columns>
-        <field>Order.EffectiveDate</field>
-    </columns>
-    <columns>
-        <field>Order.Cancellation_Reason__c</field>
-    </columns>
-    <columns>
-        <field>Order.LastModifiedDate</field>
-    </columns>
-    <filter>
-        <criteriaItems>
-            <column>Order.Status</column>
-            <operator>equals</operator>
-            <value>Cancelled</value>
-        </criteriaItems>
-    </filter>
     <format>Tabular</format>
     <name>Cancelled Orders</name>
-    <reportType>Sales_Orders</reportType>
-    <scope>organization</scope>
-    <showDetails>true</showDetails>
-    <showGrandTotal>true</showGrandTotal>
-    <showSubTotals>true</showSubTotals>
-    <sortColumn>Order.LastModifiedDate</sortColumn>
-    <sortOrder>Desc</sortOrder>
+    <reportType>AccountList</reportType>
 </Report>
-
-
-
-

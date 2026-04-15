@@ -1,53 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Report xmlns="http://soap.sforce.com/2006/04/metadata">
-    <columns>
-        <field>Order.OrderNumber</field>
-    </columns>
-    <columns>
-        <field>Order.Status</field>
-    </columns>
-    <columns>
-        <field>Order.TotalAmount</field>
-    </columns>
-    <columns>
-        <field>Order.Advance_Received__c</field>
-    </columns>
-    <columns>
-        <field>Order.Advance_Amount__c</field>
-    </columns>
-    <columns>
-        <field>Order.CreatedDate</field>
-    </columns>
-    <columns>
-        <field>Order.EffectiveDate</field>
-    </columns>
-    <filter>
-        <booleanFilter>1 AND 2</booleanFilter>
-        <criteriaItems>
-            <column>Order.Status</column>
-            <operator>notEqual</operator>
-            <value>Cancelled</value>
-        </criteriaItems>
-        <criteriaItems>
-            <column>Order.Advance_Received__c</column>
-            <operator>equals</operator>
-            <value>0</value>
-        </criteriaItems>
-    </filter>
-    <format>Summary</format>
-    <groupingsDown>
-        <dateGranularity>Month</dateGranularity>
-        <field>Order.CreatedDate</field>
-        <sortOrder>Asc</sortOrder>
-    </groupingsDown>
-    <name>Open Orders (No Money Received) by Age</name>
-    <reportType>Sales_Orders</reportType>
-    <scope>organization</scope>
-    <showDetails>true</showDetails>
-    <showGrandTotal>true</showGrandTotal>
-    <showSubTotals>true</showSubTotals>
+    <format>Tabular</format>
+    <name>Open Orders by Age</name>
+    <reportType>AccountList</reportType>
 </Report>
-
-
-
-

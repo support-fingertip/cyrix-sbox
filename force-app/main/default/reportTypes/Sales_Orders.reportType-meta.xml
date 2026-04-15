@@ -3,7 +3,7 @@
     <baseObject>Order</baseObject>
     <category>accounts</category>
     <deployed>true</deployed>
-    <description>Custom report type for Sales Order reports (Cancelled, Delayed, ERP Ack, Open by Age, etc.).</description>
+    <description>Custom report type for Sales Order reports. Admin can add the custom __c fields via Setup > Report Types once deployed.</description>
     <label>Sales Orders</label>
     <sections>
         <masterLabel>Order Fields</masterLabel>
@@ -32,72 +32,5 @@
             <field>CreatedDate</field>
             <table>Order</table>
         </columns>
-        <columns>
-            <checkedByDefault>true</checkedByDefault>
-            <field>LastModifiedDate</field>
-            <table>Order</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
-            <field>Cancellation_Reason__c</field>
-            <table>Order</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
-            <field>ERP_Ack_Number__c</field>
-            <table>Order</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
-            <field>PO_Received__c</field>
-            <table>Order</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
-            <field>PO_Received_Date__c</field>
-            <table>Order</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
-            <field>Advance_Received__c</field>
-            <table>Order</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
-            <field>Advance_Amount__c</field>
-            <table>Order</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
-            <field>Advance_Received_Date__c</field>
-            <table>Order</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
-            <field>Hold_Status__c</field>
-            <table>Order</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
-            <field>Delay_Reason__c</field>
-            <table>Order</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
-            <field>Branch__c</field>
-            <table>Order</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
-            <field>Business_Vertical__c</field>
-            <table>Order</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
-            <field>Approval_Status__c</field>
-            <table>Order</table>
-        </columns>
     </sections>
 </ReportType>
-
-
