@@ -1,64 +1,59 @@
 /* =========================================
-   Host — widen the quick action modal and let the LWC fill it.
+   Host — widen the Quick Action modal (also set via JS in .js for
+   browsers / LWS contexts where styling hooks alone don't reach the
+   parent .slds-modal__container).
 ========================================= */
 :host {
     display: block;
     width: 100%;
-    height: 100%;
-    min-height: 90vh;
-
-    /* SLDS styling hooks that resize the parent .slds-modal__container
-       (the Quick Action dialog). Multiple token names covered so
-       different Salesforce versions pick one up. */
-    --slds-c-modal-sizing-width: 95vw;
-    --slds-c-modal-sizing-max-width: 1600px;
+    --slds-c-modal-sizing-width: 85vw;
+    --slds-c-modal-sizing-max-width: 1280px;
     --slds-c-modal-sizing-min-width: 320px;
-    --slds-c-modal-sizing-height: 90vh;
-    --slds-c-modal-sizing-max-height: 95vh;
-    --lwc-widthModal: 95vw;
-    --lwc-maxWidthModal: 1600px;
+    --slds-c-modal-sizing-max-height: 92vh;
 }
 
 /* =========================================
-   Container — fills the widened modal
+   Container — the top-level card inside the Quick Action modal
 ========================================= */
 .cso-container {
-    width: 100%;
-    max-width: 100%;
-    min-height: 90vh;
-    box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    background-color: #ffffff;
+    border-radius: 4px;
+    overflow: hidden;
 }
 
 /* =========================================
-   Gradient header / footer
+   Gradient Header
 ========================================= */
 .gradient-header {
     background: linear-gradient(45deg, #1589ee, #0070d2);
+    padding: 0.9rem 1.25rem;
     border-radius: 4px 4px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.gradient-header h2 {
+.cso-title {
     color: #ffffff;
     font-weight: 600;
+    font-size: 1.15rem;
     margin: 0;
 }
 
-.gradient-footer {
-    background: linear-gradient(45deg, #f2f2f2, #ffffff);
-    border-top: 1px solid #dddbda;
-    border-radius: 0 0 4px 4px;
-}
-
 /* =========================================
-   Modal body — scrolls inside a generous max-height
+   Body — scrolls when content is tall
 ========================================= */
-.modal-body {
+.cso-body {
+    flex: 1 1 auto;
+    padding: 1rem 1.25rem;
     max-height: 70vh;
     overflow-y: auto;
     overflow-x: hidden;
-    flex: 1 1 auto;
+    background-color: #ffffff;
 }
 
 /* =========================================
@@ -74,16 +69,34 @@
 
 .customer-card-header {
     background: linear-gradient(to right, #f7f7f7, #ffffff);
-    padding: 0.75rem;
+    padding: 0.6rem 0.75rem;
     border-bottom: 1px solid #f2f2f2;
+    display: flex;
+    align-items: center;
 }
 
 .customer-card-body {
     padding: 0.75rem;
 }
 
+.cso-field-value {
+    font-weight: 500;
+    color: #032d60;
+    margin-top: 0.15rem;
+}
+
 /* =========================================
-   Items table — horizontal scroll on narrow screens
+   Items section header (heading + Add Product button)
+========================================= */
+.cso-items-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+/* =========================================
+   Items table
 ========================================= */
 .table-scroll-wrapper {
     width: 100%;
@@ -91,11 +104,12 @@
     overflow-y: hidden;
 }
 
-.slds-table_fixed-layout {
-    min-width: 960px;
+.cso-items-table {
+    width: 100%;
+    min-width: 900px;
 }
 
-.slds-table thead th {
+.cso-items-table thead th {
     background-color: #f7f7f7;
     color: #444444;
     font-weight: 600;
@@ -110,8 +124,18 @@
 }
 
 /* =========================================
-   Custom footer buttons (cancel / confirm)
+   Gradient Footer
 ========================================= */
+.gradient-footer {
+    background: linear-gradient(45deg, #f2f2f2, #ffffff);
+    border-top: 1px solid #dddbda;
+    padding: 0.6rem 1.25rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    border-radius: 0 0 4px 4px;
+}
+
 .cancel-button,
 .confirm-button {
     border-radius: 4px;
@@ -121,6 +145,7 @@
     cursor: pointer;
     border: none;
     outline: none;
+    font-size: 0.875rem;
 }
 
 .cancel-button {
@@ -129,7 +154,7 @@
     margin-right: 0.75rem;
 }
 
-.cancel-button:hover {
+.cancel-button:hover:not(:disabled) {
     background-color: #e8e8e8;
 }
 
@@ -146,7 +171,7 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.confirm-button:hover {
+.confirm-button:hover:not(:disabled) {
     background: linear-gradient(45deg, #0057a3, #0070d2);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
@@ -158,7 +183,7 @@
 }
 
 /* =========================================
-   Blur background when the Add Product sub-modal is open
+   Blur main modal while Add Product sub-modal is open
 ========================================= */
 .blur-background {
     filter: blur(4px);
@@ -166,7 +191,7 @@
     user-select: none;
 }
 
-/* Keep sub-modal sharp */
+/* Keep the sub-modal itself sharp */
 .slds-modal {
     filter: none !important;
 }
@@ -178,15 +203,29 @@
     :host {
         --slds-c-modal-sizing-width: 100vw;
         --slds-c-modal-sizing-max-width: 100vw;
-        --slds-c-modal-sizing-height: 100vh;
         --slds-c-modal-sizing-max-height: 100vh;
     }
 
-    .modal-body {
-        max-height: calc(100vh - 130px);
+    .cso-body {
+        padding: 0.75rem;
+        max-height: calc(100vh - 140px);
     }
 
-    .gradient-header h2 {
+    .gradient-header {
+        padding: 0.65rem 1rem;
+    }
+
+    .cso-title {
         font-size: 1rem;
+    }
+
+    .gradient-footer {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .cso-items-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
     }
 }
