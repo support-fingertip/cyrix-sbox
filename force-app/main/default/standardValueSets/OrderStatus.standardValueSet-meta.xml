@@ -18,7 +18,7 @@
     <standardValue>
         <fullName>Cancelled</fullName>
         <default>false</default>
-        <groupingString>Activated</groupingString>
+        <groupingString>Draft</groupingString>
         <isActive>true</isActive>
         <label>Cancelled</label>
     </standardValue>
