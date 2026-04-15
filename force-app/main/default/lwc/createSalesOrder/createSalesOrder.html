@@ -4,57 +4,49 @@
         <div class={backgroundClass}>
             <div class="cso-container">
 
-                <!-- Modal Header -->
-                <header class="slds-modal__header gradient-header">
-                    <h2 class="slds-text-heading_medium slds-hyphenate slds-text-color_inverse">
-                        Sales Order
-                    </h2>
-                </header>
+                <!-- Gradient Header -->
+                <div class="gradient-header">
+                    <h2 class="cso-title">Sales Order</h2>
+                </div>
 
-                <!-- Modal Body -->
-                <div class="slds-modal__content slds-p-around_medium modal-body">
+                <!-- Body -->
+                <div class="cso-body">
 
                     <!-- Customer Information -->
                     <div class="customer-card slds-m-bottom_medium">
-                        <div class="customer-card-header slds-p-around_small">
-                            <div class="slds-grid slds-grid_vertical-align-center">
-                                <lightning-icon
-                                    icon-name="standard:customer"
-                                    size="small"
-                                    class="slds-m-right_small">
-                                </lightning-icon>
-                                <div class="slds-col">
-                                    <div class="slds-text-heading_small">
-                                        Customer Information
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="customer-card-header">
+                            <lightning-icon
+                                icon-name="standard:customer"
+                                size="small"
+                                class="slds-m-right_small">
+                            </lightning-icon>
+                            <span class="slds-text-heading_small">Customer Information</span>
                         </div>
-                        <div class="customer-card-body slds-p-around_small">
+                        <div class="customer-card-body">
                             <div class="slds-grid slds-wrap">
                                 <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
                                     <div class="slds-text-title">Customer Name</div>
-                                    <div>{quoteContext.customerName}</div>
+                                    <div class="cso-field-value">{quoteContext.customerName}</div>
                                 </div>
                                 <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
                                     <div class="slds-text-title">Email</div>
-                                    <div>{emailDisplay}</div>
+                                    <div class="cso-field-value">{emailDisplay}</div>
                                 </div>
                                 <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
                                     <div class="slds-text-title">Phone</div>
-                                    <div>{phoneDisplay}</div>
+                                    <div class="cso-field-value">{phoneDisplay}</div>
                                 </div>
                                 <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
                                     <div class="slds-text-title">Shipping Address</div>
-                                    <div>{shippingDisplay}</div>
+                                    <div class="cso-field-value">{shippingDisplay}</div>
                                 </div>
                                 <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
                                     <div class="slds-text-title">Executive Assigned</div>
-                                    <div>{quoteContext.executiveAssigned}</div>
+                                    <div class="cso-field-value">{quoteContext.executiveAssigned}</div>
                                 </div>
                                 <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
                                     <div class="slds-text-title">Address</div>
-                                    <div>{billingDisplay}</div>
+                                    <div class="cso-field-value">{billingDisplay}</div>
                                 </div>
                             </div>
                         </div>
@@ -72,10 +64,10 @@
                                 required>
                             </lightning-input>
                         </div>
-                        <div class="slds-col slds-size_1-of-2 slds-align_absolute-center">
+                        <div class="slds-col slds-size_1-of-2 slds-p-left_small">
                             <lightning-input
                                 type="toggle"
-                                label="Credit Order : "
+                                label="Credit Order"
                                 label-position="top"
                                 checked={creditOrder}
                                 message-toggle-active="Active"
@@ -108,20 +100,19 @@
                     </div>
 
                     <!-- Order Items -->
-                    <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_small">
-                        <div class="slds-text-heading_small slds-col slds-grow">Order Items</div>
+                    <div class="cso-items-header">
+                        <div class="slds-text-heading_small">Order Items</div>
                         <lightning-button
                             label="Add Product"
                             variant="brand-outline"
                             icon-name="utility:add"
-                            onclick={handleOpenAddProduct}
-                            class="slds-col_bump-right">
+                            onclick={handleOpenAddProduct}>
                         </lightning-button>
                     </div>
 
                     <template if:true={hasItems}>
                         <div class="table-scroll-wrapper">
-                            <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_fixed-layout">
+                            <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_fixed-layout cso-items-table">
                                 <colgroup>
                                     <col style="width: 32%;">
                                     <col style="width: 10%;">
@@ -206,8 +197,8 @@
 
                 </div>
 
-                <!-- Modal Footer -->
-                <footer class="slds-modal__footer gradient-footer">
+                <!-- Gradient Footer -->
+                <div class="gradient-footer">
                     <button class="cancel-button" onclick={handleCancel} disabled={isSaving}>
                         Cancel
                     </button>
@@ -222,7 +213,7 @@
                         </lightning-icon>
                         Confirm Sale
                     </button>
-                </footer>
+                </div>
             </div>
         </div>
     </template>
@@ -232,18 +223,10 @@
         <section role="dialog" tabindex="-1" aria-modal="true"
                  class="slds-modal slds-fade-in-open slds-modal_small">
             <div class="slds-modal__container">
-                <header class="slds-modal__header gradient-header">
-                    <h2 class="slds-modal__title slds-hyphenate slds-text-color_inverse">Add Product</h2>
-                    <lightning-button-icon
-                        icon-name="utility:close"
-                        alternative-text="Close"
-                        size="large"
-                        variant="inverse"
-                        onclick={handleCloseAddProduct}
-                        class="slds-modal__close">
-                    </lightning-button-icon>
-                </header>
-                <div class="slds-modal__content slds-p-around_medium">
+                <div class="gradient-header">
+                    <h2 class="cso-title">Add Product</h2>
+                </div>
+                <div class="slds-p-around_medium">
                     <lightning-combobox
                         label="Product"
                         value={newPricebookEntryId}
@@ -272,7 +255,7 @@
                         class="slds-m-top_small">
                     </lightning-input>
                 </div>
-                <footer class="slds-modal__footer gradient-footer">
+                <div class="gradient-footer">
                     <button class="cancel-button" onclick={handleCloseAddProduct}>
                         Cancel
                     </button>
@@ -284,7 +267,7 @@
                         </lightning-icon>
                         Add
                     </button>
-                </footer>
+                </div>
             </div>
         </section>
         <div class="slds-backdrop slds-backdrop_open"></div>
