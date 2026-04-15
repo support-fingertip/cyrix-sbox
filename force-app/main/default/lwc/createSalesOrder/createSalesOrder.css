@@ -1,5 +1,5 @@
 /* =========================================
-   Host — expand the quick action modal to near-full-screen
+   Host — widen the quick action modal and let the LWC fill it.
 ========================================= */
 :host {
     display: block;
@@ -7,12 +7,16 @@
     height: 100%;
     min-height: 90vh;
 
-    /* SLDS styling hooks that widen the parent modal container. */
+    /* SLDS styling hooks that resize the parent .slds-modal__container
+       (the Quick Action dialog). Multiple token names covered so
+       different Salesforce versions pick one up. */
     --slds-c-modal-sizing-width: 95vw;
     --slds-c-modal-sizing-max-width: 1600px;
     --slds-c-modal-sizing-min-width: 320px;
     --slds-c-modal-sizing-height: 90vh;
     --slds-c-modal-sizing-max-height: 95vh;
+    --lwc-widthModal: 95vw;
+    --lwc-maxWidthModal: 1600px;
 }
 
 /* =========================================
@@ -27,108 +31,162 @@
     flex-direction: column;
 }
 
-.cso-body {
-    flex: 1 1 auto;
-    overflow-y: auto;
-    box-sizing: border-box;
-}
-
 /* =========================================
-   Header
+   Gradient header / footer
 ========================================= */
-.header-bar {
-    background: linear-gradient(90deg, #1a73e8 0%, #4285f4 100%);
-    color: #ffffff;
-    border-top-left-radius: 0.25rem;
-    border-top-right-radius: 0.25rem;
+.gradient-header {
+    background: linear-gradient(45deg, #1589ee, #0070d2);
+    border-radius: 4px 4px 0 0;
 }
 
-.header-bar h2 {
+.gradient-header h2 {
     color: #ffffff;
     font-weight: 600;
     margin: 0;
 }
 
+.gradient-footer {
+    background: linear-gradient(45deg, #f2f2f2, #ffffff);
+    border-top: 1px solid #dddbda;
+    border-radius: 0 0 4px 4px;
+}
+
 /* =========================================
-   Info box
+   Modal body — scrolls inside a generous max-height
 ========================================= */
-.slds-box {
-    background-color: #f4f6f9;
+.modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1 1 auto;
+}
+
+/* =========================================
+   Customer Card
+========================================= */
+.customer-card {
     border: 1px solid #dddbda;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
+    overflow: hidden;
+}
+
+.customer-card-header {
+    background: linear-gradient(to right, #f7f7f7, #ffffff);
+    padding: 0.75rem;
+    border-bottom: 1px solid #f2f2f2;
+}
+
+.customer-card-body {
+    padding: 0.75rem;
 }
 
 /* =========================================
    Items table — horizontal scroll on narrow screens
 ========================================= */
-.cso-table-wrapper {
+.table-scroll-wrapper {
     width: 100%;
-    -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
-.cso-items-table {
-    width: 100%;
-    min-width: 960px; /* keeps 8 columns readable; wrapper scrolls on mobile */
+.slds-table_fixed-layout {
+    min-width: 960px;
 }
 
-.cso-col-qty     { width: 100px; }
-.cso-col-price   { width: 130px; white-space: nowrap; }
-.cso-col-product { min-width: 220px; }
-.cso-col-sync    { width: 140px; white-space: nowrap; }
-.cso-col-delete  { width: 60px; }
+.slds-table thead th {
+    background-color: #f7f7f7;
+    color: #444444;
+    font-weight: 600;
+    padding: 0.75rem;
+}
+
+.product-cell {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    line-height: 1.4;
+}
 
 /* =========================================
-   Footer
+   Custom footer buttons (cancel / confirm)
 ========================================= */
-.cso-footer {
-    text-align: right;
+.cancel-button,
+.confirm-button {
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+    outline: none;
+}
+
+.cancel-button {
+    background-color: #f3f3f3;
+    color: #444444;
+    margin-right: 0.75rem;
+}
+
+.cancel-button:hover {
+    background-color: #e8e8e8;
+}
+
+.cancel-button:disabled {
+    color: #999999;
+    cursor: not-allowed;
+}
+
+.confirm-button {
+    background: linear-gradient(45deg, #0070d2, #1589ee);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.confirm-button:hover {
+    background: linear-gradient(45deg, #0057a3, #0070d2);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.confirm-button:disabled {
+    background: #c9c9c9;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 /* =========================================
-   Tablet (≤ 768px)
+   Blur background when the Add Product sub-modal is open
 ========================================= */
-@media (max-width: 768px) {
-    .header-bar h2 {
+.blur-background {
+    filter: blur(4px);
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Keep sub-modal sharp */
+.slds-modal {
+    filter: none !important;
+}
+
+/* =========================================
+   Mobile (≤ 768px)
+========================================= */
+@media (max-width: 48em) {
+    :host {
+        --slds-c-modal-sizing-width: 100vw;
+        --slds-c-modal-sizing-max-width: 100vw;
+        --slds-c-modal-sizing-height: 100vh;
+        --slds-c-modal-sizing-max-height: 100vh;
+    }
+
+    .modal-body {
+        max-height: calc(100vh - 130px);
+    }
+
+    .gradient-header h2 {
         font-size: 1rem;
-    }
-
-    .cso-body {
-        padding: 0.75rem !important;
-    }
-}
-
-/* =========================================
-   Mobile (≤ 480px)
-========================================= */
-@media (max-width: 480px) {
-    .header-bar {
-        padding-top: 0.75rem !important;
-        padding-bottom: 0.75rem !important;
-    }
-
-    .header-bar h2 {
-        font-size: 0.95rem;
-    }
-
-    .cso-body {
-        padding: 0.5rem !important;
-    }
-
-    .slds-box {
-        padding: 0.75rem !important;
-    }
-
-    /* Footer: stack buttons full-width on phones */
-    .cso-footer {
-        text-align: center;
-    }
-
-    .cso-footer-btn {
-        display: block;
-        width: 100%;
-        margin: 0 0 0.5rem 0 !important;
-    }
-
-    .cso-footer-btn:last-child {
-        margin-bottom: 0 !important;
     }
 }
