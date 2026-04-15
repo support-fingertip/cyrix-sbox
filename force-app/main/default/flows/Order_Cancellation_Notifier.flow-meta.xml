@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     DEPRECATED. Superseded by OrderTrigger + OrderTriggerHandler.
-    Status is set to Obsolete so this flow never fires, but the file is
-    retained because changedeploy.yml does not support true deletions
-    (it uses --source-dir which requires the file to exist).
-    To physically remove, run a manual destructiveChanges deploy.
+    Status is Obsolete so this flow never fires. The file is retained
+    only because the diff-based deploy workflow does not support
+    destructive changes; physically removing it requires a manual
+    destructiveChanges deploy run by an admin.
 -->
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>62.0</apiVersion>
