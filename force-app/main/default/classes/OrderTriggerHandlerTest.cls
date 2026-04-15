@@ -1,3 +1,7 @@
+/**
+ * Test coverage for OrderTriggerHandler.
+ * Exercises the cancellation path, no-op paths, and buildBody edge cases.
+ */
 @isTest
 private class OrderTriggerHandlerTest {
 
