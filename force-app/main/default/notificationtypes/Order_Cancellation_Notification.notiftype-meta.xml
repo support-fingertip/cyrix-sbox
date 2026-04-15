@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomNotificationType xmlns="http://soap.sforce.com/2006/04/metadata">
     <customNotifTypeName>Order_Cancellation_Notification</customNotifTypeName>
-    <description>In-app bell notification sent to the Order Owner when a Sales Order is cancelled.</description>
+    <description>In-app bell notification sent to the Order Owner when a Sales Order is cancelled. Sent by OrderTriggerHandler.</description>
     <desktop>true</desktop>
     <mobile>true</mobile>
     <masterLabel>Order Cancellation Notification</masterLabel>
