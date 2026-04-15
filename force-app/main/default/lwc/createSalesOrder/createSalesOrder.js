@@ -13,6 +13,35 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     isLoading = true;
     isSaving = false;
 
+    connectedCallback() {
+        this._widenQuickActionModal();
+    }
+
+    renderedCallback() {
+        this._widenQuickActionModal();
+    }
+
+    // Quick Action modals render inside a .slds-modal__container that sits
+    // ABOVE this LWC in the light DOM, so CSS custom properties on :host
+    // never reach it. Walk up and resize it directly.
+    _widenQuickActionModal() {
+        try {
+            const container =
+                this.template.host &&
+                this.template.host.closest &&
+                this.template.host.closest('.slds-modal__container');
+            if (!container) return;
+            if (container.dataset.csoResized === '1') return;
+            container.style.width = '95vw';
+            container.style.maxWidth = '95vw';
+            container.style.height = '92vh';
+            container.style.maxHeight = '92vh';
+            container.dataset.csoResized = '1';
+        } catch (e) {
+            // Ignore — modal sizing is a nice-to-have, not a blocker.
+        }
+    }
+
     @track quoteContext = {};
     @track warehouseOptions = [];
     @track displayItems = [];
