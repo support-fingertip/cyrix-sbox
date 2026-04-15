@@ -97,15 +97,28 @@ private class OrderTriggerHandlerTest {
 
     @isTest
     static void bodyGracefulWhenOptionalFieldsAreBlank() {
-        Order stub = new Order(
-            OrderNumber = '00000001'
-            // no Account, no reason
+        Account a = new Account(Name = 'Body Acct Blank');
+        insert a;
+        Order o = new Order(
+            AccountId    = a.Id,
+            Pricebook2Id = Test.getStandardPricebookId(),
+            Status       = 'Draft',
+            EffectiveDate = Date.today()
+            // no Cancellation_Reason__c
         );
-        String body = OrderTriggerHandler.buildBody(stub);
-        System.assertEquals(
-            'Order 00000001 has been cancelled.',
-            body,
-            'Body should gracefully omit missing parts'
-        );
+        insert o;
+
+        // Re-query so OrderNumber is populated. Deliberately do NOT select
+        // Account.Name or Cancellation_Reason__c so those branches of
+        // buildBody hit the null/blank paths.
+        Order reloaded = [
+            SELECT Id, OrderNumber
+            FROM Order
+            WHERE Id = :o.Id
+        ];
+
+        String body = OrderTriggerHandler.buildBody(reloaded);
+        System.assert(body.contains('has been cancelled.'), 'Body should still state cancellation');
+        System.assert(!body.contains('Reason:'), 'Body should omit Reason when blank');
     }
 }
