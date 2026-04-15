@@ -1,10 +1,12 @@
 /**
  * Handles business logic fired by OrderTrigger.
  *
- * Currently responsible for sending an in-app Custom Notification to the
- * Order Owner whenever an Order's Status transitions to 'Cancelled'.
- * The Custom Notification Type must be named Order_Cancellation_Notification
- * (created manually in Setup rather than deployed as metadata).
+ * Currently responsible for sending an in-app Custom Notification to
+ * the Order Owner whenever an Order's Status transitions to 'Cancelled'.
+ *
+ * The Custom Notification Type with DeveloperName
+ * Order_Cancellation_Notification must exist in the org (managed via
+ * Setup > Notification Builder > Custom Notifications).
  */
 public with sharing class OrderTriggerHandler {
 

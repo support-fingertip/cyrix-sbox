@@ -1,6 +1,8 @@
 /**
  * Test coverage for OrderTriggerHandler.
- * Exercises the cancellation path, no-op paths, and buildBody edge cases.
+ * Exercises the cancellation path, no-op paths, and buildBody edge
+ * cases. OrderNumber is AutoNumber so tests insert real Orders to
+ * receive a SF-assigned value rather than constructing stubs.
  */
 @isTest
 private class OrderTriggerHandlerTest {
