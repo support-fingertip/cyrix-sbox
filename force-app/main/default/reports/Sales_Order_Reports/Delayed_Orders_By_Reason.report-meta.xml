@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Report xmlns="http://soap.sforce.com/2006/04/metadata">
     <columns>
-        <field>ORDER.ORDER_NUMBER</field>
+        <field>Order.OrderNumber</field>
     </columns>
     <columns>
-        <field>ACCOUNT.NAME</field>
+        <field>Order.AccountId</field>
     </columns>
     <columns>
-        <field>ORDER.OWNER_NAME</field>
+        <field>Order.OwnerId</field>
     </columns>
     <columns>
         <field>Order.Delay_Reason__c</field>
@@ -25,10 +25,10 @@
         <field>Order.Advance_Amount__c</field>
     </columns>
     <columns>
-        <field>ORDER.TOTAL_AMOUNT</field>
+        <field>Order.TotalAmount</field>
     </columns>
     <columns>
-        <field>ORDER.CREATED_DATE</field>
+        <field>Order.CreatedDate</field>
     </columns>
     <filter>
         <booleanFilter>1 AND 2 AND 3</booleanFilter>
@@ -55,14 +55,9 @@
         <sortOrder>Asc</sortOrder>
     </groupingsDown>
     <name>Delayed Orders by Reason</name>
-    <params>
-        <name>co</name>
-        <value>0</value>
-    </params>
-    <reportType>Orders</reportType>
+    <reportType>Sales_Orders</reportType>
     <scope>organization</scope>
     <showDetails>true</showDetails>
     <showGrandTotal>true</showGrandTotal>
     <showSubTotals>true</showSubTotals>
 </Report>
-
