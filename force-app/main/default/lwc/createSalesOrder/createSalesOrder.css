@@ -6,8 +6,8 @@
 :host {
     display: block;
     width: 100%;
-    --slds-c-modal-sizing-width: 85vw;
-    --slds-c-modal-sizing-max-width: 1280px;
+    --slds-c-modal-sizing-width: 95vw;
+    --slds-c-modal-sizing-max-width: 1600px;
     --slds-c-modal-sizing-min-width: 320px;
     --slds-c-modal-sizing-max-height: 92vh;
 }

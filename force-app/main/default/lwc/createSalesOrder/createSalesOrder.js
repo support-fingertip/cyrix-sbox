@@ -32,8 +32,8 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
                 this.template.host.closest('.slds-modal__container');
             if (!container) return;
             if (container.dataset.csoResized === '1') return;
-            container.style.width = '85vw';
-            container.style.maxWidth = '1280px';
+            container.style.width = '95vw';
+            container.style.maxWidth = '1600px';
             container.style.height = 'auto';
             container.style.maxHeight = '92vh';
             container.dataset.csoResized = '1';
