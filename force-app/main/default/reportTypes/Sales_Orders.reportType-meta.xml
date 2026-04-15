@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ReportType xmlns="http://soap.sforce.com/2006/04/metadata">
     <baseObject>Order</baseObject>
-    <category>accounts</category>
+    <category>otherreports</category>
     <deployed>true</deployed>
     <description>Custom report type for Sales Order reports (Cancelled, Delayed, ERP Ack, Open by Age, etc.).</description>
     <label>Sales Orders</label>
     <sections>
+        <masterLabel>Order Fields</masterLabel>
         <columns>
             <checkedByDefault>true</checkedByDefault>
             <field>OrderNumber</field>
@@ -96,7 +97,5 @@
             <field>Approval_Status__c</field>
             <table>Order</table>
         </columns>
-        <masterLabel>Order</masterLabel>
     </sections>
 </ReportType>
-
