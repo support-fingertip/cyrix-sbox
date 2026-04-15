@@ -135,8 +135,8 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         return this.isSaving;
     }
 
-    get backgroundClass() {
-        return this.isAddProductOpen ? 'blur-background' : '';
+    get addProductButtonLabel() {
+        return this.isAddProductOpen ? 'Close' : 'Add Product';
     }
 
     toIsoDate(raw) {
@@ -223,7 +223,11 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
 
     // ===== Add Product sub-modal =====
 
-    handleOpenAddProduct() {
+    handleToggleAddProduct() {
+        if (this.isAddProductOpen) {
+            this.isAddProductOpen = false;
+            return;
+        }
         this.newPricebookEntryId = '';
         this.newQuantity = 1;
         this.newDiscount = 0;

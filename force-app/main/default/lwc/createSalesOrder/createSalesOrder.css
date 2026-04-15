@@ -183,17 +183,33 @@
 }
 
 /* =========================================
-   Blur main modal while Add Product sub-modal is open
+   Inline Add Product panel (appears below the Order Items heading)
 ========================================= */
-.blur-background {
-    filter: blur(4px);
-    pointer-events: none;
-    user-select: none;
+.cso-add-product-panel {
+    background-color: #f3f7fb;
+    border: 1px solid #c7d9ea;
+    border-radius: 8px;
+    padding: 0.75rem 1rem 1rem 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-/* Keep the sub-modal itself sharp */
-.slds-modal {
-    filter: none !important;
+.cso-add-product-title {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    color: #0070d2;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.cso-add-product-fields {
+    align-items: end;
+}
+
+.cso-add-product-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.75rem;
 }
 
 /* =========================================
