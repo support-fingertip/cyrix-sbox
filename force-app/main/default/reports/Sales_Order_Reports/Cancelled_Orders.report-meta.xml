@@ -4,12 +4,6 @@
         <field>Order.OrderNumber</field>
     </columns>
     <columns>
-        <field>Order.AccountId</field>
-    </columns>
-    <columns>
-        <field>Order.OwnerId</field>
-    </columns>
-    <columns>
         <field>Order.TotalAmount</field>
     </columns>
     <columns>

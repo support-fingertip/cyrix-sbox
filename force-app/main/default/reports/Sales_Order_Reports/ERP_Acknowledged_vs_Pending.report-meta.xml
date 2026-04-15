@@ -4,13 +4,7 @@
         <field>Order.OrderNumber</field>
     </columns>
     <columns>
-        <field>Order.AccountId</field>
-    </columns>
-    <columns>
         <field>Order.Status</field>
-    </columns>
-    <columns>
-        <field>Order.OwnerId</field>
     </columns>
     <columns>
         <field>Order.ERP_Ack_Number__c</field>
