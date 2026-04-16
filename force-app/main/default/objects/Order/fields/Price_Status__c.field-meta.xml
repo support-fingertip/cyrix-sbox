@@ -4,7 +4,7 @@
     <externalId>false</externalId>
     <label>Price Status</label>
     <required>false</required>
-    <trackHistory>false</trackHistory>
+    <trackHistory>true</trackHistory>
     <type>Picklist</type>
     <valueSet>
         <restricted>true</restricted>
