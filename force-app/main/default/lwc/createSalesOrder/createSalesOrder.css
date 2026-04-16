@@ -362,3 +362,27 @@
 
 /* =========================================
    Payment Terms (read-only block)
+========================================= */
+.cso-payment-terms {
+    white-space: pre-wrap;
+    font-family: inherit;
+    font-size: 0.9rem;
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    background-color: #f7f9fb;
+    border: 1px solid #e5e9ef;
+    border-radius: 4px;
+    color: #032d60;
+    line-height: 1.5;
+}
+
+.cso-readonly-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #747474;
+    background-color: #eeeeee;
+    border-radius: 10px;
+    padding: 0.1rem 0.5rem;
+}

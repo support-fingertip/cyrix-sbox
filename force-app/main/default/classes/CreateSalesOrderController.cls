@@ -417,15 +417,15 @@ public with sharing class CreateSalesOrderController {
         List<String> lines = new List<String>();
         Integer idx = 1;
         for (Payment_Term__c pt : terms) {
-            String pct  = pt.Percentage__c  != null ? pt.Percentage__c.setScale(2).toPlainString() + '%' : '';
-            String desc = pt.Payment_Term__c != null ? String.valueOf(pt.Payment_Term__c) : '';
+            String pct = pt.Percentage__c != null ? pt.Percentage__c.setScale(2).toPlainString() + '%' : '';
+            String termDesc = pt.Payment_Term__c != null ? String.valueOf(pt.Payment_Term__c) : '';
             String line;
-            if (String.isNotBlank(pct) && String.isNotBlank(desc)) {
-                line = idx + '. ' + pct + ' - ' + desc;
+            if (String.isNotBlank(pct) && String.isNotBlank(termDesc)) {
+                line = idx + '. ' + pct + ' - ' + termDesc;
             } else if (String.isNotBlank(pct)) {
                 line = idx + '. ' + pct;
             } else {
-                line = idx + '. ' + desc;
+                line = idx + '. ' + termDesc;
             }
             lines.add(line);
             idx++;
