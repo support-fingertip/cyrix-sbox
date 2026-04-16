@@ -3,7 +3,6 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import getQuoteDetails from '@salesforce/apex/CreateSalesOrderController.getQuoteDetails';
-import getWarehouses from '@salesforce/apex/CreateSalesOrderController.getWarehouses';
 import getPricebookProducts from '@salesforce/apex/CreateSalesOrderController.getPricebookProducts';
 import createSalesOrder from '@salesforce/apex/CreateSalesOrderController.createSalesOrder';
 
@@ -43,15 +42,11 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     }
 
     @track quoteContext = {};
-    @track warehouseOptions = [];
     @track displayItems = [];
     @track productOptions = [];
     @track productCatalog = []; // full ProductOption records (label/value/unitPrice/tax)
 
-    @track deliveryCommittedDate;
-    @track warehouseId = '';
     @track remarks = '';
-    @track creditOrder = false;
 
     // Add Product sub-modal state
     @track isAddProductOpen = false;
@@ -86,15 +81,6 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         } else if (error) {
             this.isLoading = false;
             this.showToast('Error', this.reduceError(error), 'error');
-        }
-    }
-
-    @wire(getWarehouses)
-    wiredWarehouses({ error, data }) {
-        if (data) {
-            this.warehouseOptions = data;
-        } else if (error) {
-            this.showToast('Warning', 'Could not load warehouses.', 'warning');
         }
     }
 
@@ -139,28 +125,6 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         return this.isAddProductOpen ? 'Close' : 'Add Product';
     }
 
-    toIsoDate(raw) {
-        if (raw == null) return null;
-        if (raw instanceof Date && !isNaN(raw.getTime())) {
-            const y = raw.getFullYear();
-            const m = String(raw.getMonth() + 1).padStart(2, '0');
-            const d = String(raw.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
-        }
-        const s = String(raw).trim();
-        if (!s) return null;
-        const isoMatch = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
-        if (isoMatch) return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
-        const d = new Date(s);
-        if (!isNaN(d.getTime())) {
-            const y = d.getFullYear();
-            const m = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            return `${y}-${m}-${day}`;
-        }
-        return null;
-    }
-
     calcTotal(qty, unitPrice, discountPercent) {
         const q = Number(qty) || 0;
         const p = Number(unitPrice) || 0;
@@ -168,20 +132,8 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         return q * p * (1 - d / 100);
     }
 
-    handleDeliveryDateChange(event) {
-        this.deliveryCommittedDate = this.toIsoDate(event.detail.value);
-    }
-
-    handleWarehouseChange(event) {
-        this.warehouseId = event.detail.value;
-    }
-
     handleRemarksChange(event) {
         this.remarks = event.target.value;
-    }
-
-    handleCreditToggle(event) {
-        this.creditOrder = event.target.checked;
     }
 
     handleQuantityChange(event) {
@@ -221,7 +173,7 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         this.displayItems = this.displayItems.filter((it) => it.rowKey !== rowKey);
     }
 
-    // ===== Add Product sub-modal =====
+    // ===== Add Product inline panel =====
 
     handleToggleAddProduct() {
         if (this.isAddProductOpen) {
@@ -299,39 +251,6 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     async handleConfirm() {
         if (this.isSaving) return;
 
-        const dateEl = this.template.querySelector(
-            'lightning-input[data-field="deliveryCommittedDate"]'
-        );
-        const domIso = this.toIsoDate(dateEl ? dateEl.value : null);
-        const stateIso = this.toIsoDate(this.deliveryCommittedDate);
-        const finalIso = stateIso || domIso;
-        if (finalIso && finalIso !== this.deliveryCommittedDate) {
-            this.deliveryCommittedDate = finalIso;
-        }
-
-        if (!this.warehouseId) {
-            this.showToast('Error', 'Please select a Warehouse', 'error');
-            return;
-        }
-
-        if (!finalIso) {
-            this.showToast('Error', 'Delivery Committed Date is required', 'error');
-            if (dateEl && dateEl.focus) dateEl.focus();
-            return;
-        }
-
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const selectedDate = new Date(finalIso + 'T00:00:00');
-        if (selectedDate < today) {
-            this.showToast(
-                'Error',
-                'Delivery Committed Date cannot be in the past',
-                'error'
-            );
-            return;
-        }
-
         if (!this.displayItems.length) {
             this.showToast(
                 'Error',
@@ -365,10 +284,7 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
 
             const orderId = await createSalesOrder({
                 quoteId: this.recordId,
-                deliveryCommittedDate: finalIso,
-                warehouseId: this.warehouseId,
                 remarks: this.remarks,
-                creditOrder: this.creditOrder === true,
                 selectedLineIds: selectedLineIds,
                 quantityByLineId: quantityByLineId,
                 discountByLineId: discountByLineId,

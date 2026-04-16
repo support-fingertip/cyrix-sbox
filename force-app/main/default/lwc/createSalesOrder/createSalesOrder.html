@@ -52,43 +52,6 @@
                         </div>
                     </div>
 
-                    <!-- Delivery Date + Credit Order -->
-                    <div class="slds-grid slds-wrap slds-m-bottom_medium slds-grid_vertical-align-center">
-                        <div class="slds-col slds-size_1-of-2 slds-p-right_small">
-                            <lightning-input
-                                type="date"
-                                label="Delivery Committed Date"
-                                value={deliveryCommittedDate}
-                                data-field="deliveryCommittedDate"
-                                onchange={handleDeliveryDateChange}
-                                required>
-                            </lightning-input>
-                        </div>
-                        <div class="slds-col slds-size_1-of-2 slds-p-left_small">
-                            <lightning-input
-                                type="toggle"
-                                label="Credit Order"
-                                label-position="top"
-                                checked={creditOrder}
-                                message-toggle-active="Active"
-                                message-toggle-inactive="Inactive"
-                                onchange={handleCreditToggle}>
-                            </lightning-input>
-                        </div>
-                    </div>
-
-                    <!-- Warehouse -->
-                    <div class="slds-m-bottom_medium">
-                        <lightning-combobox
-                            label="Warehouse"
-                            placeholder="Select Warehouse"
-                            value={warehouseId}
-                            options={warehouseOptions}
-                            onchange={handleWarehouseChange}
-                            required>
-                        </lightning-combobox>
-                    </div>
-
                     <!-- Remarks -->
                     <div class="slds-m-bottom_medium">
                         <lightning-textarea

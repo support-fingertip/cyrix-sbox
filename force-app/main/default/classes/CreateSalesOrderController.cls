@@ -159,10 +159,7 @@ public with sharing class CreateSalesOrderController {
     @AuraEnabled
     public static Id createSalesOrder(
         Id quoteId,
-        String deliveryCommittedDate,
-        Id warehouseId,
         String remarks,
-        Boolean creditOrder,
         List<Id> selectedLineIds,
         Map<Id, Decimal> quantityByLineId,
         Map<Id, Decimal> discountByLineId,
@@ -173,23 +170,10 @@ public with sharing class CreateSalesOrderController {
         if (quoteId == null) {
             throw new AuraHandledException('Quote Id is required.');
         }
-        if (String.isBlank(deliveryCommittedDate)) {
-            throw new AuraHandledException('Delivery Committed Date is required.');
-        }
-        if (warehouseId == null) {
-            throw new AuraHandledException('Warehouse is required.');
-        }
         Boolean hasQuoteLines = selectedLineIds != null && !selectedLineIds.isEmpty();
         Boolean hasManualLines = manualPricebookEntryIds != null && !manualPricebookEntryIds.isEmpty();
         if (!hasQuoteLines && !hasManualLines) {
             throw new AuraHandledException('Please add at least one product to the Sales Order.');
-        }
-
-        Date deliveryDate;
-        try {
-            deliveryDate = Date.valueOf(deliveryCommittedDate);
-        } catch (Exception ex) {
-            throw new AuraHandledException('Invalid Delivery Committed Date: ' + deliveryCommittedDate);
         }
 
         Quote q = [
@@ -219,11 +203,9 @@ public with sharing class CreateSalesOrderController {
             ord.QuoteId        = q.Id;
             ord.OpportunityId  = q.OpportunityId;
             ord.BillToContactId = q.ContactId;
-            ord.EffectiveDate  = deliveryDate;
+            ord.EffectiveDate  = Date.today();
             ord.Status         = 'Draft';
-            ord.Branch__c      = warehouseId;
             ord.Description    = remarks;
-            ord.is_Active__c   = creditOrder == true;
             ord.Approval_Status__c = 'Pending';
             ord.Quote_Approved_Date_Time__c = System.now();
 
