@@ -31,8 +31,8 @@ public with sharing class OrderTriggerHandler {
     }
 
     private static void sendCancellationNotifications(Set<Id> orderIds) {
-        // Re-query to pull Account.Name + cancellation reason fresh (trigger.new
-        // fields may not include related parent fields reliably).
+        // Re-query to pull Account.Name + cancellation reason + owner email
+        // (trigger.new fields may not include related parent fields reliably).
         List<Order> orders = [
             SELECT Id, OrderNumber, OwnerId, Cancellation_Reason__c,
                    Account.Name
@@ -41,6 +41,20 @@ public with sharing class OrderTriggerHandler {
         ];
         if (orders.isEmpty()) return;
 
+        // Build Id -> Email map for each Owner that is a User (Queues don't
+        // have User records and are skipped for email).
+        Set<Id> ownerIds = new Set<Id>();
+        for (Order o : orders) if (o.OwnerId != null) ownerIds.add(o.OwnerId);
+        Map<Id, String> emailByOwnerId = new Map<Id, String>();
+        for (User u : [SELECT Id, Email FROM User WHERE Id IN :ownerIds]) {
+            if (String.isNotBlank(u.Email)) emailByOwnerId.put(u.Id, u.Email);
+        }
+
+        sendInAppNotifications(orders);
+        sendCancellationEmails(orders, emailByOwnerId);
+    }
+
+    private static void sendInAppNotifications(List<Order> orders) {
         List<CustomNotificationType> types = [
             SELECT Id
             FROM CustomNotificationType
@@ -50,7 +64,7 @@ public with sharing class OrderTriggerHandler {
         if (types.isEmpty()) {
             System.debug(LoggingLevel.WARN,
                 'OrderTriggerHandler: Custom Notification Type "'
-                + NOTIF_DEV_NAME + '" not found. Skipping notification.');
+                + NOTIF_DEV_NAME + '" not found. Skipping bell notification.');
             return;
         }
         Id notifTypeId = types[0].Id;
@@ -65,9 +79,55 @@ public with sharing class OrderTriggerHandler {
                 n.send(new Set<String>{ String.valueOf(o.OwnerId) });
             } catch (Exception e) {
                 System.debug(LoggingLevel.ERROR,
-                    'OrderTriggerHandler: notification failed for ' + o.Id
+                    'OrderTriggerHandler: bell notification failed for ' + o.Id
                     + ': ' + e.getMessage());
             }
+        }
+    }
+
+    /**
+     * Sends a cancellation email to the Order Owner's email address.
+     * Wrapped in try/catch so an email failure never blocks the save or
+     * the bell notification that ran before it.
+     */
+    private static void sendCancellationEmails(List<Order> orders, Map<Id, String> emailByOwnerId) {
+        if (emailByOwnerId == null || emailByOwnerId.isEmpty()) return;
+
+        List<Messaging.SingleEmailMessage> messages = new List<Messaging.SingleEmailMessage>();
+        for (Order o : orders) {
+            String toEmail = emailByOwnerId.get(o.OwnerId);
+            if (String.isBlank(toEmail)) continue;
+
+            String acctName = (o.Account != null && String.isNotBlank(o.Account.Name))
+                ? o.Account.Name : 'the customer';
+            String reasonPart = String.isNotBlank(o.Cancellation_Reason__c)
+                ? 'Reason: ' + o.Cancellation_Reason__c + '\n\n'
+                : '';
+
+            Messaging.SingleEmailMessage msg = new Messaging.SingleEmailMessage();
+            msg.setToAddresses(new List<String>{ toEmail });
+            msg.setSubject('Order ' + o.OrderNumber + ' has been cancelled');
+            msg.setPlainTextBody(
+                'Hello,\n\n' +
+                'This is to inform you that Order ' + o.OrderNumber +
+                ' for ' + acctName + ' has been cancelled on ' +
+                Date.today().format() + '.\n\n' +
+                reasonPart +
+                'You can review the record here: ' +
+                URL.getOrgDomainUrl().toExternalForm() + '/' + o.Id + '\n\n' +
+                'Regards,\nCyrix Order Management'
+            );
+            msg.setSaveAsActivity(false);
+            messages.add(msg);
+        }
+
+        if (messages.isEmpty()) return;
+
+        try {
+            Messaging.sendEmail(messages, false);
+        } catch (Exception e) {
+            System.debug(LoggingLevel.ERROR,
+                'OrderTriggerHandler: cancellation email batch failed: ' + e.getMessage());
         }
     }
 
