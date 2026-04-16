@@ -535,3 +535,4 @@ public with sharing class CreateSalesOrderController {
     }
 
 }
+
