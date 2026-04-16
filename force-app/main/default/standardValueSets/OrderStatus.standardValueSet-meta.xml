@@ -9,6 +9,34 @@
         <label>Draft</label>
     </standardValue>
     <standardValue>
+        <fullName>Submitted for Approval</fullName>
+        <default>false</default>
+        <groupingString>Draft</groupingString>
+        <isActive>true</isActive>
+        <label>Submitted for Approval</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Approved</fullName>
+        <default>false</default>
+        <groupingString>Activated</groupingString>
+        <isActive>true</isActive>
+        <label>Approved</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Rejected</fullName>
+        <default>false</default>
+        <groupingString>Draft</groupingString>
+        <isActive>true</isActive>
+        <label>Rejected</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Submitted to ERP</fullName>
+        <default>false</default>
+        <groupingString>Activated</groupingString>
+        <isActive>true</isActive>
+        <label>Submitted to ERP</label>
+    </standardValue>
+    <standardValue>
         <fullName>Activated</fullName>
         <default>false</default>
         <groupingString>Activated</groupingString>
