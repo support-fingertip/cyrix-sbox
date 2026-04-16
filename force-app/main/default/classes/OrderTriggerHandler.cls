@@ -86,14 +86,17 @@ public with sharing class OrderTriggerHandler {
     }
 
     /**
-     * Sends a cancellation email to the Order Owner's email address.
-     * Wrapped in try/catch so an email failure never blocks the save or
-     * the bell notification that ran before it.
+     * Sends a cancellation email to the Order Owner's email address AND
+     * logs a Task record on the Order so the email appears in the
+     * Activity panel. Wrapped in try/catch so an email failure never
+     * blocks the save or the bell notification that ran before it.
      */
     private static void sendCancellationEmails(List<Order> orders, Map<Id, String> emailByOwnerId) {
         if (emailByOwnerId == null || emailByOwnerId.isEmpty()) return;
 
         List<Messaging.SingleEmailMessage> messages = new List<Messaging.SingleEmailMessage>();
+        List<Task> activityTasks = new List<Task>();
+
         for (Order o : orders) {
             String toEmail = emailByOwnerId.get(o.OwnerId);
             if (String.isBlank(toEmail)) continue;
@@ -104,10 +107,8 @@ public with sharing class OrderTriggerHandler {
                 ? 'Reason: ' + o.Cancellation_Reason__c + '\n\n'
                 : '';
 
-            Messaging.SingleEmailMessage msg = new Messaging.SingleEmailMessage();
-            msg.setToAddresses(new List<String>{ toEmail });
-            msg.setSubject('Order ' + o.OrderNumber + ' has been cancelled');
-            msg.setPlainTextBody(
+            String subject = 'Order ' + o.OrderNumber + ' has been cancelled';
+            String body =
                 'Hello,\n\n' +
                 'This is to inform you that Order ' + o.OrderNumber +
                 ' for ' + acctName + ' has been cancelled on ' +
@@ -115,19 +116,45 @@ public with sharing class OrderTriggerHandler {
                 reasonPart +
                 'You can review the record here: ' +
                 URL.getOrgDomainUrl().toExternalForm() + '/' + o.Id + '\n\n' +
-                'Regards,\nCyrix Order Management'
-            );
+                'Regards,\nCyrix Order Management';
+
+            Messaging.SingleEmailMessage msg = new Messaging.SingleEmailMessage();
+            msg.setToAddresses(new List<String>{ toEmail });
+            msg.setSubject(subject);
+            msg.setPlainTextBody(body);
             msg.setSaveAsActivity(false);
             messages.add(msg);
+
+            // Mirror the email as a Task so it appears under the Order's
+            // Activity panel (saveAsActivity on the email itself doesn't
+            // always attach to the Order when we're not using a template).
+            Task t = new Task();
+            t.WhatId       = o.Id;
+            t.Subject      = 'Email: ' + subject;
+            t.Description  = 'To: ' + toEmail + '\n\n' + body;
+            t.Status       = 'Completed';
+            t.Priority     = 'Normal';
+            t.ActivityDate = Date.today();
+            t.Type         = 'Email';
+            activityTasks.add(t);
         }
 
-        if (messages.isEmpty()) return;
+        if (!messages.isEmpty()) {
+            try {
+                Messaging.sendEmail(messages, false);
+            } catch (Exception e) {
+                System.debug(LoggingLevel.ERROR,
+                    'OrderTriggerHandler: cancellation email batch failed: ' + e.getMessage());
+            }
+        }
 
-        try {
-            Messaging.sendEmail(messages, false);
-        } catch (Exception e) {
-            System.debug(LoggingLevel.ERROR,
-                'OrderTriggerHandler: cancellation email batch failed: ' + e.getMessage());
+        if (!activityTasks.isEmpty()) {
+            try {
+                insert activityTasks;
+            } catch (Exception e) {
+                System.debug(LoggingLevel.ERROR,
+                    'OrderTriggerHandler: activity task insert failed: ' + e.getMessage());
+            }
         }
     }
 
