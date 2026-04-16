@@ -32,3 +32,4 @@
 )</errorConditionFormula>
     <errorMessage>Fields copied from the source Quote cannot be edited on the Sales Order. Contact your System Administrator if a correction is needed.</errorMessage>
 </ValidationRule>
+
