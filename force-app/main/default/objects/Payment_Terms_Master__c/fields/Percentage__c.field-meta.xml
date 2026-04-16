@@ -3,7 +3,7 @@
     <fullName>Percentage__c</fullName>
     <label>Percentage</label>
     <precision>18</precision>
-    <required>false</required>
+    <required>true</required>
     <scale>0</scale>
     <trackTrending>false</trackTrending>
     <type>Percent</type>

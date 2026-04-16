@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
     <fieldUpdates>
+        <fullName>Approved_Date_Time</fullName>
+        <field>Quote_Approved_Date_Time__c</field>
+        <formula>now()</formula>
+        <name>Approved Date Time</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Formula</operation>
+        <protected>false</protected>
+        <reevaluateOnChange>false</reevaluateOnChange>
+    </fieldUpdates>
+    <fieldUpdates>
         <fullName>Quote_Approved</fullName>
         <field>Approval_Status__c</field>
         <literalValue>Approved</literalValue>
@@ -23,8 +33,18 @@
     <fieldUpdates>
         <fullName>Quote_Rejected</fullName>
         <field>Approval_Status__c</field>
-        <literalValue>Approved</literalValue>
+        <literalValue>Rejected</literalValue>
         <name>Quote Rejected</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Literal</operation>
+        <protected>false</protected>
+        <reevaluateOnChange>false</reevaluateOnChange>
+    </fieldUpdates>
+    <fieldUpdates>
+        <fullName>Quote_Stage</fullName>
+        <field>Status</field>
+        <literalValue>Approved</literalValue>
+        <name>Quote Stage</name>
         <notifyAssignee>false</notifyAssignee>
         <operation>Literal</operation>
         <protected>false</protected>

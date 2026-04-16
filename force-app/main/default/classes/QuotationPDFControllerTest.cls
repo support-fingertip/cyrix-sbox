@@ -84,7 +84,7 @@ private class QuotationPDFControllerTest {
             is_Active__c = true,
             Vertical__c = 'Medical Equipment',
             Billing_Address__c = '123 MG Road, Kochi, Kerala - 682001',
-            Shipping_Address__c = '123 MG Road, Kochi, Kerala - 682001',
+           
             Shipping_Mode__c = 'By Road'
         );
         insert qt1;

@@ -1,0 +1,290 @@
+<template>
+    <!-- ================= MAIN CONTENT ================= -->
+    <template if:false={isLoading}>
+        <div>
+            <div class="cso-container">
+
+                <!-- Gradient Header -->
+                <div class="gradient-header">
+                    <h2 class="cso-title">Sales Order</h2>
+                </div>
+
+                <!-- Body -->
+                <div class="cso-body">
+
+                    <!-- Customer Information -->
+                    <div class="customer-card slds-m-bottom_medium">
+                        <div class="customer-card-header">
+                            <lightning-icon
+                                icon-name="standard:customer"
+                                size="small"
+                                class="slds-m-right_small">
+                            </lightning-icon>
+                            <span class="slds-text-heading_small">Customer Information</span>
+                        </div>
+                        <div class="customer-card-body">
+                            <div class="slds-grid slds-wrap">
+                                <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                    <div class="slds-text-title">Customer Name</div>
+                                    <div class="cso-field-value">{quoteContext.customerName}</div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                    <div class="slds-text-title">Email</div>
+                                    <div class="cso-field-value">{emailDisplay}</div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                    <div class="slds-text-title">Phone</div>
+                                    <div class="cso-field-value">{phoneDisplay}</div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                    <div class="slds-text-title">Shipping Address</div>
+                                    <div class="cso-field-value">{shippingDisplay}</div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                    <div class="slds-text-title">Executive Assigned</div>
+                                    <div class="cso-field-value">{quoteContext.executiveAssigned}</div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                    <div class="slds-text-title">Address</div>
+                                    <div class="cso-field-value">{billingDisplay}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Date + Credit Order -->
+                    <div class="slds-grid slds-wrap slds-m-bottom_medium slds-grid_vertical-align-center">
+                        <div class="slds-col slds-size_1-of-2 slds-p-right_small">
+                            <lightning-input
+                                type="date"
+                                label="Delivery Committed Date"
+                                value={deliveryCommittedDate}
+                                data-field="deliveryCommittedDate"
+                                onchange={handleDeliveryDateChange}
+                                required>
+                            </lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2 slds-p-left_small">
+                            <lightning-input
+                                type="toggle"
+                                label="Credit Order"
+                                label-position="top"
+                                checked={creditOrder}
+                                message-toggle-active="Active"
+                                message-toggle-inactive="Inactive"
+                                onchange={handleCreditToggle}>
+                            </lightning-input>
+                        </div>
+                    </div>
+
+                    <!-- Warehouse -->
+                    <div class="slds-m-bottom_medium">
+                        <lightning-combobox
+                            label="Warehouse"
+                            placeholder="Select Warehouse"
+                            value={warehouseId}
+                            options={warehouseOptions}
+                            onchange={handleWarehouseChange}
+                            required>
+                        </lightning-combobox>
+                    </div>
+
+                    <!-- Remarks -->
+                    <div class="slds-m-bottom_medium">
+                        <lightning-textarea
+                            label="Remarks"
+                            value={remarks}
+                            onchange={handleRemarksChange}
+                            placeholder="Enter remarks">
+                        </lightning-textarea>
+                    </div>
+
+                    <!-- Order Items -->
+                    <div class="cso-items-header">
+                        <div class="slds-text-heading_small">Order Items</div>
+                        <lightning-button
+                            label="Add Product"
+                            variant="brand-outline"
+                            icon-name="utility:add"
+                            onclick={handleToggleAddProduct}>
+                        </lightning-button>
+                    </div>
+
+                    <!-- Inline Add Product panel -->
+                    <template if:true={isAddProductOpen}>
+                        <div class="cso-add-product-panel slds-m-bottom_medium">
+                            <div class="cso-add-product-title">
+                                <lightning-icon
+                                    icon-name="utility:add"
+                                    size="x-small"
+                                    class="slds-m-right_x-small">
+                                </lightning-icon>
+                                Add Product
+                            </div>
+                            <div class="slds-grid slds-wrap slds-gutters_small cso-add-product-fields">
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                    <lightning-combobox
+                                        label="Product"
+                                        value={newPricebookEntryId}
+                                        placeholder="Select a product"
+                                        options={productOptions}
+                                        onchange={handleNewProductChange}
+                                        required>
+                                    </lightning-combobox>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+                                    <lightning-input
+                                        type="number"
+                                        label="Quantity"
+                                        value={newQuantity}
+                                        min="1"
+                                        step="1"
+                                        onchange={handleNewQuantityChange}>
+                                    </lightning-input>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+                                    <lightning-input
+                                        type="number"
+                                        label="Discount (%)"
+                                        value={newDiscount}
+                                        min="0"
+                                        max="100"
+                                        step="0.01"
+                                        onchange={handleNewDiscountChange}>
+                                    </lightning-input>
+                                </div>
+                            </div>
+                            <div class="cso-add-product-actions">
+                                <button class="cancel-button" onclick={handleCloseAddProduct}>
+                                    Cancel
+                                </button>
+                                <button class="confirm-button" onclick={handleAddProduct}>
+                                    <lightning-icon
+                                        icon-name="utility:add"
+                                        size="x-small"
+                                        class="slds-m-right_x-small">
+                                    </lightning-icon>
+                                    Add
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template if:true={hasItems}>
+                        <div class="table-scroll-wrapper">
+                            <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_fixed-layout cso-items-table">
+                                <colgroup>
+                                    <col style="width: 32%;">
+                                    <col style="width: 10%;">
+                                    <col style="width: 13%;">
+                                    <col style="width: 10%;">
+                                    <col style="width: 13%;">
+                                    <col style="width: 14%;">
+                                    <col style="width: 8%;">
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Unit Price</th>
+                                        <th>Discount (%)</th>
+                                        <th>Total Price</th>
+                                        <th>Sync</th>
+                                        <th class="slds-text-align_center">Delete</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={displayItems} for:item="item">
+                                        <tr key={item.rowKey}>
+                                            <td class="product-cell">{item.productName}</td>
+                                            <td>
+                                                <lightning-input
+                                                    type="number"
+                                                    variant="label-hidden"
+                                                    label="Quantity"
+                                                    value={item.quantity}
+                                                    min="1"
+                                                    step="1"
+                                                    data-row-key={item.rowKey}
+                                                    onchange={handleQuantityChange}>
+                                                </lightning-input>
+                                            </td>
+                                            <td>{item.unitPriceDisplay}</td>
+                                            <td>
+                                                <lightning-input
+                                                    type="number"
+                                                    variant="label-hidden"
+                                                    label="Discount"
+                                                    value={item.discount}
+                                                    min="0"
+                                                    max="100"
+                                                    step="0.01"
+                                                    data-row-key={item.rowKey}
+                                                    onchange={handleDiscountChange}>
+                                                </lightning-input>
+                                            </td>
+                                            <td>{item.totalPriceDisplay}</td>
+                                            <td>
+                                                <lightning-button
+                                                    label="Check Stock"
+                                                    variant="brand-outline"
+                                                    data-row-key={item.rowKey}
+                                                    onclick={handleCheckStock}>
+                                                </lightning-button>
+                                            </td>
+                                            <td class="slds-text-align_center">
+                                                <lightning-button-icon
+                                                    icon-name="utility:delete"
+                                                    alternative-text="Delete row"
+                                                    title="Delete row"
+                                                    variant="bare"
+                                                    data-row-key={item.rowKey}
+                                                    onclick={handleDeleteRow}>
+                                                </lightning-button-icon>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+                    <template if:false={hasItems}>
+                        <div class="slds-text-align_center slds-p-around_medium">
+                            <lightning-icon icon-name="utility:info" size="medium"></lightning-icon>
+                            <p>No products on the order. Click "Add Product" to add one.</p>
+                        </div>
+                    </template>
+
+                </div>
+
+                <!-- Gradient Footer -->
+                <div class="gradient-footer">
+                    <button class="cancel-button" onclick={handleCancel} disabled={isSaving}>
+                        Cancel
+                    </button>
+                    <button
+                        class="confirm-button"
+                        onclick={handleConfirm}
+                        disabled={isConfirmDisabled}>
+                        <lightning-icon
+                            icon-name="utility:check"
+                            size="x-small"
+                            class="slds-m-right_x-small">
+                        </lightning-icon>
+                        Confirm Sale
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- ================= LOADING / SAVING ================= -->
+    <template if:true={isLoading}>
+        <div class="slds-is-relative slds-p-around_medium">
+            <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+        </div>
+    </template>
+    <template if:true={isSaving}>
+        <lightning-spinner alternative-text="Creating order..." size="medium"></lightning-spinner>
+    </template>
+</template>

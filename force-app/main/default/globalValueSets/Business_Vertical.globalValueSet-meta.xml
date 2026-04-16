@@ -100,6 +100,11 @@
         <default>false</default>
         <label>Warehouse</label>
     </customValue>
+    <customValue>
+        <fullName>Calibration</fullName>
+        <default>false</default>
+        <label>Calibration</label>
+    </customValue>
     <masterLabel>Business Vertical</masterLabel>
     <sorted>false</sorted>
 </GlobalValueSet>

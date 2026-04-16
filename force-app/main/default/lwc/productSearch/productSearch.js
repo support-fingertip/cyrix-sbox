@@ -9,7 +9,7 @@ import { LightningElement, api, track, wire } from 'lwc';
 import searchProducts from '@salesforce/apex/ProductSearchController.searchProducts';
 import getProductDetails from '@salesforce/apex/ProductSearchController.getProductDetails';
 import getProductCategories from '@salesforce/apex/ProductSearchController.getProductCategories';
-import getProductFamilies from '@salesforce/apex/ProductSearchController.getProductFamilies';
+import getProductVerticals from '@salesforce/apex/ProductSearchController.getProductVerticals';
 
 export default class ProductSearch extends LightningElement {
     @api recordId;
@@ -52,16 +52,16 @@ export default class ProductSearch extends LightningElement {
         }
     }
 
-    @wire(getProductFamilies)
-    wiredFamilies({ data, error }) {
+    @wire(getProductVerticals)
+    wiredVerticals({ data, error }) {
         if (data) {
             this.verticalOptions = [
-                { label: 'All Families', value: '' },
+                { label: 'All Verticals', value: '' },
                 ...data.map(v => ({ label: v, value: v }))
             ];
         }
         if (error) {
-            console.error('Error loading product families:', error);
+            console.error('Error loading verticals:', error);
         }
     }
 

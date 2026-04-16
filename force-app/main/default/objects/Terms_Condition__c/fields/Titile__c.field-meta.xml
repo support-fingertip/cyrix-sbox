@@ -2,7 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Titile__c</fullName>
     <externalId>false</externalId>
-    <label>Titile</label>
+    <label>Title</label>
     <length>255</length>
     <required>false</required>
     <trackTrending>false</trackTrending>
