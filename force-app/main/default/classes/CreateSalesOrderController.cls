@@ -6,20 +6,14 @@
  */
 public with sharing class CreateSalesOrderController {
 
-    // Quote statuses that allow conversion to a Sales Order.
-    // 'Approved'  = internal price/approval flow done.
-    // 'Accepted'  = customer has accepted the proposal.
-    private static final Set<String> APPROVED_STATUSES = new Set<String>{
-        'Approved', 'Accepted'
-    };
-
     /**
      * Returns the Quote header info (customer, owner, addresses, commercial
      * and operational fields) plus its line items so the LWC can render a
      * full Quote-like read-only view in the Sales Order modal.
      *
-     * Blocks the load if the Quote is not in 'Approved' status — Sales Orders
-     * may only be created from a finalized/approved Quote.
+     * Quote-status gating is done at the Quick Action button visibility
+     * level, not here -- this method assumes it's only invoked for Quotes
+     * that are eligible to be converted.
      */
     @AuraEnabled(cacheable=true)
     public static QuoteContext getQuoteDetails(Id quoteId) {
@@ -48,12 +42,6 @@ public with sharing class CreateSalesOrderController {
             LIMIT 1
         ];
 
-        if (!APPROVED_STATUSES.contains(q.Status)) {
-            throw new AuraHandledException(
-                'Sales Order can only be created from an Approved or Accepted Quote. ' +
-                'Current Quote status: ' + (q.Status == null ? 'None' : q.Status) + '.'
-            );
-        }
 
         List<QuoteLineItem> items = [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
@@ -254,13 +242,6 @@ public with sharing class CreateSalesOrderController {
             WHERE Id = :quoteId
             LIMIT 1
         ];
-
-        if (!APPROVED_STATUSES.contains(q.Status)) {
-            throw new AuraHandledException(
-                'Sales Order can only be created from an Approved or Accepted Quote. ' +
-                'Current Quote status: ' + (q.Status == null ? 'None' : q.Status) + '.'
-            );
-        }
 
         Savepoint sp = Database.setSavepoint();
         try {
