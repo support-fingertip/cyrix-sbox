@@ -26,7 +26,8 @@
         ISCHANGED(Valid_Till__c),
         ISCHANGED(Vertical__c),
         ISCHANGED(Reason_for_Revision__c),
-        ISCHANGED(Billing_Address__c)
+        ISCHANGED(Billing_Address__c),
+        ISCHANGED(Payment_Terms__c)
     )
 )</errorConditionFormula>
     <errorMessage>Fields copied from the source Quote cannot be edited on the Sales Order. Contact your System Administrator if a correction is needed.</errorMessage>

@@ -110,6 +110,11 @@ public with sharing class CreateSalesOrderController {
         ctx.shipToCountry          = q.ShippingCountry;
         ctx.shippingAddress        = formatAddress(q.ShippingStreet, q.ShippingCity, q.ShippingState, q.ShippingPostalCode, q.ShippingCountry);
 
+        // Payment Terms (child records on Quote). Formatted into a text summary
+        // so the LWC modal and the Order.Payment_Terms__c field can display it
+        // read-only. No structure retained -- purely display.
+        ctx.paymentTerms = buildPaymentTermsText(quoteId);
+
         List<QuoteItemWrap> wraps = new List<QuoteItemWrap>();
         for (QuoteLineItem qli : items) {
             QuoteItemWrap w = new QuoteItemWrap();
@@ -290,6 +295,7 @@ public with sharing class CreateSalesOrderController {
             ord.Delivery__c                   = q.Delivery__c;
             ord.Bank_Name__c                  = q.Bank_Name__c;
             ord.is_Active__c                  = q.is_Active__c == true;
+            ord.Payment_Terms__c              = buildPaymentTermsText(quoteId);
 
             insert ord;
 
@@ -387,6 +393,46 @@ public with sharing class CreateSalesOrderController {
         }
     }
 
+    /**
+     * Formats the Quote's Payment_Term__c child records into a single
+     * multi-line text block for display on the Sales Order modal and
+     * for storage on Order.Payment_Terms__c.
+     *
+     * Output example:
+     *   1. 50.00% - Advance on PO
+     *   2. 40.00% - Before Dispatch
+     *   3. 10.00% - After Installation
+     */
+    private static String buildPaymentTermsText(Id quoteId) {
+        if (quoteId == null) return null;
+        List<Payment_Term__c> terms = [
+            SELECT Id, Payment_Term__c, Percentage__c
+            FROM Payment_Term__c
+            WHERE Quote__c = :quoteId
+            ORDER BY CreatedDate ASC
+            LIMIT 200
+        ];
+        if (terms.isEmpty()) return null;
+
+        List<String> lines = new List<String>();
+        Integer idx = 1;
+        for (Payment_Term__c pt : terms) {
+            String pct  = pt.Percentage__c  != null ? pt.Percentage__c.setScale(2).toPlainString() + '%' : '';
+            String desc = pt.Payment_Term__c != null ? String.valueOf(pt.Payment_Term__c) : '';
+            String line;
+            if (String.isNotBlank(pct) && String.isNotBlank(desc)) {
+                line = idx + '. ' + pct + ' - ' + desc;
+            } else if (String.isNotBlank(pct)) {
+                line = idx + '. ' + pct;
+            } else {
+                line = idx + '. ' + desc;
+            }
+            lines.add(line);
+            idx++;
+        }
+        return String.join(lines, '\n');
+    }
+
     private static String formatAddress(String street, String city, String state, String zip, String country) {
         List<String> parts = new List<String>();
         if (String.isNotBlank(street))  parts.add(street);
@@ -447,6 +493,7 @@ public with sharing class CreateSalesOrderController {
         @AuraEnabled public String shipToPostalCode;
         @AuraEnabled public String shipToCountry;
         @AuraEnabled public String shippingAddress;
+        @AuraEnabled public String paymentTerms;
         @AuraEnabled public List<QuoteItemWrap> items;
     }
 

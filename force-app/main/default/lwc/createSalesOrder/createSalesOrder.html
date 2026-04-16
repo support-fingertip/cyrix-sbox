@@ -97,6 +97,23 @@
                         </div>
                     </div>
 
+                    <!-- Payment Terms (read-only, copied from Quote) -->
+                    <div class="cso-section slds-m-bottom_medium">
+                        <div class="cso-section-header">
+                            <lightning-icon icon-name="standard:task2" size="small" class="slds-m-right_small"></lightning-icon>
+                            <span class="slds-text-heading_small">Payment Terms</span>
+                            <span class="cso-readonly-tag slds-m-left_small">Read only</span>
+                        </div>
+                        <div class="cso-section-body">
+                            <template if:true={hasPaymentTerms}>
+                                <pre class="cso-payment-terms">{quoteContext.paymentTerms}</pre>
+                            </template>
+                            <template if:false={hasPaymentTerms}>
+                                <p class="slds-text-color_weak">No Payment Terms on the source Quote.</p>
+                            </template>
+                        </div>
+                    </div>
+
                     <!-- Remarks -->
                     <div class="slds-m-bottom_medium">
                         <lightning-textarea
