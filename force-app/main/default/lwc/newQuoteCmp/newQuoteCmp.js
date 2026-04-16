@@ -115,6 +115,10 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // In edit mode, return undefined so an empty defaultValues object can't
     // interfere with LDS auto-loading the saved Quote address subfields.
     get formDefaultValues() { return this.isEditMode ? undefined : this.defaultValues; }
+    // Force is_Active__c to be checked on new quote creation. In edit mode,
+    // returning undefined lets lightning-input-field fall back to the saved
+    // record value.
+    get defaultIsActive() { return this.isEditMode ? undefined : true; }
 
     // ===== CALCULATIONS =====
 
