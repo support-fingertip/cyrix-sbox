@@ -20,9 +20,6 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         this._widenQuickActionModal();
     }
 
-    // Quick Action modals render inside a .slds-modal__container that sits
-    // ABOVE this LWC in the light DOM, so CSS custom properties on :host
-    // never reach it. Walk up and resize it directly.
     _widenQuickActionModal() {
         try {
             const container =
@@ -44,11 +41,10 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     @track quoteContext = {};
     @track displayItems = [];
     @track productOptions = [];
-    @track productCatalog = []; // full ProductOption records (label/value/unitPrice/tax)
+    @track productCatalog = [];
 
     @track remarks = '';
 
-    // Add Product sub-modal state
     @track isAddProductOpen = false;
     @track newPricebookEntryId = '';
     @track newQuantity = 1;
@@ -58,7 +54,7 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     wiredQuote({ error, data }) {
         if (data) {
             this.quoteContext = data;
-            this.displayItems = (data.items || []).map((it) => {
+            this.displayItems = (data.items || []).map((it, idx) => {
                 const qty = it.quantity || 0;
                 const price = it.unitPrice || 0;
                 const disc = it.discount || 0;
@@ -66,12 +62,14 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
                 return {
                     ...it,
                     source: 'quote',
+                    rowNum: idx + 1,
                     quantity: qty,
                     discount: disc,
-                    stockQty: 0,
-                    stockQtyDisplay: '0',
-                    syncing: false,
+                    uomDisplay: it.uom || 'Nos',
+                    listPriceDisplay: this.formatCurrency(it.listPrice),
                     unitPriceDisplay: this.formatCurrency(price),
+                    taxDisplay: it.tax != null ? Number(it.tax).toFixed(0) + '%' : '-',
+                    priceStatusBadgeClass: this.priceStatusBadge(it.priceStatus),
                     totalPrice: total,
                     totalPriceDisplay: this.formatCurrency(total),
                     rowKey: it.lineId
@@ -88,34 +86,69 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     wiredProducts({ error, data }) {
         if (data) {
             this.productCatalog = data;
-            this.productOptions = data.map((p) => ({
-                label: p.label,
-                value: p.value
-            }));
+            this.productOptions = data.map((p) => ({ label: p.label, value: p.value }));
         } else if (error) {
             this.showToast('Warning', 'Could not load products.', 'warning');
         }
     }
 
+    // ===== Getters for Quote Information display =====
+
     get hasItems() {
         return this.displayItems && this.displayItems.length > 0;
     }
 
-    get emailDisplay() {
-        return this.quoteContext.email || 'N/A';
+    get quoteDateDisplay() {
+        return this.formatDate(this.quoteContext.quoteDate) || 'N/A';
     }
 
-    get phoneDisplay() {
-        return this.quoteContext.phone || 'N/A';
+    get validTillDaysDisplay() {
+        return this.quoteContext.quoteValidTillInDays || 'N/A';
     }
 
-    get shippingDisplay() {
-        return this.quoteContext.shippingAddress || 'N/A';
+    get opportunityNameDisplay() {
+        return this.quoteContext.opportunityName || 'N/A';
     }
 
-    get billingDisplay() {
-        return this.quoteContext.billingAddress || 'N/A';
+    get businessVerticalDisplay() {
+        return this.quoteContext.businessVertical || this.quoteContext.vertical || 'N/A';
     }
+
+    get shippingModeDisplay() {
+        return this.quoteContext.shippingMode || 'N/A';
+    }
+
+    get deliveryDisplay() {
+        return this.quoteContext.delivery || 'N/A';
+    }
+
+    get contractPeriodFromDisplay() {
+        return this.formatDate(this.quoteContext.contractPeriodFromDate) || 'N/A';
+    }
+
+    get contractPeriodEndDisplay() {
+        return this.formatDate(this.quoteContext.contractPeriodEndDate) || 'N/A';
+    }
+
+    get statusDisplay() {
+        return this.quoteContext.status || 'N/A';
+    }
+
+    // ===== Getters for Bill To / Ship To =====
+
+    get billToNameDisplay()       { return this.quoteContext.billToName || this.quoteContext.customerName || 'N/A'; }
+    get billToStreetDisplay()     { return this.quoteContext.billToStreet || 'N/A'; }
+    get billToCityDisplay()       { return this.quoteContext.billToCity || 'N/A'; }
+    get billToStateDisplay()      { return this.quoteContext.billToState || 'N/A'; }
+    get billToPostalCodeDisplay() { return this.quoteContext.billToPostalCode || 'N/A'; }
+    get billToCountryDisplay()    { return this.quoteContext.billToCountry || 'N/A'; }
+
+    get shipToNameDisplay()       { return this.quoteContext.shipToName || this.quoteContext.customerName || 'N/A'; }
+    get shipToStreetDisplay()     { return this.quoteContext.shipToStreet || 'N/A'; }
+    get shipToCityDisplay()       { return this.quoteContext.shipToCity || 'N/A'; }
+    get shipToStateDisplay()      { return this.quoteContext.shipToState || 'N/A'; }
+    get shipToPostalCodeDisplay() { return this.quoteContext.shipToPostalCode || 'N/A'; }
+    get shipToCountryDisplay()    { return this.quoteContext.shipToCountry || 'N/A'; }
 
     get isConfirmDisabled() {
         return this.isSaving;
@@ -125,12 +158,46 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         return this.isAddProductOpen ? 'Close' : 'Add Product';
     }
 
+    // ===== Helpers =====
+
     calcTotal(qty, unitPrice, discountPercent) {
         const q = Number(qty) || 0;
         const p = Number(unitPrice) || 0;
         const d = Number(discountPercent) || 0;
         return q * p * (1 - d / 100);
     }
+
+    priceStatusBadge(status) {
+        if (!status) return 'cso-badge cso-badge-neutral';
+        const s = String(status).toLowerCase();
+        if (s.indexOf('approval') !== -1) return 'cso-badge cso-badge-warn';
+        if (s === 'approved')             return 'cso-badge cso-badge-ok';
+        if (s === 'rejected')             return 'cso-badge cso-badge-error';
+        return 'cso-badge cso-badge-neutral';
+    }
+
+    formatCurrency(value) {
+        if (value === null || value === undefined) return '';
+        return Number(value).toLocaleString('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    formatDate(iso) {
+        if (!iso) return null;
+        try {
+            const d = new Date(iso);
+            if (isNaN(d.getTime())) return iso;
+            const day = String(d.getDate()).padStart(2, '0');
+            const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            return `${day}-${months[d.getMonth()]}-${d.getFullYear()}`;
+        } catch (e) {
+            return String(iso);
+        }
+    }
+
+    // ===== Handlers =====
 
     handleRemarksChange(event) {
         this.remarks = event.target.value;
@@ -170,10 +237,10 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
 
     handleDeleteRow(event) {
         const rowKey = event.target.dataset.rowKey;
-        this.displayItems = this.displayItems.filter((it) => it.rowKey !== rowKey);
+        this.displayItems = this.displayItems
+            .filter((it) => it.rowKey !== rowKey)
+            .map((it, idx) => ({ ...it, rowNum: idx + 1 }));
     }
-
-    // ===== Add Product inline panel =====
 
     handleToggleAddProduct() {
         if (this.isAddProductOpen) {
@@ -214,7 +281,6 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
             this.showToast('Error', 'Selected product is not available.', 'error');
             return;
         }
-        // Reject duplicates (same PricebookEntry already on the list).
         if (this.displayItems.some(
             (it) => it.source === 'manual' && it.pricebookEntryId === cat.value
         )) {
@@ -223,26 +289,37 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         }
         const qty = Number(this.newQuantity) || 1;
         const disc = Number(this.newDiscount) || 0;
-        const total = this.calcTotal(qty, cat.unitPrice, disc);
+        const unitPrice = cat.unitPrice;
+        const listPrice = cat.listPrice != null ? cat.listPrice : unitPrice;
+        const total = this.calcTotal(qty, unitPrice, disc);
         const rowKey = 'manual-' + cat.value;
+        const nextRowNum = this.displayItems.length + 1;
         this.displayItems = [
             ...this.displayItems,
             {
                 source: 'manual',
                 rowKey: rowKey,
+                rowNum: nextRowNum,
                 lineId: null,
                 pricebookEntryId: cat.value,
+                pricebookName: null,
                 productId: cat.productId,
                 productName: cat.productName,
+                productCode: cat.productCode,
+                uom: cat.uom,
+                uomDisplay: cat.uom || 'Nos',
                 quantity: qty,
-                unitPrice: cat.unitPrice,
-                unitPriceDisplay: this.formatCurrency(cat.unitPrice),
+                unitPrice: unitPrice,
+                unitPriceDisplay: this.formatCurrency(unitPrice),
+                listPrice: listPrice,
+                listPriceDisplay: this.formatCurrency(listPrice),
                 discount: disc,
                 totalPrice: total,
                 totalPriceDisplay: this.formatCurrency(total),
-                stockQty: 0,
-                stockQtyDisplay: '0',
-                tax: cat.tax
+                tax: cat.tax,
+                taxDisplay: cat.tax != null ? Number(cat.tax).toFixed(0) + '%' : '-',
+                priceStatus: null,
+                priceStatusBadgeClass: this.priceStatusBadge(null)
             }
         ];
         this.isAddProductOpen = false;
@@ -252,15 +329,10 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         if (this.isSaving) return;
 
         if (!this.displayItems.length) {
-            this.showToast(
-                'Error',
-                'Please add at least one product to the Sales Order',
-                'error'
-            );
+            this.showToast('Error', 'Please add at least one product to the Sales Order', 'error');
             return;
         }
 
-        // Split items into Quote-sourced vs manually-added.
         const quoteItems = this.displayItems.filter((i) => i.source === 'quote');
         const manualItems = this.displayItems.filter((i) => i.source === 'manual');
 
@@ -311,20 +383,8 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         }
     }
 
-    handleCheckStock() {
-        // UI-only button for now. Wire to Apex when the stock data source is available.
-    }
-
     handleCancel() {
         this.dispatchEvent(new CloseActionScreenEvent());
-    }
-
-    formatCurrency(value) {
-        if (value === null || value === undefined) return '';
-        return Number(value).toLocaleString('en-IN', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
     }
 
     showToast(title, message, variant) {
