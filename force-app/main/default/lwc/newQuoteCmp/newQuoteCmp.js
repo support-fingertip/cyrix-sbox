@@ -41,8 +41,9 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     accountName = '';
     regionId;
 
-    // Default values for new quote
-    defaultValues = {};
+    // Default values for new quote (is_Active defaults to true so fresh quotes
+    // are marked as the active one for the opportunity).
+    defaultValues = { is_Active__c: true };
 
     // Address objects for custom address input
     @track billingAddress = { name: '', street: '', city: '', state: '', postalCode: '', country: 'IN' };

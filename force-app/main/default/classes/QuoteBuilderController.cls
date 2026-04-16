@@ -607,7 +607,7 @@ public with sharing class QuoteBuilderController {
             AND Price_Status__c = 'Approval Required'
         ];
 
-        String newStatus = approvalCount > 0 ? 'Approval Required' : 'Draft';
+        String newStatus = approvalCount > 0 ? 'Approval Required' : 'Not Required';
 
         if (q.Price_Status__c != newStatus) {
             q.Price_Status__c = newStatus;
