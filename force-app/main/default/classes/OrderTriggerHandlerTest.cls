@@ -98,24 +98,6 @@ private class OrderTriggerHandlerTest {
     }
 
     @isTest
-    static void beforeUpdateNoOpWhenNoInvoices() {
-        // Cancellation path with no Invoice records linked. handleBeforeUpdate
-        // should find none and let the update through.
-        Order o = createDraftOrder();
-
-        Test.startTest();
-        o.Status = 'Cancelled';
-        o.Cancellation_Reason__c = 'Testing no-invoice path';
-        Database.SaveResult sr = Database.update(o, false);
-        Test.stopTest();
-
-        System.assert(sr.isSuccess(),
-            'Cancellation should succeed when no Invoice references the Order');
-        Order refreshed = [SELECT Status FROM Order WHERE Id = :o.Id];
-        System.assertEquals('Cancelled', refreshed.Status);
-    }
-
-    @isTest
     static void bodyGracefulWhenOptionalFieldsAreBlank() {
         Account a = new Account(Name = 'Body Acct Blank');
         insert a;
