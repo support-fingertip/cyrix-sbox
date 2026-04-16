@@ -1,7 +1,12 @@
-// OrderTrigger dispatches after-update events to OrderTriggerHandler.
-// Currently handles the Cancelled status transition to send an in-app
-// Custom Notification (Order_Cancellation_Notification) to the Owner.
-trigger OrderTrigger on Order (after update) {
+// OrderTrigger dispatches update events to OrderTriggerHandler.
+//   before update : blocks cancellation when an Invoice already exists
+//                   (Invoice.Order__c lookup).
+//   after  update : sends in-app Custom Notification + email + Activity Task
+//                   on transition to 'Cancelled'.
+trigger OrderTrigger on Order (before update, after update) {
+    if (Trigger.isBefore && Trigger.isUpdate) {
+        OrderTriggerHandler.handleBeforeUpdate(Trigger.new, Trigger.oldMap);
+    }
     if (Trigger.isAfter && Trigger.isUpdate) {
         OrderTriggerHandler.handleAfterUpdate(Trigger.new, Trigger.oldMap);
     }

@@ -13,6 +13,52 @@ public with sharing class OrderTriggerHandler {
     private static final String NOTIF_DEV_NAME = 'Order_Cancellation_Notification';
     private static final String CANCELLED_STATUS = 'Cancelled';
 
+    /**
+     * Blocks an Order from being cancelled when at least one Invoice
+     * already references it via the Invoice.Order__c lookup.
+     *
+     * Business rule: "Order Cancellation / Allowed only before Invoice
+     * Creation." Once an Invoice exists for the Order, the Status may
+     * not transition to 'Cancelled'.
+     */
+    public static void handleBeforeUpdate(List<Order> newList, Map<Id, Order> oldMap) {
+        if (newList == null || oldMap == null) return;
+
+        // Collect Orders attempting to transition into 'Cancelled'.
+        Set<Id> attemptingCancelIds = new Set<Id>();
+        Map<Id, Order> orderById = new Map<Id, Order>();
+        for (Order o : newList) {
+            Order prev = oldMap.get(o.Id);
+            if (prev == null) continue;
+            if (o.Status == CANCELLED_STATUS && prev.Status != CANCELLED_STATUS) {
+                attemptingCancelIds.add(o.Id);
+                orderById.put(o.Id, o);
+            }
+        }
+        if (attemptingCancelIds.isEmpty()) return;
+
+        // Query Invoices linked to these Orders via the custom lookup.
+        Set<Id> blockedOrderIds = new Set<Id>();
+        for (Invoice inv : [
+            SELECT Id, Order__c
+            FROM Invoice
+            WHERE Order__c IN :attemptingCancelIds
+        ]) {
+            if (inv.Order__c != null) blockedOrderIds.add(inv.Order__c);
+        }
+
+        for (Id blockedId : blockedOrderIds) {
+            Order o = orderById.get(blockedId);
+            if (o != null) {
+                o.addError(
+                    'This Order cannot be cancelled because one or more ' +
+                    'Invoices have already been created against it. ' +
+                    'Cancel or void the Invoice(s) first.'
+                );
+            }
+        }
+    }
+
     public static void handleAfterUpdate(List<Order> newList, Map<Id, Order> oldMap) {
         if (newList == null || oldMap == null) return;
 
