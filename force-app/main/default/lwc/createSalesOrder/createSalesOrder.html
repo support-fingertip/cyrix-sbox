@@ -12,81 +12,89 @@
                 <!-- Body -->
                 <div class="cso-body">
 
-                    <!-- Customer Information -->
-                    <div class="customer-card slds-m-bottom_medium">
-                        <div class="customer-card-header">
-                            <lightning-icon
-                                icon-name="standard:customer"
-                                size="small"
-                                class="slds-m-right_small">
-                            </lightning-icon>
-                            <span class="slds-text-heading_small">Customer Information</span>
+                    <!-- Quote Information (read-only) -->
+                    <div class="cso-section slds-m-bottom_medium">
+                        <div class="cso-section-header">
+                            <lightning-icon icon-name="standard:quotes" size="small" class="slds-m-right_small"></lightning-icon>
+                            <span class="slds-text-heading_small">Quote Information</span>
                         </div>
-                        <div class="customer-card-body">
-                            <div class="slds-grid slds-wrap">
-                                <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
-                                    <div class="slds-text-title">Customer Name</div>
-                                    <div class="cso-field-value">{quoteContext.customerName}</div>
+                        <div class="cso-section-body">
+                            <div class="slds-grid slds-wrap slds-gutters_small">
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Quote Date</div>
+                                    <div class="cso-field-value">{quoteDateDisplay}</div>
                                 </div>
-                                <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
-                                    <div class="slds-text-title">Email</div>
-                                    <div class="cso-field-value">{emailDisplay}</div>
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Quote Valid Till (in days)</div>
+                                    <div class="cso-field-value">{validTillDaysDisplay}</div>
                                 </div>
-                                <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
-                                    <div class="slds-text-title">Phone</div>
-                                    <div class="cso-field-value">{phoneDisplay}</div>
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Opportunity Name</div>
+                                    <div class="cso-field-value">{opportunityNameDisplay}</div>
                                 </div>
-                                <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
-                                    <div class="slds-text-title">Shipping Address</div>
-                                    <div class="cso-field-value">{shippingDisplay}</div>
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Business Vertical</div>
+                                    <div class="cso-field-value">{businessVerticalDisplay}</div>
                                 </div>
-                                <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
-                                    <div class="slds-text-title">Executive Assigned</div>
-                                    <div class="cso-field-value">{quoteContext.executiveAssigned}</div>
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Shipping Mode</div>
+                                    <div class="cso-field-value">{shippingModeDisplay}</div>
                                 </div>
-                                <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
-                                    <div class="slds-text-title">Address</div>
-                                    <div class="cso-field-value">{billingDisplay}</div>
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Delivery</div>
+                                    <div class="cso-field-value">{deliveryDisplay}</div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Contract Period From Date</div>
+                                    <div class="cso-field-value">{contractPeriodFromDisplay}</div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Contract Period End Date</div>
+                                    <div class="cso-field-value">{contractPeriodEndDisplay}</div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Is Active</div>
+                                    <div class="cso-field-value">
+                                        <lightning-icon if:true={quoteContext.isActive} icon-name="utility:check" size="x-small"></lightning-icon>
+                                        <lightning-icon if:false={quoteContext.isActive} icon-name="utility:close" size="x-small" variant="error"></lightning-icon>
+                                    </div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Status</div>
+                                    <div class="cso-field-value">{statusDisplay}</div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Delivery Date + Credit Order -->
-                    <div class="slds-grid slds-wrap slds-m-bottom_medium slds-grid_vertical-align-center">
-                        <div class="slds-col slds-size_1-of-2 slds-p-right_small">
-                            <lightning-input
-                                type="date"
-                                label="Delivery Committed Date"
-                                value={deliveryCommittedDate}
-                                data-field="deliveryCommittedDate"
-                                onchange={handleDeliveryDateChange}
-                                required>
-                            </lightning-input>
+                    <!-- Bill To / Ship To -->
+                    <div class="cso-section slds-m-bottom_medium">
+                        <div class="cso-section-header">
+                            <lightning-icon icon-name="standard:address" size="small" class="slds-m-right_small"></lightning-icon>
+                            <span class="slds-text-heading_small">Bill To / Ship To</span>
                         </div>
-                        <div class="slds-col slds-size_1-of-2 slds-p-left_small">
-                            <lightning-input
-                                type="toggle"
-                                label="Credit Order"
-                                label-position="top"
-                                checked={creditOrder}
-                                message-toggle-active="Active"
-                                message-toggle-inactive="Inactive"
-                                onchange={handleCreditToggle}>
-                            </lightning-input>
+                        <div class="cso-section-body">
+                            <div class="slds-grid slds-wrap slds-gutters">
+                                <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                    <div class="cso-subheader">BILL TO</div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">Name</span><span class="cso-addr-val">{billToNameDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">Street</span><span class="cso-addr-val">{billToStreetDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">City</span><span class="cso-addr-val">{billToCityDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">State</span><span class="cso-addr-val">{billToStateDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">Postal Code</span><span class="cso-addr-val">{billToPostalCodeDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">Country</span><span class="cso-addr-val">{billToCountryDisplay}</span></div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                    <div class="cso-subheader">SHIP TO</div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">Name</span><span class="cso-addr-val">{shipToNameDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">Street</span><span class="cso-addr-val">{shipToStreetDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">City</span><span class="cso-addr-val">{shipToCityDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">State</span><span class="cso-addr-val">{shipToStateDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">Postal Code</span><span class="cso-addr-val">{shipToPostalCodeDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">Country</span><span class="cso-addr-val">{shipToCountryDisplay}</span></div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-
-                    <!-- Warehouse -->
-                    <div class="slds-m-bottom_medium">
-                        <lightning-combobox
-                            label="Warehouse"
-                            placeholder="Select Warehouse"
-                            value={warehouseId}
-                            options={warehouseOptions}
-                            onchange={handleWarehouseChange}
-                            required>
-                        </lightning-combobox>
                     </div>
 
                     <!-- Remarks -->
@@ -114,11 +122,7 @@
                     <template if:true={isAddProductOpen}>
                         <div class="cso-add-product-panel slds-m-bottom_medium">
                             <div class="cso-add-product-title">
-                                <lightning-icon
-                                    icon-name="utility:add"
-                                    size="x-small"
-                                    class="slds-m-right_x-small">
-                                </lightning-icon>
+                                <lightning-icon icon-name="utility:add" size="x-small" class="slds-m-right_x-small"></lightning-icon>
                                 Add Product
                             </div>
                             <div class="slds-grid slds-wrap slds-gutters_small cso-add-product-fields">
@@ -155,15 +159,9 @@
                                 </div>
                             </div>
                             <div class="cso-add-product-actions">
-                                <button class="cancel-button" onclick={handleCloseAddProduct}>
-                                    Cancel
-                                </button>
+                                <button class="cancel-button" onclick={handleCloseAddProduct}>Cancel</button>
                                 <button class="confirm-button" onclick={handleAddProduct}>
-                                    <lightning-icon
-                                        icon-name="utility:add"
-                                        size="x-small"
-                                        class="slds-m-right_x-small">
-                                    </lightning-icon>
+                                    <lightning-icon icon-name="utility:add" size="x-small" class="slds-m-right_x-small"></lightning-icon>
                                     Add
                                 </button>
                             </div>
@@ -174,34 +172,52 @@
                         <div class="table-scroll-wrapper">
                             <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_fixed-layout cso-items-table">
                                 <colgroup>
-                                    <col style="width: 32%;">
+                                    <col style="width: 4%;">
+                                    <col style="width: 20%;">
+                                    <col style="width: 6%;">
+                                    <col style="width: 7%;">
+                                    <col style="width: 9%;">
+                                    <col style="width: 9%;">
+                                    <col style="width: 7%;">
+                                    <col style="width: 6%;">
+                                    <col style="width: 11%;">
                                     <col style="width: 10%;">
-                                    <col style="width: 13%;">
-                                    <col style="width: 10%;">
-                                    <col style="width: 13%;">
-                                    <col style="width: 14%;">
-                                    <col style="width: 8%;">
+                                    <col style="width: 6%;">
                                 </colgroup>
                                 <thead>
                                     <tr>
+                                        <th>#</th>
                                         <th>Product</th>
-                                        <th>Quantity</th>
-                                        <th>Unit Price</th>
-                                        <th>Discount (%)</th>
-                                        <th>Total Price</th>
-                                        <th>Sync</th>
-                                        <th class="slds-text-align_center">Delete</th>
+                                        <th>UOM</th>
+                                        <th>Qty</th>
+                                        <th>List Price</th>
+                                        <th>Sales Price</th>
+                                        <th>Disc. %</th>
+                                        <th>Tax %</th>
+                                        <th>Price Status</th>
+                                        <th>Line Total</th>
+                                        <th class="slds-text-align_center">Del</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <template for:each={displayItems} for:item="item">
+                                    <template for:each={displayItems} for:item="item" for:index="idx">
                                         <tr key={item.rowKey}>
-                                            <td class="product-cell">{item.productName}</td>
+                                            <td>{item.rowNum}</td>
+                                            <td class="product-cell">
+                                                <div class="cso-product-name">{item.productName}</div>
+                                                <template if:true={item.pricebookName}>
+                                                    <div class="cso-pricebook-badge">{item.pricebookName}</div>
+                                                </template>
+                                                <template if:true={item.productCode}>
+                                                    <div class="cso-product-code">{item.productCode}</div>
+                                                </template>
+                                            </td>
+                                            <td>{item.uomDisplay}</td>
                                             <td>
                                                 <lightning-input
                                                     type="number"
                                                     variant="label-hidden"
-                                                    label="Quantity"
+                                                    label="Qty"
                                                     value={item.quantity}
                                                     min="1"
                                                     step="1"
@@ -209,6 +225,7 @@
                                                     onchange={handleQuantityChange}>
                                                 </lightning-input>
                                             </td>
+                                            <td>{item.listPriceDisplay}</td>
                                             <td>{item.unitPriceDisplay}</td>
                                             <td>
                                                 <lightning-input
@@ -223,15 +240,13 @@
                                                     onchange={handleDiscountChange}>
                                                 </lightning-input>
                                             </td>
-                                            <td>{item.totalPriceDisplay}</td>
+                                            <td>{item.taxDisplay}</td>
                                             <td>
-                                                <lightning-button
-                                                    label="Check Stock"
-                                                    variant="brand-outline"
-                                                    data-row-key={item.rowKey}
-                                                    onclick={handleCheckStock}>
-                                                </lightning-button>
+                                                <template if:true={item.priceStatus}>
+                                                    <span class={item.priceStatusBadgeClass}>{item.priceStatus}</span>
+                                                </template>
                                             </td>
+                                            <td>{item.totalPriceDisplay}</td>
                                             <td class="slds-text-align_center">
                                                 <lightning-button-icon
                                                     icon-name="utility:delete"
@@ -259,18 +274,9 @@
 
                 <!-- Gradient Footer -->
                 <div class="gradient-footer">
-                    <button class="cancel-button" onclick={handleCancel} disabled={isSaving}>
-                        Cancel
-                    </button>
-                    <button
-                        class="confirm-button"
-                        onclick={handleConfirm}
-                        disabled={isConfirmDisabled}>
-                        <lightning-icon
-                            icon-name="utility:check"
-                            size="x-small"
-                            class="slds-m-right_x-small">
-                        </lightning-icon>
+                    <button class="cancel-button" onclick={handleCancel} disabled={isSaving}>Cancel</button>
+                    <button class="confirm-button" onclick={handleConfirm} disabled={isConfirmDisabled}>
+                        <lightning-icon icon-name="utility:check" size="x-small" class="slds-m-right_x-small"></lightning-icon>
                         Confirm Sale
                     </button>
                 </div>
