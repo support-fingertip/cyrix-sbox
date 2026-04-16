@@ -134,6 +134,10 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         return this.quoteContext.status || 'N/A';
     }
 
+    get hasPaymentTerms() {
+        return !!(this.quoteContext && this.quoteContext.paymentTerms && String(this.quoteContext.paymentTerms).trim().length);
+    }
+
     // ===== Getters for Bill To / Ship To =====
 
     get billToNameDisplay()       { return this.quoteContext.billToName || this.quoteContext.customerName || 'N/A'; }

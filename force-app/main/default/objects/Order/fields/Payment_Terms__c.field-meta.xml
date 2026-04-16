@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Payment_Terms__c</fullName>
+    <description>Payment Terms snapshotted from the source Quote at Sales Order creation. Read-only on the Order; maintained on the Quote's Payment_Term__c child records.</description>
+    <externalId>false</externalId>
+    <label>Payment Terms</label>
+    <length>3000</length>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>6</visibleLines>
+</CustomField>
