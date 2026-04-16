@@ -607,7 +607,95 @@ public class LeadTriggerHandlerTest {
         Test.startTest();
         
         LeadTriggerHandler.createfollowupTasks(new List<Lead>());
-        
+
+        Test.stopTest();
+    }
+
+    @isTest
+    static void testSendClosedWonNotification() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testus4er@test.com' LIMIT 1];
+
+        Test.startTest();
+
+        Lead testLead = new Lead(
+            Salutation = 'Mr.',
+            FirstName = 'Test',
+            LastName = 'ClosedWon',
+            Company = 'Test Company CW',
+            OwnerId = testUser.Id,
+            Status = 'Open',
+            phone = '1234569999'
+        );
+        insert testLead;
+
+        testLead.Status = 'Closed Won';
+        update testLead;
+
+        Test.stopTest();
+    }
+
+    @isTest
+    static void testSendClosedWonNotificationNoCompany() {
+        User testUser = [SELECT Id FROM User WHERE UserName = 'testus4er@test.com' LIMIT 1];
+
+        Test.startTest();
+
+        Lead testLead = new Lead(
+            LastName = 'ClosedWonNoComp',
+            Company = 'N/A',
+            OwnerId = testUser.Id,
+            Status = 'Open',
+            phone = '1234561111'
+        );
+        insert testLead;
+
+        testLead.Status = 'Closed Won';
+        update testLead;
+
+        Test.stopTest();
+    }
+
+    @isTest
+    static void testMapPhoneToOpportunity() {
+        Test.startTest();
+
+        Lead testLead = new Lead(
+            LastName = 'PhoneMap',
+            Company = 'Phone Map Co',
+            
+            MobilePhone = '9876543211',
+            Status = 'Open',
+            phone = '9876543210'
+        );
+        insert testLead;
+
+        // Simulate conversion
+        LeadTriggerHandler.mapPhoneToOpportunity(new List<Lead>{testLead});
+
+        Test.stopTest();
+    }
+
+    @isTest
+    static void testMapPhoneToOpportunityNoPhone() {
+        Test.startTest();
+
+        Lead testLead = new Lead(
+            LastName = 'NoPhoneMap',
+            Company = 'No Phone Co',
+            Status = 'Open',
+            phone = '9876548888'
+        );
+        insert testLead;
+
+        LeadTriggerHandler.mapPhoneToOpportunity(new List<Lead>{testLead});
+
+        Test.stopTest();
+    }
+
+    @isTest
+    static void testMapPhoneToOpportunityEmptyList() {
+        Test.startTest();
+        LeadTriggerHandler.mapPhoneToOpportunity(new List<Lead>());
         Test.stopTest();
     }
 }
