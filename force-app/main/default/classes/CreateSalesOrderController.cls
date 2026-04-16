@@ -6,6 +6,13 @@
  */
 public with sharing class CreateSalesOrderController {
 
+    // Quote statuses that allow conversion to a Sales Order.
+    // 'Approved'  = internal price/approval flow done.
+    // 'Accepted'  = customer has accepted the proposal.
+    private static final Set<String> APPROVED_STATUSES = new Set<String>{
+        'Approved', 'Accepted'
+    };
+
     /**
      * Returns the Quote header info (customer, owner, addresses, commercial
      * and operational fields) plus its line items so the LWC can render a
@@ -41,9 +48,9 @@ public with sharing class CreateSalesOrderController {
             LIMIT 1
         ];
 
-        if (q.Status != 'Approved') {
+        if (!APPROVED_STATUSES.contains(q.Status)) {
             throw new AuraHandledException(
-                'Sales Order can only be created from an Approved Quote. ' +
+                'Sales Order can only be created from an Approved or Accepted Quote. ' +
                 'Current Quote status: ' + (q.Status == null ? 'None' : q.Status) + '.'
             );
         }
@@ -248,9 +255,9 @@ public with sharing class CreateSalesOrderController {
             LIMIT 1
         ];
 
-        if (q.Status != 'Approved') {
+        if (!APPROVED_STATUSES.contains(q.Status)) {
             throw new AuraHandledException(
-                'Sales Order can only be created from an Approved Quote. ' +
+                'Sales Order can only be created from an Approved or Accepted Quote. ' +
                 'Current Quote status: ' + (q.Status == null ? 'None' : q.Status) + '.'
             );
         }
