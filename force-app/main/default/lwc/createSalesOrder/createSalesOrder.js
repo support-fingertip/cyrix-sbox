@@ -169,6 +169,10 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         return this.displayItems && this.displayItems.length > 0;
     }
 
+    get sourceQuoteDisplay() {
+        return this.quoteContext.quoteName || this.quoteContext.quoteNumber || 'N/A';
+    }
+
     get quoteDateDisplay() {
         return this.formatDate(this.quoteContext.quoteDate) || 'N/A';
     }
