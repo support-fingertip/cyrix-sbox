@@ -184,8 +184,11 @@ public with sharing class CreateSalesOrderController {
         List<ProductOption> result = new List<ProductOption>();
         for (PricebookEntry pbe : [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
-                   Product2.QuantityUnitOfMeasure, Product2.Tax__c, UnitPrice,
-                   Max_Discount_Percentage__c
+                   Product2.QuantityUnitOfMeasure, Product2.Tax__c,
+                   Product2.Category__c, Product2.Make__c, Product2.Model__c,
+                   Product2.HSN_Code__c, UnitPrice,
+                   Max_Discount_Percentage__c,
+                   Pricebook2Id, Pricebook2.Name
             FROM PricebookEntry
             WHERE Pricebook2Id = :q.Pricebook2Id
               AND IsActive = true
@@ -204,6 +207,11 @@ public with sharing class CreateSalesOrderController {
             opt.unitPrice = pbe.UnitPrice;
             opt.tax = pbe.Product2.Tax__c;
             opt.maxDiscount = pbe.Max_Discount_Percentage__c;
+            opt.category = pbe.Product2.Category__c;
+            opt.makeModel = (pbe.Product2.Make__c != null ? pbe.Product2.Make__c : '') +
+                            (pbe.Product2.Model__c != null ? ' / ' + pbe.Product2.Model__c : '');
+            opt.hsnCode = pbe.Product2.HSN_Code__c;
+            opt.priceSource = pbe.Pricebook2 != null ? pbe.Pricebook2.Name : null;
             result.add(opt);
         }
         return result;
@@ -557,8 +565,11 @@ public with sharing class CreateSalesOrderController {
         List<ProductOption> result = new List<ProductOption>();
         for (PricebookEntry pbe : [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
-                   Product2.QuantityUnitOfMeasure, Product2.Tax__c, UnitPrice,
-                   Max_Discount_Percentage__c
+                   Product2.QuantityUnitOfMeasure, Product2.Tax__c,
+                   Product2.Category__c, Product2.Make__c, Product2.Model__c,
+                   Product2.HSN_Code__c, UnitPrice,
+                   Max_Discount_Percentage__c,
+                   Pricebook2Id, Pricebook2.Name
             FROM PricebookEntry
             WHERE Pricebook2Id = :o.Pricebook2Id
               AND IsActive = true
@@ -577,6 +588,11 @@ public with sharing class CreateSalesOrderController {
             opt.unitPrice = pbe.UnitPrice;
             opt.tax = pbe.Product2.Tax__c;
             opt.maxDiscount = pbe.Max_Discount_Percentage__c;
+            opt.category = pbe.Product2.Category__c;
+            opt.makeModel = (pbe.Product2.Make__c != null ? pbe.Product2.Make__c : '') +
+                            (pbe.Product2.Model__c != null ? ' / ' + pbe.Product2.Model__c : '');
+            opt.hsnCode = pbe.Product2.HSN_Code__c;
+            opt.priceSource = pbe.Pricebook2 != null ? pbe.Pricebook2.Name : null;
             result.add(opt);
         }
         return result;
@@ -771,6 +787,10 @@ public with sharing class CreateSalesOrderController {
         @AuraEnabled public Decimal unitPrice;
         @AuraEnabled public Decimal tax;
         @AuraEnabled public Decimal maxDiscount;
+        @AuraEnabled public String category;
+        @AuraEnabled public String makeModel;
+        @AuraEnabled public String hsnCode;
+        @AuraEnabled public String priceSource;
     }
 
 }
