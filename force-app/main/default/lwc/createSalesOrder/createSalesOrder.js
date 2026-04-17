@@ -165,7 +165,7 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     // ===== Getters =====
 
     get pageTitle() {
-        return this.isEditMode ? 'Edit Order' : 'Order';
+        return this.isEditMode ? 'Edit Sales Order' : 'Sales Order';
     }
 
     get confirmButtonLabel() {
