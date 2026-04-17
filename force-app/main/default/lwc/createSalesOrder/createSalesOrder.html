@@ -140,59 +140,70 @@
                                 Add Product
                             </div>
                             <div class="slds-grid slds-wrap slds-gutters_small cso-add-product-fields">
-                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2" style="position:relative;">
+                                <div class="slds-col slds-size_1-of-1">
                                     <lightning-input
-                                        label="Product"
+                                        label="Search Product"
                                         value={productSearchTerm}
-                                        placeholder="Search products..."
+                                        placeholder="Type product name or code to search..."
                                         onchange={handleProductSearch}
                                         autocomplete="off"
-                                        required>
+                                        class="slds-m-bottom_small">
                                     </lightning-input>
-                                    <template if:true={showProductResults}>
-                                        <div class="cso-search-results">
-                                            <template for:each={filteredProducts} for:item="prod">
-                                                <div key={prod.value} class="cso-search-item" data-value={prod.value} onclick={handleProductSelect}>
-                                                    <span class="cso-search-name">{prod.productName}</span>
-                                                    <template if:true={prod.productCode}>
-                                                        <span class="cso-search-code"> ({prod.productCode})</span>
+                                </div>
+                                <template if:true={showProductResults}>
+                                    <div class="slds-col slds-size_1-of-1">
+                                        <div class="cso-search-table-wrapper">
+                                            <table class="slds-table slds-table_bordered slds-table_cell-buffer cso-search-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Product Name</th>
+                                                        <th>Code</th>
+                                                        <th>Category</th>
+                                                        <th>Make / Model</th>
+                                                        <th>Unit Price</th>
+                                                        <th>Price Source</th>
+                                                        <th>Max Disc %</th>
+                                                        <th>HSN</th>
+                                                        <th>Tax %</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <template for:each={filteredProducts} for:item="prod">
+                                                        <tr key={prod.value}>
+                                                            <td class="cso-search-name">{prod.productName}</td>
+                                                            <td>{prod.productCode}</td>
+                                                            <td>{prod.category}</td>
+                                                            <td>{prod.makeModel}</td>
+                                                            <td>{prod.unitPriceDisplay}</td>
+                                                            <td>{prod.priceSource}</td>
+                                                            <td>{prod.maxDiscountDisplay}</td>
+                                                            <td>{prod.hsnCode}</td>
+                                                            <td>{prod.taxDisplay}</td>
+                                                            <td>
+                                                                <lightning-button-icon
+                                                                    icon-name="utility:add"
+                                                                    alternative-text="Add"
+                                                                    title="Add to order"
+                                                                    variant="brand"
+                                                                    size="small"
+                                                                    data-value={prod.value}
+                                                                    onclick={handleProductSelect}>
+                                                                </lightning-button-icon>
+                                                            </td>
+                                                        </tr>
                                                     </template>
-                                                </div>
-                                            </template>
+                                                </tbody>
+                                            </table>
                                             <template if:false={hasFilteredProducts}>
-                                                <div class="cso-search-item cso-search-empty">No products found</div>
+                                                <p class="slds-text-align_center slds-p-around_small slds-text-color_weak">No products found</p>
                                             </template>
                                         </div>
-                                    </template>
-                                </div>
-                                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
-                                    <lightning-input
-                                        type="number"
-                                        label="Quantity"
-                                        value={newQuantity}
-                                        min="1"
-                                        step="1"
-                                        onchange={handleNewQuantityChange}>
-                                    </lightning-input>
-                                </div>
-                                <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
-                                    <lightning-input
-                                        type="number"
-                                        label="Discount (%)"
-                                        value={newDiscount}
-                                        min="0"
-                                        max="100"
-                                        step="0.01"
-                                        onchange={handleNewDiscountChange}>
-                                    </lightning-input>
-                                </div>
+                                    </div>
+                                </template>
                             </div>
                             <div class="cso-add-product-actions">
-                                <button class="cancel-button" onclick={handleCloseAddProduct}>Cancel</button>
-                                <button class="confirm-button" onclick={handleAddProduct}>
-                                    <lightning-icon icon-name="utility:add" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                                    Add
-                                </button>
+                                <button class="cancel-button" onclick={handleCloseAddProduct}>Close</button>
                             </div>
                         </div>
                     </template>

@@ -356,23 +356,69 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
             this.filteredProducts = this.productCatalog.filter(
                 (p) => (p.productName && p.productName.toLowerCase().includes(lowerTerm)) ||
                        (p.productCode && p.productCode.toLowerCase().includes(lowerTerm))
-            ).slice(0, 20);
+            ).slice(0, 20).map((p) => ({
+                ...p,
+                unitPriceDisplay: this.formatCurrency(p.unitPrice),
+                maxDiscountDisplay: p.maxDiscount != null ? p.maxDiscount + '%' : '',
+                taxDisplay: p.tax != null ? Number(p.tax).toFixed(0) + '%' : '-'
+            }));
             this.showProductResults = true;
         } else {
             this.filteredProducts = [];
             this.showProductResults = false;
         }
-        this.newPricebookEntryId = '';
     }
 
     handleProductSelect(event) {
         const val = event.currentTarget.dataset.value;
-        const prod = this.productCatalog.find((p) => p.value === val);
-        if (prod) {
-            this.newPricebookEntryId = val;
-            this.productSearchTerm = prod.productName;
+        const cat = this.productCatalog.find((p) => p.value === val);
+        if (!cat) return;
+
+        if (this.displayItems.some(
+            (it) => it.source === 'manual' && it.pricebookEntryId === cat.value
+        )) {
+            this.showToast('Warning', 'This product is already in the order.', 'warning');
+            return;
         }
-        this.showProductResults = false;
+
+        const qty = 1;
+        const disc = 0;
+        const unitPrice = cat.unitPrice;
+        const listPrice = cat.listPrice != null ? cat.listPrice : unitPrice;
+        const total = this.calcTotal(qty, unitPrice, disc);
+        const rowKey = 'manual-' + cat.value;
+        const nextRowNum = this.displayItems.length + 1;
+        this.displayItems = [
+            ...this.displayItems,
+            {
+                source: 'manual',
+                rowKey: rowKey,
+                rowNum: nextRowNum,
+                lineId: null,
+                pricebookEntryId: cat.value,
+                pricebookName: cat.priceSource,
+                productId: cat.productId,
+                productName: cat.productName,
+                productCode: cat.productCode,
+                uom: cat.uom,
+                uomDisplay: cat.uom || 'Nos',
+                quantity: qty,
+                unitPrice: unitPrice,
+                unitPriceDisplay: this.formatCurrency(unitPrice),
+                listPrice: listPrice,
+                listPriceDisplay: this.formatCurrency(listPrice),
+                discount: disc,
+                totalPrice: total,
+                totalPriceDisplay: this.formatCurrency(total),
+                tax: cat.tax,
+                taxDisplay: cat.tax != null ? Number(cat.tax).toFixed(0) + '%' : '-',
+                maxDiscount: cat.maxDiscount,
+                maxDiscountDisplay: cat.maxDiscount != null ? cat.maxDiscount + '%' : '',
+                priceStatus: null,
+                priceStatusBadgeClass: this.priceStatusBadge(null)
+            }
+        ];
+        this.showToast('Success', cat.productName + ' added.', 'success');
     }
 
     handleNewQuantityChange(event) {
