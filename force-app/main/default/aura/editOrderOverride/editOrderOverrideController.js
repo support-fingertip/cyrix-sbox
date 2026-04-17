@@ -1,15 +1,7 @@
 ({
     doInit : function(component, event, helper) {
-        var navService = component.find("navService");
-        var pageRef = {
-            type: "standard__navItemPage",
-            attributes: {
-                apiName: "Edit_Order"
-            },
-            state: {
-                c__recordId: component.get("v.recordId")
-            }
-        };
-        navService.navigate(pageRef);
+        var recordId = component.get("v.recordId");
+        var url = "/lightning/n/Edit_Order?c__recordId=" + recordId;
+        window.open(url, "_self");
     }
 })
