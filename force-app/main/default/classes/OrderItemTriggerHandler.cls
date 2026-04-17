@@ -17,6 +17,7 @@ public with sharing class OrderItemTriggerHandler {
     private static final String STATUS_APPROVAL_REQUIRED = 'Approval Required';
     private static final String STATUS_NOT_REQUIRED      = 'Not Required';
     private static final String STATUS_APPROVED          = 'Approved';
+    private static final String ORDER_STATUS_DRAFT       = 'Draft';
 
     /** BEFORE insert/update. Mutates records in-place. */
     public static void evaluateDiscountThresholds(List<OrderItem> items) {
@@ -114,7 +115,7 @@ public with sharing class OrderItemTriggerHandler {
 
     @TestVisible
     private static String computeRollup(List<OrderItem> items) {
-        if (items == null || items.isEmpty()) return STATUS_NOT_REQUIRED;
+        if (items == null || items.isEmpty()) return ORDER_STATUS_DRAFT;
         Boolean anyApprovalRequired = false;
         Boolean allApproved = true;
         for (OrderItem oi : items) {
@@ -123,6 +124,6 @@ public with sharing class OrderItemTriggerHandler {
         }
         if (anyApprovalRequired) return STATUS_APPROVAL_REQUIRED;
         if (allApproved) return STATUS_APPROVED;
-        return STATUS_NOT_REQUIRED;
+        return ORDER_STATUS_DRAFT;
     }
 }
