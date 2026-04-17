@@ -64,7 +64,6 @@ public with sharing class OrderTriggerHandler {
         if (newList == null || oldMap == null) return;
 
         Set<Id> cancelledIds = new Set<Id>();
-        List<Id> autoSubmitIds = new List<Id>();
 
         for (Order o : newList) {
             Order prev = oldMap.get(o.Id);
@@ -73,36 +72,10 @@ public with sharing class OrderTriggerHandler {
             if (o.Status == CANCELLED_STATUS && prev.Status != CANCELLED_STATUS) {
                 cancelledIds.add(o.Id);
             }
-
-            if (o.Price_Status__c == APPROVAL_REQUIRED && prev.Price_Status__c != APPROVAL_REQUIRED) {
-                autoSubmitIds.add(o.Id);
-            }
         }
 
         if (!cancelledIds.isEmpty()) {
             sendCancellationNotifications(cancelledIds);
-        }
-
-        if (!autoSubmitIds.isEmpty()) {
-            autoSubmitForApproval(autoSubmitIds);
-        }
-    }
-
-    private static void autoSubmitForApproval(List<Id> orderIds) {
-        List<Approval.ProcessSubmitRequest> requests = new List<Approval.ProcessSubmitRequest>();
-        for (Id ordId : orderIds) {
-            Approval.ProcessSubmitRequest req = new Approval.ProcessSubmitRequest();
-            req.setObjectId(ordId);
-            req.setComments('Auto-submitted: Order line item requires price approval.');
-            requests.add(req);
-        }
-        if (!requests.isEmpty()) {
-            try {
-                Approval.process(requests);
-            } catch (Exception e) {
-                System.debug(LoggingLevel.ERROR,
-                    'OrderTriggerHandler: auto-submit approval failed: ' + e.getMessage());
-            }
         }
     }
 
