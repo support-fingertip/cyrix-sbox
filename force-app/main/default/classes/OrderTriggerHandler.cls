@@ -12,6 +12,7 @@ public with sharing class OrderTriggerHandler {
 
     private static final String NOTIF_DEV_NAME = 'Order_Cancellation_Notification';
     private static final String CANCELLED_STATUS = 'Cancelled';
+    private static final String APPROVAL_REQUIRED = 'Approval Required';
 
     /**
      * Blocks an Order from being cancelled when at least one Invoice
@@ -62,18 +63,47 @@ public with sharing class OrderTriggerHandler {
     public static void handleAfterUpdate(List<Order> newList, Map<Id, Order> oldMap) {
         if (newList == null || oldMap == null) return;
 
-        // Collect only the Orders whose Status just transitioned to 'Cancelled'.
         Set<Id> cancelledIds = new Set<Id>();
+        List<Id> autoSubmitIds = new List<Id>();
+
         for (Order o : newList) {
             Order prev = oldMap.get(o.Id);
             if (prev == null) continue;
+
             if (o.Status == CANCELLED_STATUS && prev.Status != CANCELLED_STATUS) {
                 cancelledIds.add(o.Id);
             }
-        }
-        if (cancelledIds.isEmpty()) return;
 
-        sendCancellationNotifications(cancelledIds);
+            if (o.Price_Status__c == APPROVAL_REQUIRED && prev.Price_Status__c != APPROVAL_REQUIRED) {
+                autoSubmitIds.add(o.Id);
+            }
+        }
+
+        if (!cancelledIds.isEmpty()) {
+            sendCancellationNotifications(cancelledIds);
+        }
+
+        if (!autoSubmitIds.isEmpty()) {
+            autoSubmitForApproval(autoSubmitIds);
+        }
+    }
+
+    private static void autoSubmitForApproval(List<Id> orderIds) {
+        List<Approval.ProcessSubmitRequest> requests = new List<Approval.ProcessSubmitRequest>();
+        for (Id ordId : orderIds) {
+            Approval.ProcessSubmitRequest req = new Approval.ProcessSubmitRequest();
+            req.setObjectId(ordId);
+            req.setComments('Auto-submitted: Order line item requires price approval.');
+            requests.add(req);
+        }
+        if (!requests.isEmpty()) {
+            try {
+                Approval.process(requests);
+            } catch (Exception e) {
+                System.debug(LoggingLevel.ERROR,
+                    'OrderTriggerHandler: auto-submit approval failed: ' + e.getMessage());
+            }
+        }
     }
 
     private static void sendCancellationNotifications(Set<Id> orderIds) {
