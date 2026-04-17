@@ -25,7 +25,9 @@ public with sharing class OrderItemTriggerHandler {
 
         Set<Id> productIds = new Set<Id>();
         for (OrderItem oi : items) {
-            if (oi.Product2Id != null) productIds.add(oi.Product2Id);
+            if (oi.Product2Id != null && oi.Discount__c != null && oi.Discount__c > 0) {
+                productIds.add(oi.Product2Id);
+            }
         }
         if (productIds.isEmpty()) return;
 
@@ -39,10 +41,12 @@ public with sharing class OrderItemTriggerHandler {
         ]);
 
         for (OrderItem oi : items) {
+            if (oi.Discount__c == null || oi.Discount__c == 0) continue;
+
             Product2 p = prodMap.get(oi.Product2Id);
             if (p == null) continue;
 
-            Decimal discount    = oi.Discount__c != null ? oi.Discount__c / 100 : 0;
+            Decimal discount    = oi.Discount__c / 100;
             Decimal managerLim  = p.Manager_Discount_Up_to__c   != null ? p.Manager_Discount_Up_to__c   / 100 : 0;
             Decimal vpLim       = p.VP_Sales_Discount_Up_to__c  != null ? p.VP_Sales_Discount_Up_to__c  / 100 : 0;
             Decimal ceoLim      = p.CEO_Sales_Discount_Up_to__c != null ? p.CEO_Sales_Discount_Up_to__c / 100 : 0;
