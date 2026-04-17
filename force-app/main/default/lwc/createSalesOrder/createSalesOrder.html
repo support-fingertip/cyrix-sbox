@@ -6,7 +6,7 @@
 
                 <!-- Gradient Header -->
                 <div class="gradient-header">
-                    <h2 class="cso-title">Order</h2>
+                    <h2 class="cso-title">{pageTitle}</h2>
                 </div>
 
                 <!-- Body -->
@@ -294,7 +294,7 @@
                     <button class="cancel-button" onclick={handleCancel} disabled={isSaving}>Cancel</button>
                     <button class="confirm-button" onclick={handleConfirm} disabled={isConfirmDisabled}>
                         <lightning-icon icon-name="utility:check" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                        Confirm Sale
+                        {confirmButtonLabel}
                     </button>
                 </div>
             </div>
