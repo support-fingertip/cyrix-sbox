@@ -301,9 +301,17 @@
         </div>
     </template>
 
+    <!-- ================= ERROR ================= -->
+    <template if:true={errorMessage}>
+        <div class="slds-p-around_medium slds-text-color_error slds-text-align_center">
+            <lightning-icon icon-name="utility:error" size="small" variant="error" class="slds-m-right_small"></lightning-icon>
+            {errorMessage}
+        </div>
+    </template>
+
     <!-- ================= LOADING / SAVING ================= -->
     <template if:true={isLoading}>
-        <div class="slds-is-relative slds-p-around_medium">
+        <div class="slds-is-relative slds-p-around_medium" style="min-height:200px;">
             <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
         </div>
     </template>

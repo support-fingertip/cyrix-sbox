@@ -31,6 +31,7 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     isSaving = false;
     isEditMode = false;
     _orderId = null;
+    @track errorMessage = '';
 
     @track quoteContext = {};
     @track displayItems = [];
@@ -99,7 +100,8 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
             })
             .catch((error) => {
                 this.isLoading = false;
-                this.showToast('Error', this.reduceError(error), 'error');
+                this.errorMessage = this.reduceError(error);
+                this.showToast('Error', this.errorMessage, 'error');
             });
 
         getPricebookProductsForOrder({ orderId: this._orderId })

@@ -1,4 +1,6 @@
 <aura:component implements="force:lightningQuickActionWithoutHeader,force:hasRecordId,flexipage:availableForRecordHome,lightning:actionOverride" access="global">
     <aura:attribute name="recordId" type="Id"/>
-    <c:createSalesOrder order-id="{!v.recordId}"/>
+    <aura:if isTrue="{!not(empty(v.recordId))}">
+        <c:createSalesOrder order-id="{!v.recordId}"/>
+    </aura:if>
 </aura:component>
