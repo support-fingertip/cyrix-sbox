@@ -140,15 +140,30 @@
                                 Add Product
                             </div>
                             <div class="slds-grid slds-wrap slds-gutters_small cso-add-product-fields">
-                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                                    <lightning-combobox
+                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2" style="position:relative;">
+                                    <lightning-input
                                         label="Product"
-                                        value={newPricebookEntryId}
-                                        placeholder="Select a product"
-                                        options={productOptions}
-                                        onchange={handleNewProductChange}
+                                        value={productSearchTerm}
+                                        placeholder="Search products..."
+                                        onchange={handleProductSearch}
+                                        autocomplete="off"
                                         required>
-                                    </lightning-combobox>
+                                    </lightning-input>
+                                    <template if:true={showProductResults}>
+                                        <div class="cso-search-results">
+                                            <template for:each={filteredProducts} for:item="prod">
+                                                <div key={prod.value} class="cso-search-item" data-value={prod.value} onclick={handleProductSelect}>
+                                                    <span class="cso-search-name">{prod.productName}</span>
+                                                    <template if:true={prod.productCode}>
+                                                        <span class="cso-search-code"> ({prod.productCode})</span>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                            <template if:false={hasFilteredProducts}>
+                                                <div class="cso-search-item cso-search-empty">No products found</div>
+                                            </template>
+                                        </div>
+                                    </template>
                                 </div>
                                 <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
                                     <lightning-input
@@ -186,17 +201,18 @@
                         <div class="table-scroll-wrapper">
                             <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_fixed-layout cso-items-table">
                                 <colgroup>
-                                    <col style="width: 4%;">
-                                    <col style="width: 20%;">
+                                    <col style="width: 3%;">
+                                    <col style="width: 17%;">
+                                    <col style="width: 5%;">
                                     <col style="width: 6%;">
+                                    <col style="width: 8%;">
+                                    <col style="width: 8%;">
                                     <col style="width: 7%;">
-                                    <col style="width: 9%;">
-                                    <col style="width: 9%;">
                                     <col style="width: 7%;">
-                                    <col style="width: 6%;">
-                                    <col style="width: 11%;">
+                                    <col style="width: 5%;">
                                     <col style="width: 10%;">
-                                    <col style="width: 6%;">
+                                    <col style="width: 9%;">
+                                    <col style="width: 5%;">
                                 </colgroup>
                                 <thead>
                                     <tr>
@@ -207,6 +223,7 @@
                                         <th>List Price</th>
                                         <th>Sales Price</th>
                                         <th>Disc. %</th>
+                                        <th>Max Disc %</th>
                                         <th>Tax %</th>
                                         <th>Price Status</th>
                                         <th>Line Total</th>
@@ -254,6 +271,7 @@
                                                     onchange={handleDiscountChange}>
                                                 </lightning-input>
                                             </td>
+                                            <td>{item.maxDiscountDisplay}</td>
                                             <td>{item.taxDisplay}</td>
                                             <td>
                                                 <template if:true={item.priceStatus}>

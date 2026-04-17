@@ -27,6 +27,9 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     @track newPricebookEntryId = '';
     @track newQuantity = 1;
     @track newDiscount = 0;
+    @track productSearchTerm = '';
+    @track filteredProducts = [];
+    @track showProductResults = false;
 
     @wire(CurrentPageReference)
     handlePageRef(pageRef) {
@@ -84,6 +87,8 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
                         listPriceDisplay: this.formatCurrency(it.listPrice),
                         unitPriceDisplay: this.formatCurrency(price),
                         taxDisplay: it.tax != null ? Number(it.tax).toFixed(0) + '%' : '-',
+                        maxDiscount: it.maxDiscount,
+                        maxDiscountDisplay: it.maxDiscount != null ? it.maxDiscount + '%' : '',
                         priceStatusBadgeClass: this.priceStatusBadge(it.priceStatus),
                         totalPrice: total,
                         totalPriceDisplay: this.formatCurrency(total),
@@ -128,6 +133,8 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
                     listPriceDisplay: this.formatCurrency(it.listPrice),
                     unitPriceDisplay: this.formatCurrency(price),
                     taxDisplay: it.tax != null ? Number(it.tax).toFixed(0) + '%' : '-',
+                    maxDiscount: it.maxDiscount,
+                    maxDiscountDisplay: it.maxDiscount != null ? it.maxDiscount + '%' : '',
                     priceStatusBadgeClass: this.priceStatusBadge(it.priceStatus),
                     totalPrice: total,
                     totalPriceDisplay: this.formatCurrency(total),
@@ -327,6 +334,9 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         this.newPricebookEntryId = '';
         this.newQuantity = 1;
         this.newDiscount = 0;
+        this.productSearchTerm = '';
+        this.filteredProducts = [];
+        this.showProductResults = false;
         this.isAddProductOpen = true;
     }
 
@@ -334,8 +344,35 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         this.isAddProductOpen = false;
     }
 
-    handleNewProductChange(event) {
-        this.newPricebookEntryId = event.detail.value;
+    get hasFilteredProducts() {
+        return this.filteredProducts.length > 0;
+    }
+
+    handleProductSearch(event) {
+        const term = event.target.value;
+        this.productSearchTerm = term;
+        if (term && term.length >= 2) {
+            const lowerTerm = term.toLowerCase();
+            this.filteredProducts = this.productCatalog.filter(
+                (p) => (p.productName && p.productName.toLowerCase().includes(lowerTerm)) ||
+                       (p.productCode && p.productCode.toLowerCase().includes(lowerTerm))
+            ).slice(0, 20);
+            this.showProductResults = true;
+        } else {
+            this.filteredProducts = [];
+            this.showProductResults = false;
+        }
+        this.newPricebookEntryId = '';
+    }
+
+    handleProductSelect(event) {
+        const val = event.currentTarget.dataset.value;
+        const prod = this.productCatalog.find((p) => p.value === val);
+        if (prod) {
+            this.newPricebookEntryId = val;
+            this.productSearchTerm = prod.productName;
+        }
+        this.showProductResults = false;
     }
 
     handleNewQuantityChange(event) {
@@ -395,6 +432,8 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
                 totalPriceDisplay: this.formatCurrency(total),
                 tax: cat.tax,
                 taxDisplay: cat.tax != null ? Number(cat.tax).toFixed(0) + '%' : '-',
+                maxDiscount: cat.maxDiscount,
+                maxDiscountDisplay: cat.maxDiscount != null ? cat.maxDiscount + '%' : '',
                 priceStatus: null,
                 priceStatusBadgeClass: this.priceStatusBadge(null)
             }
