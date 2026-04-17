@@ -48,6 +48,7 @@ public with sharing class CreateSalesOrderController {
                    Product2.QuantityUnitOfMeasure, Product2.Tax__c,
                    PricebookEntryId, PricebookEntry.UnitPrice,
                    PricebookEntry.Pricebook2Id, PricebookEntry.Pricebook2.Name,
+                   PricebookEntry.Max_Discount_Percentage__c,
                    Quantity, UnitPrice, TotalPrice, Discount, Description,
                    Tax__c, Tax_Amount__c, Price_Status__c,
                    Source_Pricebook_Ref__c, Source_Pricebook__c
@@ -131,6 +132,7 @@ public with sharing class CreateSalesOrderController {
             w.taxAmount        = qli.Tax_Amount__c;
             w.priceStatus      = qli.Price_Status__c;
             w.sourcePricebookId = qli.Source_Pricebook_Ref__c;
+            w.maxDiscount      = qli.PricebookEntry != null ? qli.PricebookEntry.Max_Discount_Percentage__c : null;
             wraps.add(w);
         }
         ctx.items = wraps;
@@ -182,7 +184,8 @@ public with sharing class CreateSalesOrderController {
         List<ProductOption> result = new List<ProductOption>();
         for (PricebookEntry pbe : [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
-                   Product2.QuantityUnitOfMeasure, Product2.Tax__c, UnitPrice
+                   Product2.QuantityUnitOfMeasure, Product2.Tax__c, UnitPrice,
+                   Max_Discount_Percentage__c
             FROM PricebookEntry
             WHERE Pricebook2Id = :q.Pricebook2Id
               AND IsActive = true
@@ -200,6 +203,7 @@ public with sharing class CreateSalesOrderController {
             opt.listPrice = pbe.UnitPrice;
             opt.unitPrice = pbe.UnitPrice;
             opt.tax = pbe.Product2.Tax__c;
+            opt.maxDiscount = pbe.Max_Discount_Percentage__c;
             result.add(opt);
         }
         return result;
@@ -462,6 +466,7 @@ public with sharing class CreateSalesOrderController {
                    Product2.QuantityUnitOfMeasure, Product2.Tax__c,
                    PricebookEntryId, PricebookEntry.UnitPrice,
                    PricebookEntry.Pricebook2Id, PricebookEntry.Pricebook2.Name,
+                   PricebookEntry.Max_Discount_Percentage__c,
                    Quantity, UnitPrice, TotalPrice, Description,
                    Tax__c, Tax_Amount__c, Price_Status__c, Discount__c,
                    Source_Pricebook_Ref__c, Source_Pricebook__c
@@ -532,6 +537,7 @@ public with sharing class CreateSalesOrderController {
             w.taxAmount        = oi.Tax_Amount__c;
             w.priceStatus      = oi.Price_Status__c;
             w.sourcePricebookId = oi.Source_Pricebook_Ref__c;
+            w.maxDiscount      = oi.PricebookEntry != null ? oi.PricebookEntry.Max_Discount_Percentage__c : null;
             wraps.add(w);
         }
         ctx.items = wraps;
@@ -551,7 +557,8 @@ public with sharing class CreateSalesOrderController {
         List<ProductOption> result = new List<ProductOption>();
         for (PricebookEntry pbe : [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
-                   Product2.QuantityUnitOfMeasure, Product2.Tax__c, UnitPrice
+                   Product2.QuantityUnitOfMeasure, Product2.Tax__c, UnitPrice,
+                   Max_Discount_Percentage__c
             FROM PricebookEntry
             WHERE Pricebook2Id = :o.Pricebook2Id
               AND IsActive = true
@@ -569,6 +576,7 @@ public with sharing class CreateSalesOrderController {
             opt.listPrice = pbe.UnitPrice;
             opt.unitPrice = pbe.UnitPrice;
             opt.tax = pbe.Product2.Tax__c;
+            opt.maxDiscount = pbe.Max_Discount_Percentage__c;
             result.add(opt);
         }
         return result;
@@ -744,6 +752,7 @@ public with sharing class CreateSalesOrderController {
         @AuraEnabled public Decimal taxAmount;
         @AuraEnabled public String priceStatus;
         @AuraEnabled public Id sourcePricebookId;
+        @AuraEnabled public Decimal maxDiscount;
     }
 
     public class WarehouseOption {
@@ -761,6 +770,7 @@ public with sharing class CreateSalesOrderController {
         @AuraEnabled public Decimal listPrice;
         @AuraEnabled public Decimal unitPrice;
         @AuraEnabled public Decimal tax;
+        @AuraEnabled public Decimal maxDiscount;
     }
 
 }

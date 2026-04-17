@@ -386,3 +386,46 @@
     border-radius: 10px;
     padding: 0.1rem 0.5rem;
 }
+
+/* =========================================
+   Product Search dropdown
+========================================= */
+.cso-search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    background: #ffffff;
+    border: 1px solid #dddbda;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+}
+
+.cso-search-item {
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    border-bottom: 1px solid #f2f2f2;
+}
+
+.cso-search-item:hover {
+    background-color: #f3f7fb;
+}
+
+.cso-search-name {
+    font-weight: 600;
+    color: #032d60;
+}
+
+.cso-search-code {
+    color: #7c8b9d;
+    font-size: 0.8rem;
+}
+
+.cso-search-empty {
+    color: #999;
+    cursor: default;
+}
