@@ -12,16 +12,16 @@
                 <!-- Body -->
                 <div class="cso-body">
 
-                    <!-- Quote Information (read-only) -->
+                    <!-- Order Information (read-only) -->
                     <div class="cso-section slds-m-bottom_medium">
                         <div class="cso-section-header">
-                            <lightning-icon icon-name="standard:quotes" size="small" class="slds-m-right_small"></lightning-icon>
-                            <span class="slds-text-heading_small">Quote Information</span>
+                            <lightning-icon icon-name="standard:orders" size="small" class="slds-m-right_small"></lightning-icon>
+                            <span class="slds-text-heading_small">Order Information</span>
                         </div>
                         <div class="cso-section-body">
                             <div class="slds-grid slds-wrap slds-gutters_small">
                                 <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
-                                    <div class="slds-text-title">Quote Date</div>
+                                    <div class="slds-text-title">Order Date</div>
                                     <div class="cso-field-value">{quoteDateDisplay}</div>
                                 </div>
                                 <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
@@ -51,13 +51,6 @@
                                 <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
                                     <div class="slds-text-title">Contract Period End Date</div>
                                     <div class="cso-field-value">{contractPeriodEndDisplay}</div>
-                                </div>
-                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
-                                    <div class="slds-text-title">Is Active</div>
-                                    <div class="cso-field-value">
-                                        <lightning-icon if:true={quoteContext.isActive} icon-name="utility:check" size="x-small"></lightning-icon>
-                                        <lightning-icon if:false={quoteContext.isActive} icon-name="utility:close" size="x-small" variant="error"></lightning-icon>
-                                    </div>
                                 </div>
                                 <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
                                     <div class="slds-text-title">Status</div>
