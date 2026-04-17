@@ -11,7 +11,21 @@ import updateSalesOrder from '@salesforce/apex/CreateSalesOrderController.update
 
 export default class CreateSalesOrder extends NavigationMixin(LightningElement) {
     @api recordId;
-    @api orderId;
+
+    _orderIdValue = null;
+    _dataLoaded = false;
+
+    @api
+    get orderId() { return this._orderIdValue; }
+    set orderId(value) {
+        this._orderIdValue = value;
+        if (value && !this._dataLoaded) {
+            this._orderId = value;
+            this.isEditMode = true;
+            this._dataLoaded = true;
+            this.loadOrderData();
+        }
+    }
 
     isLoading = true;
     isSaving = false;
@@ -29,11 +43,6 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     @track newDiscount = 0;
 
     connectedCallback() {
-        if (this.orderId) {
-            this._orderId = this.orderId;
-            this.isEditMode = true;
-            this.loadOrderData();
-        }
         this._widenQuickActionModal();
     }
 
