@@ -1,16 +1,40 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { NavigationMixin } from 'lightning/navigation';
+import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import getQuoteDetails from '@salesforce/apex/CreateSalesOrderController.getQuoteDetails';
+import getOrderDetails from '@salesforce/apex/CreateSalesOrderController.getOrderDetails';
 import getPricebookProducts from '@salesforce/apex/CreateSalesOrderController.getPricebookProducts';
+import getPricebookProductsForOrder from '@salesforce/apex/CreateSalesOrderController.getPricebookProductsForOrder';
 import createSalesOrder from '@salesforce/apex/CreateSalesOrderController.createSalesOrder';
+import updateSalesOrder from '@salesforce/apex/CreateSalesOrderController.updateSalesOrder';
 
 export default class CreateSalesOrder extends NavigationMixin(LightningElement) {
     @api recordId;
 
     isLoading = true;
     isSaving = false;
+    isEditMode = false;
+    _orderId = null;
+
+    @track quoteContext = {};
+    @track displayItems = [];
+    @track productOptions = [];
+    @track productCatalog = [];
+    @track remarks = '';
+    @track isAddProductOpen = false;
+    @track newPricebookEntryId = '';
+    @track newQuantity = 1;
+    @track newDiscount = 0;
+
+    @wire(CurrentPageReference)
+    handlePageRef(pageRef) {
+        if (pageRef && pageRef.state && pageRef.state.c__recordId) {
+            this._orderId = pageRef.state.c__recordId;
+            this.isEditMode = true;
+            this.loadOrderData();
+        }
+    }
 
     connectedCallback() {
         this._widenQuickActionModal();
@@ -21,6 +45,7 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     }
 
     _widenQuickActionModal() {
+        if (this.isEditMode) return;
         try {
             const container =
                 this.template.host &&
@@ -34,23 +59,56 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
             container.style.maxHeight = '92vh';
             container.dataset.csoResized = '1';
         } catch (e) {
-            // Ignore — modal sizing is a nice-to-have, not a blocker.
+            // Ignore
         }
     }
 
-    @track quoteContext = {};
-    @track displayItems = [];
-    @track productOptions = [];
-    @track productCatalog = [];
+    loadOrderData() {
+        this.isLoading = true;
+        getOrderDetails({ orderId: this._orderId })
+            .then((data) => {
+                this.quoteContext = data;
+                this.remarks = data.description || '';
+                this.displayItems = (data.items || []).map((it, idx) => {
+                    const qty = it.quantity || 0;
+                    const price = it.unitPrice || 0;
+                    const disc = it.discount || 0;
+                    const total = this.calcTotal(qty, price, disc);
+                    return {
+                        ...it,
+                        source: 'existing',
+                        rowNum: idx + 1,
+                        quantity: qty,
+                        discount: disc,
+                        uomDisplay: it.uom || 'Nos',
+                        listPriceDisplay: this.formatCurrency(it.listPrice),
+                        unitPriceDisplay: this.formatCurrency(price),
+                        taxDisplay: it.tax != null ? Number(it.tax).toFixed(0) + '%' : '-',
+                        priceStatusBadgeClass: this.priceStatusBadge(it.priceStatus),
+                        totalPrice: total,
+                        totalPriceDisplay: this.formatCurrency(total),
+                        rowKey: it.lineId
+                    };
+                });
+                this.isLoading = false;
+            })
+            .catch((error) => {
+                this.isLoading = false;
+                this.showToast('Error', this.reduceError(error), 'error');
+            });
 
-    @track remarks = '';
+        getPricebookProductsForOrder({ orderId: this._orderId })
+            .then((data) => {
+                this.productCatalog = data;
+                this.productOptions = data.map((p) => ({ label: p.label, value: p.value }));
+            })
+            .catch((error) => {
+                this.showToast('Warning', 'Could not load products.', 'warning');
+            });
+    }
 
-    @track isAddProductOpen = false;
-    @track newPricebookEntryId = '';
-    @track newQuantity = 1;
-    @track newDiscount = 0;
-
-    @wire(getQuoteDetails, { quoteId: '$recordId' })
+    // --- Create mode: wired to Quote ---
+    @wire(getQuoteDetails, { quoteId: '$_quoteId' })
     wiredQuote({ error, data }) {
         if (data) {
             this.quoteContext = data;
@@ -82,7 +140,11 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         }
     }
 
-    @wire(getPricebookProducts, { quoteId: '$recordId' })
+    get _quoteId() {
+        return this.isEditMode ? null : this.recordId;
+    }
+
+    @wire(getPricebookProducts, { quoteId: '$_quoteId' })
     wiredProducts({ error, data }) {
         if (data) {
             this.productCatalog = data;
@@ -92,7 +154,15 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         }
     }
 
-    // ===== Getters for Quote Information display =====
+    // ===== Getters =====
+
+    get pageTitle() {
+        return this.isEditMode ? 'Edit Order' : 'Order';
+    }
+
+    get confirmButtonLabel() {
+        return this.isEditMode ? 'Save Changes' : 'Confirm Sale';
+    }
 
     get hasItems() {
         return this.displayItems && this.displayItems.length > 0;
@@ -137,8 +207,6 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     get hasPaymentTerms() {
         return !!(this.quoteContext && this.quoteContext.paymentTerms && String(this.quoteContext.paymentTerms).trim().length);
     }
-
-    // ===== Getters for Bill To / Ship To =====
 
     get billToNameDisplay()       { return this.quoteContext.billToName || this.quoteContext.customerName || 'N/A'; }
     get billToStreetDisplay()     { return this.quoteContext.billToStreet || 'N/A'; }
@@ -333,14 +401,23 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         if (this.isSaving) return;
 
         if (!this.displayItems.length) {
-            this.showToast('Error', 'Please add at least one product to the Sales Order', 'error');
+            this.showToast('Error', 'Please add at least one product.', 'error');
             return;
         }
 
+        this.isSaving = true;
+
+        if (this.isEditMode) {
+            await this._handleUpdate();
+        } else {
+            await this._handleCreate();
+        }
+    }
+
+    async _handleCreate() {
         const quoteItems = this.displayItems.filter((i) => i.source === 'quote');
         const manualItems = this.displayItems.filter((i) => i.source === 'manual');
 
-        this.isSaving = true;
         try {
             const selectedLineIds = quoteItems.map((i) => i.lineId);
             const quantityByLineId = {};
@@ -387,8 +464,68 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         }
     }
 
+    async _handleUpdate() {
+        const existingItems = this.displayItems.filter((i) => i.source === 'existing');
+        const manualItems = this.displayItems.filter((i) => i.source === 'manual');
+
+        try {
+            const existingLineIds = existingItems.map((i) => i.lineId);
+            const quantityByLineId = {};
+            const discountByLineId = {};
+            existingItems.forEach((i) => {
+                quantityByLineId[i.lineId] = i.quantity;
+                discountByLineId[i.lineId] = i.discount || 0;
+            });
+
+            const manualPricebookEntryIds = manualItems.map((i) => i.pricebookEntryId);
+            const manualQuantityByPbeId = {};
+            const manualDiscountByPbeId = {};
+            manualItems.forEach((i) => {
+                manualQuantityByPbeId[i.pricebookEntryId] = i.quantity;
+                manualDiscountByPbeId[i.pricebookEntryId] = i.discount || 0;
+            });
+
+            await updateSalesOrder({
+                orderId: this._orderId,
+                remarks: this.remarks,
+                existingLineIds: existingLineIds,
+                quantityByLineId: quantityByLineId,
+                discountByLineId: discountByLineId,
+                manualPricebookEntryIds: manualPricebookEntryIds,
+                manualQuantityByPbeId: manualQuantityByPbeId,
+                manualDiscountByPbeId: manualDiscountByPbeId
+            });
+
+            this.showToast('Success', 'Order updated successfully.', 'success');
+
+            this[NavigationMixin.Navigate]({
+                type: 'standard__recordPage',
+                attributes: {
+                    recordId: this._orderId,
+                    objectApiName: 'Order',
+                    actionName: 'view'
+                }
+            });
+        } catch (err) {
+            this.showToast('Error', this.reduceError(err), 'error');
+        } finally {
+            this.isSaving = false;
+        }
+    }
+
     handleCancel() {
-        this.dispatchEvent(new CloseActionScreenEvent());
+        if (this.isEditMode) {
+            this[NavigationMixin.Navigate]({
+                type: 'standard__recordPage',
+                attributes: {
+                    recordId: this._orderId,
+                    objectApiName: 'Order',
+                    actionName: 'view'
+                }
+            });
+        } else {
+            this.dispatchEvent(new CloseActionScreenEvent());
+        }
     }
 
     showToast(title, message, variant) {
