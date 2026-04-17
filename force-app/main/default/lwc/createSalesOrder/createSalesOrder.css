@@ -86,6 +86,61 @@
 }
 
 /* =========================================
+   Generic section (Quote Information, Bill To/Ship To)
+========================================= */
+.cso-section {
+    border: 1px solid #dddbda;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.cso-section-header {
+    background: linear-gradient(to right, #eef5fd, #ffffff);
+    border-bottom: 1px solid #e4eaf2;
+    padding: 0.6rem 0.9rem;
+    display: flex;
+    align-items: center;
+}
+
+.cso-section-body {
+    padding: 0.9rem;
+}
+
+/* Sub-header inside a section (e.g. BILL TO / SHIP TO) */
+.cso-subheader {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #0070d2;
+    letter-spacing: 0.04rem;
+    margin-bottom: 0.4rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid #e4eaf2;
+}
+
+.cso-addr-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.2rem 0;
+    border-bottom: 1px dashed #f1f1f1;
+    font-size: 0.85rem;
+}
+
+.cso-addr-row:last-child {
+    border-bottom: none;
+}
+
+.cso-addr-val {
+    color: #032d60;
+    font-weight: 500;
+    text-align: right;
+    word-break: break-word;
+    max-width: 65%;
+}
+
+/* =========================================
    Items section header (heading + Add Product button)
 ========================================= */
 .cso-items-header {
@@ -121,6 +176,65 @@
     word-break: break-word;
     overflow-wrap: anywhere;
     line-height: 1.4;
+}
+
+.cso-product-name {
+    font-weight: 600;
+    color: #032d60;
+    margin-bottom: 0.2rem;
+}
+
+.cso-pricebook-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #0070d2;
+    background-color: #e8f4ff;
+    border: 1px solid #bcd9f7;
+    border-radius: 10px;
+    padding: 0.1rem 0.5rem;
+    margin-top: 0.15rem;
+}
+
+.cso-product-code {
+    color: #7c8b9d;
+    font-size: 0.72rem;
+    margin-top: 0.15rem;
+}
+
+/* Price Status badges */
+.cso-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 0.1rem 0.55rem;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.cso-badge-neutral {
+    color: #535e71;
+    background-color: #f0f2f5;
+    border-color: #d6dbe3;
+}
+
+.cso-badge-ok {
+    color: #14703e;
+    background-color: #dff7e9;
+    border-color: #a8e1c0;
+}
+
+.cso-badge-warn {
+    color: #8a5700;
+    background-color: #fff2cf;
+    border-color: #f2d89e;
+}
+
+.cso-badge-error {
+    color: #8a1e1e;
+    background-color: #fde0e0;
+    border-color: #f2bcbc;
 }
 
 /* =========================================
@@ -244,4 +358,31 @@
         align-items: stretch;
         gap: 0.5rem;
     }
+}
+
+/* =========================================
+   Payment Terms (read-only block)
+========================================= */
+.cso-payment-terms {
+    white-space: pre-wrap;
+    font-family: inherit;
+    font-size: 0.9rem;
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    background-color: #f7f9fb;
+    border: 1px solid #e5e9ef;
+    border-radius: 4px;
+    color: #032d60;
+    line-height: 1.5;
+}
+
+.cso-readonly-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #747474;
+    background-color: #eeeeee;
+    border-radius: 10px;
+    padding: 0.1rem 0.5rem;
 }

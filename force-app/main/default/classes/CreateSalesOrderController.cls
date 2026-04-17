@@ -1,17 +1,19 @@
 /**
  * Controller for the "Create Sales Order" LWC launched from a Quote record.
  * Provides methods to fetch Quote context (customer info + line items),
- * list available warehouses (Branch__c), and create an Order + OrderItems
- * from the selected quote lines.
+ * list available warehouses (Branch__c), list Pricebook products, and
+ * create an Order + OrderItems from the selected quote lines.
  */
 public with sharing class CreateSalesOrderController {
 
     /**
-     * Returns the Quote header info (customer, owner, addresses) plus its line items
-     * so the LWC can render the Sales Order modal.
+     * Returns the Quote header info (customer, owner, addresses, commercial
+     * and operational fields) plus its line items so the LWC can render a
+     * full Quote-like read-only view in the Sales Order modal.
      *
-     * Blocks the load if the Quote is not in 'Approved' status — Sales Orders
-     * may only be created from a finalized/approved Quote.
+     * Quote-status gating is done at the Quick Action button visibility
+     * level, not here -- this method assumes it's only invoked for Quotes
+     * that are eligible to be converted.
      */
     @AuraEnabled(cacheable=true)
     public static QuoteContext getQuoteDetails(Id quoteId) {
@@ -21,47 +23,92 @@ public with sharing class CreateSalesOrderController {
 
         Quote q = [
             SELECT Id, Name, QuoteNumber, AccountId, Account.Name,
-                   Pricebook2Id, OpportunityId,
+                   Pricebook2Id, Pricebook2.Name,
+                   OpportunityId, Opportunity.Name,
                    ContactId, Contact.Name, Contact.Email, Contact.Phone,
                    Email, Phone,
                    OwnerId, Owner.Name,
-                   BillingStreet, BillingCity, BillingState, BillingPostalCode, BillingCountry,
-                   ShippingStreet, ShippingCity, ShippingState, ShippingPostalCode, ShippingCountry,
-                   Status, GrandTotal, TotalPrice
+                   BillingName, BillingStreet, BillingCity, BillingState, BillingPostalCode, BillingCountry,
+                   ShippingName, ShippingStreet, ShippingCity, ShippingState, ShippingPostalCode, ShippingCountry,
+                   Status, GrandTotal, TotalPrice, Subtotal, Discount, ShippingHandling, Tax,
+                   ExpirationDate, Description,
+                   Quote_Date__c, Shipping_Mode__c, Valid_Till__c, Vertical__c,
+                   Reason_for_Revision__c, Billing_Address__c, is_Active__c,
+                   Quote_Valid_Till_in_days__c, Business_Vertical__c,
+                   Contract_Period_From_Date__c, Contract_Period_End_Date__c,
+                   Delivery__c, Bank_Name__c
             FROM Quote
             WHERE Id = :quoteId
             LIMIT 1
         ];
 
-        if (q.Status != 'Approved') {
-            throw new AuraHandledException(
-                'Sales Order can only be created from an Approved Quote. ' +
-                'Current Quote status: ' + (q.Status == null ? 'None' : q.Status) + '.'
-            );
-        }
 
         List<QuoteLineItem> items = [
-            SELECT Id, Product2Id, Product2.Name, PricebookEntryId,
+            SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
+                   Product2.QuantityUnitOfMeasure, Product2.Tax__c,
+                   PricebookEntryId, PricebookEntry.UnitPrice,
+                   PricebookEntry.Pricebook2Id, PricebookEntry.Pricebook2.Name,
                    Quantity, UnitPrice, TotalPrice, Discount, Description,
-                   Tax__c, Tax_Amount__c, Source_Pricebook_Ref__c, Source_Pricebook__c
+                   Tax__c, Tax_Amount__c, Price_Status__c,
+                   Source_Pricebook_Ref__c, Source_Pricebook__c
             FROM QuoteLineItem
             WHERE QuoteId = :quoteId
             ORDER BY SortOrder NULLS LAST, CreatedDate
         ];
 
         QuoteContext ctx = new QuoteContext();
-        ctx.quoteId           = q.Id;
-        ctx.quoteName         = q.Name;
-        ctx.quoteNumber       = q.QuoteNumber;
-        ctx.accountId         = q.AccountId;
-        ctx.customerName      = q.Account != null ? q.Account.Name : null;
-        ctx.pricebookId       = q.Pricebook2Id;
-        ctx.opportunityId     = q.OpportunityId;
-        ctx.email             = q.Email != null ? q.Email : (q.Contact != null ? q.Contact.Email : null);
-        ctx.phone             = q.Phone != null ? q.Phone : (q.Contact != null ? q.Contact.Phone : null);
-        ctx.executiveAssigned = q.Owner != null ? q.Owner.Name : null;
-        ctx.billingAddress    = formatAddress(q.BillingStreet, q.BillingCity, q.BillingState, q.BillingPostalCode, q.BillingCountry);
-        ctx.shippingAddress   = formatAddress(q.ShippingStreet, q.ShippingCity, q.ShippingState, q.ShippingPostalCode, q.ShippingCountry);
+        ctx.quoteId                = q.Id;
+        ctx.quoteName              = q.Name;
+        ctx.quoteNumber            = q.QuoteNumber;
+        ctx.accountId              = q.AccountId;
+        ctx.customerName           = q.Account != null ? q.Account.Name : null;
+        ctx.pricebookId            = q.Pricebook2Id;
+        ctx.pricebookName          = q.Pricebook2 != null ? q.Pricebook2.Name : null;
+        ctx.opportunityId          = q.OpportunityId;
+        ctx.opportunityName        = q.Opportunity != null ? q.Opportunity.Name : null;
+        ctx.email                  = q.Email != null ? q.Email : (q.Contact != null ? q.Contact.Email : null);
+        ctx.phone                  = q.Phone != null ? q.Phone : (q.Contact != null ? q.Contact.Phone : null);
+        ctx.executiveAssigned      = q.Owner != null ? q.Owner.Name : null;
+        ctx.status                 = q.Status;
+        ctx.description            = q.Description;
+        ctx.quoteDate              = q.Quote_Date__c;
+        ctx.validTill              = q.Valid_Till__c;
+        ctx.quoteValidTillInDays   = q.Quote_Valid_Till_in_days__c != null ? String.valueOf(q.Quote_Valid_Till_in_days__c) : null;
+        ctx.businessVertical       = q.Business_Vertical__c;
+        ctx.vertical               = q.Vertical__c;
+        ctx.shippingMode           = q.Shipping_Mode__c;
+        ctx.delivery               = q.Delivery__c;
+        ctx.contractPeriodFromDate = q.Contract_Period_From_Date__c;
+        ctx.contractPeriodEndDate  = q.Contract_Period_End_Date__c;
+        ctx.bankName               = q.Bank_Name__c;
+        ctx.isActive               = q.is_Active__c;
+        ctx.grandTotal             = q.GrandTotal;
+        ctx.totalPrice             = q.TotalPrice;
+        ctx.subtotal               = q.Subtotal;
+        ctx.discount               = q.Discount;
+        ctx.shippingHandling       = q.ShippingHandling;
+        ctx.tax                    = q.Tax;
+        // Bill To
+        ctx.billToName             = q.BillingName;
+        ctx.billToStreet           = q.BillingStreet;
+        ctx.billToCity             = q.BillingCity;
+        ctx.billToState            = q.BillingState;
+        ctx.billToPostalCode       = q.BillingPostalCode;
+        ctx.billToCountry          = q.BillingCountry;
+        ctx.billingAddress         = formatAddress(q.BillingStreet, q.BillingCity, q.BillingState, q.BillingPostalCode, q.BillingCountry);
+        // Ship To
+        ctx.shipToName             = q.ShippingName;
+        ctx.shipToStreet           = q.ShippingStreet;
+        ctx.shipToCity             = q.ShippingCity;
+        ctx.shipToState            = q.ShippingState;
+        ctx.shipToPostalCode       = q.ShippingPostalCode;
+        ctx.shipToCountry          = q.ShippingCountry;
+        ctx.shippingAddress        = formatAddress(q.ShippingStreet, q.ShippingCity, q.ShippingState, q.ShippingPostalCode, q.ShippingCountry);
+
+        // Payment Terms (child records on Quote). Formatted into a text summary
+        // so the LWC modal and the Order.Payment_Terms__c field can display it
+        // read-only. No structure retained -- purely display.
+        ctx.paymentTerms = buildPaymentTermsText(quoteId);
 
         List<QuoteItemWrap> wraps = new List<QuoteItemWrap>();
         for (QuoteLineItem qli : items) {
@@ -69,7 +116,12 @@ public with sharing class CreateSalesOrderController {
             w.lineId           = qli.Id;
             w.productId        = qli.Product2Id;
             w.productName      = qli.Product2 != null ? qli.Product2.Name : null;
+            w.productCode      = qli.Product2 != null ? qli.Product2.ProductCode : null;
+            w.uom              = qli.Product2 != null ? qli.Product2.QuantityUnitOfMeasure : null;
             w.pricebookEntryId = qli.PricebookEntryId;
+            w.pricebookName    = (qli.PricebookEntry != null && qli.PricebookEntry.Pricebook2 != null)
+                                 ? qli.PricebookEntry.Pricebook2.Name : null;
+            w.listPrice        = qli.PricebookEntry != null ? qli.PricebookEntry.UnitPrice : null;
             w.quantity         = qli.Quantity;
             w.unitPrice        = qli.UnitPrice;
             w.totalPrice       = qli.TotalPrice;
@@ -77,6 +129,7 @@ public with sharing class CreateSalesOrderController {
             w.description      = qli.Description;
             w.tax              = qli.Tax__c;
             w.taxAmount        = qli.Tax_Amount__c;
+            w.priceStatus      = qli.Price_Status__c;
             w.sourcePricebookId = qli.Source_Pricebook_Ref__c;
             wraps.add(w);
         }
@@ -87,7 +140,7 @@ public with sharing class CreateSalesOrderController {
 
     /**
      * Returns the list of active warehouses (Branch__c records) to populate
-     * the Warehouse picklist in the modal.
+     * the Warehouse picklist. Retained for backward compatibility.
      */
     @AuraEnabled(cacheable=true)
     public static List<WarehouseOption> getWarehouses() {
@@ -129,7 +182,7 @@ public with sharing class CreateSalesOrderController {
         List<ProductOption> result = new List<ProductOption>();
         for (PricebookEntry pbe : [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
-                   Product2.Tax__c, UnitPrice
+                   Product2.QuantityUnitOfMeasure, Product2.Tax__c, UnitPrice
             FROM PricebookEntry
             WHERE Pricebook2Id = :q.Pricebook2Id
               AND IsActive = true
@@ -142,6 +195,9 @@ public with sharing class CreateSalesOrderController {
             opt.label = pbe.Product2.Name;
             opt.productId = pbe.Product2Id;
             opt.productName = pbe.Product2.Name;
+            opt.productCode = pbe.Product2.ProductCode;
+            opt.uom = pbe.Product2.QuantityUnitOfMeasure;
+            opt.listPrice = pbe.UnitPrice;
             opt.unitPrice = pbe.UnitPrice;
             opt.tax = pbe.Product2.Tax__c;
             result.add(opt);
@@ -152,17 +208,11 @@ public with sharing class CreateSalesOrderController {
     /**
      * Creates an Order and its OrderItems from the given Quote and form inputs.
      * Returns the newly created Order Id so the LWC can navigate to it.
-     *
-     * Flat parameters are used instead of a wrapper class so LWC → Apex
-     * deserialization is fully deterministic.
      */
     @AuraEnabled
     public static Id createSalesOrder(
         Id quoteId,
-        String deliveryCommittedDate,
-        Id warehouseId,
         String remarks,
-        Boolean creditOrder,
         List<Id> selectedLineIds,
         Map<Id, Decimal> quantityByLineId,
         Map<Id, Decimal> discountByLineId,
@@ -173,23 +223,10 @@ public with sharing class CreateSalesOrderController {
         if (quoteId == null) {
             throw new AuraHandledException('Quote Id is required.');
         }
-        if (String.isBlank(deliveryCommittedDate)) {
-            throw new AuraHandledException('Delivery Committed Date is required.');
-        }
-        if (warehouseId == null) {
-            throw new AuraHandledException('Warehouse is required.');
-        }
         Boolean hasQuoteLines = selectedLineIds != null && !selectedLineIds.isEmpty();
         Boolean hasManualLines = manualPricebookEntryIds != null && !manualPricebookEntryIds.isEmpty();
         if (!hasQuoteLines && !hasManualLines) {
             throw new AuraHandledException('Please add at least one product to the Sales Order.');
-        }
-
-        Date deliveryDate;
-        try {
-            deliveryDate = Date.valueOf(deliveryCommittedDate);
-        } catch (Exception ex) {
-            throw new AuraHandledException('Invalid Delivery Committed Date: ' + deliveryCommittedDate);
         }
 
         Quote q = [
@@ -197,19 +234,14 @@ public with sharing class CreateSalesOrderController {
                    BillingStreet, BillingCity, BillingState, BillingPostalCode, BillingCountry,
                    ShippingStreet, ShippingCity, ShippingState, ShippingPostalCode, ShippingCountry,
                    Quote_Date__c, Shipping_Mode__c,
-                   Valid_Till__c, Vertical__c, Reason_for_Revision__c, Billing_Address__c
+                   Valid_Till__c, Vertical__c, Reason_for_Revision__c, Billing_Address__c,
+                   Quote_Valid_Till_in_days__c, Business_Vertical__c,
+                   Contract_Period_From_Date__c, Contract_Period_End_Date__c,
+                   Delivery__c, Bank_Name__c, is_Active__c
             FROM Quote
             WHERE Id = :quoteId
             LIMIT 1
         ];
-
-        // Gate: only Approved Quotes can be converted to Sales Orders.
-        if (q.Status != 'Approved') {
-            throw new AuraHandledException(
-                'Sales Order can only be created from an Approved Quote. ' +
-                'Current Quote status: ' + (q.Status == null ? 'None' : q.Status) + '.'
-            );
-        }
 
         Savepoint sp = Database.setSavepoint();
         try {
@@ -219,36 +251,39 @@ public with sharing class CreateSalesOrderController {
             ord.QuoteId        = q.Id;
             ord.OpportunityId  = q.OpportunityId;
             ord.BillToContactId = q.ContactId;
-            ord.EffectiveDate  = deliveryDate;
+            ord.EffectiveDate  = Date.today();
             ord.Status         = 'Draft';
-            ord.Branch__c      = warehouseId;
             ord.Description    = remarks;
-            ord.is_Active__c   = creditOrder == true;
             ord.Approval_Status__c = 'Pending';
             ord.Quote_Approved_Date_Time__c = System.now();
 
-            // Copy addresses
-            ord.BillingStreet     = q.BillingStreet;
-            ord.BillingCity       = q.BillingCity;
-            ord.BillingState      = q.BillingState;
-            ord.BillingPostalCode = q.BillingPostalCode;
-            ord.BillingCountry    = q.BillingCountry;
+            // Addresses
+            ord.BillingStreet      = q.BillingStreet;
+            ord.BillingCity        = q.BillingCity;
+            ord.BillingState       = q.BillingState;
+            ord.BillingPostalCode  = q.BillingPostalCode;
+            ord.BillingCountry     = q.BillingCountry;
             ord.ShippingStreet     = q.ShippingStreet;
             ord.ShippingCity       = q.ShippingCity;
             ord.ShippingState      = q.ShippingState;
             ord.ShippingPostalCode = q.ShippingPostalCode;
             ord.ShippingCountry    = q.ShippingCountry;
 
-            // Copy mirrored custom header fields from Quote.
-            // Note: Quote_Id__c on Order is an AutoNumber and cannot be
-            // written. Revised_Quote__c is skipped here to avoid cross-org
-            // field-drift deploy failures.
-            ord.Quote_Date__c            = q.Quote_Date__c;
-            ord.Shipping_Mode__c         = q.Shipping_Mode__c;
-            ord.Valid_Till__c            = q.Valid_Till__c;
-            ord.Vertical__c              = q.Vertical__c;
-            ord.Reason_for_Revision__c   = q.Reason_for_Revision__c;
-            ord.Billing_Address__c       = q.Billing_Address__c;
+            // Mirrored custom header fields from Quote -> Order.
+            ord.Quote_Date__c                 = q.Quote_Date__c;
+            ord.Shipping_Mode__c              = q.Shipping_Mode__c;
+            ord.Valid_Till__c                 = q.Valid_Till__c;
+            ord.Vertical__c                   = q.Vertical__c;
+            ord.Reason_for_Revision__c        = q.Reason_for_Revision__c;
+            ord.Billing_Address__c            = q.Billing_Address__c;
+            ord.Quote_Valid_Till_in_days__c   = q.Quote_Valid_Till_in_days__c;
+            ord.Business_Vertical__c          = q.Business_Vertical__c;
+            ord.Contract_Period_From_Date__c  = q.Contract_Period_From_Date__c;
+            ord.Contract_Period_End_Date__c   = q.Contract_Period_End_Date__c;
+            ord.Delivery__c                   = q.Delivery__c;
+            ord.Bank_Name__c                  = q.Bank_Name__c;
+            ord.is_Active__c                  = q.is_Active__c == true;
+            ord.Payment_Terms__c              = buildPaymentTermsText(quoteId);
 
             insert ord;
 
@@ -258,7 +293,7 @@ public with sharing class CreateSalesOrderController {
             if (hasQuoteLines) {
                 Map<Id, QuoteLineItem> quoteLinesById = new Map<Id, QuoteLineItem>([
                     SELECT Id, Product2Id, PricebookEntryId, Quantity, UnitPrice,
-                           Discount, Description, Tax__c, Tax_Amount__c,
+                           Discount, Description, Tax__c, Tax_Amount__c, Price_Status__c,
                            Source_Pricebook_Ref__c, Source_Pricebook__c
                     FROM QuoteLineItem
                     WHERE QuoteId = :quoteId
@@ -284,6 +319,7 @@ public with sharing class CreateSalesOrderController {
                     oi.Description             = src.Description;
                     oi.Tax__c                  = src.Tax__c;
                     oi.Tax_Amount__c           = src.Tax_Amount__c;
+                    oi.Price_Status__c         = src.Price_Status__c;
                     oi.Source_Pricebook_Ref__c = src.Source_Pricebook_Ref__c;
                     oi.Source_Pricebook__c     = src.Source_Pricebook__c;
                     if (disc != null) {
@@ -295,7 +331,6 @@ public with sharing class CreateSalesOrderController {
 
             // Build OrderItems from manually-added products.
             if (hasManualLines) {
-                // Validate manual PricebookEntries belong to the Quote's Pricebook.
                 Map<Id, PricebookEntry> pbeById = new Map<Id, PricebookEntry>([
                     SELECT Id, Product2Id, Pricebook2Id, UnitPrice, IsActive,
                            Product2.Tax__c
@@ -346,6 +381,46 @@ public with sharing class CreateSalesOrderController {
         }
     }
 
+    /**
+     * Formats the Quote's Payment_Term__c child records into a single
+     * multi-line text block for display on the Sales Order modal and
+     * for storage on Order.Payment_Terms__c.
+     *
+     * Output example:
+     *   1. 50.00% - Advance on PO
+     *   2. 40.00% - Before Dispatch
+     *   3. 10.00% - After Installation
+     */
+    private static String buildPaymentTermsText(Id quoteId) {
+        if (quoteId == null) return null;
+        List<Payment_Term__c> terms = [
+            SELECT Id, Payment_Term__c, Percentage__c
+            FROM Payment_Term__c
+            WHERE Quote__c = :quoteId
+            ORDER BY CreatedDate ASC
+            LIMIT 200
+        ];
+        if (terms.isEmpty()) return null;
+
+        List<String> lines = new List<String>();
+        Integer idx = 1;
+        for (Payment_Term__c pt : terms) {
+            String pct = pt.Percentage__c != null ? pt.Percentage__c.setScale(2).toPlainString() + '%' : '';
+            String termDesc = pt.Payment_Term__c != null ? String.valueOf(pt.Payment_Term__c) : '';
+            String line;
+            if (String.isNotBlank(pct) && String.isNotBlank(termDesc)) {
+                line = idx + '. ' + pct + ' - ' + termDesc;
+            } else if (String.isNotBlank(pct)) {
+                line = idx + '. ' + pct;
+            } else {
+                line = idx + '. ' + termDesc;
+            }
+            lines.add(line);
+            idx++;
+        }
+        return String.join(lines, '\n');
+    }
+
     private static String formatAddress(String street, String city, String state, String zip, String country) {
         List<String> parts = new List<String>();
         if (String.isNotBlank(street))  parts.add(street);
@@ -365,12 +440,48 @@ public with sharing class CreateSalesOrderController {
         @AuraEnabled public Id accountId;
         @AuraEnabled public String customerName;
         @AuraEnabled public Id pricebookId;
+        @AuraEnabled public String pricebookName;
         @AuraEnabled public Id opportunityId;
+        @AuraEnabled public String opportunityName;
         @AuraEnabled public String email;
         @AuraEnabled public String phone;
         @AuraEnabled public String executiveAssigned;
+        @AuraEnabled public String status;
+        @AuraEnabled public String description;
+        @AuraEnabled public Date quoteDate;
+        @AuraEnabled public Date validTill;
+        @AuraEnabled public String quoteValidTillInDays;
+        @AuraEnabled public String businessVertical;
+        @AuraEnabled public String vertical;
+        @AuraEnabled public String shippingMode;
+        @AuraEnabled public String delivery;
+        @AuraEnabled public Date contractPeriodFromDate;
+        @AuraEnabled public Date contractPeriodEndDate;
+        @AuraEnabled public String bankName;
+        @AuraEnabled public Boolean isActive;
+        @AuraEnabled public Decimal grandTotal;
+        @AuraEnabled public Decimal totalPrice;
+        @AuraEnabled public Decimal subtotal;
+        @AuraEnabled public Decimal discount;
+        @AuraEnabled public Decimal shippingHandling;
+        @AuraEnabled public Decimal tax;
+        // Bill To
+        @AuraEnabled public String billToName;
+        @AuraEnabled public String billToStreet;
+        @AuraEnabled public String billToCity;
+        @AuraEnabled public String billToState;
+        @AuraEnabled public String billToPostalCode;
+        @AuraEnabled public String billToCountry;
         @AuraEnabled public String billingAddress;
+        // Ship To
+        @AuraEnabled public String shipToName;
+        @AuraEnabled public String shipToStreet;
+        @AuraEnabled public String shipToCity;
+        @AuraEnabled public String shipToState;
+        @AuraEnabled public String shipToPostalCode;
+        @AuraEnabled public String shipToCountry;
         @AuraEnabled public String shippingAddress;
+        @AuraEnabled public String paymentTerms;
         @AuraEnabled public List<QuoteItemWrap> items;
     }
 
@@ -378,7 +489,11 @@ public with sharing class CreateSalesOrderController {
         @AuraEnabled public Id lineId;
         @AuraEnabled public Id productId;
         @AuraEnabled public String productName;
+        @AuraEnabled public String productCode;
+        @AuraEnabled public String uom;
         @AuraEnabled public Id pricebookEntryId;
+        @AuraEnabled public String pricebookName;
+        @AuraEnabled public Decimal listPrice;
         @AuraEnabled public Decimal quantity;
         @AuraEnabled public Decimal unitPrice;
         @AuraEnabled public Decimal totalPrice;
@@ -386,6 +501,7 @@ public with sharing class CreateSalesOrderController {
         @AuraEnabled public String description;
         @AuraEnabled public Decimal tax;
         @AuraEnabled public Decimal taxAmount;
+        @AuraEnabled public String priceStatus;
         @AuraEnabled public Id sourcePricebookId;
     }
 
@@ -399,6 +515,9 @@ public with sharing class CreateSalesOrderController {
         @AuraEnabled public String value;        // PricebookEntry Id
         @AuraEnabled public Id productId;
         @AuraEnabled public String productName;
+        @AuraEnabled public String productCode;
+        @AuraEnabled public String uom;
+        @AuraEnabled public Decimal listPrice;
         @AuraEnabled public Decimal unitPrice;
         @AuraEnabled public Decimal tax;
     }

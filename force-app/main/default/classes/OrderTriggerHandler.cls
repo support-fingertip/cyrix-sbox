@@ -13,6 +13,52 @@ public with sharing class OrderTriggerHandler {
     private static final String NOTIF_DEV_NAME = 'Order_Cancellation_Notification';
     private static final String CANCELLED_STATUS = 'Cancelled';
 
+    /**
+     * Blocks an Order from being cancelled when at least one Invoice
+     * already references it via the Invoice.Order__c lookup.
+     *
+     * Business rule: "Order Cancellation / Allowed only before Invoice
+     * Creation." Once an Invoice exists for the Order, the Status may
+     * not transition to 'Cancelled'.
+     */
+    public static void handleBeforeUpdate(List<Order> newList, Map<Id, Order> oldMap) {
+        if (newList == null || oldMap == null) return;
+
+        // Collect Orders attempting to transition into 'Cancelled'.
+        Set<Id> attemptingCancelIds = new Set<Id>();
+        Map<Id, Order> orderById = new Map<Id, Order>();
+        for (Order o : newList) {
+            Order prev = oldMap.get(o.Id);
+            if (prev == null) continue;
+            if (o.Status == CANCELLED_STATUS && prev.Status != CANCELLED_STATUS) {
+                attemptingCancelIds.add(o.Id);
+                orderById.put(o.Id, o);
+            }
+        }
+        if (attemptingCancelIds.isEmpty()) return;
+
+        // Query Invoices linked to these Orders via the custom lookup.
+        Set<Id> blockedOrderIds = new Set<Id>();
+        for (Invoice inv : [
+            SELECT Id, Order__c
+            FROM Invoice
+            WHERE Order__c IN :attemptingCancelIds
+        ]) {
+            if (inv.Order__c != null) blockedOrderIds.add(inv.Order__c);
+        }
+
+        for (Id blockedId : blockedOrderIds) {
+            Order o = orderById.get(blockedId);
+            if (o != null) {
+                o.addError(
+                    'This Order cannot be cancelled because one or more ' +
+                    'Invoices have already been created against it. ' +
+                    'Cancel or void the Invoice(s) first.'
+                );
+            }
+        }
+    }
+
     public static void handleAfterUpdate(List<Order> newList, Map<Id, Order> oldMap) {
         if (newList == null || oldMap == null) return;
 
@@ -31,8 +77,8 @@ public with sharing class OrderTriggerHandler {
     }
 
     private static void sendCancellationNotifications(Set<Id> orderIds) {
-        // Re-query to pull Account.Name + cancellation reason fresh (trigger.new
-        // fields may not include related parent fields reliably).
+        // Re-query to pull Account.Name + cancellation reason + owner email
+        // (trigger.new fields may not include related parent fields reliably).
         List<Order> orders = [
             SELECT Id, OrderNumber, OwnerId, Cancellation_Reason__c,
                    Account.Name
@@ -41,6 +87,20 @@ public with sharing class OrderTriggerHandler {
         ];
         if (orders.isEmpty()) return;
 
+        // Build Id -> Email map for each Owner that is a User (Queues don't
+        // have User records and are skipped for email).
+        Set<Id> ownerIds = new Set<Id>();
+        for (Order o : orders) if (o.OwnerId != null) ownerIds.add(o.OwnerId);
+        Map<Id, String> emailByOwnerId = new Map<Id, String>();
+        for (User u : [SELECT Id, Email FROM User WHERE Id IN :ownerIds]) {
+            if (String.isNotBlank(u.Email)) emailByOwnerId.put(u.Id, u.Email);
+        }
+
+        sendInAppNotifications(orders);
+        sendCancellationEmails(orders, emailByOwnerId);
+    }
+
+    private static void sendInAppNotifications(List<Order> orders) {
         List<CustomNotificationType> types = [
             SELECT Id
             FROM CustomNotificationType
@@ -50,7 +110,7 @@ public with sharing class OrderTriggerHandler {
         if (types.isEmpty()) {
             System.debug(LoggingLevel.WARN,
                 'OrderTriggerHandler: Custom Notification Type "'
-                + NOTIF_DEV_NAME + '" not found. Skipping notification.');
+                + NOTIF_DEV_NAME + '" not found. Skipping bell notification.');
             return;
         }
         Id notifTypeId = types[0].Id;
@@ -65,8 +125,81 @@ public with sharing class OrderTriggerHandler {
                 n.send(new Set<String>{ String.valueOf(o.OwnerId) });
             } catch (Exception e) {
                 System.debug(LoggingLevel.ERROR,
-                    'OrderTriggerHandler: notification failed for ' + o.Id
+                    'OrderTriggerHandler: bell notification failed for ' + o.Id
                     + ': ' + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Sends a cancellation email to the Order Owner's email address AND
+     * logs a Task record on the Order so the email appears in the
+     * Activity panel. Wrapped in try/catch so an email failure never
+     * blocks the save or the bell notification that ran before it.
+     */
+    private static void sendCancellationEmails(List<Order> orders, Map<Id, String> emailByOwnerId) {
+        if (emailByOwnerId == null || emailByOwnerId.isEmpty()) return;
+
+        List<Messaging.SingleEmailMessage> messages = new List<Messaging.SingleEmailMessage>();
+        List<Task> activityTasks = new List<Task>();
+
+        for (Order o : orders) {
+            String toEmail = emailByOwnerId.get(o.OwnerId);
+            if (String.isBlank(toEmail)) continue;
+
+            String acctName = (o.Account != null && String.isNotBlank(o.Account.Name))
+                ? o.Account.Name : 'the customer';
+            String reasonPart = String.isNotBlank(o.Cancellation_Reason__c)
+                ? 'Reason: ' + o.Cancellation_Reason__c + '\n\n'
+                : '';
+
+            String subject = 'Order ' + o.OrderNumber + ' has been cancelled';
+            String body =
+                'Hello,\n\n' +
+                'This is to inform you that Order ' + o.OrderNumber +
+                ' for ' + acctName + ' has been cancelled on ' +
+                Date.today().format() + '.\n\n' +
+                reasonPart +
+                'You can review the record here: ' +
+                URL.getOrgDomainUrl().toExternalForm() + '/' + o.Id + '\n\n' +
+                'Regards,\nCyrix Order Management';
+
+            Messaging.SingleEmailMessage msg = new Messaging.SingleEmailMessage();
+            msg.setToAddresses(new List<String>{ toEmail });
+            msg.setSubject(subject);
+            msg.setPlainTextBody(body);
+            msg.setSaveAsActivity(false);
+            messages.add(msg);
+
+            // Mirror the email as a Task so it appears under the Order's
+            // Activity panel (saveAsActivity on the email itself doesn't
+            // always attach to the Order when we're not using a template).
+            Task t = new Task();
+            t.WhatId       = o.Id;
+            t.Subject      = 'Email: ' + subject;
+            t.Description  = 'To: ' + toEmail + '\n\n' + body;
+            t.Status       = 'Completed';
+            t.Priority     = 'Normal';
+            t.ActivityDate = Date.today();
+            t.Type         = 'Email';
+            activityTasks.add(t);
+        }
+
+        if (!messages.isEmpty()) {
+            try {
+                Messaging.sendEmail(messages, false);
+            } catch (Exception e) {
+                System.debug(LoggingLevel.ERROR,
+                    'OrderTriggerHandler: cancellation email batch failed: ' + e.getMessage());
+            }
+        }
+
+        if (!activityTasks.isEmpty()) {
+            try {
+                insert activityTasks;
+            } catch (Exception e) {
+                System.debug(LoggingLevel.ERROR,
+                    'OrderTriggerHandler: activity task insert failed: ' + e.getMessage());
             }
         }
     }
