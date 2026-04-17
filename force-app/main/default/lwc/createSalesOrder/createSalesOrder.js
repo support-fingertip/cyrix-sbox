@@ -1,6 +1,6 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { NavigationMixin } from 'lightning/navigation';
+import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import getQuoteDetails from '@salesforce/apex/CreateSalesOrderController.getQuoteDetails';
 import getOrderDetails from '@salesforce/apex/CreateSalesOrderController.getOrderDetails';
@@ -11,21 +11,6 @@ import updateSalesOrder from '@salesforce/apex/CreateSalesOrderController.update
 
 export default class CreateSalesOrder extends NavigationMixin(LightningElement) {
     @api recordId;
-
-    _orderIdValue = null;
-    _dataLoaded = false;
-
-    @api
-    get orderId() { return this._orderIdValue; }
-    set orderId(value) {
-        this._orderIdValue = value;
-        if (value && !this._dataLoaded) {
-            this._orderId = value;
-            this.isEditMode = true;
-            this._dataLoaded = true;
-            this.loadOrderData();
-        }
-    }
 
     isLoading = true;
     isSaving = false;
@@ -42,6 +27,15 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     @track newPricebookEntryId = '';
     @track newQuantity = 1;
     @track newDiscount = 0;
+
+    @wire(CurrentPageReference)
+    handlePageRef(pageRef) {
+        if (pageRef && pageRef.state && pageRef.state.c__recordId) {
+            this._orderId = pageRef.state.c__recordId;
+            this.isEditMode = true;
+            this.loadOrderData();
+        }
+    }
 
     connectedCallback() {
         this._widenQuickActionModal();
