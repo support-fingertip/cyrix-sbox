@@ -313,6 +313,73 @@
                         </div>
                     </template>
 
+                    <!-- Internal Charges + Order Summary -->
+                    <div class="slds-grid slds-wrap slds-gutters slds-m-top_medium">
+                        <!-- Internal Charges -->
+                        <div class="slds-col slds-size_1-of-2">
+                            <div class="cso-section">
+                                <div class="cso-section-header">
+                                    <lightning-icon icon-name="standard:expense_report" size="small" class="slds-m-right_small"></lightning-icon>
+                                    <span class="slds-text-heading_small">Internal Charges</span>
+                                </div>
+                                <div class="cso-section-body">
+                                    <div class="slds-grid slds-wrap slds-gutters_small">
+                                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                            <lightning-input type="number" label="Packing Charges" value={packingCharges} formatter="currency" step="0.01" onchange={handleChargeChange} data-field="packingCharges"></lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                            <lightning-input type="number" label="Insurance Charges" value={insuranceCharges} formatter="currency" step="0.01" onchange={handleChargeChange} data-field="insuranceCharges"></lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                            <lightning-input type="number" label="Transport Cost" value={transportCharges} formatter="currency" step="0.01" onchange={handleChargeChange} data-field="transportCharges"></lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                            <lightning-input type="number" label="Warranty Cost" value={warrantyCost} formatter="currency" step="0.01" onchange={handleChargeChange} data-field="warrantyCost"></lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                            <lightning-input type="number" label="Installation Cost" value={installationCost} formatter="currency" step="0.01" onchange={handleChargeChange} data-field="installationCost"></lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                            <lightning-input type="number" label="Training Cost" value={trainingCost} formatter="currency" step="0.01" onchange={handleChargeChange} data-field="trainingCost"></lightning-input>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Summary -->
+                        <div class="slds-col slds-size_1-of-2">
+                            <div class="cso-section">
+                                <div class="cso-section-header">
+                                    <lightning-icon icon-name="standard:order" size="small" class="slds-m-right_small"></lightning-icon>
+                                    <span class="slds-text-heading_small">Order Summary</span>
+                                </div>
+                                <div class="cso-section-body">
+                                    <div class="cso-summary-row">
+                                        <span>Subtotal</span>
+                                        <span>{subtotalDisplay}</span>
+                                    </div>
+                                    <div class="cso-summary-row">
+                                        <span>Total Discount</span>
+                                        <span class="cso-discount-val">- {totalDiscountDisplay}</span>
+                                    </div>
+                                    <div class="cso-summary-row">
+                                        <span>Total Tax</span>
+                                        <span>{totalTaxDisplay}</span>
+                                    </div>
+                                    <div class="cso-summary-row">
+                                        <span>Internal Charges</span>
+                                        <span>{totalChargesDisplay}</span>
+                                    </div>
+                                    <div class="cso-summary-row cso-grand-total">
+                                        <span>Grand Total</span>
+                                        <span>{grandTotalDisplay}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- Gradient Footer -->

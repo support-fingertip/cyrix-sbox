@@ -234,6 +234,51 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     get shipToPostalCodeDisplay() { return this.quoteContext.shipToPostalCode || 'N/A'; }
     get shipToCountryDisplay()    { return this.quoteContext.shipToCountry || 'N/A'; }
 
+    // ===== Internal Charges =====
+    packingCharges = 0;
+    insuranceCharges = 0;
+    transportCharges = 0;
+    warrantyCost = 0;
+    installationCost = 0;
+    trainingCost = 0;
+
+    handleChargeChange(event) {
+        const field = event.target.dataset.field;
+        const val = parseFloat(event.target.value) || 0;
+        this[field] = val;
+    }
+
+    // ===== Order Summary =====
+    get subtotal() {
+        return this.displayItems.reduce((sum, it) => sum + ((it.unitPrice || 0) * (it.quantity || 0)), 0);
+    }
+    get totalDiscount() {
+        return this.displayItems.reduce((sum, it) => {
+            const base = (it.unitPrice || 0) * (it.quantity || 0);
+            return sum + (base * ((it.discount || 0) / 100));
+        }, 0);
+    }
+    get totalTax() {
+        return this.displayItems.reduce((sum, it) => {
+            const base = (it.unitPrice || 0) * (it.quantity || 0);
+            const afterDiscount = base - (base * ((it.discount || 0) / 100));
+            return sum + (afterDiscount * ((it.tax || 0) / 100));
+        }, 0);
+    }
+    get totalCharges() {
+        return (this.packingCharges || 0) + (this.insuranceCharges || 0) +
+               (this.transportCharges || 0) + (this.warrantyCost || 0) +
+               (this.installationCost || 0) + (this.trainingCost || 0);
+    }
+    get grandTotal() {
+        return this.subtotal - this.totalDiscount + this.totalTax + this.totalCharges;
+    }
+    get subtotalDisplay()       { return this.formatCurrency(this.subtotal); }
+    get totalDiscountDisplay()  { return this.formatCurrency(this.totalDiscount); }
+    get totalTaxDisplay()       { return this.formatCurrency(this.totalTax); }
+    get totalChargesDisplay()   { return this.formatCurrency(this.totalCharges); }
+    get grandTotalDisplay()     { return this.formatCurrency(this.grandTotal); }
+
     get isConfirmDisabled() {
         return this.isSaving;
     }
