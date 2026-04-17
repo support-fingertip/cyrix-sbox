@@ -1,6 +1,6 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
+import { NavigationMixin } from 'lightning/navigation';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import getQuoteDetails from '@salesforce/apex/CreateSalesOrderController.getQuoteDetails';
 import getOrderDetails from '@salesforce/apex/CreateSalesOrderController.getOrderDetails';
@@ -11,6 +11,7 @@ import updateSalesOrder from '@salesforce/apex/CreateSalesOrderController.update
 
 export default class CreateSalesOrder extends NavigationMixin(LightningElement) {
     @api recordId;
+    @api orderId;
 
     isLoading = true;
     isSaving = false;
@@ -27,16 +28,12 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     @track newQuantity = 1;
     @track newDiscount = 0;
 
-    @wire(CurrentPageReference)
-    handlePageRef(pageRef) {
-        if (pageRef && pageRef.state && pageRef.state.c__recordId) {
-            this._orderId = pageRef.state.c__recordId;
+    connectedCallback() {
+        if (this.orderId) {
+            this._orderId = this.orderId;
             this.isEditMode = true;
             this.loadOrderData();
         }
-    }
-
-    connectedCallback() {
         this._widenQuickActionModal();
     }
 
@@ -45,7 +42,6 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     }
 
     _widenQuickActionModal() {
-        if (this.isEditMode) return;
         try {
             const container =
                 this.template.host &&
