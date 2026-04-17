@@ -185,7 +185,7 @@ public with sharing class CreateSalesOrderController {
         for (PricebookEntry pbe : [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
                    Product2.QuantityUnitOfMeasure, Product2.Tax__c,
-                   Product2.Category__c, Product2.Make__c, Product2.Model__c,
+                   Product2.Product_Category__c, Product2.Make__c, Product2.Model__c,
                    Product2.HSN_Code__c, UnitPrice,
                    Max_Discount_Percentage__c,
                    Pricebook2Id, Pricebook2.Name
@@ -207,7 +207,7 @@ public with sharing class CreateSalesOrderController {
             opt.unitPrice = pbe.UnitPrice;
             opt.tax = pbe.Product2.Tax__c;
             opt.maxDiscount = pbe.Max_Discount_Percentage__c;
-            opt.category = pbe.Product2.Category__c;
+            opt.category = pbe.Product2.Product_Category__c;
             opt.makeModel = (pbe.Product2.Make__c != null ? pbe.Product2.Make__c : '') +
                             (pbe.Product2.Model__c != null ? ' / ' + pbe.Product2.Model__c : '');
             opt.hsnCode = pbe.Product2.HSN_Code__c;
@@ -566,7 +566,7 @@ public with sharing class CreateSalesOrderController {
         for (PricebookEntry pbe : [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
                    Product2.QuantityUnitOfMeasure, Product2.Tax__c,
-                   Product2.Category__c, Product2.Make__c, Product2.Model__c,
+                   Product2.Product_Category__c, Product2.Make__c, Product2.Model__c,
                    Product2.HSN_Code__c, UnitPrice,
                    Max_Discount_Percentage__c,
                    Pricebook2Id, Pricebook2.Name
@@ -588,7 +588,7 @@ public with sharing class CreateSalesOrderController {
             opt.unitPrice = pbe.UnitPrice;
             opt.tax = pbe.Product2.Tax__c;
             opt.maxDiscount = pbe.Max_Discount_Percentage__c;
-            opt.category = pbe.Product2.Category__c;
+            opt.category = pbe.Product2.Product_Category__c;
             opt.makeModel = (pbe.Product2.Make__c != null ? pbe.Product2.Make__c : '') +
                             (pbe.Product2.Model__c != null ? ' / ' + pbe.Product2.Model__c : '');
             opt.hsnCode = pbe.Product2.HSN_Code__c;
