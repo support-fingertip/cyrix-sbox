@@ -42,6 +42,12 @@
                 width: 210mm;
                 height: 297mm;
                 z-index: 0;
+                overflow: hidden;
+                }
+                .letterhead-bg img {
+                display: block;
+                width: 210mm;
+                height: 297mm;
                 }
 
                 /* Running quote header - sits in the top margin, between the
@@ -87,9 +93,12 @@
         <body>
 
             <!-- Rendered ONCE. position:fixed makes Flying Saucer repeat both
-                 of these on every physical page of the PDF. -->
+                 of these on every physical page of the PDF. Use plain <img>
+                 with explicit width/height attributes - Flying Saucer's image
+                 sizer ignores style="width:..." on <apex:image> and falls back
+                 to the image's intrinsic pixel dimensions. -->
             <div class="letterhead-bg">
-                <apex:image url="{!URLFOR($Resource.Letter_Head)}" style="width:210mm;height:297mm;" />
+                <img src="{!URLFOR($Resource.Letter_Head)}" width="794" height="1123" />
             </div>
 
             <div class="page-header">
