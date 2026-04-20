@@ -4,10 +4,12 @@
             <style type="text/css">
                 /* Reserve top space for the letterhead logo + running quote header,
                 and bottom space for the letterhead footer band. Content flows
-                inside the remaining content box and auto-paginates. */
+                inside the remaining content box and auto-paginates.
+                All paged-media dimensions in mm - Flying Saucer is strict about
+                consistent absolute units in @page and fixed-positioned elements. */
                 @page {
-                size: A4 portrait;
-                margin: 200px 60px 85px 60px;
+                size: A4;
+                margin: 53mm 16mm 22mm 16mm;
                 }
 
                 body {
@@ -34,8 +36,8 @@
                 reach into the page margins. */
                 .letterhead-bg {
                 position: fixed;
-                top: -200px;
-                left: -60px;
+                top: -53mm;
+                left: -16mm;
                 width: 210mm;
                 height: 297mm;
                 z-index: 0;
@@ -45,7 +47,7 @@
                 above the content area, repeats on every page. */
                 .page-header {
                 position: fixed;
-                top: -35px;
+                top: -9mm;
                 left: 0;
                 right: 0;
                 z-index: 2;
