@@ -243,6 +243,10 @@
                 </div>
             </div>
 
+            <!-- ===== TWO-COLUMN LAYOUT: LINE ITEMS + TERMS (LEFT), SUMMARY (RIGHT) ===== -->
+            <div class="main-content-grid">
+              <div class="main-content-left">
+
             <!-- ===== SECTION: LINE ITEMS ===== -->
             <div class="section-card">
                 <div class="section-header">
@@ -345,8 +349,101 @@
                 </div>
             </div>
 
-            <!-- ===== SECTION: ORDER SUMMARY ===== -->
+            <!-- ===== SECTION: PAYMENT TERMS ===== -->
             <div class="section-card">
+                <div class="section-header">
+                    <lightning-icon icon-name="utility:money" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                    <span>Payment Terms ({paymentTermCount})</span>
+                    <lightning-button
+                        label="Add Term"
+                        variant="brand"
+                        icon-name="utility:add"
+                        onclick={handleAddPaymentTerm}
+                        class="slds-m-left_auto">
+                    </lightning-button>
+                </div>
+                <div class="section-body">
+                    <template if:true={hasPaymentTerms}>
+                        <div class="table-scroll">
+                            <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                                <thead>
+                                    <tr class="slds-line-height_reset">
+                                        <th scope="col" style="width:35px"><div class="slds-truncate">#</div></th>
+                                        <th scope="col"><div class="slds-truncate">Payment Term</div></th>
+                                        <th scope="col" style="width:130px"><div class="slds-truncate">Percentage %</div></th>
+                                        <th scope="col" style="width:45px"><div class="slds-truncate"></div></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={paymentTerms} for:item="term">
+                                        <tr key={term.ptId}>
+                                            <td class="row-number">{term.rowNumber}</td>
+                                            <td>
+                                                <lightning-input
+                                                    type="text"
+                                                    value={term.paymentTerm}
+                                                    variant="label-hidden"
+                                                    placeholder="e.g. 30% Advance"
+                                                    data-pt-id={term.ptId}
+                                                    data-field="paymentTerm"
+                                                    onchange={handlePaymentTermChange}>
+                                                </lightning-input>
+                                            </td>
+                                            <td>
+                                                <lightning-input
+                                                    type="number"
+                                                    value={term.percentage}
+                                                    min="0"
+                                                    max="100"
+                                                    step="1"
+                                                    variant="label-hidden"
+                                                    data-pt-id={term.ptId}
+                                                    data-field="percentage"
+                                                    onchange={handlePaymentTermChange}>
+                                                </lightning-input>
+                                            </td>
+                                            <td>
+                                                <lightning-button-icon
+                                                    icon-name="utility:delete"
+                                                    alternative-text="Remove"
+                                                    variant="bare"
+                                                    class="delete-btn"
+                                                    data-pt-id={term.ptId}
+                                                    onclick={handleRemovePaymentTerm}>
+                                                </lightning-button-icon>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td></td>
+                                        <td class="slds-text-align_right"><strong>Total</strong></td>
+                                        <td>
+                                            <strong>{totalPercentage}%</strong>
+                                            <template if:true={percentageOverflow}>
+                                                <span class="slds-text-color_error slds-text-body_small"> (exceeds 100%)</span>
+                                            </template>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </template>
+                    <template if:false={hasPaymentTerms}>
+                        <div class="slds-text-align_center slds-p-around_medium slds-text-color_weak">
+                            No payment terms added. Click "Add Term" to define payment terms.
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+              </div>
+              <div class="main-content-right">
+
+            <!-- ===== SECTION: ORDER SUMMARY ===== -->
+            <div class="section-card summary-sticky">
                 <div class="section-header">
                     <lightning-icon icon-name="utility:summary" size="x-small" class="slds-m-right_x-small"></lightning-icon>
                     <span>Order Summary</span>
@@ -373,6 +470,9 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+              </div>
             </div>
 
             <!-- ===== FOOTER ACTIONS ===== -->
