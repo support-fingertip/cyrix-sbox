@@ -42,5 +42,18 @@
                 </div>
             </template>
         </div>
+
+        <template if:true={showRevisionReason}>
+            <div class="qsp-revision-block">
+                <lightning-textarea
+                    label="Reason for Revision"
+                    value={revisionReason}
+                    onchange={handleRevisionReasonChange}
+                    placeholder="Describe why this quote is being revised..."
+                    required
+                    message-when-value-missing="Please provide a reason before marking the quote as Revision.">
+                </lightning-textarea>
+            </div>
+        </template>
     </div>
 </template>

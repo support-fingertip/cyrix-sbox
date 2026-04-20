@@ -5,6 +5,9 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import QUOTE_OBJECT from '@salesforce/schema/Quote';
 import STATUS_FIELD from '@salesforce/schema/Quote.Status';
 import ID_FIELD from '@salesforce/schema/Quote.Id';
+import REVISION_REASON_FIELD from '@salesforce/schema/Quote.Reason_for_Revision__c';
+
+const REVISION_STATUS = 'Revision';
 
 export default class QuoteStatusPath extends LightningElement {
     @api recordId;
@@ -12,15 +15,21 @@ export default class QuoteStatusPath extends LightningElement {
     @track picklistValues = [];
     currentStatus = '';
     selectedStatus = '';
+    revisionReason = '';
+    currentRevisionReason = '';
     isSaving = false;
     _defaultRecordTypeId;
 
-    @wire(getRecord, { recordId: '$recordId', fields: [STATUS_FIELD] })
+    @wire(getRecord, { recordId: '$recordId', fields: [STATUS_FIELD, REVISION_REASON_FIELD] })
     wiredRecord({ data, error }) {
         if (data) {
             this.currentStatus = getFieldValue(data, STATUS_FIELD) || '';
+            this.currentRevisionReason = getFieldValue(data, REVISION_REASON_FIELD) || '';
             if (!this.selectedStatus) {
                 this.selectedStatus = this.currentStatus;
+            }
+            if (this.selectedStatus !== REVISION_STATUS) {
+                this.revisionReason = this.currentRevisionReason;
             }
         } else if (error) {
             this.showToast('Error', this.reduceError(error), 'error');
@@ -75,6 +84,10 @@ export default class QuoteStatusPath extends LightningElement {
         return this.selectedStatus && this.selectedStatus !== this.currentStatus;
     }
 
+    get showRevisionReason() {
+        return this.selectedStatus === REVISION_STATUS && this.selectedStatus !== this.currentStatus;
+    }
+
     get markButtonLabel() {
         if (this.isSaving) return 'Saving...';
         if (this.selectedStatus && this.selectedStatus !== this.currentStatus) {
@@ -87,19 +100,47 @@ export default class QuoteStatusPath extends LightningElement {
         const value = event.currentTarget.dataset.value;
         if (!value || this.isSaving) return;
         this.selectedStatus = value;
+        if (value === REVISION_STATUS) {
+            this.revisionReason = '';
+        }
+    }
+
+    handleRevisionReasonChange(event) {
+        this.revisionReason = event.target.value;
     }
 
     async handleMarkStatus() {
         if (!this.canMark || this.isSaving) return;
+
+        if (this.selectedStatus === REVISION_STATUS) {
+            const textarea = this.template.querySelector('lightning-textarea');
+            const reason = (this.revisionReason || '').trim();
+            if (!reason) {
+                if (textarea) textarea.reportValidity();
+                this.showToast(
+                    'Reason required',
+                    'Please enter a reason before marking the quote as Revision.',
+                    'warning'
+                );
+                return;
+            }
+        }
+
         this.isSaving = true;
 
         const fields = {};
         fields[ID_FIELD.fieldApiName] = this.recordId;
         fields[STATUS_FIELD.fieldApiName] = this.selectedStatus;
+        if (this.selectedStatus === REVISION_STATUS) {
+            fields[REVISION_REASON_FIELD.fieldApiName] = this.revisionReason.trim();
+        }
 
         try {
             await updateRecord({ fields });
             this.currentStatus = this.selectedStatus;
+            if (this.selectedStatus === REVISION_STATUS) {
+                this.currentRevisionReason = this.revisionReason.trim();
+            }
             getRecordNotifyChange([{ recordId: this.recordId }]);
             this.showToast('Status Updated', `Quote marked as ${this.selectedStatus}.`, 'success');
         } catch (error) {
