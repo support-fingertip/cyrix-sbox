@@ -481,98 +481,37 @@
                 </div>
             </div>
 
-            <!-- ===== SECTION: CHARGES & TOTALS ===== -->
-            <div class="slds-grid slds-wrap slds-gutters_small charges-totals-row">
-                <!-- Internal Charges -->
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                    <div class="section-card full-height">
-                        <div class="section-header">
-                            <lightning-icon icon-name="utility:money" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                            <span>Internal Charges</span>
-                        </div>
-                        <div class="section-body">
-                            <div class="slds-grid slds-wrap slds-gutters_x-small">
-                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
-                                    <lightning-input type="number" label="Packing Charges" value={packingCharges}
-                                        formatter="currency" step="0.01" min="0"
-                                        data-field="packingCharges" onchange={handleChargeChange}>
-                                    </lightning-input>
-                                </div>
-                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
-                                    <lightning-input type="number" label="Insurance Charges" value={insuranceCost}
-                                        formatter="currency" step="0.01" min="0"
-                                        data-field="insuranceCost" onchange={handleChargeChange}>
-                                    </lightning-input>
-                                </div>
-                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
-                                    <lightning-input type="number" label="Transport Cost" value={transportCharges}
-                                        formatter="currency" step="0.01" min="0"
-                                        data-field="transportCharges" onchange={handleChargeChange}>
-                                    </lightning-input>
-                                </div>
-                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
-                                    <lightning-input type="number" label="Warranty Cost" value={warrantyCost}
-                                        formatter="currency" step="0.01" min="0"
-                                        data-field="warrantyCost" onchange={handleChargeChange}>
-                                    </lightning-input>
-                                </div>
-                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
-                                    <lightning-input type="number" label="Installation Cost" value={installationCost}
-                                        formatter="currency" step="0.01" min="0"
-                                        data-field="installationCost" onchange={handleChargeChange}>
-                                    </lightning-input>
-                                </div>
-                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
-                                    <lightning-input type="number" label="Training Cost" value={trainingCost}
-                                        formatter="currency" step="0.01" min="0"
-                                        data-field="trainingCost" onchange={handleChargeChange}>
-                                    </lightning-input>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- ===== SECTION: QUOTE SUMMARY ===== -->
+            <div class="section-card">
+                <div class="section-header">
+                    <lightning-icon icon-name="utility:summary" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                    <span>Quote Summary</span>
                 </div>
-
-                <!-- Quote Summary -->
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                    <div class="section-card full-height">
-                        <div class="section-header">
-                            <lightning-icon icon-name="utility:summary" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                            <span>Quote Summary</span>
+                <div class="section-body">
+                    <div class="totals-box">
+                        <div class="total-row">
+                            <span class="total-label">Subtotal</span>
+                            <span class="total-value">
+                                <lightning-formatted-number value={subtotal} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                            </span>
                         </div>
-                        <div class="section-body">
-                            <div class="totals-box">
-                                <div class="total-row">
-                                    <span class="total-label">Subtotal</span>
-                                    <span class="total-value">
-                                        <lightning-formatted-number value={subtotal} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
-                                    </span>
-                                </div>
-                                <div class="total-row">
-                                    <span class="total-label">Total Discount</span>
-                                    <span class="total-value discount-value">
-                                        - <lightning-formatted-number value={totalDiscount} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
-                                    </span>
-                                </div>
-                                <div class="total-row">
-                                    <span class="total-label">Total Tax</span>
-                                    <span class="total-value">
-                                        <lightning-formatted-number value={totalTax} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
-                                    </span>
-                                </div>
-                                <div class="total-row">
-                                    <span class="total-label">Internal Charges</span>
-                                    <span class="total-value">
-                                        <lightning-formatted-number value={totalCharges} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
-                                    </span>
-                                </div>
-                                <div class="total-row grand-total">
-                                    <span class="total-label">Grand Total</span>
-                                    <span class="total-value">
-                                        <lightning-formatted-number value={grandTotal} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
-                                    </span>
-                                </div>
-                            </div>
+                        <div class="total-row">
+                            <span class="total-label">Total Discount</span>
+                            <span class="total-value discount-value">
+                                - <lightning-formatted-number value={totalDiscount} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                            </span>
+                        </div>
+                        <div class="total-row">
+                            <span class="total-label">Total Tax</span>
+                            <span class="total-value">
+                                <lightning-formatted-number value={totalTax} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                            </span>
+                        </div>
+                        <div class="total-row grand-total">
+                            <span class="total-label">Grand Total</span>
+                            <span class="total-value">
+                                <lightning-formatted-number value={grandTotal} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                            </span>
                         </div>
                     </div>
                 </div>

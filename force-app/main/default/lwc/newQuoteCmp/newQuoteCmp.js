@@ -65,14 +65,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // Payment terms
     @track paymentTerms = [];
 
-    // Internal charges
-    packingCharges = 0;
-    transportCharges = 0;
-    warrantyCost = 0;
-    installationCost = 0;
-    trainingCost = 0;
-    insuranceCost = 0;
-
     // ===== PICKLIST OPTIONS =====
 
     get categoryOptions() {
@@ -143,17 +135,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }, 0);
     }
 
-    get totalCharges() {
-        return (parseFloat(this.packingCharges) || 0) +
-               (parseFloat(this.transportCharges) || 0) +
-               (parseFloat(this.warrantyCost) || 0) +
-               (parseFloat(this.installationCost) || 0) +
-               (parseFloat(this.insuranceCost) || 0) +
-               (parseFloat(this.trainingCost) || 0);
-    }
-
     get grandTotal() {
-        return this.subtotal - this.totalDiscount + this.totalTax + this.totalCharges;
+        return this.subtotal - this.totalDiscount + this.totalTax;
     }
 
     // ===== LIFECYCLE =====
@@ -463,14 +446,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         fields.ShippingPostalCode = this.shippingAddress.postalCode || '';
         fields.ShippingCountryCode = this.shippingAddress.country || '';
 
-        // Inject internal charge fields (custom fields on Quote)
-        fields.Packing_Charge__c = this.packingCharges || 0;
-        fields.Internal_Transport_Cost__c = this.transportCharges || 0;
-        fields.Warrantee_Cost__c = this.warrantyCost || 0;
-        fields.Installation_Cost__c = this.installationCost || 0;
-        fields.Traning_Cost__c = this.trainingCost || 0;
-        fields.Insurance_Charge__c = this.insuranceCost || 0;   // adjust field name if needed
-
         // Set defaults for new quotes
         if (!this.isEditMode) {
             fields.Status = 'Draft';
@@ -726,13 +701,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
             return updated;
         });
-    }
-
-    // ===== CHARGE HANDLERS =====
-
-    handleChargeChange(event) {
-        const field = event.currentTarget.dataset.field;
-        this[field] = parseFloat(event.target.value) || 0;
     }
 
     // ===== CANCEL =====
