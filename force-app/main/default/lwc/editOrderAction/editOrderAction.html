@@ -1,0 +1,19 @@
+<template>
+    <template if:true={loaded}>
+        <template if:true={errorMsg}>
+            <div style="padding:20px;color:red;font-size:16px;">
+                ERROR: {errorMsg}
+            </div>
+        </template>
+        <template if:false={errorMsg}>
+            <div style="padding:20px;color:green;font-size:16px;">
+                Order loaded successfully: {orderNumber}
+            </div>
+        </template>
+    </template>
+    <template if:false={loaded}>
+        <div style="padding:40px;text-align:center;">
+            <lightning-spinner alternative-text="Loading..."></lightning-spinner>
+        </div>
+    </template>
+</template>

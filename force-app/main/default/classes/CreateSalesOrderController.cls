@@ -1,5 +1,5 @@
 /**
- * Controller for the "Create Sales Order" LWC launched from a Quote record.
+ * Controller for the Create / Edit Sales Order LWC.
  * Provides methods to fetch Quote context (customer info + line items),
  * list available warehouses (Branch__c), list Pricebook products, and
  * create an Order + OrderItems from the selected quote lines.
@@ -48,6 +48,7 @@ public with sharing class CreateSalesOrderController {
                    Product2.QuantityUnitOfMeasure, Product2.Tax__c,
                    PricebookEntryId, PricebookEntry.UnitPrice,
                    PricebookEntry.Pricebook2Id, PricebookEntry.Pricebook2.Name,
+                   PricebookEntry.Max_Discount_Percentage__c,
                    Quantity, UnitPrice, TotalPrice, Discount, Description,
                    Tax__c, Tax_Amount__c, Price_Status__c,
                    Source_Pricebook_Ref__c, Source_Pricebook__c
@@ -131,6 +132,7 @@ public with sharing class CreateSalesOrderController {
             w.taxAmount        = qli.Tax_Amount__c;
             w.priceStatus      = qli.Price_Status__c;
             w.sourcePricebookId = qli.Source_Pricebook_Ref__c;
+            w.maxDiscount      = qli.PricebookEntry != null ? qli.PricebookEntry.Max_Discount_Percentage__c : null;
             wraps.add(w);
         }
         ctx.items = wraps;
@@ -182,7 +184,11 @@ public with sharing class CreateSalesOrderController {
         List<ProductOption> result = new List<ProductOption>();
         for (PricebookEntry pbe : [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
-                   Product2.QuantityUnitOfMeasure, Product2.Tax__c, UnitPrice
+                   Product2.QuantityUnitOfMeasure, Product2.Tax__c,
+                   Product2.Product_Category__c, Product2.Make__c, Product2.Model__c,
+                   Product2.HSN_Code__c, UnitPrice,
+                   Max_Discount_Percentage__c,
+                   Pricebook2Id, Pricebook2.Name
             FROM PricebookEntry
             WHERE Pricebook2Id = :q.Pricebook2Id
               AND IsActive = true
@@ -200,6 +206,12 @@ public with sharing class CreateSalesOrderController {
             opt.listPrice = pbe.UnitPrice;
             opt.unitPrice = pbe.UnitPrice;
             opt.tax = pbe.Product2.Tax__c;
+            opt.maxDiscount = pbe.Max_Discount_Percentage__c;
+            opt.category = pbe.Product2.Product_Category__c;
+            opt.makeModel = (pbe.Product2.Make__c != null ? pbe.Product2.Make__c : '') +
+                            (pbe.Product2.Model__c != null ? ' / ' + pbe.Product2.Model__c : '');
+            opt.hsnCode = pbe.Product2.HSN_Code__c;
+            opt.priceSource = pbe.Pricebook2 != null ? pbe.Pricebook2.Name : null;
             result.add(opt);
         }
         return result;
@@ -431,6 +443,259 @@ public with sharing class CreateSalesOrderController {
         return String.join(parts, ', ');
     }
 
+    @AuraEnabled(cacheable=true)
+    public static QuoteContext getOrderDetails(Id orderId) {
+        if (orderId == null) {
+            throw new AuraHandledException('Order Id is required.');
+        }
+
+        Order o = [
+            SELECT Id, OrderNumber, AccountId, Account.Name,
+                   Pricebook2Id, Pricebook2.Name,
+                   OpportunityId, Opportunity.Name,
+                   BillToContactId,
+                   OwnerId, Owner.Name,
+                   BillingStreet, BillingCity, BillingState, BillingPostalCode, BillingCountry,
+                   ShippingStreet, ShippingCity, ShippingState, ShippingPostalCode, ShippingCountry,
+                   Status, TotalAmount, Description,
+                   Quote_Date__c, Shipping_Mode__c, Valid_Till__c, Vertical__c,
+                   Reason_for_Revision__c, Billing_Address__c, is_Active__c,
+                   Quote_Valid_Till_in_days__c, Business_Vertical__c,
+                   Contract_Period_From_Date__c, Contract_Period_End_Date__c,
+                   Delivery__c, Bank_Name__c, Payment_Terms__c,
+                   Approval_Status__c, Price_Status__c, EffectiveDate
+            FROM Order
+            WHERE Id = :orderId
+            LIMIT 1
+        ];
+
+        List<OrderItem> items = [
+            SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
+                   Product2.QuantityUnitOfMeasure, Product2.Tax__c,
+                   PricebookEntryId, PricebookEntry.UnitPrice,
+                   PricebookEntry.Pricebook2Id, PricebookEntry.Pricebook2.Name,
+                   PricebookEntry.Max_Discount_Percentage__c,
+                   Quantity, UnitPrice, TotalPrice, Description,
+                   Tax__c, Tax_Amount__c, Price_Status__c, Discount__c,
+                   Source_Pricebook_Ref__c, Source_Pricebook__c
+            FROM OrderItem
+            WHERE OrderId = :orderId
+            ORDER BY CreatedDate
+        ];
+
+        QuoteContext ctx = new QuoteContext();
+        ctx.quoteId                = o.Id;
+        ctx.quoteName              = o.OrderNumber;
+        ctx.quoteNumber            = o.OrderNumber;
+        ctx.accountId              = o.AccountId;
+        ctx.customerName           = o.Account != null ? o.Account.Name : null;
+        ctx.pricebookId            = o.Pricebook2Id;
+        ctx.pricebookName          = o.Pricebook2 != null ? o.Pricebook2.Name : null;
+        ctx.opportunityId          = o.OpportunityId;
+        ctx.opportunityName        = o.Opportunity != null ? o.Opportunity.Name : null;
+        ctx.executiveAssigned      = o.Owner != null ? o.Owner.Name : null;
+        ctx.status                 = o.Status;
+        ctx.description            = o.Description;
+        ctx.quoteDate              = o.Quote_Date__c;
+        ctx.validTill              = o.Valid_Till__c;
+        ctx.quoteValidTillInDays   = o.Quote_Valid_Till_in_days__c != null ? String.valueOf(o.Quote_Valid_Till_in_days__c) : null;
+        ctx.businessVertical       = o.Business_Vertical__c;
+        ctx.vertical               = o.Vertical__c;
+        ctx.shippingMode           = o.Shipping_Mode__c;
+        ctx.delivery               = o.Delivery__c;
+        ctx.contractPeriodFromDate = o.Contract_Period_From_Date__c;
+        ctx.contractPeriodEndDate  = o.Contract_Period_End_Date__c;
+        ctx.bankName               = o.Bank_Name__c;
+        ctx.isActive               = o.is_Active__c;
+        ctx.grandTotal             = o.TotalAmount;
+        ctx.billToName             = o.Account != null ? o.Account.Name : null;
+        ctx.billToStreet           = o.BillingStreet;
+        ctx.billToCity             = o.BillingCity;
+        ctx.billToState            = o.BillingState;
+        ctx.billToPostalCode       = o.BillingPostalCode;
+        ctx.billToCountry          = o.BillingCountry;
+        ctx.billingAddress         = formatAddress(o.BillingStreet, o.BillingCity, o.BillingState, o.BillingPostalCode, o.BillingCountry);
+        ctx.shipToName             = o.Account != null ? o.Account.Name : null;
+        ctx.shipToStreet           = o.ShippingStreet;
+        ctx.shipToCity             = o.ShippingCity;
+        ctx.shipToState            = o.ShippingState;
+        ctx.shipToPostalCode       = o.ShippingPostalCode;
+        ctx.shipToCountry          = o.ShippingCountry;
+        ctx.shippingAddress        = formatAddress(o.ShippingStreet, o.ShippingCity, o.ShippingState, o.ShippingPostalCode, o.ShippingCountry);
+        ctx.paymentTerms           = o.Payment_Terms__c;
+
+        List<QuoteItemWrap> wraps = new List<QuoteItemWrap>();
+        for (OrderItem oi : items) {
+            QuoteItemWrap w = new QuoteItemWrap();
+            w.lineId           = oi.Id;
+            w.productId        = oi.Product2Id;
+            w.productName      = oi.Product2 != null ? oi.Product2.Name : null;
+            w.productCode      = oi.Product2 != null ? oi.Product2.ProductCode : null;
+            w.uom              = oi.Product2 != null ? oi.Product2.QuantityUnitOfMeasure : null;
+            w.pricebookEntryId = oi.PricebookEntryId;
+            w.pricebookName    = (oi.PricebookEntry != null && oi.PricebookEntry.Pricebook2 != null)
+                                 ? oi.PricebookEntry.Pricebook2.Name : null;
+            w.listPrice        = oi.PricebookEntry != null ? oi.PricebookEntry.UnitPrice : null;
+            w.quantity         = oi.Quantity;
+            w.unitPrice        = oi.UnitPrice;
+            w.totalPrice       = oi.TotalPrice;
+            w.discount         = oi.Discount__c;
+            w.description      = oi.Description;
+            w.tax              = oi.Tax__c;
+            w.taxAmount        = oi.Tax_Amount__c;
+            w.priceStatus      = oi.Price_Status__c;
+            w.sourcePricebookId = oi.Source_Pricebook_Ref__c;
+            w.maxDiscount      = oi.PricebookEntry != null ? oi.PricebookEntry.Max_Discount_Percentage__c : null;
+            wraps.add(w);
+        }
+        ctx.items = wraps;
+
+        return ctx;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<ProductOption> getPricebookProductsForOrder(Id orderId) {
+        if (orderId == null) {
+            throw new AuraHandledException('Order Id is required.');
+        }
+        Order o = [SELECT Id, Pricebook2Id FROM Order WHERE Id = :orderId LIMIT 1];
+        if (o.Pricebook2Id == null) {
+            return new List<ProductOption>();
+        }
+        List<ProductOption> result = new List<ProductOption>();
+        for (PricebookEntry pbe : [
+            SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
+                   Product2.QuantityUnitOfMeasure, Product2.Tax__c,
+                   Product2.Product_Category__c, Product2.Make__c, Product2.Model__c,
+                   Product2.HSN_Code__c, UnitPrice,
+                   Max_Discount_Percentage__c,
+                   Pricebook2Id, Pricebook2.Name
+            FROM PricebookEntry
+            WHERE Pricebook2Id = :o.Pricebook2Id
+              AND IsActive = true
+              AND Product2.IsActive = true
+            ORDER BY Product2.Name ASC
+            LIMIT 1000
+        ]) {
+            ProductOption opt = new ProductOption();
+            opt.value = pbe.Id;
+            opt.label = pbe.Product2.Name;
+            opt.productId = pbe.Product2Id;
+            opt.productName = pbe.Product2.Name;
+            opt.productCode = pbe.Product2.ProductCode;
+            opt.uom = pbe.Product2.QuantityUnitOfMeasure;
+            opt.listPrice = pbe.UnitPrice;
+            opt.unitPrice = pbe.UnitPrice;
+            opt.tax = pbe.Product2.Tax__c;
+            opt.maxDiscount = pbe.Max_Discount_Percentage__c;
+            opt.category = pbe.Product2.Product_Category__c;
+            opt.makeModel = (pbe.Product2.Make__c != null ? pbe.Product2.Make__c : '') +
+                            (pbe.Product2.Model__c != null ? ' / ' + pbe.Product2.Model__c : '');
+            opt.hsnCode = pbe.Product2.HSN_Code__c;
+            opt.priceSource = pbe.Pricebook2 != null ? pbe.Pricebook2.Name : null;
+            result.add(opt);
+        }
+        return result;
+    }
+
+    @AuraEnabled
+    public static Id updateSalesOrder(
+        Id orderId,
+        String remarks,
+        List<Id> existingLineIds,
+        Map<Id, Decimal> quantityByLineId,
+        Map<Id, Decimal> discountByLineId,
+        List<Id> manualPricebookEntryIds,
+        Map<Id, Decimal> manualQuantityByPbeId,
+        Map<Id, Decimal> manualDiscountByPbeId
+    ) {
+        if (orderId == null) {
+            throw new AuraHandledException('Order Id is required.');
+        }
+
+        Order o = [SELECT Id, Pricebook2Id, Status FROM Order WHERE Id = :orderId LIMIT 1];
+
+        Savepoint sp = Database.setSavepoint();
+        try {
+            o.Description = remarks;
+            update o;
+
+            Set<Id> keepLineIds = new Set<Id>();
+            if (existingLineIds != null) keepLineIds.addAll(existingLineIds);
+
+            List<OrderItem> currentItems = [
+                SELECT Id FROM OrderItem WHERE OrderId = :orderId
+            ];
+            List<OrderItem> toDelete = new List<OrderItem>();
+            for (OrderItem oi : currentItems) {
+                if (!keepLineIds.contains(oi.Id)) {
+                    toDelete.add(oi);
+                }
+            }
+            if (!toDelete.isEmpty()) {
+                delete toDelete;
+            }
+
+            List<OrderItem> toUpdate = new List<OrderItem>();
+            if (existingLineIds != null) {
+                for (Id lineId : existingLineIds) {
+                    OrderItem oi = new OrderItem(Id = lineId);
+                    if (quantityByLineId != null && quantityByLineId.containsKey(lineId)) {
+                        oi.Quantity = quantityByLineId.get(lineId);
+                    }
+                    if (discountByLineId != null && discountByLineId.containsKey(lineId)) {
+                        oi.Discount__c = discountByLineId.get(lineId);
+                    }
+                    toUpdate.add(oi);
+                }
+            }
+            if (!toUpdate.isEmpty()) {
+                update toUpdate;
+            }
+
+            if (manualPricebookEntryIds != null && !manualPricebookEntryIds.isEmpty()) {
+                Map<Id, PricebookEntry> pbeById = new Map<Id, PricebookEntry>([
+                    SELECT Id, Product2Id, Pricebook2Id, UnitPrice, IsActive,
+                           Product2.Tax__c
+                    FROM PricebookEntry
+                    WHERE Id IN :manualPricebookEntryIds
+                ]);
+                List<OrderItem> newItems = new List<OrderItem>();
+                for (Id pbeId : manualPricebookEntryIds) {
+                    PricebookEntry pbe = pbeById.get(pbeId);
+                    if (pbe == null || pbe.IsActive != true) continue;
+
+                    Decimal qty = (manualQuantityByPbeId != null && manualQuantityByPbeId.get(pbeId) != null)
+                        ? manualQuantityByPbeId.get(pbeId) : 1;
+                    Decimal disc = (manualDiscountByPbeId != null && manualDiscountByPbeId.get(pbeId) != null)
+                        ? manualDiscountByPbeId.get(pbeId) : 0;
+
+                    OrderItem oi = new OrderItem();
+                    oi.OrderId          = orderId;
+                    oi.Product2Id       = pbe.Product2Id;
+                    oi.PricebookEntryId = pbe.Id;
+                    oi.Quantity         = qty;
+                    oi.UnitPrice        = pbe.UnitPrice;
+                    if (pbe.Product2 != null && pbe.Product2.Tax__c != null) {
+                        oi.Tax__c = pbe.Product2.Tax__c;
+                    }
+                    if (disc != null) {
+                        oi.Discount__c = disc;
+                    }
+                    newItems.add(oi);
+                }
+                if (!newItems.isEmpty()) {
+                    insert newItems;
+                }
+            }
+
+            return orderId;
+        } catch (Exception e) {
+            Database.rollback(sp);
+            throw new AuraHandledException('Failed to update Sales Order: ' + e.getMessage());
+        }
+    }
+
     // ===== Wrapper classes =====
 
     public class QuoteContext {
@@ -503,6 +768,7 @@ public with sharing class CreateSalesOrderController {
         @AuraEnabled public Decimal taxAmount;
         @AuraEnabled public String priceStatus;
         @AuraEnabled public Id sourcePricebookId;
+        @AuraEnabled public Decimal maxDiscount;
     }
 
     public class WarehouseOption {
@@ -520,6 +786,11 @@ public with sharing class CreateSalesOrderController {
         @AuraEnabled public Decimal listPrice;
         @AuraEnabled public Decimal unitPrice;
         @AuraEnabled public Decimal tax;
+        @AuraEnabled public Decimal maxDiscount;
+        @AuraEnabled public String category;
+        @AuraEnabled public String makeModel;
+        @AuraEnabled public String hsnCode;
+        @AuraEnabled public String priceSource;
     }
 
 }

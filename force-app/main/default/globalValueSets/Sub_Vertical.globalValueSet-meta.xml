@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>AMC</fullName>
+        <default>false</default>
+        <label>AMC</label>
+    </customValue>
+    <customValue>
+        <fullName>CAMC</fullName>
+        <default>false</default>
+        <label>CAMC</label>
+    </customValue>
+    <customValue>
+        <fullName>Calibration</fullName>
+        <default>false</default>
+        <label>Calibration</label>
+    </customValue>
+    <masterLabel>Sub Vertical</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

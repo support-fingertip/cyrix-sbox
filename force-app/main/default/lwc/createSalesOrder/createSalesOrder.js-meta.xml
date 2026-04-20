@@ -4,6 +4,7 @@
     <isExposed>true</isExposed>
     <targets>
         <target>lightning__RecordAction</target>
+        <target>lightning__Tab</target>
     </targets>
     <targetConfigs>
         <targetConfig targets="lightning__RecordAction">
@@ -14,5 +15,5 @@
         </targetConfig>
     </targetConfigs>
     <masterLabel>Create Sales Order</masterLabel>
-    <description>Launches a modal to convert a Quote into a Sales Order (Order + OrderItems).</description>
+    <description>Converts a Quote into a Sales Order, or edits an existing Order when launched via the Order Edit Quick Action.</description>
 </LightningComponentBundle>

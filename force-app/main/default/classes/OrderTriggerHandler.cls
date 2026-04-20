@@ -12,6 +12,8 @@ public with sharing class OrderTriggerHandler {
 
     private static final String NOTIF_DEV_NAME = 'Order_Cancellation_Notification';
     private static final String CANCELLED_STATUS = 'Cancelled';
+    private static final String APPROVAL_REQUIRED = 'Approval Required';
+    private static final String PRICE_APPROVED = 'Approved';
 
     /**
      * Blocks an Order from being cancelled when at least one Invoice
@@ -62,18 +64,133 @@ public with sharing class OrderTriggerHandler {
     public static void handleAfterUpdate(List<Order> newList, Map<Id, Order> oldMap) {
         if (newList == null || oldMap == null) return;
 
-        // Collect only the Orders whose Status just transitioned to 'Cancelled'.
         Set<Id> cancelledIds = new Set<Id>();
+        Set<Id> approvedIds = new Set<Id>();
+
         for (Order o : newList) {
             Order prev = oldMap.get(o.Id);
             if (prev == null) continue;
+
             if (o.Status == CANCELLED_STATUS && prev.Status != CANCELLED_STATUS) {
                 cancelledIds.add(o.Id);
             }
-        }
-        if (cancelledIds.isEmpty()) return;
 
-        sendCancellationNotifications(cancelledIds);
+            if (o.Price_Status__c == PRICE_APPROVED && prev.Price_Status__c != PRICE_APPROVED) {
+                approvedIds.add(o.Id);
+            }
+        }
+
+        if (!cancelledIds.isEmpty()) {
+            sendCancellationNotifications(cancelledIds);
+        }
+
+        if (!approvedIds.isEmpty()) {
+            sendApprovalNotifications(approvedIds);
+        }
+    }
+
+    private static void sendApprovalNotifications(Set<Id> orderIds) {
+        List<Order> orders = [
+            SELECT Id, OrderNumber, OwnerId, Account.Name
+            FROM Order
+            WHERE Id IN :orderIds
+        ];
+        if (orders.isEmpty()) return;
+
+        Set<Id> ownerIds = new Set<Id>();
+        for (Order o : orders) if (o.OwnerId != null) ownerIds.add(o.OwnerId);
+        Map<Id, String> emailByOwnerId = new Map<Id, String>();
+        for (User u : [SELECT Id, Email FROM User WHERE Id IN :ownerIds]) {
+            if (String.isNotBlank(u.Email)) emailByOwnerId.put(u.Id, u.Email);
+        }
+
+        sendApprovalBellNotifications(orders);
+        sendApprovalEmails(orders, emailByOwnerId);
+    }
+
+    private static void sendApprovalBellNotifications(List<Order> orders) {
+        List<CustomNotificationType> types = [
+            SELECT Id FROM CustomNotificationType
+            WHERE DeveloperName = :NOTIF_DEV_NAME LIMIT 1
+        ];
+        if (types.isEmpty()) return;
+        Id notifTypeId = types[0].Id;
+
+        for (Order o : orders) {
+            try {
+                String acctName = (o.Account != null && String.isNotBlank(o.Account.Name))
+                    ? ' for ' + o.Account.Name : '';
+                Messaging.CustomNotification n = new Messaging.CustomNotification();
+                n.setTitle('Order Approved');
+                n.setBody('Order ' + o.OrderNumber + acctName + ' has been approved.');
+                n.setNotificationTypeId(notifTypeId);
+                n.setTargetId(o.Id);
+                n.send(new Set<String>{ String.valueOf(o.OwnerId) });
+            } catch (Exception e) {
+                System.debug(LoggingLevel.ERROR,
+                    'OrderTriggerHandler: approval bell failed for ' + o.Id + ': ' + e.getMessage());
+            }
+        }
+    }
+
+    private static void sendApprovalEmails(List<Order> orders, Map<Id, String> emailByOwnerId) {
+        if (emailByOwnerId == null || emailByOwnerId.isEmpty()) return;
+
+        List<Messaging.SingleEmailMessage> messages = new List<Messaging.SingleEmailMessage>();
+        List<Task> activityTasks = new List<Task>();
+
+        for (Order o : orders) {
+            String toEmail = emailByOwnerId.get(o.OwnerId);
+            if (String.isBlank(toEmail)) continue;
+
+            String acctName = (o.Account != null && String.isNotBlank(o.Account.Name))
+                ? o.Account.Name : 'the customer';
+
+            String subject = 'Order ' + o.OrderNumber + ' has been approved';
+            String body =
+                'Hello,\n\n' +
+                'This is to inform you that Order ' + o.OrderNumber +
+                ' for ' + acctName + ' has been approved on ' +
+                Date.today().format() + '.\n\n' +
+                'You can review the record here: ' +
+                URL.getOrgDomainUrl().toExternalForm() + '/' + o.Id + '\n\n' +
+                'Regards,\nCyrix Order Management';
+
+            Messaging.SingleEmailMessage msg = new Messaging.SingleEmailMessage();
+            msg.setToAddresses(new List<String>{ toEmail });
+            msg.setSubject(subject);
+            msg.setPlainTextBody(body);
+            msg.setSaveAsActivity(false);
+            messages.add(msg);
+
+            Task t = new Task();
+            t.WhatId       = o.Id;
+            t.Subject      = 'Email: ' + subject;
+            t.Description  = 'To: ' + toEmail + '\n\n' + body;
+            t.Status       = 'Completed';
+            t.Priority     = 'Normal';
+            t.ActivityDate = Date.today();
+            t.Type         = 'Email';
+            activityTasks.add(t);
+        }
+
+        if (!messages.isEmpty()) {
+            try {
+                Messaging.sendEmail(messages, false);
+            } catch (Exception e) {
+                System.debug(LoggingLevel.ERROR,
+                    'OrderTriggerHandler: approval email failed: ' + e.getMessage());
+            }
+        }
+
+        if (!activityTasks.isEmpty()) {
+            try {
+                insert activityTasks;
+            } catch (Exception e) {
+                System.debug(LoggingLevel.ERROR,
+                    'OrderTriggerHandler: approval activity task failed: ' + e.getMessage());
+            }
+        }
     }
 
     private static void sendCancellationNotifications(Set<Id> orderIds) {

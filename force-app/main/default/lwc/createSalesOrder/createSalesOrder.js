@@ -1,16 +1,44 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { NavigationMixin } from 'lightning/navigation';
+import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import getQuoteDetails from '@salesforce/apex/CreateSalesOrderController.getQuoteDetails';
+import getOrderDetails from '@salesforce/apex/CreateSalesOrderController.getOrderDetails';
 import getPricebookProducts from '@salesforce/apex/CreateSalesOrderController.getPricebookProducts';
+import getPricebookProductsForOrder from '@salesforce/apex/CreateSalesOrderController.getPricebookProductsForOrder';
 import createSalesOrder from '@salesforce/apex/CreateSalesOrderController.createSalesOrder';
+import updateSalesOrder from '@salesforce/apex/CreateSalesOrderController.updateSalesOrder';
 
 export default class CreateSalesOrder extends NavigationMixin(LightningElement) {
     @api recordId;
 
     isLoading = true;
     isSaving = false;
+    isEditMode = false;
+    _orderId = null;
+    @track errorMessage = '';
+
+    @track quoteContext = {};
+    @track displayItems = [];
+    @track productOptions = [];
+    @track productCatalog = [];
+    @track remarks = '';
+    @track isAddProductOpen = false;
+    @track newPricebookEntryId = '';
+    @track newQuantity = 1;
+    @track newDiscount = 0;
+    @track productSearchTerm = '';
+    @track filteredProducts = [];
+    @track showProductResults = false;
+
+    @wire(CurrentPageReference)
+    handlePageRef(pageRef) {
+        if (pageRef && pageRef.state && pageRef.state.c__recordId) {
+            this._orderId = pageRef.state.c__recordId;
+            this.isEditMode = true;
+            this.loadOrderData();
+        }
+    }
 
     connectedCallback() {
         this._widenQuickActionModal();
@@ -34,23 +62,59 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
             container.style.maxHeight = '92vh';
             container.dataset.csoResized = '1';
         } catch (e) {
-            // Ignore — modal sizing is a nice-to-have, not a blocker.
+            // Ignore
         }
     }
 
-    @track quoteContext = {};
-    @track displayItems = [];
-    @track productOptions = [];
-    @track productCatalog = [];
+    loadOrderData() {
+        this.isLoading = true;
+        getOrderDetails({ orderId: this._orderId })
+            .then((data) => {
+                this.quoteContext = data;
+                this.remarks = data.description || '';
+                this.displayItems = (data.items || []).map((it, idx) => {
+                    const qty = it.quantity || 0;
+                    const price = it.unitPrice || 0;
+                    const disc = it.discount || 0;
+                    const total = this.calcTotal(qty, price, disc);
+                    return {
+                        ...it,
+                        source: 'existing',
+                        rowNum: idx + 1,
+                        quantity: qty,
+                        discount: disc,
+                        uomDisplay: it.uom || 'Nos',
+                        listPriceDisplay: this.formatCurrency(it.listPrice),
+                        unitPriceDisplay: this.formatCurrency(price),
+                        taxDisplay: it.tax != null ? Number(it.tax).toFixed(0) + '%' : '-',
+                        maxDiscount: it.maxDiscount,
+                        maxDiscountDisplay: it.maxDiscount != null ? it.maxDiscount + '%' : '',
+                        priceStatusBadgeClass: this.priceStatusBadge(it.priceStatus),
+                        totalPrice: total,
+                        totalPriceDisplay: this.formatCurrency(total),
+                        rowKey: it.lineId
+                    };
+                });
+                this.isLoading = false;
+            })
+            .catch((error) => {
+                this.isLoading = false;
+                this.errorMessage = this.reduceError(error);
+                this.showToast('Error', this.errorMessage, 'error');
+            });
 
-    @track remarks = '';
+        getPricebookProductsForOrder({ orderId: this._orderId })
+            .then((data) => {
+                this.productCatalog = data;
+                this.productOptions = data.map((p) => ({ label: p.label, value: p.value }));
+            })
+            .catch((error) => {
+                this.showToast('Warning', 'Could not load products.', 'warning');
+            });
+    }
 
-    @track isAddProductOpen = false;
-    @track newPricebookEntryId = '';
-    @track newQuantity = 1;
-    @track newDiscount = 0;
-
-    @wire(getQuoteDetails, { quoteId: '$recordId' })
+    // --- Create mode: wired to Quote ---
+    @wire(getQuoteDetails, { quoteId: '$_quoteId' })
     wiredQuote({ error, data }) {
         if (data) {
             this.quoteContext = data;
@@ -69,6 +133,8 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
                     listPriceDisplay: this.formatCurrency(it.listPrice),
                     unitPriceDisplay: this.formatCurrency(price),
                     taxDisplay: it.tax != null ? Number(it.tax).toFixed(0) + '%' : '-',
+                    maxDiscount: it.maxDiscount,
+                    maxDiscountDisplay: it.maxDiscount != null ? it.maxDiscount + '%' : '',
                     priceStatusBadgeClass: this.priceStatusBadge(it.priceStatus),
                     totalPrice: total,
                     totalPriceDisplay: this.formatCurrency(total),
@@ -82,7 +148,11 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         }
     }
 
-    @wire(getPricebookProducts, { quoteId: '$recordId' })
+    get _quoteId() {
+        return this.isEditMode ? null : this.recordId;
+    }
+
+    @wire(getPricebookProducts, { quoteId: '$_quoteId' })
     wiredProducts({ error, data }) {
         if (data) {
             this.productCatalog = data;
@@ -92,10 +162,22 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         }
     }
 
-    // ===== Getters for Quote Information display =====
+    // ===== Getters =====
+
+    get pageTitle() {
+        return this.isEditMode ? 'Edit Sales Order' : 'Sales Order';
+    }
+
+    get confirmButtonLabel() {
+        return this.isEditMode ? 'Save Changes' : 'Confirm Sale';
+    }
 
     get hasItems() {
         return this.displayItems && this.displayItems.length > 0;
+    }
+
+    get sourceQuoteDisplay() {
+        return this.quoteContext.quoteName || this.quoteContext.quoteNumber || 'N/A';
     }
 
     get quoteDateDisplay() {
@@ -138,8 +220,6 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         return !!(this.quoteContext && this.quoteContext.paymentTerms && String(this.quoteContext.paymentTerms).trim().length);
     }
 
-    // ===== Getters for Bill To / Ship To =====
-
     get billToNameDisplay()       { return this.quoteContext.billToName || this.quoteContext.customerName || 'N/A'; }
     get billToStreetDisplay()     { return this.quoteContext.billToStreet || 'N/A'; }
     get billToCityDisplay()       { return this.quoteContext.billToCity || 'N/A'; }
@@ -153,6 +233,51 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
     get shipToStateDisplay()      { return this.quoteContext.shipToState || 'N/A'; }
     get shipToPostalCodeDisplay() { return this.quoteContext.shipToPostalCode || 'N/A'; }
     get shipToCountryDisplay()    { return this.quoteContext.shipToCountry || 'N/A'; }
+
+    // ===== Internal Charges =====
+    packingCharges = 0;
+    insuranceCharges = 0;
+    transportCharges = 0;
+    warrantyCost = 0;
+    installationCost = 0;
+    trainingCost = 0;
+
+    handleChargeChange(event) {
+        const field = event.target.dataset.field;
+        const val = parseFloat(event.target.value) || 0;
+        this[field] = val;
+    }
+
+    // ===== Order Summary =====
+    get subtotal() {
+        return this.displayItems.reduce((sum, it) => sum + ((it.unitPrice || 0) * (it.quantity || 0)), 0);
+    }
+    get totalDiscount() {
+        return this.displayItems.reduce((sum, it) => {
+            const base = (it.unitPrice || 0) * (it.quantity || 0);
+            return sum + (base * ((it.discount || 0) / 100));
+        }, 0);
+    }
+    get totalTax() {
+        return this.displayItems.reduce((sum, it) => {
+            const base = (it.unitPrice || 0) * (it.quantity || 0);
+            const afterDiscount = base - (base * ((it.discount || 0) / 100));
+            return sum + (afterDiscount * ((it.tax || 0) / 100));
+        }, 0);
+    }
+    get totalCharges() {
+        return (this.packingCharges || 0) + (this.insuranceCharges || 0) +
+               (this.transportCharges || 0) + (this.warrantyCost || 0) +
+               (this.installationCost || 0) + (this.trainingCost || 0);
+    }
+    get grandTotal() {
+        return this.subtotal - this.totalDiscount + this.totalTax + this.totalCharges;
+    }
+    get subtotalDisplay()       { return this.formatCurrency(this.subtotal); }
+    get totalDiscountDisplay()  { return this.formatCurrency(this.totalDiscount); }
+    get totalTaxDisplay()       { return this.formatCurrency(this.totalTax); }
+    get totalChargesDisplay()   { return this.formatCurrency(this.totalCharges); }
+    get grandTotalDisplay()     { return this.formatCurrency(this.grandTotal); }
 
     get isConfirmDisabled() {
         return this.isSaving;
@@ -254,6 +379,9 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         this.newPricebookEntryId = '';
         this.newQuantity = 1;
         this.newDiscount = 0;
+        this.productSearchTerm = '';
+        this.filteredProducts = [];
+        this.showProductResults = false;
         this.isAddProductOpen = true;
     }
 
@@ -261,8 +389,81 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         this.isAddProductOpen = false;
     }
 
-    handleNewProductChange(event) {
-        this.newPricebookEntryId = event.detail.value;
+    get hasFilteredProducts() {
+        return this.filteredProducts.length > 0;
+    }
+
+    handleProductSearch(event) {
+        const term = event.target.value;
+        this.productSearchTerm = term;
+        if (term && term.length >= 2) {
+            const lowerTerm = term.toLowerCase();
+            this.filteredProducts = this.productCatalog.filter(
+                (p) => (p.productName && p.productName.toLowerCase().includes(lowerTerm)) ||
+                       (p.productCode && p.productCode.toLowerCase().includes(lowerTerm))
+            ).slice(0, 20).map((p) => ({
+                ...p,
+                unitPriceDisplay: this.formatCurrency(p.unitPrice),
+                maxDiscountDisplay: p.maxDiscount != null ? p.maxDiscount + '%' : '',
+                taxDisplay: p.tax != null ? Number(p.tax).toFixed(0) + '%' : '-'
+            }));
+            this.showProductResults = true;
+        } else {
+            this.filteredProducts = [];
+            this.showProductResults = false;
+        }
+    }
+
+    handleProductSelect(event) {
+        const val = event.currentTarget.dataset.value;
+        const cat = this.productCatalog.find((p) => p.value === val);
+        if (!cat) return;
+
+        if (this.displayItems.some(
+            (it) => it.source === 'manual' && it.pricebookEntryId === cat.value
+        )) {
+            this.showToast('Warning', 'This product is already in the order.', 'warning');
+            return;
+        }
+
+        const qty = 1;
+        const disc = 0;
+        const unitPrice = cat.unitPrice;
+        const listPrice = cat.listPrice != null ? cat.listPrice : unitPrice;
+        const total = this.calcTotal(qty, unitPrice, disc);
+        const rowKey = 'manual-' + cat.value;
+        const nextRowNum = this.displayItems.length + 1;
+        this.displayItems = [
+            ...this.displayItems,
+            {
+                source: 'manual',
+                rowKey: rowKey,
+                rowNum: nextRowNum,
+                lineId: null,
+                pricebookEntryId: cat.value,
+                pricebookName: cat.priceSource,
+                productId: cat.productId,
+                productName: cat.productName,
+                productCode: cat.productCode,
+                uom: cat.uom,
+                uomDisplay: cat.uom || 'Nos',
+                quantity: qty,
+                unitPrice: unitPrice,
+                unitPriceDisplay: this.formatCurrency(unitPrice),
+                listPrice: listPrice,
+                listPriceDisplay: this.formatCurrency(listPrice),
+                discount: disc,
+                totalPrice: total,
+                totalPriceDisplay: this.formatCurrency(total),
+                tax: cat.tax,
+                taxDisplay: cat.tax != null ? Number(cat.tax).toFixed(0) + '%' : '-',
+                maxDiscount: cat.maxDiscount,
+                maxDiscountDisplay: cat.maxDiscount != null ? cat.maxDiscount + '%' : '',
+                priceStatus: null,
+                priceStatusBadgeClass: this.priceStatusBadge(null)
+            }
+        ];
+        this.showToast('Success', cat.productName + ' added.', 'success');
     }
 
     handleNewQuantityChange(event) {
@@ -322,6 +523,8 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
                 totalPriceDisplay: this.formatCurrency(total),
                 tax: cat.tax,
                 taxDisplay: cat.tax != null ? Number(cat.tax).toFixed(0) + '%' : '-',
+                maxDiscount: cat.maxDiscount,
+                maxDiscountDisplay: cat.maxDiscount != null ? cat.maxDiscount + '%' : '',
                 priceStatus: null,
                 priceStatusBadgeClass: this.priceStatusBadge(null)
             }
@@ -333,14 +536,23 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         if (this.isSaving) return;
 
         if (!this.displayItems.length) {
-            this.showToast('Error', 'Please add at least one product to the Sales Order', 'error');
+            this.showToast('Error', 'Please add at least one product.', 'error');
             return;
         }
 
+        this.isSaving = true;
+
+        if (this.isEditMode) {
+            await this._handleUpdate();
+        } else {
+            await this._handleCreate();
+        }
+    }
+
+    async _handleCreate() {
         const quoteItems = this.displayItems.filter((i) => i.source === 'quote');
         const manualItems = this.displayItems.filter((i) => i.source === 'manual');
 
-        this.isSaving = true;
         try {
             const selectedLineIds = quoteItems.map((i) => i.lineId);
             const quantityByLineId = {};
@@ -387,8 +599,68 @@ export default class CreateSalesOrder extends NavigationMixin(LightningElement) 
         }
     }
 
+    async _handleUpdate() {
+        const existingItems = this.displayItems.filter((i) => i.source === 'existing');
+        const manualItems = this.displayItems.filter((i) => i.source === 'manual');
+
+        try {
+            const existingLineIds = existingItems.map((i) => i.lineId);
+            const quantityByLineId = {};
+            const discountByLineId = {};
+            existingItems.forEach((i) => {
+                quantityByLineId[i.lineId] = i.quantity;
+                discountByLineId[i.lineId] = i.discount || 0;
+            });
+
+            const manualPricebookEntryIds = manualItems.map((i) => i.pricebookEntryId);
+            const manualQuantityByPbeId = {};
+            const manualDiscountByPbeId = {};
+            manualItems.forEach((i) => {
+                manualQuantityByPbeId[i.pricebookEntryId] = i.quantity;
+                manualDiscountByPbeId[i.pricebookEntryId] = i.discount || 0;
+            });
+
+            await updateSalesOrder({
+                orderId: this._orderId,
+                remarks: this.remarks,
+                existingLineIds: existingLineIds,
+                quantityByLineId: quantityByLineId,
+                discountByLineId: discountByLineId,
+                manualPricebookEntryIds: manualPricebookEntryIds,
+                manualQuantityByPbeId: manualQuantityByPbeId,
+                manualDiscountByPbeId: manualDiscountByPbeId
+            });
+
+            this.showToast('Success', 'Order updated successfully.', 'success');
+
+            this[NavigationMixin.Navigate]({
+                type: 'standard__recordPage',
+                attributes: {
+                    recordId: this._orderId,
+                    objectApiName: 'Order',
+                    actionName: 'view'
+                }
+            });
+        } catch (err) {
+            this.showToast('Error', this.reduceError(err), 'error');
+        } finally {
+            this.isSaving = false;
+        }
+    }
+
     handleCancel() {
-        this.dispatchEvent(new CloseActionScreenEvent());
+        if (this.isEditMode) {
+            this[NavigationMixin.Navigate]({
+                type: 'standard__recordPage',
+                attributes: {
+                    recordId: this._orderId,
+                    objectApiName: 'Order',
+                    actionName: 'view'
+                }
+            });
+        } else {
+            this.dispatchEvent(new CloseActionScreenEvent());
+        }
     }
 
     showToast(title, message, variant) {

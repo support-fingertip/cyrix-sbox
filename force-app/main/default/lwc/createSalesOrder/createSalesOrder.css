@@ -386,3 +386,63 @@
     border-radius: 10px;
     padding: 0.1rem 0.5rem;
 }
+
+/* =========================================
+   Product Search dropdown
+========================================= */
+.cso-search-table-wrapper {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.cso-search-table thead th {
+    background-color: #f7f7f7;
+    color: #444;
+    font-weight: 600;
+    font-size: 0.78rem;
+    padding: 0.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.cso-search-table tbody td {
+    font-size: 0.82rem;
+    padding: 0.4rem 0.5rem;
+}
+
+.cso-search-name {
+    font-weight: 600;
+    color: #032d60;
+}
+
+/* =========================================
+   Order Summary
+========================================= */
+.cso-summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.45rem 0.75rem;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 0.9rem;
+}
+
+.cso-summary-row:last-child {
+    border-bottom: none;
+}
+
+.cso-discount-val {
+    color: #d9534f;
+}
+
+.cso-grand-total {
+    background-color: #eef5fd;
+    border-top: 2px solid #0070d2;
+    border-bottom: none;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #032d60;
+}

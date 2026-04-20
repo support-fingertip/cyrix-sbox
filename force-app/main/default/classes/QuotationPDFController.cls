@@ -21,7 +21,9 @@ public with sharing class QuotationPDFController {
    public String productNamesList { get; set; }
     // Default tax rate for Product quotations (5%)
       public String grandTotalInWords { get; set; }
-    
+    public String productName { get; set; }
+   public  General_Settings__c general{get;set;}  
+     public String productStringify { get; set; }
 
 
     public QuotationPDFController(ApexPages.StandardController stdController) {
@@ -51,10 +53,8 @@ public with sharing class QuotationPDFController {
                    Account.BillingStreet, Account.BillingCity, Account.BillingState,
                    Account.BillingPostalCode, Account.BillingCountry,
             BillingCity,BillingAddress,BillingCountry,BillingState,Business_Vertical__c,
-                   Account.Payment_Terms__c,
-                   Bank_Name__c, Bank_Name__r.Name,
-                   Bank_Name__r.Account_No__c, Bank_Name__r.Bank_Name__c,
-                   Bank_Name__r.Branch_Name__c, Bank_Name__r.IFSC_CODE__c,
+                   Account.Payment_Terms__c,Additional_Warranty__c,Notes__c,Sub_Vertical__c,
+                  
                    ContactId, Contact.Name, Contact.Email, Contact.Phone, Contact.Title, owner.Name,Owner_Designation__c,Owner_Phone__c
             FROM Quote
             WHERE Id = :quoteId
@@ -79,7 +79,7 @@ public with sharing class QuotationPDFController {
                    Product2.QuantityUnitOfMeasure,
                    PricebookEntryId, Quantity, UnitPrice, TotalPrice, Discount, ListPrice,
                    Price_Status__c, Tax_Type__c,
-                   Product_Line_Description__c, Product_Detailed_Description__c
+                   Product_Line_Description__c, Product_Detailed_Description__c,Product2.Product_Type__c
             FROM QuoteLineItem
             WHERE QuoteId = :quoteId
             ORDER BY CreatedDate ASC
@@ -100,17 +100,20 @@ public with sharing class QuotationPDFController {
             WHERE Quote__c = :quoteId
             ORDER BY CreatedDate ASC
         ];
-
+general =[select id,Bank_Name__c,Account_No__c,Branch_Code__c,IFSC_Code__c from General_Settings__c limit 1];
     // Build product names list
         List<String> prodNames = new List<String>();
-        //productNamesNumbered = new List<String>();
+    
         Integer prodIndex = 1;
         for (QuoteLineItem qli : lineItems) {
             if (qli.Product2 != null && String.isNotBlank(qli.Product2.Name)) {
                 prodNames.add(qli.Product2.Name);
-             //  productNamesNumbered.add(qli.Product2.Name);
+ productStringify += qli.Product2.Product_Type__c+','; 
                 prodIndex++;
             }
+        }
+        if(lineItems.size() ==1){
+            productName=lineItems[0].Product2.Name;
         }
         productNamesList = String.join(prodNames, ', ');
     }

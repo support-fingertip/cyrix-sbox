@@ -454,14 +454,6 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>ProductSearchController</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>ProductSearchControllerTest</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
         <apexClass>ProductTriggerHandler</apexClass>
         <enabled>false</enabled>
     </classAccesses>
@@ -575,6 +567,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>WhatsAppLeadCreator</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>WhatsAppQuoteSender</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
@@ -1394,6 +1390,26 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>General_Settings__c.Account_No__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>General_Settings__c.Bank_Name__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>General_Settings__c.Beneficiary_Name__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>General_Settings__c.Branch_Code__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>General_Settings__c.Campaign_Expense_Approver__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -1425,6 +1441,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>General_Settings__c.HR_Campaign_Approver__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>General_Settings__c.IFSC_Code__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -3199,6 +3220,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Quote.Sub_Vertical__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Quote.Traning_Cost__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -4254,6 +4280,10 @@
     <tabVisibilities>
         <tab>Daily_Log__c</tab>
         <visibility>DefaultOn</visibility>
+    </tabVisibilities>
+    <tabVisibilities>
+        <tab>Edit_Order</tab>
+        <visibility>Hidden</visibility>
     </tabVisibilities>
     <tabVisibilities>
         <tab>Error_Log__c</tab>
