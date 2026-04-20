@@ -219,11 +219,7 @@ public with sharing class QuoteBuilderController {
         String prodQuery = 'SELECT Id, Name, ProductCode, Product_Category__c, Make__c, Model__c, ' +
             'Description, HSN_Code__c, Standard_Price__c, QuantityUnitOfMeasure, ' +
             'Line_Description__c, Detailed_Description__c, ' +
-            'Service_Item__c, Tax__c, ' +
-            'Manager_Discount_Up_to__c, VP_Sales_Discount_Up_to__c, CEO_Sales_Discount_Up_to__c, ' +
-            'Installation_Cost_Percent__c, Insurance_Cost_Percent__c, ' +
-            'Internal_Transport_Cost_Percent__c, Promotional_Cost_Percent__c, ' +
-            'Training_Cost_Percent__c, Warranty_Cost_Percent__c ' +
+            'Service_Item__c, Tax__c ' +
             'FROM Product2 ' +
             'WHERE IsActive = true ' +
             'AND (Name LIKE :searchKey OR ProductCode LIKE :searchKey)';
@@ -284,15 +280,6 @@ public with sharing class QuoteBuilderController {
             psr.detailedDescription = prod.Detailed_Description__c;
             psr.isServiceItem = (prod.Service_Item__c == 'Yes');
             psr.taxPercent = prod.Tax__c;
-            psr.managerDiscountUpTo = prod.Manager_Discount_Up_to__c;
-            psr.vpDiscountUpTo = prod.VP_Sales_Discount_Up_to__c;
-            psr.ceoDiscountUpTo = prod.CEO_Sales_Discount_Up_to__c;
-            psr.installationCostPercent = prod.Installation_Cost_Percent__c;
-            psr.insuranceCostPercent = prod.Insurance_Cost_Percent__c;
-            psr.transportCostPercent = prod.Internal_Transport_Cost_Percent__c;
-            psr.promotionalCostPercent = prod.Promotional_Cost_Percent__c;
-            psr.trainingCostPercent = prod.Training_Cost_Percent__c;
-            psr.warrantyCostPercent = prod.Warranty_Cost_Percent__c;
             psr.availablePrices = new List<PriceOption>();
 
             if (psr.isServiceItem) {
@@ -435,15 +422,6 @@ public with sharing class QuoteBuilderController {
         for (QuoteLineItem qli : [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
                    Product2.QuantityUnitOfMeasure,
-                   Product2.Manager_Discount_Up_to__c,
-                   Product2.VP_Sales_Discount_Up_to__c,
-                   Product2.CEO_Sales_Discount_Up_to__c,
-                   Product2.Installation_Cost_Percent__c,
-                   Product2.Insurance_Cost_Percent__c,
-                   Product2.Internal_Transport_Cost_Percent__c,
-                   Product2.Promotional_Cost_Percent__c,
-                   Product2.Training_Cost_Percent__c,
-                   Product2.Warranty_Cost_Percent__c,
                    PricebookEntryId, PricebookEntry.Tax__c,
                    PricebookEntry.Max_Discount_Percentage__c,
                    Quantity, ListPrice, UnitPrice, Discount,
@@ -468,15 +446,6 @@ public with sharing class QuoteBuilderController {
             item.discount = qli.Discount != null ? qli.Discount : 0;
             item.taxPercent = qli.PricebookEntry.Tax__c != null ? qli.PricebookEntry.Tax__c : 0;
             item.maxDiscount = qli.PricebookEntry.Max_Discount_Percentage__c;
-            item.managerDiscountUpTo = qli.Product2.Manager_Discount_Up_to__c;
-            item.vpDiscountUpTo = qli.Product2.VP_Sales_Discount_Up_to__c;
-            item.ceoDiscountUpTo = qli.Product2.CEO_Sales_Discount_Up_to__c;
-            item.installationCostPercent = qli.Product2.Installation_Cost_Percent__c;
-            item.insuranceCostPercent = qli.Product2.Insurance_Cost_Percent__c;
-            item.transportCostPercent = qli.Product2.Internal_Transport_Cost_Percent__c;
-            item.promotionalCostPercent = qli.Product2.Promotional_Cost_Percent__c;
-            item.trainingCostPercent = qli.Product2.Training_Cost_Percent__c;
-            item.warrantyCostPercent = qli.Product2.Warranty_Cost_Percent__c;
             item.priceStatus = qli.Price_Status__c;
             item.lineDescription = qli.Product_Line_Description__c;
             item.detailedDescription = qli.Product_Detailed_Description__c;
@@ -662,15 +631,6 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public String lineDescription;
         @AuraEnabled public String detailedDescription;
         @AuraEnabled public Decimal maxDiscount;
-        @AuraEnabled public Decimal managerDiscountUpTo;
-        @AuraEnabled public Decimal vpDiscountUpTo;
-        @AuraEnabled public Decimal ceoDiscountUpTo;
-        @AuraEnabled public Decimal installationCostPercent;
-        @AuraEnabled public Decimal insuranceCostPercent;
-        @AuraEnabled public Decimal transportCostPercent;
-        @AuraEnabled public Decimal promotionalCostPercent;
-        @AuraEnabled public Decimal trainingCostPercent;
-        @AuraEnabled public Decimal warrantyCostPercent;
         @AuraEnabled public Id sourcePricebookId;
         @AuraEnabled public String sourcePricebook;
         @AuraEnabled public String sourcePricebookType;
@@ -748,15 +708,6 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Decimal discount;
         @AuraEnabled public Decimal taxPercent;
         @AuraEnabled public Decimal maxDiscount;
-        @AuraEnabled public Decimal managerDiscountUpTo;
-        @AuraEnabled public Decimal vpDiscountUpTo;
-        @AuraEnabled public Decimal ceoDiscountUpTo;
-        @AuraEnabled public Decimal installationCostPercent;
-        @AuraEnabled public Decimal insuranceCostPercent;
-        @AuraEnabled public Decimal transportCostPercent;
-        @AuraEnabled public Decimal promotionalCostPercent;
-        @AuraEnabled public Decimal trainingCostPercent;
-        @AuraEnabled public Decimal warrantyCostPercent;
         @AuraEnabled public String priceStatus;
         @AuraEnabled public String lineDescription;
         @AuraEnabled public String detailedDescription;

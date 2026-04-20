@@ -135,33 +135,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }, 0);
     }
 
-    get productCostBreakdown() {
-        const cats = [
-            { key: 'installation', label: 'Installation', field: 'installationCostPercent' },
-            { key: 'training', label: 'Training', field: 'trainingCostPercent' },
-            { key: 'warranty', label: 'Warranty', field: 'warrantyCostPercent' },
-            { key: 'insurance', label: 'Insurance', field: 'insuranceCostPercent' },
-            { key: 'transport', label: 'Transport', field: 'transportCostPercent' },
-            { key: 'promotional', label: 'Promotional', field: 'promotionalCostPercent' }
-        ];
-        return cats.map(c => {
-            const amount = this.lineItems.reduce((sum, item) => {
-                const base = (item.unitPrice || 0) * (item.quantity || 0);
-                const afterDiscount = base - (base * ((item.discount || 0) / 100));
-                return sum + (afterDiscount * ((item[c.field] || 0) / 100));
-            }, 0);
-            return { ...c, amount };
-        }).filter(c => c.amount > 0);
-    }
-
-    get totalProductCosts() {
-        return this.productCostBreakdown.reduce((s, c) => s + c.amount, 0);
-    }
-
-    get hasProductCosts() { return this.totalProductCosts > 0; }
-
     get grandTotal() {
-        return this.subtotal - this.totalDiscount + this.totalTax + this.totalProductCosts;
+        return this.subtotal - this.totalDiscount + this.totalTax;
     }
 
     // ===== LIFECYCLE =====
@@ -308,21 +283,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                         sourcePricebookName: item.sourcePricebookName || '',
                         priceBadgeClass: this.getPriceBadgeClass(item.sourcePricebookName),
                         priceBadgeLabel: this.getPriceBadgeLabel(item.sourcePricebookName),
-                        hasPriceSource: !!item.sourcePricebookName,
-                        managerDiscountUpTo: item.managerDiscountUpTo,
-                        vpDiscountUpTo: item.vpDiscountUpTo,
-                        ceoDiscountUpTo: item.ceoDiscountUpTo,
-                        installationCostPercent: item.installationCostPercent,
-                        insuranceCostPercent: item.insuranceCostPercent,
-                        transportCostPercent: item.transportCostPercent,
-                        promotionalCostPercent: item.promotionalCostPercent,
-                        trainingCostPercent: item.trainingCostPercent,
-                        warrantyCostPercent: item.warrantyCostPercent,
-                        discountDisplay: this.buildDiscountDisplay(item),
-                        discountTooltip: this.buildDiscountTooltip(item),
-                        totalCostPercentDisplay: this.buildTotalCostDisplay(item),
-                        costBreakdownTooltip: this.buildCostTooltip(item),
-                        discountInputClass: this.getDiscountInputClass(disc, item.managerDiscountUpTo)
+                        hasPriceSource: !!item.sourcePricebookName
                     };
                 });
             }
@@ -610,11 +571,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 formattedTax: r.taxPercent != null ? r.taxPercent + '%' : '0%',
                 priceBadgeClass: this.getPriceBadgeClass(r.sourcePricebookType),
                 priceBadgeLabel: this.getPriceBadgeLabel(r.sourcePricebookType),
-                hasPriceSource: !!r.sourcePricebookType,
-                discountDisplay: this.buildDiscountDisplay(r),
-                discountTooltip: this.buildDiscountTooltip(r),
-                totalCostPercentDisplay: this.buildTotalCostDisplay(r),
-                costBreakdownTooltip: this.buildCostTooltip(r)
+                hasPriceSource: !!r.sourcePricebookType
             }));
         } catch (error) {
             this.showError('Search failed', this.reduceErrors(error));
@@ -672,21 +629,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             sourcePricebookName: product.sourcePricebook || (isService ? 'Service' : ''),
             priceBadgeClass: this.getPriceBadgeClass(product.sourcePricebookType),
             priceBadgeLabel: this.getPriceBadgeLabel(product.sourcePricebookType),
-            hasPriceSource: !!product.sourcePricebookType,
-            managerDiscountUpTo: product.managerDiscountUpTo,
-            vpDiscountUpTo: product.vpDiscountUpTo,
-            ceoDiscountUpTo: product.ceoDiscountUpTo,
-            installationCostPercent: product.installationCostPercent,
-            insuranceCostPercent: product.insuranceCostPercent,
-            transportCostPercent: product.transportCostPercent,
-            promotionalCostPercent: product.promotionalCostPercent,
-            trainingCostPercent: product.trainingCostPercent,
-            warrantyCostPercent: product.warrantyCostPercent,
-            discountDisplay: this.buildDiscountDisplay(product),
-            discountTooltip: this.buildDiscountTooltip(product),
-            totalCostPercentDisplay: this.buildTotalCostDisplay(product),
-            costBreakdownTooltip: this.buildCostTooltip(product),
-            discountInputClass: 'discount-input'
+            hasPriceSource: !!product.sourcePricebookType
         };
 
         this.lineItems = [...this.lineItems, newItem];
@@ -728,16 +671,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                     updated.unitPrice = raw;
                 }
             } else if (field === 'discount') {
-                const d = parseFloat(value) || 0;
-                updated.discount = d;
-                const mgrCap = updated.managerDiscountUpTo;
-                if (mgrCap != null && d > mgrCap) {
-                    this.showToastWarn(
-                        'Discount exceeds Manager limit',
-                        `${updated.productName}: ${d}% is above Manager Discount Up To (${mgrCap}%). Higher-level approval will be required.`
-                    );
-                }
-                updated.discountInputClass = this.getDiscountInputClass(d, mgrCap);
+                updated.discount = parseFloat(value) || 0;
             } else if (field === 'taxPercent') {
                 // Only service lines allow tax editing. Non-service tax is
                 // server-stamped from Product2.Tax__c.
@@ -884,55 +818,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             case 'Service':    return 'Service';
             default:           return pricebookType;
         }
-    }
-
-    // ===== DISCOUNT + COST DISPLAY HELPERS =====
-
-    buildDiscountDisplay(r) {
-        const mgr = r.managerDiscountUpTo;
-        const vp = r.vpDiscountUpTo;
-        const ceo = r.ceoDiscountUpTo;
-        if (mgr == null && vp == null && ceo == null) return '-';
-        const fmt = v => (v == null ? '-' : v + '%');
-        return `${fmt(mgr)} / ${fmt(vp)} / ${fmt(ceo)}`;
-    }
-
-    buildDiscountTooltip(r) {
-        const mgr = r.managerDiscountUpTo;
-        const vp = r.vpDiscountUpTo;
-        const ceo = r.ceoDiscountUpTo;
-        const fmt = v => (v == null ? 'N/A' : v + '%');
-        return `Manager: ${fmt(mgr)}\nVP Sales: ${fmt(vp)}\nCEO Sales: ${fmt(ceo)}`;
-    }
-
-    buildTotalCostDisplay(r) {
-        const total = (r.installationCostPercent || 0) + (r.insuranceCostPercent || 0) +
-                      (r.transportCostPercent || 0) + (r.promotionalCostPercent || 0) +
-                      (r.trainingCostPercent || 0) + (r.warrantyCostPercent || 0);
-        if (total === 0) return '-';
-        return total.toFixed(2) + '%';
-    }
-
-    buildCostTooltip(r) {
-        const fmt = (label, v) => `${label}: ${v == null ? 0 : v}%`;
-        return [
-            fmt('Installation', r.installationCostPercent),
-            fmt('Training', r.trainingCostPercent),
-            fmt('Warranty', r.warrantyCostPercent),
-            fmt('Insurance', r.insuranceCostPercent),
-            fmt('Transport', r.transportCostPercent),
-            fmt('Promotional', r.promotionalCostPercent)
-        ].join('\n');
-    }
-
-    getDiscountInputClass(discount, mgrCap) {
-        const d = discount == null ? 0 : discount;
-        if (mgrCap != null && d > mgrCap) return 'discount-input discount-over-cap';
-        return 'discount-input';
-    }
-
-    showToastWarn(title, message) {
-        this.dispatchEvent(new ShowToastEvent({ title, message, variant: 'warning' }));
     }
 
     // ===== UTILITY =====
