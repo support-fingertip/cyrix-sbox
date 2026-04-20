@@ -200,17 +200,15 @@
                                     <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped slds-table_fixed-layout">
                                         <thead>
                                             <tr class="slds-line-height_reset">
-                                                <th scope="col" style="width:15%"><div class="slds-truncate">Product Name</div></th>
-                                                <th scope="col" style="width:7%"><div class="slds-truncate">Code</div></th>
-                                                <th scope="col" style="width:8%"><div class="slds-truncate">Category</div></th>
-                                                <th scope="col" style="width:9%"><div class="slds-truncate">Make / Model</div></th>
-                                                <th scope="col" style="width:8%"><div class="slds-truncate">Unit Price</div></th>
-                                                <th scope="col" style="width:9%"><div class="slds-truncate">Tier</div></th>
-                                                <th scope="col" style="width:6%"><div class="slds-truncate">HSN</div></th>
-                                                <th scope="col" style="width:6%"><div class="slds-truncate">Tax %</div></th>
-                                                <th scope="col" style="width:11%" title="Manager / VP / CEO"><div class="slds-truncate">Max Disc %</div></th>
-                                                <th scope="col" style="width:9%" title="Total of Installation, Training, Warranty, Insurance, Transport, Promotional"><div class="slds-truncate">Cost %</div></th>
-                                                <th scope="col" style="width:6%"><div class="slds-truncate">Action</div></th>
+                                                <th scope="col" style="width:18%"><div class="slds-truncate">Product Name</div></th>
+                                                <th scope="col" style="width:8%"><div class="slds-truncate">Code</div></th>
+                                                <th scope="col" style="width:10%"><div class="slds-truncate">Category</div></th>
+                                                <th scope="col" style="width:11%"><div class="slds-truncate">Make / Model</div></th>
+                                                <th scope="col" style="width:10%"><div class="slds-truncate">Unit Price</div></th>
+                                                <th scope="col" style="width:11%"><div class="slds-truncate">Tier</div></th>
+                                                <th scope="col" style="width:7%"><div class="slds-truncate">HSN</div></th>
+                                                <th scope="col" style="width:7%"><div class="slds-truncate">Tax %</div></th>
+                                                <th scope="col" style="width:7%"><div class="slds-truncate">Action</div></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -228,16 +226,6 @@
                                                     </td>
                                                     <td><div class="slds-truncate">{prod.hsnCode}</div></td>
                                                     <td><div class="slds-truncate">{prod.formattedTax}</div></td>
-                                                    <td>
-                                                        <div class="slds-truncate discount-cell" title={prod.discountTooltip}>
-                                                            {prod.discountDisplay}
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="slds-truncate cost-cell" title={prod.costBreakdownTooltip}>
-                                                            {prod.totalCostPercentDisplay}
-                                                        </div>
-                                                    </td>
                                                     <td>
                                                         <lightning-button-icon
                                                             icon-name="utility:add"
@@ -284,15 +272,13 @@
                                         <th scope="col" style="width:35px"><div class="slds-truncate">#</div></th>
                                         <th scope="col" style="min-width:160px"><div class="slds-truncate">Product</div></th>
                                         <th scope="col" style="width:60px"><div class="slds-truncate">UOM</div></th>
-                                        <th scope="col" style="width:75px"><div class="slds-truncate">Qty</div></th>
-                                        <th scope="col" style="width:105px"><div class="slds-truncate">List Price</div></th>
-                                        <th scope="col" style="width:105px"><div class="slds-truncate">Sales Price</div></th>
-                                        <th scope="col" style="width:85px"><div class="slds-truncate">Disc. %</div></th>
-                                        <th scope="col" style="width:90px" title="Manager / VP / CEO"><div class="slds-truncate">Max Disc %</div></th>
-                                        <th scope="col" style="width:75px"><div class="slds-truncate">Tax %</div></th>
-                                        <th scope="col" style="width:75px" title="Total cost % from Product"><div class="slds-truncate">Cost %</div></th>
+                                        <th scope="col" style="width:85px"><div class="slds-truncate">Qty</div></th>
+                                        <th scope="col" style="width:110px"><div class="slds-truncate">List Price</div></th>
+                                        <th scope="col" style="width:110px"><div class="slds-truncate">Sales Price</div></th>
+                                        <th scope="col" style="width:90px"><div class="slds-truncate">Disc. %</div></th>
+                                        <th scope="col" style="width:90px"><div class="slds-truncate">Tax %</div></th>
                                         <th scope="col" style="width:100px"><div class="slds-truncate">Price Status</div></th>
-                                        <th scope="col" style="width:110px"><div class="slds-truncate">Line Total</div></th>
+                                        <th scope="col" style="width:115px"><div class="slds-truncate">Line Total</div></th>
                                         <th scope="col" style="width:45px"><div class="slds-truncate"></div></th>
                                     </tr>
                                 </thead>
@@ -350,16 +336,10 @@
                                                     max="100"
                                                     step="0.01"
                                                     variant="label-hidden"
-                                                    class={item.discountInputClass}
                                                     data-row-id={item.rowId}
                                                     data-field="discount"
                                                     onchange={handleLineItemChange}>
                                                 </lightning-input>
-                                            </td>
-                                            <td>
-                                                <div class="slds-truncate discount-cell" title={item.discountTooltip}>
-                                                    {item.discountDisplay}
-                                                </div>
                                             </td>
                                             <td class="slds-text-align_center">
                                                 <template if:true={item.isServiceItem}>
@@ -378,11 +358,6 @@
                                                 <template if:false={item.isServiceItem}>
                                                     {item.taxPercentDisplay}
                                                 </template>
-                                            </td>
-                                            <td>
-                                                <div class="slds-truncate cost-cell" title={item.costBreakdownTooltip}>
-                                                    {item.totalCostPercentDisplay}
-                                                </div>
                                             </td>
                                             <td class="slds-text-align_center">
                                                 <span class={item.priceStatusBadgeClass}>{item.priceStatus}</span>
@@ -539,24 +514,6 @@
                                 <lightning-formatted-number value={totalTax} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
                             </span>
                         </div>
-                        <template if:true={hasProductCosts}>
-                            <div class="total-row subtotal-divider">
-                                <span class="total-label total-label_muted">Product Costs</span>
-                                <span class="total-value">
-                                    <lightning-formatted-number value={totalProductCosts} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
-                                </span>
-                            </div>
-                            <div class="cost-breakdown">
-                                <template for:each={productCostBreakdown} for:item="c">
-                                    <div key={c.key} class="cost-breakdown-row">
-                                        <span class="cost-breakdown-label">{c.label}</span>
-                                        <span class="cost-breakdown-value">
-                                            <lightning-formatted-number value={c.amount} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
-                                        </span>
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
                         <div class="total-row grand-total">
                             <span class="total-label">Grand Total</span>
                             <span class="total-value">
