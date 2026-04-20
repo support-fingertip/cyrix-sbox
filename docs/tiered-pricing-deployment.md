@@ -14,10 +14,9 @@ Deploy in this sequence to avoid dangling references:
 1. **Fields** — `Product2.Service_Item__c`, updated `Pricebook2.Price_Book_Type__c` picklist.
 2. **Apex classes + trigger** — `PricebookTierService`, `QuoteLineItemTriggerHandler`, `QuoteLineItemTrigger`, the updated `QuoteBuilderController` and `quoteTriggerHandler`, plus the new and updated test classes.
 3. **LWC** — `newQuoteCmp` (JS + HTML).
-4. **Workflow field updates** — `Quote_Price_Status_Approved`, `Quote_Price_Status_Rejected` (added to existing `Quote.workflow-meta.xml`).
-5. **Approval Process** — `Quote.Quote_Price_Approval`.
+4. **Approval Process (manual / separate PR)** — the Quote approval process originally included in this branch was dropped because the target org rejected the `Price_Status__c` literal values `Approved` and `Rejected` during deploy (likely due to picklist configuration drift between source and org). Recreate the approval process in the target org via Setup, or author it in a follow-up PR once the picklist drift is resolved. Entry criteria should still be `Quote.Price_Status__c = 'Approval Required'` - the QuoteLineItem trigger maintains that field automatically.
 
-A single `sfdx force:source:deploy` / `sf project deploy start` picks the right order, but if you are deploying piecemeal, the approval process fails to deploy until its field updates exist.
+A single `sf project deploy start` picks the right order for the remaining items.
 
 ## Data migration — `Pricebook2.Price_Book_Type__c`
 
