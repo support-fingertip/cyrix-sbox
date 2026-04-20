@@ -36,6 +36,7 @@
     <tabs>Asset__c</tabs>
     <tabs>General_Settings__c</tabs>
     <tabs>Visit_Plans</tabs>
+    <tabs>Bank__c</tabs>
     <tabs>Payment_Term__c</tabs>
     <tabs>Branch__c</tabs>
     <tabs>standard-Pricebook2</tabs>

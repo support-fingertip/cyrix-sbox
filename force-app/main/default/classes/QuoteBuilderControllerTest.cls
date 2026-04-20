@@ -81,31 +81,6 @@ private class QuoteBuilderControllerTest {
             IsActive = true
         );
         insert new List<PricebookEntry>{ pbe1, pbe2 };
-
-        // Price list5 (standard tier) - required by the tiered pricing engine
-        // before any non-service product can be added to a quote.
-        Pricebook2 tier5Pb = new Pricebook2(
-            Name = 'Tier5 Standard',
-            IsActive = true,
-            Price_Book_Type__c = 'Price list5'
-        );
-        insert tier5Pb;
-        insert new List<PricebookEntry>{
-            new PricebookEntry(
-                Pricebook2Id = tier5Pb.Id,
-                Product2Id = prod1.Id,
-                UnitPrice = 150000,
-                IsActive = true,
-                UseStandardPrice = false
-            ),
-            new PricebookEntry(
-                Pricebook2Id = tier5Pb.Id,
-                Product2Id = prod2.Id,
-                UnitPrice = 85000,
-                IsActive = true,
-                UseStandardPrice = false
-            )
-        };
     }
 
     @isTest
@@ -384,8 +359,115 @@ private class QuoteBuilderControllerTest {
     }
 
     @isTest
-    static void testSearchDefaultsToTier5() {
+    static void testSearchProductsWithBestPricePromotional() {
         Opportunity opp = [SELECT Id, AccountId, Pricebook2Id FROM Opportunity LIMIT 1];
+        Product2 prod = [SELECT Id FROM Product2 WHERE ProductCode = 'USG-500' LIMIT 1];
+
+        // Create a promotional pricebook with a lower price
+        Pricebook2 promoPb = new Pricebook2(
+            Name = 'Summer Promo 2026',
+            IsActive = true,
+            Price_Book_Type__c = 'Promotional Price',
+            Valid_From__c = Date.today().addDays(-10),
+            Valid_Till__c = Date.today().addDays(30)
+        );
+        insert promoPb;
+
+        PricebookEntry promoPbe = new PricebookEntry(
+            Pricebook2Id = promoPb.Id,
+            Product2Id = prod.Id,
+            UnitPrice = 120000,
+            Max_Discount_Percentage__c = 15,
+            IsActive = true
+        );
+        insert promoPbe;
+
+        Test.startTest();
+        List<QuoteBuilderController.ProductSearchResult> results =
+            QuoteBuilderController.searchProductsWithBestPrice(
+                'Ultrasound', null, opp.AccountId, null
+            );
+        Test.stopTest();
+
+        System.assertEquals(1, results.size(), 'Should find 1 product');
+        System.assertEquals(120000, results[0].unitPrice, 'Should auto-select promotional price');
+        System.assertEquals('Promotional Price', results[0].sourcePricebookType);
+        System.assertEquals(15, results[0].maxDiscount, 'Max discount should be returned from best price entry');
+    }
+
+    @isTest
+    static void testSearchProductsWithBestPriceCustomerSpecific() {
+        Opportunity opp = [SELECT Id, AccountId, Pricebook2Id FROM Opportunity LIMIT 1];
+        Product2 prod = [SELECT Id FROM Product2 WHERE ProductCode = 'USG-500' LIMIT 1];
+
+        // Create a customer-specific pricebook
+        Pricebook2 custPb = new Pricebook2(
+            Name = 'Test Hospital Pricebook',
+            IsActive = true,
+            Price_Book_Type__c = 'Customer Specific',
+            Customer__c = opp.AccountId
+        );
+        insert custPb;
+
+        PricebookEntry custPbe = new PricebookEntry(
+            Pricebook2Id = custPb.Id,
+            Product2Id = prod.Id,
+            UnitPrice = 135000,
+            IsActive = true
+        );
+        insert custPbe;
+
+        Test.startTest();
+        List<QuoteBuilderController.ProductSearchResult> results =
+            QuoteBuilderController.searchProductsWithBestPrice(
+                'Ultrasound', null, opp.AccountId, null
+            );
+        Test.stopTest();
+
+        System.assertEquals(1, results.size(), 'Should find 1 product');
+        System.assertEquals(135000, results[0].unitPrice, 'Should auto-select customer-specific price');
+        System.assertEquals('Customer Specific', results[0].sourcePricebookType);
+    }
+
+    @isTest
+    static void testSearchProductsWithBestPricePriorityOrder() {
+        Opportunity opp = [SELECT Id, AccountId, Pricebook2Id FROM Opportunity LIMIT 1];
+        Product2 prod = [SELECT Id FROM Product2 WHERE ProductCode = 'USG-500' LIMIT 1];
+
+        // Create customer-specific pricebook (priority 2)
+        Pricebook2 custPb = new Pricebook2(
+            Name = 'Customer PB',
+            IsActive = true,
+            Price_Book_Type__c = 'Customer Specific',
+            Customer__c = opp.AccountId
+        );
+        insert custPb;
+
+        PricebookEntry custPbe = new PricebookEntry(
+            Pricebook2Id = custPb.Id,
+            Product2Id = prod.Id,
+            UnitPrice = 135000,
+            IsActive = true
+        );
+        insert custPbe;
+
+        // Create promotional pricebook (priority 1 - should win)
+        Pricebook2 promoPb = new Pricebook2(
+            Name = 'Promo PB',
+            IsActive = true,
+            Price_Book_Type__c = 'Promotional Price',
+            Valid_From__c = Date.today().addDays(-5),
+            Valid_Till__c = Date.today().addDays(30)
+        );
+        insert promoPb;
+
+        PricebookEntry promoPbe = new PricebookEntry(
+            Pricebook2Id = promoPb.Id,
+            Product2Id = prod.Id,
+            UnitPrice = 110000,
+            IsActive = true
+        );
+        insert promoPbe;
 
         Test.startTest();
         List<QuoteBuilderController.ProductSearchResult> results =
@@ -395,127 +477,46 @@ private class QuoteBuilderControllerTest {
         Test.stopTest();
 
         System.assertEquals(1, results.size());
-        System.assertEquals('USG-500', results[0].productCode);
-        System.assertEquals(150000, results[0].unitPrice, 'Should default to Price list5 list price');
-        System.assertEquals('Price list5', results[0].sourcePricebookType);
-        System.assertEquals(false, results[0].isServiceItem);
+        // Promotional should win over customer-specific
+        System.assertEquals(110000, results[0].unitPrice, 'Promotional price should have highest priority');
+        System.assertEquals('Promotional Price', results[0].sourcePricebookType);
+        // Should have multiple available prices
+        System.assert(results[0].availablePrices.size() >= 2, 'Should show multiple price options');
     }
 
     @isTest
-    static void testSearchExcludesProductWithoutTier5() {
-        // New product with no Price list5 entry - must not be returned.
-        Product2 orphan = new Product2(
-            Name = 'Orphan Product',
-            ProductCode = 'ORPH-1',
-            IsActive = true
-        );
-        insert orphan;
+    static void testSearchProductsWithBestPriceExpiredPromo() {
+        Opportunity opp = [SELECT Id, AccountId, Pricebook2Id FROM Opportunity LIMIT 1];
+        Product2 prod = [SELECT Id FROM Product2 WHERE ProductCode = 'USG-500' LIMIT 1];
 
-        Id stdPbId = Test.getStandardPricebookId();
-        insert new PricebookEntry(
-            Pricebook2Id = stdPbId,
-            Product2Id = orphan.Id,
-            UnitPrice = 5000,
-            IsActive = true
-        );
-
-        Test.startTest();
-        List<QuoteBuilderController.ProductSearchResult> results =
-            QuoteBuilderController.searchProductsWithBestPrice(
-                'Orphan', null, null, null
-            );
-        Test.stopTest();
-
-        System.assertEquals(0, results.size(),
-            'Non-service product without Price list5 must be excluded from search');
-    }
-
-    @isTest
-    static void testSearchReturnsServiceItem() {
-        Product2 svc = new Product2(
-            Name = 'Installation Service',
-            ProductCode = 'SVC-INSTALL',
+        // Create an expired promotional pricebook
+        Pricebook2 promoPb = new Pricebook2(
+            Name = 'Expired Promo',
             IsActive = true,
-            Service_Item__c = 'Yes',
-            Tax__c = 18
+            Price_Book_Type__c = 'Promotional Price',
+            Valid_From__c = Date.today().addDays(-60),
+            Valid_Till__c = Date.today().addDays(-1)
         );
-        insert svc;
+        insert promoPb;
+
+        PricebookEntry promoPbe = new PricebookEntry(
+            Pricebook2Id = promoPb.Id,
+            Product2Id = prod.Id,
+            UnitPrice = 100000,
+            IsActive = true
+        );
+        insert promoPbe;
 
         Test.startTest();
         List<QuoteBuilderController.ProductSearchResult> results =
             QuoteBuilderController.searchProductsWithBestPrice(
-                'Installation', null, null, null
+                'Ultrasound', null, opp.AccountId, null
             );
         Test.stopTest();
 
         System.assertEquals(1, results.size());
-        System.assertEquals(true, results[0].isServiceItem);
-        System.assertEquals(0, results[0].unitPrice, 'Service items return 0 - user enters price');
-        System.assertEquals(18, results[0].taxPercent, 'Service items carry product tax');
-        System.assertEquals('Service', results[0].sourcePricebookType);
-    }
-
-    @isTest
-    static void testPricingPreview_tierResolution() {
-        Product2 prod = [SELECT Id FROM Product2 WHERE ProductCode = 'USG-500' LIMIT 1];
-
-        // Add Price list3 at 100000 and Price list1 at 50000 to exercise the walk.
-        Pricebook2 pb3 = new Pricebook2(Name = 'T3', IsActive = true, Price_Book_Type__c = 'Price list3');
-        Pricebook2 pb1 = new Pricebook2(Name = 'T1', IsActive = true, Price_Book_Type__c = 'Price list1');
-        insert new List<Pricebook2>{pb3, pb1};
-        insert new List<PricebookEntry>{
-            new PricebookEntry(Pricebook2Id = pb3.Id, Product2Id = prod.Id, UnitPrice = 100000, IsActive = true, UseStandardPrice = false),
-            new PricebookEntry(Pricebook2Id = pb1.Id, Product2Id = prod.Id, UnitPrice = 50000, IsActive = true, UseStandardPrice = false)
-        };
-
-        Test.startTest();
-        // Unit price 150000, discount 40% -> discounted = 90000. Tightest fit = Price list3 (100000).
-        QuoteBuilderController.PricingPreview p =
-            QuoteBuilderController.getProductPricingPreview(prod.Id, 150000, 40);
-        Test.stopTest();
-
-        System.assertEquals('Price list3', p.resolvedTier);
-        System.assertEquals(100000, p.resolvedTierListPrice);
-        System.assertEquals(150000, p.standardPrice);
-        // 90000 < 150000 -> Approval Required
-        System.assertEquals('Approval Required', p.priceStatus);
-    }
-
-    @isTest
-    static void testPricingPreview_salesPriceFloor() {
-        Product2 prod = [SELECT Id FROM Product2 WHERE ProductCode = 'USG-500' LIMIT 1];
-
-        Test.startTest();
-        try {
-            QuoteBuilderController.getProductPricingPreview(prod.Id, 100000, 0);
-            System.assert(false, 'Should have thrown - Sales Price below Price list5 floor');
-        } catch (AuraHandledException e) {
-            // AuraHandledException intentionally masks its server-side message
-            // so tests can only assert the exception type, not its text.
-            System.assert(true);
-        }
-        Test.stopTest();
-    }
-
-    @isTest
-    static void testPricingPreview_serviceItem() {
-        Product2 svc = new Product2(
-            Name = 'Calibration Service',
-            ProductCode = 'SVC-CAL',
-            IsActive = true,
-            Service_Item__c = 'Yes',
-            Tax__c = 5
-        );
-        insert svc;
-
-        Test.startTest();
-        QuoteBuilderController.PricingPreview p =
-            QuoteBuilderController.getProductPricingPreview(svc.Id, 2500, 10);
-        Test.stopTest();
-
-        System.assertEquals(true, p.isServiceItem);
-        System.assertEquals('Not Required', p.priceStatus);
-        System.assertEquals(null, p.resolvedTier, 'Service items do not resolve a tier');
+        // Expired promo should NOT be selected; should fall back to standard price
+        System.assertNotEquals(100000, results[0].unitPrice, 'Expired promo price should not be selected');
     }
 
     @isTest
@@ -546,18 +547,16 @@ private class QuoteBuilderControllerTest {
         );
         insert q;
 
-        // UnitPrice at the Price list5 floor, zero discount - trigger should
-        // stamp Source_Pricebook_Ref__c to the Tier5 pricebook and leave the
-        // line at Not Required (final price == standard price).
         String lineItemsJSON = JSON.serialize(new List<Map<String, Object>>{
             new Map<String, Object>{
                 'productId' => pbe.Product2Id,
                 'pricebookEntryId' => pbe.Id,
                 'quantity' => 1,
-                'unitPrice' => 150000,
+                'unitPrice' => 120000,
                 'discount' => 0,
-                'lineDescription' => 'Standard priced item',
-                'detailedDescription' => 'Full list price',
+                'maxDiscount' => 10,
+                'lineDescription' => 'Promo priced item',
+                'detailedDescription' => 'Auto-selected from promo',
                 'sourcePricebookId' => opp.Pricebook2Id
             }
         });
@@ -566,17 +565,9 @@ private class QuoteBuilderControllerTest {
         QuoteBuilderController.saveQuoteLineItems(q.Id, lineItemsJSON);
         Test.stopTest();
 
-        QuoteLineItem savedItem = [
-            SELECT Source_Pricebook_Ref__c, Source_Pricebook_Ref__r.Price_Book_Type__c,
-                   Price_Status__c, Tax__c
-            FROM QuoteLineItem WHERE QuoteId = :q.Id LIMIT 1
-        ];
-        System.assertNotEquals(null, savedItem.Source_Pricebook_Ref__c,
-            'Trigger must stamp a resolved tier pricebook');
-        System.assertEquals('Price list5', savedItem.Source_Pricebook_Ref__r.Price_Book_Type__c,
-            'Zero-discount line at list price resolves to Price list5');
-        System.assertEquals('Not Required', savedItem.Price_Status__c,
-            'Final price == standard price -> Not Required');
+        QuoteLineItem savedItem = [SELECT Source_Pricebook_Ref__c, Price_Status__c FROM QuoteLineItem WHERE QuoteId = :q.Id LIMIT 1];
+        System.assertEquals(opp.Pricebook2Id, savedItem.Source_Pricebook_Ref__c, 'Source pricebook lookup should be saved');
+        System.assertEquals('Not Required', savedItem.Price_Status__c, 'Price status should be Not Required when discount <= max');
     }
 
     @isTest
@@ -593,16 +584,16 @@ private class QuoteBuilderControllerTest {
         );
         insert q;
 
-        // UnitPrice 150000 (= standard), 15% discount -> final 127500 < 150000
-        // -> Approval Required under the new standard-price comparison.
+        // Discount (15) exceeds max discount (10) -> Approval Required
         String lineItemsJSON = JSON.serialize(new List<Map<String, Object>>{
             new Map<String, Object>{
                 'productId' => pbe.Product2Id,
                 'pricebookEntryId' => pbe.Id,
                 'quantity' => 1,
-                'unitPrice' => 150000,
+                'unitPrice' => 120000,
                 'discount' => 15,
-                'lineDescription' => 'Discounted item',
+                'maxDiscount' => 10,
+                'lineDescription' => 'Over-discounted item',
                 'detailedDescription' => 'Needs approval',
                 'sourcePricebookId' => opp.Pricebook2Id
             }
@@ -635,14 +626,15 @@ private class QuoteBuilderControllerTest {
         );
         insert q;
 
-        // Save a normal (non-approval) line item at list price. Quote stays Approved.
+        // Save a normal (non-approval) line item. Quote should stay 'Approved'.
         String lineItemsJSON = JSON.serialize(new List<Map<String, Object>>{
             new Map<String, Object>{
                 'productId' => pbe.Product2Id,
                 'pricebookEntryId' => pbe.Id,
                 'quantity' => 1,
-                'unitPrice' => 150000,
-                'discount' => 0,
+                'unitPrice' => 100000,
+                'discount' => 5,
+                'maxDiscount' => 10,
                 'lineDescription' => 'Within limit',
                 'detailedDescription' => '',
                 'sourcePricebookId' => opp.Pricebook2Id
