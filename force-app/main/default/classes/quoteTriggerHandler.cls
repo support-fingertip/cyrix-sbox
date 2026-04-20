@@ -204,7 +204,16 @@ public with sharing class quoteTriggerHandler {
                 );
                 newQlis.add(n);
             }
-            if (!newQlis.isEmpty()) insert newQlis;
+            if (!newQlis.isEmpty()) {
+                // Snapshot QLIs carry original tier / tax / status values that
+                // must not be re-stamped by QuoteLineItemTriggerHandler.
+                QuoteLineItemTriggerHandler.bypass = true;
+                try {
+                    insert newQlis;
+                } finally {
+                    QuoteLineItemTriggerHandler.bypass = false;
+                }
+            }
 
             // Clone Payment_Term__c
             List<Payment_Term__c> newPts = new List<Payment_Term__c>();

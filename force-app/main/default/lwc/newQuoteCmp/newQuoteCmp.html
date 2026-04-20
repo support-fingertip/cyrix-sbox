@@ -205,8 +205,7 @@
                                                 <th scope="col" style="width:10%"><div class="slds-truncate">Category</div></th>
                                                 <th scope="col" style="width:11%"><div class="slds-truncate">Make / Model</div></th>
                                                 <th scope="col" style="width:10%"><div class="slds-truncate">Unit Price</div></th>
-                                                <th scope="col" style="width:11%"><div class="slds-truncate">Price Source</div></th>
-                                                <th scope="col" style="width:8%"><div class="slds-truncate">Max Disc %</div></th>
+                                                <th scope="col" style="width:11%"><div class="slds-truncate">Tier</div></th>
                                                 <th scope="col" style="width:7%"><div class="slds-truncate">HSN</div></th>
                                                 <th scope="col" style="width:7%"><div class="slds-truncate">Tax %</div></th>
                                                 <th scope="col" style="width:7%"><div class="slds-truncate">Action</div></th>
@@ -225,7 +224,6 @@
                                                             <span class={prod.priceBadgeClass}>{prod.priceBadgeLabel}</span>
                                                         </template>
                                                     </td>
-                                                    <td><div class="slds-truncate">{prod.maxDiscountDisplay}</div></td>
                                                     <td><div class="slds-truncate">{prod.hsnCode}</div></td>
                                                     <td><div class="slds-truncate">{prod.formattedTax}</div></td>
                                                     <td>
@@ -274,8 +272,7 @@
                                         <th scope="col" style="width:110px"><div class="slds-truncate">List Price</div></th>
                                         <th scope="col" style="width:110px"><div class="slds-truncate">Sales Price</div></th>
                                         <th scope="col" style="width:90px"><div class="slds-truncate">Disc. %</div></th>
-                                        <th scope="col" style="width:80px"><div class="slds-truncate">Max Disc %</div></th>
-                                        <th scope="col" style="width:70px"><div class="slds-truncate">Tax %</div></th>
+                                        <th scope="col" style="width:90px"><div class="slds-truncate">Tax %</div></th>
                                         <th scope="col" style="width:100px"><div class="slds-truncate">Price Status</div></th>
                                         <th scope="col" style="width:115px"><div class="slds-truncate">Line Total</div></th>
                                         <th scope="col" style="width:45px"><div class="slds-truncate"></div></th>
@@ -340,8 +337,24 @@
                                                     onchange={handleLineItemChange}>
                                                 </lightning-input>
                                             </td>
-                                            <td class="slds-text-align_center">{item.maxDiscountDisplay}</td>
-                                            <td class="slds-text-align_center">{item.taxPercentDisplay}</td>
+                                            <td class="slds-text-align_center">
+                                                <template if:true={item.isServiceItem}>
+                                                    <lightning-input
+                                                        type="number"
+                                                        value={item.taxPercent}
+                                                        min="0"
+                                                        max="100"
+                                                        step="0.01"
+                                                        variant="label-hidden"
+                                                        data-row-id={item.rowId}
+                                                        data-field="taxPercent"
+                                                        onchange={handleLineItemChange}>
+                                                    </lightning-input>
+                                                </template>
+                                                <template if:false={item.isServiceItem}>
+                                                    {item.taxPercentDisplay}
+                                                </template>
+                                            </td>
                                             <td class="slds-text-align_center">
                                                 <span class={item.priceStatusBadgeClass}>{item.priceStatus}</span>
                                             </td>

@@ -60,4 +60,26 @@
         <protected>false</protected>
         <reevaluateOnChange>false</reevaluateOnChange>
     </fieldUpdates>
+    <fieldUpdates>
+        <fullName>Quote_Price_Status_Approved</fullName>
+        <description>Final action of Quote Price Approval: sets Price_Status__c to Approved on successful approval.</description>
+        <field>Price_Status__c</field>
+        <literalValue>Approved</literalValue>
+        <name>Quote Price Status Approved</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Literal</operation>
+        <protected>false</protected>
+        <reevaluateOnChange>false</reevaluateOnChange>
+    </fieldUpdates>
+    <fieldUpdates>
+        <fullName>Quote_Price_Status_Rejected</fullName>
+        <description>Final action of Quote Price Approval: sets Price_Status__c to Rejected on rejection.</description>
+        <field>Price_Status__c</field>
+        <literalValue>Rejected</literalValue>
+        <name>Quote Price Status Rejected</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Literal</operation>
+        <protected>false</protected>
+        <reevaluateOnChange>false</reevaluateOnChange>
+    </fieldUpdates>
 </Workflow>

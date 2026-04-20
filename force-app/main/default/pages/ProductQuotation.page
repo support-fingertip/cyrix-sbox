@@ -19,8 +19,55 @@
                 content: element(footer); 
                 } 
                 }
-                div.header { 
-                position: running(header);
+
+                body {
+                font-family: 'Times New Roman', Times, serif;
+                line-height: 1.4;
+                margin: 0;
+                padding: 0;
+                font-size: 12.9px;
+                }
+
+                /* Each logical section starts on a fresh physical page.
+                No fixed height, no overflow:hidden - let the engine paginate. */
+                .page {
+                position: relative;
+                page-break-after: always;
+                z-index: 2;
+                }
+                .page:last-child {
+                page-break-after: auto;
+                }
+
+                /* position:fixed elements are painted on EVERY physical page by
+                Flying Saucer. Coordinates are measured from the top-left corner
+                of the PAGE (including @page margins), so use positive offsets. */
+                .letterhead-bg {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 210mm;
+                height: 297mm;
+                z-index: 0;
+                overflow: hidden;
+                }
+                .letterhead-bg img {
+                display: block;
+                width: 210mm;
+                height: 297mm;
+                }
+
+                /* Running quote header - sits in the top margin, between the
+                logo area and the content box. */
+                .page-header {
+                position: fixed;
+                top: 44mm;
+                left: 16mm;
+                right: 16mm;
+                z-index: 2;
+                font-size: 14px;
+                }
+                .header-inner {
                 width: 100%;
                 }
                     div.footer { 
@@ -51,28 +98,30 @@
             </style>
         </head>
         <body>
-            
-            <!-- LETTERHEAD – FIXED ON EVERY PAGE, FULL SIZE -->
-            <div class="footer">
-            </div>  
-            
-            <!-- RUNNING HEADER – FIXED ON EVERY PAGE, BELOW LETTERHEAD LOGO AREA -->
-               <div class="header">  
-                   <apex:image url="{!URLFOR($Resource.Letter_Head)}" style="index:1;width:90 em;height:70em;"/>
-            <table class="header-inner overlaytext"  style="index:10;">
-                <tr>
-                    <td style="width: 80%; text-align: left;">
-                        <span style="color: #000000;">{!quote.Name}</span>
-                    </td>
-                    <td style="width: 20%; text-align: left;">
-                        <span style="color: #000000;">DATE:</span>
-                        <apex:outputText value="{0,date,dd/MM/yyyy}">
-                            <apex:param value="{!quote.Quote_Date__c}" />
-                        </apex:outputText>
-                    </td>
-                </tr>
-            </table>
-                  
+
+            <!-- Rendered ONCE. position:fixed makes Flying Saucer repeat both
+                 of these on every physical page of the PDF. Use plain <img>
+                 with explicit width/height attributes - Flying Saucer's image
+                 sizer ignores style="width:..." on <apex:image> and falls back
+                 to the image's intrinsic pixel dimensions. -->
+            <div class="letterhead-bg">
+                <img src="{!URLFOR($Resource.Letter_Head)}" width="794" height="1123" />
+            </div>
+
+            <div class="page-header">
+                <table class="header-inner">
+                    <tr>
+                        <td style="width: 80%; text-align: left;">
+                            <span style="color: #000000;">{!quote.Name}</span>
+                        </td>
+                        <td style="width: 20%; text-align: center;">
+                            <span style="color: #000000;">DATE:</span>
+                            <apex:outputText value="{0,date,dd/MM/yyyy}">
+                                <apex:param value="{!quote.Quote_Date__c}" />
+                            </apex:outputText>
+                        </td>
+                    </tr>
+                </table>
             </div>
         
         <!-- ====================================================================== -->

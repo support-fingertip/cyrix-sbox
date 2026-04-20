@@ -3,6 +3,7 @@
     <fullName>Price_Book_Type__c</fullName>
     <externalId>false</externalId>
     <label>Price Book Type</label>
+    <description>Tiered pricing band. Price list5 is the highest / standard list price; Price list1 is the lowest. The quote engine walks from 5 down to 1 to find the tightest-fitting tier for a discounted unit price.</description>
     <required>false</required>
     <type>Picklist</type>
     <valueSet>
@@ -10,24 +11,29 @@
         <valueSetDefinition>
             <sorted>false</sorted>
             <value>
-                <fullName>Customer Specific</fullName>
-                <default>false</default>
-                <label>Customer Specific</label>
+                <fullName>Price list5</fullName>
+                <default>true</default>
+                <label>Price list5</label>
             </value>
             <value>
-                <fullName>Region Specific</fullName>
+                <fullName>Price list4</fullName>
                 <default>false</default>
-                <label>Region Specific</label>
+                <label>Price list4</label>
             </value>
             <value>
-                <fullName>Promotional Price</fullName>
+                <fullName>Price list3</fullName>
                 <default>false</default>
-                <label>Promotional Price</label>
+                <label>Price list3</label>
             </value>
             <value>
-                <fullName>Dealer Price</fullName>
+                <fullName>Price list2</fullName>
                 <default>false</default>
-                <label>Dealer Price</label>
+                <label>Price list2</label>
+            </value>
+            <value>
+                <fullName>Price list1</fullName>
+                <default>false</default>
+                <label>Price list1</label>
             </value>
         </valueSetDefinition>
     </valueSet>
