@@ -144,6 +144,36 @@
     color: #ffffff;
 }
 
+.qsp-step-locked {
+    cursor: not-allowed;
+    opacity: 0.55;
+    background: repeating-linear-gradient(
+        45deg,
+        #f1f5f9,
+        #f1f5f9 6px,
+        #e2e8f0 6px,
+        #e2e8f0 12px
+    );
+    color: #64748b;
+}
+
+.qsp-step-locked:hover {
+    background: repeating-linear-gradient(
+        45deg,
+        #f1f5f9,
+        #f1f5f9 6px,
+        #e2e8f0 6px,
+        #e2e8f0 12px
+    );
+    color: #64748b;
+}
+
+.qsp-step-locked.qsp-step-current {
+    opacity: 1;
+    background: linear-gradient(135deg, var(--qsp-primary) 0%, var(--qsp-primary-dark) 100%);
+    color: #ffffff;
+}
+
 .qsp-step-inner {
     display: flex;
     align-items: center;
