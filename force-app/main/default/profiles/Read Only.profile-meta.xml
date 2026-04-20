@@ -785,36 +785,6 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Bank__c.Account_No__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Bank__c.Bank_Name__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Bank__c.Beneficiary_Name__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Bank__c.Branch_Address__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Bank__c.Branch_Name__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Bank__c.IFSC_CODE__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
         <field>Branch__c.Short_Code__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -3890,9 +3860,6 @@
         <layout>Asset__c-Asset Layout</layout>
     </layoutAssignments>
     <layoutAssignments>
-        <layout>Bank__c-Bank Layout</layout>
-    </layoutAssignments>
-    <layoutAssignments>
         <layout>Branch__c-Branch Layout</layout>
     </layoutAssignments>
     <layoutAssignments>
@@ -4263,10 +4230,6 @@
     </pageAccesses>
     <tabVisibilities>
         <tab>Asset__c</tab>
-        <visibility>DefaultOn</visibility>
-    </tabVisibilities>
-    <tabVisibilities>
-        <tab>Bank__c</tab>
         <visibility>DefaultOn</visibility>
     </tabVisibilities>
     <tabVisibilities>
