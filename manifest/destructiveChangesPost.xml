@@ -5,17 +5,5 @@
         <members>SAPIntegrationControllerTest</members>
         <name>ApexClass</name>
     </types>
-    <types>
-        <members>Bank__c</members>
-        <name>CustomObject</name>
-    </types>
-    <types>
-        <members>Bank__c</members>
-        <name>CustomTab</name>
-    </types>
-    <types>
-        <members>Bank__c-Bank Layout</members>
-        <name>Layout</name>
-    </types>
     <version>62.0</version>
 </Package>
