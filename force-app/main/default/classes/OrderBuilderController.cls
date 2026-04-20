@@ -124,6 +124,15 @@ public with sharing class OrderBuilderController {
         for (QuoteLineItem qli : [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
                    Product2.QuantityUnitOfMeasure,
+                   Product2.Manager_Discount_Up_to__c,
+                   Product2.VP_Sales_Discount_Up_to__c,
+                   Product2.CEO_Sales_Discount_Up_to__c,
+                   Product2.Installation_Cost_Percent__c,
+                   Product2.Insurance_Cost_Percent__c,
+                   Product2.Internal_Transport_Cost_Percent__c,
+                   Product2.Promotional_Cost_Percent__c,
+                   Product2.Training_Cost_Percent__c,
+                   Product2.Warranty_Cost_Percent__c,
                    PricebookEntryId, PricebookEntry.Tax__c,
                    Quantity, ListPrice, UnitPrice
             FROM QuoteLineItem
@@ -140,6 +149,15 @@ public with sharing class OrderBuilderController {
             item.listPrice = qli.ListPrice;
             item.unitPrice = qli.UnitPrice;
             item.taxPercent = qli.PricebookEntry.Tax__c != null ? qli.PricebookEntry.Tax__c : 0;
+            item.managerDiscountUpTo = qli.Product2.Manager_Discount_Up_to__c;
+            item.vpDiscountUpTo = qli.Product2.VP_Sales_Discount_Up_to__c;
+            item.ceoDiscountUpTo = qli.Product2.CEO_Sales_Discount_Up_to__c;
+            item.installationCostPercent = qli.Product2.Installation_Cost_Percent__c;
+            item.insuranceCostPercent = qli.Product2.Insurance_Cost_Percent__c;
+            item.transportCostPercent = qli.Product2.Internal_Transport_Cost_Percent__c;
+            item.promotionalCostPercent = qli.Product2.Promotional_Cost_Percent__c;
+            item.trainingCostPercent = qli.Product2.Training_Cost_Percent__c;
+            item.warrantyCostPercent = qli.Product2.Warranty_Cost_Percent__c;
             ctx.lineItems.add(item);
         }
 
@@ -204,6 +222,15 @@ public with sharing class OrderBuilderController {
         for (OrderItem oi : [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
                    Product2.QuantityUnitOfMeasure,
+                   Product2.Manager_Discount_Up_to__c,
+                   Product2.VP_Sales_Discount_Up_to__c,
+                   Product2.CEO_Sales_Discount_Up_to__c,
+                   Product2.Installation_Cost_Percent__c,
+                   Product2.Insurance_Cost_Percent__c,
+                   Product2.Internal_Transport_Cost_Percent__c,
+                   Product2.Promotional_Cost_Percent__c,
+                   Product2.Training_Cost_Percent__c,
+                   Product2.Warranty_Cost_Percent__c,
                    PricebookEntryId, PricebookEntry.Tax__c,
                    Quantity, ListPrice, UnitPrice
             FROM OrderItem
@@ -221,6 +248,15 @@ public with sharing class OrderBuilderController {
             item.listPrice = oi.ListPrice;
             item.unitPrice = oi.UnitPrice;
             item.taxPercent = oi.PricebookEntry.Tax__c != null ? oi.PricebookEntry.Tax__c : 0;
+            item.managerDiscountUpTo = oi.Product2.Manager_Discount_Up_to__c;
+            item.vpDiscountUpTo = oi.Product2.VP_Sales_Discount_Up_to__c;
+            item.ceoDiscountUpTo = oi.Product2.CEO_Sales_Discount_Up_to__c;
+            item.installationCostPercent = oi.Product2.Installation_Cost_Percent__c;
+            item.insuranceCostPercent = oi.Product2.Insurance_Cost_Percent__c;
+            item.transportCostPercent = oi.Product2.Internal_Transport_Cost_Percent__c;
+            item.promotionalCostPercent = oi.Product2.Promotional_Cost_Percent__c;
+            item.trainingCostPercent = oi.Product2.Training_Cost_Percent__c;
+            item.warrantyCostPercent = oi.Product2.Warranty_Cost_Percent__c;
             ctx.lineItems.add(item);
         }
 
@@ -401,5 +437,14 @@ public with sharing class OrderBuilderController {
         @AuraEnabled public Decimal listPrice;
         @AuraEnabled public Decimal unitPrice;
         @AuraEnabled public Decimal taxPercent;
+        @AuraEnabled public Decimal managerDiscountUpTo;
+        @AuraEnabled public Decimal vpDiscountUpTo;
+        @AuraEnabled public Decimal ceoDiscountUpTo;
+        @AuraEnabled public Decimal installationCostPercent;
+        @AuraEnabled public Decimal insuranceCostPercent;
+        @AuraEnabled public Decimal transportCostPercent;
+        @AuraEnabled public Decimal promotionalCostPercent;
+        @AuraEnabled public Decimal trainingCostPercent;
+        @AuraEnabled public Decimal warrantyCostPercent;
     }
 }
