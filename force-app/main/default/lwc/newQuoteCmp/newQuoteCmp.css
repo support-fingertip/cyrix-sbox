@@ -314,6 +314,52 @@
     border: 1px solid var(--border-color);
 }
 
+.subtotal-divider {
+    margin-top: 0.5rem;
+    padding-top: 0.625rem;
+    border-top: 1px dashed #cbd5e1;
+}
+
+.total-label_muted {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.cost-breakdown {
+    padding: 0.25rem 0 0.25rem 0.875rem;
+    margin-bottom: 0.25rem;
+    border-left: 2px solid #e2e8f0;
+}
+
+.cost-breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.25rem 0;
+    font-size: 0.75rem;
+    color: var(--text-weak);
+}
+
+.cost-breakdown-label {
+    font-weight: 500;
+}
+
+.cost-breakdown-value {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.discount-cell,
+.cost-cell {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    cursor: help;
+}
+
+.discount-input.discount-over-cap input {
+    border-color: var(--warning-color) !important;
+    background-color: #fffbeb !important;
+}
+
 .total-row {
     display: flex;
     justify-content: space-between;
