@@ -1,0 +1,398 @@
+<template>
+    <!-- LOADING OVERLAY -->
+    <template if:true={isLoading}>
+        <div class="loading-overlay">
+            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+        </div>
+    </template>
+
+    <div class="order-builder">
+        <!-- PAGE HEADER -->
+        <div class="page-header slds-p-around_medium">
+            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                <div>
+                    <h1 class="slds-text-heading_medium page-title">{pageTitle}</h1>
+                    <p class="slds-text-body_small slds-m-top_xxx-small page-subtitle">
+                        <template if:false={isEditMode}>Fill in the details below to create a new sales order.</template>
+                        <template if:true={isEditMode}>Modify the order details and save your changes.</template>
+                    </p>
+                </div>
+                <div class="slds-grid slds-grid_vertical-align-center">
+                    <template if:true={accountName}>
+                        <div class="customer-badge slds-m-right_small">
+                            <lightning-icon icon-name="standard:account" size="x-small" class="slds-m-right_xx-small"></lightning-icon>
+                            <span>{accountName}</span>
+                        </div>
+                    </template>
+                    <lightning-icon icon-name="standard:orders" size="medium"></lightning-icon>
+                </div>
+            </div>
+        </div>
+
+        <!-- RECORD EDIT FORM (HEADER-LEVEL) -->
+        <lightning-record-edit-form
+            object-api-name="Order"
+            record-id={editRecordId}
+            onsubmit={handleFormSubmit}
+            onsuccess={handleFormSuccess}
+            onerror={handleFormError}
+            density="comfy">
+
+            <!-- ===== SECTION: ORDER INFORMATION ===== -->
+            <div class="section-card">
+                <div class="section-header">
+                    <lightning-icon icon-name="utility:description" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                    <span>Order Information</span>
+                </div>
+                <div class="section-body">
+                    <div class="slds-hide">
+                        <lightning-input-field field-name="Name" value={orderName}></lightning-input-field>
+                    </div>
+                    <div class="slds-grid slds-wrap slds-gutters_small">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                            <lightning-input-field field-name="EffectiveDate" value={defaultEffectiveDate} required></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                            <lightning-input-field field-name="Status" value={defaultStatus} required></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                            <lightning-input-field field-name="AccountId" value={defaultAccountId} required></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                            <lightning-input-field field-name="OpportunityId" value={defaultOpportunityId}></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                            <lightning-input-field field-name="Business_Vertical__c"></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                            <lightning-input-field field-name="Type"></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                            <lightning-input-field field-name="Contract_Period_From_Date__c"></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                            <lightning-input-field field-name="Contract_Period_End_Date__c"></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                            <lightning-input-field field-name="EndDate"></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-p-around_x-small">
+                            <lightning-input-field field-name="Description"></lightning-input-field>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== SECTION: BILL TO / SHIP TO ===== -->
+            <div class="section-card">
+                <div class="section-header">
+                    <lightning-icon icon-name="utility:location" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                    <span>Bill To / Ship To</span>
+                </div>
+                <div class="section-body">
+                    <div class="slds-grid slds-wrap slds-gutters_small">
+                        <!-- Bill To -->
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                            <div class="address-block slds-p-around_x-small">
+                                <h3 class="address-label slds-m-bottom_xx-small">
+                                    <lightning-icon icon-name="utility:company" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                    Bill To
+                                </h3>
+                                <c-address-input
+                                    label="Billing Address"
+                                    name={billingAddress.name}
+                                    street={billingAddress.street}
+                                    city={billingAddress.city}
+                                    state={billingAddress.state}
+                                    postal-code={billingAddress.postalCode}
+                                    country={billingAddress.country}
+                                    onaddresschange={handleBillingAddressChange}>
+                                </c-address-input>
+                            </div>
+                        </div>
+
+                        <!-- Ship To -->
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                            <div class="address-block slds-p-around_x-small">
+                                <h3 class="address-label slds-m-bottom_xx-small">
+                                    <lightning-icon icon-name="utility:shipping" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                    Ship To
+                                </h3>
+                                <template if:true={hasShippingAddresses}>
+                                    <div class="slds-p-bottom_xx-small">
+                                        <lightning-combobox
+                                            label="Select Shipping Address"
+                                            value={selectedShippingAddressId}
+                                            options={shippingAddressOptions}
+                                            onchange={handleShippingAddressSelect}
+                                            placeholder="Choose a shipping address...">
+                                        </lightning-combobox>
+                                    </div>
+                                </template>
+                                <template if:false={hasShippingAddresses}>
+                                    <div class="slds-text-body_small slds-text-color_weak slds-p-bottom_xx-small no-address-msg">
+                                        No shipping addresses found for this customer. Enter manually below.
+                                    </div>
+                                </template>
+                                <c-address-input
+                                    label="Shipping Address"
+                                    name={shippingAddress.name}
+                                    street={shippingAddress.street}
+                                    city={shippingAddress.city}
+                                    state={shippingAddress.state}
+                                    postal-code={shippingAddress.postalCode}
+                                    country={shippingAddress.country}
+                                    onaddresschange={handleShippingAddressChange}>
+                                </c-address-input>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== SECTION: PRODUCT SEARCH ===== -->
+            <div class="section-card">
+                <div class="section-header">
+                    <lightning-icon icon-name="utility:search" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                    <span>Add Products</span>
+                </div>
+                <div class="section-body">
+                    <div class="slds-grid slds-wrap slds-gutters_small slds-grid_vertical-align-end">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-p-around_x-small">
+                            <lightning-input
+                                label="Search Products"
+                                value={searchTerm}
+                                onchange={handleSearchTermChange}
+                                placeholder="Search by name or code..."
+                                type="search">
+                            </lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-p-around_x-small">
+                            <lightning-combobox
+                                label="Category Filter"
+                                value={categoryFilter}
+                                options={categoryOptions}
+                                onchange={handleCategoryFilterChange}
+                                placeholder="All Categories">
+                            </lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-p-around_x-small">
+                            <lightning-button
+                                label="Search"
+                                variant="brand"
+                                icon-name="utility:search"
+                                onclick={handleSearch}
+                                disabled={isSearchDisabled}
+                                class="full-width-btn">
+                            </lightning-button>
+                        </div>
+                    </div>
+
+                    <!-- Search Results -->
+                    <template if:true={showSearchResults}>
+                        <div class="search-results slds-m-top_small">
+                            <template if:true={hasSearchResults}>
+                                <div class="table-scroll">
+                                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped slds-table_fixed-layout">
+                                        <thead>
+                                            <tr class="slds-line-height_reset">
+                                                <th scope="col" style="width:22%"><div class="slds-truncate">Product Name</div></th>
+                                                <th scope="col" style="width:10%"><div class="slds-truncate">Code</div></th>
+                                                <th scope="col" style="width:12%"><div class="slds-truncate">Category</div></th>
+                                                <th scope="col" style="width:14%"><div class="slds-truncate">Make / Model</div></th>
+                                                <th scope="col" style="width:12%"><div class="slds-truncate">Unit Price</div></th>
+                                                <th scope="col" style="width:10%"><div class="slds-truncate">HSN</div></th>
+                                                <th scope="col" style="width:10%"><div class="slds-truncate">Tax %</div></th>
+                                                <th scope="col" style="width:10%"><div class="slds-truncate">Action</div></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={searchResults} for:item="prod">
+                                                <tr key={prod.pricebookEntryId}>
+                                                    <td><div class="slds-truncate" title={prod.productName}>{prod.productName}</div></td>
+                                                    <td><div class="slds-truncate">{prod.productCode}</div></td>
+                                                    <td><div class="slds-truncate">{prod.category}</div></td>
+                                                    <td><div class="slds-truncate">{prod.make} {prod.model}</div></td>
+                                                    <td><div class="slds-truncate">{prod.formattedPrice}</div></td>
+                                                    <td><div class="slds-truncate">{prod.hsnCode}</div></td>
+                                                    <td><div class="slds-truncate">{prod.formattedTax}</div></td>
+                                                    <td>
+                                                        <lightning-button-icon
+                                                            icon-name="utility:add"
+                                                            alternative-text="Add"
+                                                            variant="brand"
+                                                            size="small"
+                                                            data-id={prod.pricebookEntryId}
+                                                            onclick={handleAddProduct}>
+                                                        </lightning-button-icon>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </template>
+                            <template if:true={noSearchResults}>
+                                <div class="slds-text-align_center slds-p-around_medium slds-text-color_weak">
+                                    <lightning-icon icon-name="utility:info" size="small" class="slds-m-right_x-small"></lightning-icon>
+                                    No products found matching your search.
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- ===== SECTION: LINE ITEMS ===== -->
+            <div class="section-card">
+                <div class="section-header">
+                    <lightning-icon icon-name="utility:cart" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                    <span>Order Line Items ({lineItemCount})</span>
+                </div>
+                <div class="section-body">
+                    <template if:true={hasLineItems}>
+                        <div class="table-scroll line-items-table">
+                            <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                                <thead>
+                                    <tr class="slds-line-height_reset">
+                                        <th scope="col" style="width:35px"><div class="slds-truncate">#</div></th>
+                                        <th scope="col" style="min-width:160px"><div class="slds-truncate">Product</div></th>
+                                        <th scope="col" style="width:60px"><div class="slds-truncate">UOM</div></th>
+                                        <th scope="col" style="width:85px"><div class="slds-truncate">Qty</div></th>
+                                        <th scope="col" style="width:110px"><div class="slds-truncate">List Price</div></th>
+                                        <th scope="col" style="width:110px"><div class="slds-truncate">Sales Price</div></th>
+                                        <th scope="col" style="width:90px"><div class="slds-truncate">Tax %</div></th>
+                                        <th scope="col" style="width:115px"><div class="slds-truncate">Line Total</div></th>
+                                        <th scope="col" style="width:45px"><div class="slds-truncate"></div></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={lineItems} for:item="item">
+                                        <tr key={item.rowId}>
+                                            <td class="row-number">{item.rowNumber}</td>
+                                            <td>
+                                                <div class="slds-truncate product-name" title={item.productName}>
+                                                    {item.productName}
+                                                </div>
+                                                <div class="slds-text-body_small slds-text-color_weak">{item.productCode}</div>
+                                            </td>
+                                            <td class="slds-text-body_small">{item.uom}</td>
+                                            <td>
+                                                <lightning-input
+                                                    type="number"
+                                                    value={item.quantity}
+                                                    min="1"
+                                                    step="1"
+                                                    variant="label-hidden"
+                                                    data-row-id={item.rowId}
+                                                    data-field="quantity"
+                                                    onchange={handleLineItemChange}>
+                                                </lightning-input>
+                                            </td>
+                                            <td>
+                                                <lightning-formatted-number
+                                                    value={item.listPrice}
+                                                    format-style="currency"
+                                                    currency-code={currencyCode}>
+                                                </lightning-formatted-number>
+                                            </td>
+                                            <td>
+                                                <lightning-input
+                                                    type="number"
+                                                    value={item.unitPrice}
+                                                    min="0"
+                                                    step="0.01"
+                                                    variant="label-hidden"
+                                                    formatter="currency"
+                                                    data-row-id={item.rowId}
+                                                    data-field="unitPrice"
+                                                    onchange={handleLineItemChange}>
+                                                </lightning-input>
+                                            </td>
+                                            <td class="slds-text-align_center">
+                                                {item.taxPercentDisplay}
+                                            </td>
+                                            <td class="line-total-cell">
+                                                <lightning-formatted-number
+                                                    value={item.lineTotal}
+                                                    format-style="currency"
+                                                    currency-code={currencyCode}>
+                                                </lightning-formatted-number>
+                                            </td>
+                                            <td>
+                                                <lightning-button-icon
+                                                    icon-name="utility:delete"
+                                                    alternative-text="Remove"
+                                                    variant="bare"
+                                                    class="delete-btn"
+                                                    data-row-id={item.rowId}
+                                                    onclick={handleRemoveLineItem}>
+                                                </lightning-button-icon>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+
+                    <template if:false={hasLineItems}>
+                        <div class="empty-state slds-text-align_center slds-p-around_large">
+                            <lightning-icon icon-name="utility:cart" size="large" class="slds-m-bottom_small empty-icon"></lightning-icon>
+                            <p class="slds-text-color_weak">No products added yet. Use the search above to find and add products.</p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- ===== SECTION: ORDER SUMMARY ===== -->
+            <div class="section-card">
+                <div class="section-header">
+                    <lightning-icon icon-name="utility:summary" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                    <span>Order Summary</span>
+                </div>
+                <div class="section-body">
+                    <div class="totals-box">
+                        <div class="total-row">
+                            <span class="total-label">Subtotal</span>
+                            <span class="total-value">
+                                <lightning-formatted-number value={subtotal} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                            </span>
+                        </div>
+                        <div class="total-row">
+                            <span class="total-label">Total Tax</span>
+                            <span class="total-value">
+                                <lightning-formatted-number value={totalTax} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                            </span>
+                        </div>
+                        <div class="total-row grand-total">
+                            <span class="total-label">Grand Total</span>
+                            <span class="total-value">
+                                <lightning-formatted-number value={grandTotal} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== FOOTER ACTIONS ===== -->
+            <div class="footer-actions slds-p-around_medium">
+                <div class="slds-grid slds-grid_align-end">
+                    <lightning-button
+                        label="Cancel"
+                        onclick={handleCancel}
+                        class="slds-m-right_small">
+                    </lightning-button>
+                    <lightning-button
+                        label={saveButtonLabel}
+                        variant="brand"
+                        type="submit"
+                        disabled={isSaveDisabled}
+                        icon-name="utility:save">
+                    </lightning-button>
+                </div>
+            </div>
+
+        </lightning-record-edit-form>
+    </div>
+</template>
