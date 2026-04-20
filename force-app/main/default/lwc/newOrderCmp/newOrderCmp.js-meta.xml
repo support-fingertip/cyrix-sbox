@@ -22,6 +22,7 @@
                 <object>Order</object>
                 <object>Opportunity</object>
                 <object>Account</object>
+                <object>Quote</object>
             </objects>
         </targetConfig>
     </targetConfigs>

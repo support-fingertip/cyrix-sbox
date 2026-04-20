@@ -79,6 +79,87 @@ public with sharing class OrderBuilderController {
     }
 
     @AuraEnabled
+    public static OrderEditContext getQuoteContext(Id quoteId) {
+        Quote q = [
+            SELECT Id, Name, QuoteNumber, OpportunityId, Opportunity.Name,
+                   Opportunity.AccountId, Opportunity.Account.Name,
+                   Opportunity.Buisness_Vertical__c, Opportunity.Region__c,
+                   Pricebook2Id, CurrencyIsoCode,
+                   BillingName, BillingStreet, BillingCity,
+                   BillingStateCode, BillingPostalCode, BillingCountryCode,
+                   ShippingName, ShippingStreet, ShippingCity,
+                   ShippingStateCode, ShippingPostalCode, ShippingCountryCode
+            FROM Quote
+            WHERE Id = :quoteId
+            LIMIT 1
+        ];
+
+        OrderEditContext ctx = new OrderEditContext();
+        ctx.accountId = q.Opportunity != null ? q.Opportunity.AccountId : null;
+        ctx.accountName = (q.Opportunity != null && q.Opportunity.Account != null)
+            ? q.Opportunity.Account.Name : '';
+        ctx.opportunityId = q.OpportunityId;
+        ctx.opportunityName = q.Opportunity != null ? q.Opportunity.Name : '';
+        ctx.pricebookId = q.Pricebook2Id;
+        ctx.sourceQuoteId = q.Id;
+        ctx.sourceQuoteName = q.QuoteNumber;
+
+        ctx.billingStreet = q.BillingStreet;
+        ctx.billingCity = q.BillingCity;
+        ctx.billingState = q.BillingStateCode;
+        ctx.billingPostalCode = q.BillingPostalCode;
+        ctx.billingCountry = q.BillingCountryCode;
+        ctx.shippingStreet = q.ShippingStreet;
+        ctx.shippingCity = q.ShippingCity;
+        ctx.shippingState = q.ShippingStateCode;
+        ctx.shippingPostalCode = q.ShippingPostalCode;
+        ctx.shippingCountry = q.ShippingCountryCode;
+
+        List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
+        if (!stdPbs.isEmpty()) {
+            ctx.standardPricebookId = stdPbs[0].Id;
+        }
+
+        ctx.lineItems = new List<OrderLineResult>();
+        for (QuoteLineItem qli : [
+            SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
+                   Product2.QuantityUnitOfMeasure,
+                   PricebookEntryId, PricebookEntry.Tax__c,
+                   Quantity, ListPrice, UnitPrice
+            FROM QuoteLineItem
+            WHERE QuoteId = :quoteId
+            ORDER BY SortOrder ASC, Id ASC
+        ]) {
+            OrderLineResult item = new OrderLineResult();
+            item.productId = qli.Product2Id;
+            item.pricebookEntryId = qli.PricebookEntryId;
+            item.productName = qli.Product2.Name;
+            item.productCode = qli.Product2.ProductCode;
+            item.uom = qli.Product2.QuantityUnitOfMeasure != null ? qli.Product2.QuantityUnitOfMeasure : 'Nos';
+            item.quantity = qli.Quantity;
+            item.listPrice = qli.ListPrice;
+            item.unitPrice = qli.UnitPrice;
+            item.taxPercent = qli.PricebookEntry.Tax__c != null ? qli.PricebookEntry.Tax__c : 0;
+            ctx.lineItems.add(item);
+        }
+
+        ctx.paymentTerms = new List<PaymentTermResult>();
+        for (Payment_Term__c pt : [
+            SELECT Id, Payment_Term__c, Percentage__c
+            FROM Payment_Term__c
+            WHERE Quote__c = :quoteId
+            ORDER BY CreatedDate ASC
+        ]) {
+            PaymentTermResult ptr = new PaymentTermResult();
+            ptr.paymentTerm = pt.Payment_Term__c;
+            ptr.percentage = pt.Percentage__c;
+            ctx.paymentTerms.add(ptr);
+        }
+
+        return ctx;
+    }
+
+    @AuraEnabled
     public static OrderEditContext getOrderForEdit(Id orderId) {
         Order o = [
             SELECT Id, AccountId, Account.Name, OpportunityId, Opportunity.Name,
@@ -143,7 +224,52 @@ public with sharing class OrderBuilderController {
             ctx.lineItems.add(item);
         }
 
+        ctx.paymentTerms = new List<PaymentTermResult>();
+        for (Payment_Term__c pt : [
+            SELECT Id, Payment_Term__c, Percentage__c
+            FROM Payment_Term__c
+            WHERE Order__c = :orderId
+            ORDER BY CreatedDate ASC
+        ]) {
+            PaymentTermResult ptr = new PaymentTermResult();
+            ptr.paymentTerm = pt.Payment_Term__c;
+            ptr.percentage = pt.Percentage__c;
+            ctx.paymentTerms.add(ptr);
+        }
+
         return ctx;
+    }
+
+    @AuraEnabled
+    public static void savePaymentTerms(Id orderId, String paymentTermsJSON, Boolean deleteExisting) {
+        try {
+            List<PaymentTermInput> terms = (List<PaymentTermInput>) JSON.deserialize(
+                paymentTermsJSON, List<PaymentTermInput>.class
+            );
+
+            if (deleteExisting) {
+                List<Payment_Term__c> existing = [
+                    SELECT Id FROM Payment_Term__c WHERE Order__c = :orderId
+                ];
+                if (!existing.isEmpty()) delete existing;
+            }
+
+            if (terms == null || terms.isEmpty()) return;
+
+            List<Payment_Term__c> ptList = new List<Payment_Term__c>();
+            for (PaymentTermInput t : terms) {
+                Payment_Term__c pt = new Payment_Term__c();
+                pt.Order__c = orderId;
+                pt.Payment_Term__c = t.paymentTerm;
+                pt.Percentage__c = t.percentage;
+                ptList.add(pt);
+            }
+            insert ptList;
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new AuraHandledException('Payment terms save failed: ' + e.getMessage());
+        }
     }
 
     @AuraEnabled
@@ -209,6 +335,16 @@ public with sharing class OrderBuilderController {
         public Decimal unitPrice;
     }
 
+    public class PaymentTermInput {
+        public String paymentTerm;
+        public Decimal percentage;
+    }
+
+    public class PaymentTermResult {
+        @AuraEnabled public String paymentTerm;
+        @AuraEnabled public Decimal percentage;
+    }
+
     public class OrderContext {
         @AuraEnabled public Id opportunityId;
         @AuraEnabled public String opportunityName;
@@ -238,6 +374,8 @@ public with sharing class OrderBuilderController {
         @AuraEnabled public Date effectiveDate;
         @AuraEnabled public String status;
         @AuraEnabled public String description;
+        @AuraEnabled public Id sourceQuoteId;
+        @AuraEnabled public String sourceQuoteName;
         @AuraEnabled public String billingStreet;
         @AuraEnabled public String billingCity;
         @AuraEnabled public String billingState;
@@ -249,6 +387,7 @@ public with sharing class OrderBuilderController {
         @AuraEnabled public String shippingPostalCode;
         @AuraEnabled public String shippingCountry;
         @AuraEnabled public List<OrderLineResult> lineItems;
+        @AuraEnabled public List<PaymentTermResult> paymentTerms;
     }
 
     public class OrderLineResult {

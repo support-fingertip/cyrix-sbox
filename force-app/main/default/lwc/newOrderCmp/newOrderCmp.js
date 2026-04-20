@@ -4,13 +4,16 @@ import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import getOpportunityContext from '@salesforce/apex/OrderBuilderController.getOpportunityContext';
 import getAccountContext from '@salesforce/apex/OrderBuilderController.getAccountContext';
+import getQuoteContext from '@salesforce/apex/OrderBuilderController.getQuoteContext';
 import getOrderForEdit from '@salesforce/apex/OrderBuilderController.getOrderForEdit';
 import saveOrderItems from '@salesforce/apex/OrderBuilderController.saveOrderItems';
 import updateOrderItems from '@salesforce/apex/OrderBuilderController.updateOrderItems';
+import savePaymentTerms from '@salesforce/apex/OrderBuilderController.savePaymentTerms';
 import getShippingAddresses from '@salesforce/apex/QuoteBuilderController.getShippingAddresses';
 import searchProductsWithBestPrice from '@salesforce/apex/QuoteBuilderController.searchProductsWithBestPrice';
 
 let rowCounter = 0;
+let ptCounter = 0;
 
 export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -56,6 +59,12 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     // Line items
     @track lineItems = [];
 
+    // Payment terms
+    @track paymentTerms = [];
+
+    // Source quote (when creating from a Quote)
+    sourceQuoteId = null;
+
     // ===== PICKLIST OPTIONS =====
 
     get categoryOptions() {
@@ -89,6 +98,12 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     get orderName() { return this.isEditMode ? undefined : 'Auto'; }
     get saveButtonLabel() { return this.isSaving ? 'Saving...' : (this.isEditMode ? 'Update Order' : 'Save Order'); }
     get hasShippingAddresses() { return this.shippingAddresses.length > 0; }
+    get hasPaymentTerms() { return this.paymentTerms.length > 0; }
+    get paymentTermCount() { return this.paymentTerms.length; }
+    get totalPercentage() {
+        return this.paymentTerms.reduce((sum, t) => sum + (parseFloat(t.percentage) || 0), 0);
+    }
+    get percentageOverflow() { return this.totalPercentage > 100; }
     get defaultEffectiveDate() {
         if (this.isEditMode) return undefined;
         const d = new Date();
@@ -133,6 +148,11 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 this.isEditMode = true;
                 this.editRecordId = this.recordId;
                 await this.loadOrderForEdit();
+            } else if (idPrefix === '0Q0') {
+                // Quote - new order from quote (carry addresses, lines, payment terms)
+                this.isEditMode = false;
+                this.sourceQuoteId = this.recordId;
+                await this.loadQuoteContext();
             } else if (idPrefix === '006') {
                 // Opportunity - new order for opportunity
                 this.isEditMode = false;
@@ -195,6 +215,71 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         }
     }
 
+    async loadQuoteContext() {
+        const data = await getQuoteContext({ quoteId: this.sourceQuoteId });
+        this.pricebookId = data.standardPricebookId || data.pricebookId;
+        this.accountId = data.accountId;
+        this.accountName = data.accountName || '';
+        this.defaultAccountId = data.accountId;
+        this.defaultOpportunityId = data.opportunityId;
+
+        this.billingAddress = {
+            name: data.accountName || '',
+            street: data.billingStreet || '',
+            city: data.billingCity || '',
+            state: data.billingState || '',
+            postalCode: data.billingPostalCode || '',
+            country: data.billingCountry || 'IN'
+        };
+        this.shippingAddress = {
+            name: data.accountName || '',
+            street: data.shippingStreet || '',
+            city: data.shippingCity || '',
+            state: data.shippingState || '',
+            postalCode: data.shippingPostalCode || '',
+            country: data.shippingCountry || 'IN'
+        };
+
+        if (this.accountId) {
+            await this.loadShippingAddresses(this.accountId);
+        }
+
+        if (data.lineItems && data.lineItems.length > 0) {
+            this.lineItems = data.lineItems.map((item, index) => {
+                rowCounter++;
+                const base = (item.unitPrice || 0) * (item.quantity || 0);
+                const taxAmt = base * ((item.taxPercent || 0) / 100);
+                return {
+                    rowId: 'row-' + rowCounter,
+                    rowNumber: index + 1,
+                    productId: item.productId,
+                    pricebookEntryId: item.pricebookEntryId,
+                    productName: item.productName,
+                    productCode: item.productCode,
+                    uom: item.uom || 'Nos',
+                    quantity: item.quantity,
+                    listPrice: item.listPrice || item.unitPrice,
+                    unitPrice: item.unitPrice,
+                    taxPercent: item.taxPercent || 0,
+                    taxPercentDisplay: (item.taxPercent || 0) + '%',
+                    lineTotal: base + taxAmt
+                };
+            });
+        }
+
+        if (data.paymentTerms && data.paymentTerms.length > 0) {
+            this.paymentTerms = data.paymentTerms.map((t, index) => {
+                ptCounter++;
+                return {
+                    ptId: 'pt-' + ptCounter,
+                    rowNumber: index + 1,
+                    paymentTerm: t.paymentTerm || '',
+                    percentage: t.percentage || 0
+                };
+            });
+        }
+    }
+
     async loadOrderForEdit() {
         const data = await getOrderForEdit({ orderId: this.editRecordId });
         this.pricebookId = data.standardPricebookId || data.pricebookId;
@@ -244,6 +329,18 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                     taxPercent: item.taxPercent || 0,
                     taxPercentDisplay: (item.taxPercent || 0) + '%',
                     lineTotal: base + taxAmt
+                };
+            });
+        }
+
+        if (data.paymentTerms && data.paymentTerms.length > 0) {
+            this.paymentTerms = data.paymentTerms.map((t, index) => {
+                ptCounter++;
+                return {
+                    ptId: 'pt-' + ptCounter,
+                    rowNumber: index + 1,
+                    paymentTerm: t.paymentTerm || '',
+                    percentage: t.percentage || 0
                 };
             });
         }
@@ -311,6 +408,47 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         };
     }
 
+    // ===== PAYMENT TERM HANDLERS =====
+
+    handleAddPaymentTerm() {
+        ptCounter++;
+        this.paymentTerms = [
+            ...this.paymentTerms,
+            {
+                ptId: 'pt-' + ptCounter,
+                rowNumber: this.paymentTerms.length + 1,
+                paymentTerm: '',
+                percentage: 0
+            }
+        ];
+    }
+
+    handleRemovePaymentTerm(event) {
+        const ptId = event.currentTarget.dataset.ptId;
+        this.paymentTerms = this.paymentTerms
+            .filter(t => t.ptId !== ptId)
+            .map((t, index) => ({ ...t, rowNumber: index + 1 }));
+    }
+
+    handlePaymentTermChange(event) {
+        const ptId = event.currentTarget.dataset.ptId;
+        const field = event.currentTarget.dataset.field;
+        const value = event.target.value;
+
+        this.paymentTerms = this.paymentTerms.map(t => {
+            if (t.ptId === ptId) {
+                const updated = { ...t };
+                if (field === 'paymentTerm') {
+                    updated.paymentTerm = value;
+                } else if (field === 'percentage') {
+                    updated.percentage = parseFloat(value) || 0;
+                }
+                return updated;
+            }
+            return t;
+        });
+    }
+
     // ===== FORM HANDLERS =====
 
     handleFormSubmit(event) {
@@ -368,9 +506,21 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 });
             }
 
+            const ptPayload = this.paymentTerms
+                .filter(t => t.paymentTerm && t.paymentTerm.trim() !== '')
+                .map(t => ({
+                    paymentTerm: t.paymentTerm,
+                    percentage: t.percentage || 0
+                }));
+            await savePaymentTerms({
+                orderId: orderId,
+                paymentTermsJSON: JSON.stringify(ptPayload),
+                deleteExisting: this.isEditMode
+            });
+
             this.showSuccess(
                 this.isEditMode ? 'Order Updated' : 'Order Created',
-                'Order and line items saved successfully.'
+                'Order, line items, and payment terms saved successfully.'
             );
 
             this.dispatchEvent(new CloseActionScreenEvent());
@@ -547,7 +697,10 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 });
             } else if (this.recordId) {
                 const prefix = this.recordId.substring(0, 3);
-                const objectApiName = prefix === '006' ? 'Opportunity' : (prefix === '001' ? 'Account' : 'Order');
+                let objectApiName = 'Order';
+                if (prefix === '006') objectApiName = 'Opportunity';
+                else if (prefix === '001') objectApiName = 'Account';
+                else if (prefix === '0Q0') objectApiName = 'Quote';
                 this[NavigationMixin.Navigate]({
                     type: 'standard__recordPage',
                     attributes: {
