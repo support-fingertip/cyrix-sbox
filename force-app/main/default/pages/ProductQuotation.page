@@ -2,14 +2,15 @@
     <html>
         <head>
             <style type="text/css">
-                /* Reserve top space for the letterhead logo + running quote header,
-                and bottom space for the letterhead footer band. Content flows
-                inside the remaining content box and auto-paginates.
-                All paged-media dimensions in mm - Flying Saucer is strict about
-                consistent absolute units in @page and fixed-positioned elements. */
+                /* @page margins reserve space at the top for the letterhead logo +
+                running quote header, and at the bottom for the letterhead footer.
+                Content auto-paginates inside the remaining content box. */
                 @page {
                 size: A4;
-                margin: 53mm 16mm 22mm 16mm;
+                margin-top: 53mm;
+                margin-right: 16mm;
+                margin-bottom: 22mm;
+                margin-left: 16mm;
                 }
 
                 body {
@@ -31,25 +32,25 @@
                 page-break-after: auto;
                 }
 
-                /* position:fixed elements are repeated on EVERY page by Flying Saucer.
-                Coordinates are relative to the content box, so negative offsets
-                reach into the page margins. */
+                /* position:fixed elements are painted on EVERY physical page by
+                Flying Saucer. Coordinates are measured from the top-left corner
+                of the PAGE (including @page margins), so use positive offsets. */
                 .letterhead-bg {
                 position: fixed;
-                top: -53mm;
-                left: -16mm;
+                top: 0;
+                left: 0;
                 width: 210mm;
                 height: 297mm;
                 z-index: 0;
                 }
 
-                /* Running quote header - sits in the top margin, below the logo,
-                above the content area, repeats on every page. */
+                /* Running quote header - sits in the top margin, between the
+                logo area and the content box. */
                 .page-header {
                 position: fixed;
-                top: -9mm;
-                left: 0;
-                right: 0;
+                top: 44mm;
+                left: 16mm;
+                right: 16mm;
                 z-index: 2;
                 font-size: 14px;
                 }
@@ -87,7 +88,9 @@
 
             <!-- Rendered ONCE. position:fixed makes Flying Saucer repeat both
                  of these on every physical page of the PDF. -->
-            <apex:image url="{!URLFOR($Resource.Letter_Head)}" styleClass="letterhead-bg" />
+            <div class="letterhead-bg">
+                <apex:image url="{!URLFOR($Resource.Letter_Head)}" style="width:210mm;height:297mm;" />
+            </div>
 
             <div class="page-header">
                 <table class="header-inner">
