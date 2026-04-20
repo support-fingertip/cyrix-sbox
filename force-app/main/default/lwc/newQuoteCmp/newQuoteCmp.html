@@ -110,6 +110,7 @@
                                     state={billingAddress.state}
                                     postal-code={billingAddress.postalCode}
                                     country={billingAddress.country}
+                                    hide-search
                                     onaddresschange={handleBillingAddressChange}>
                                 </c-address-input>
                             </div>
@@ -122,22 +123,6 @@
                                     <lightning-icon icon-name="utility:shipping" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
                                     Ship To
                                 </h3>
-                                <template if:true={hasShippingAddresses}>
-                                    <div class="slds-p-bottom_xx-small">
-                                        <lightning-combobox
-                                            label="Select Shipping Address"
-                                            value={selectedShippingAddressId}
-                                            options={shippingAddressOptions}
-                                            onchange={handleShippingAddressSelect}
-                                            placeholder="Choose a shipping address...">
-                                        </lightning-combobox>
-                                    </div>
-                                </template>
-                                <template if:false={hasShippingAddresses}>
-                                    <div class="slds-text-body_small slds-text-color_weak slds-p-bottom_xx-small no-address-msg">
-                                        No shipping addresses found for this customer. Enter manually below.
-                                    </div>
-                                </template>
                                 <c-address-input
                                     label="Shipping Address"
                                     name={shippingAddress.name}
@@ -146,6 +131,7 @@
                                     state={shippingAddress.state}
                                     postal-code={shippingAddress.postalCode}
                                     country={shippingAddress.country}
+                                    hide-search
                                     onaddresschange={handleShippingAddressChange}>
                                 </c-address-input>
                             </div>

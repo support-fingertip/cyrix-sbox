@@ -4,7 +4,6 @@ import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import { CloseActionScreenEvent } from 'lightning/actions';
 import getOpportunityContext from '@salesforce/apex/QuoteBuilderController.getOpportunityContext';
 import getQuoteForEdit from '@salesforce/apex/QuoteBuilderController.getQuoteForEdit';
-import getShippingAddresses from '@salesforce/apex/QuoteBuilderController.getShippingAddresses';
 import searchProductsWithBestPrice from '@salesforce/apex/QuoteBuilderController.searchProductsWithBestPrice';
 import saveQuoteLineItems from '@salesforce/apex/QuoteBuilderController.saveQuoteLineItems';
 import updateQuoteLineItems from '@salesforce/apex/QuoteBuilderController.updateQuoteLineItems';
@@ -49,10 +48,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     @track billingAddress = { name: '', street: '', city: '', state: '', postalCode: '', country: 'IN' };
     @track shippingAddress = { name: '', street: '', city: '', state: '', postalCode: '', country: 'IN' };
 
-    // Shipping address picker
-    @track shippingAddresses = [];
-    selectedShippingAddressId = '';
-
     // Search
     searchTerm = '';
     categoryFilter = '';
@@ -79,13 +74,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         ];
     }
 
-    get shippingAddressOptions() {
-        return this.shippingAddresses.map(addr => ({
-            label: addr.displayLabel,
-            value: addr.addressId
-        }));
-    }
-
     // ===== COMPUTED PROPERTIES =====
 
     get hasLineItems() { return this.lineItems.length > 0; }
@@ -97,7 +85,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     get pageTitle() { return this.isEditMode ? 'Edit Quote' : 'Create Quote'; }
     get quoteName() { return this.isEditMode ? undefined : 'Auto'; }
     get saveButtonLabel() { return this.isSaving ? 'Saving...' : (this.isEditMode ? 'Update Quote' : 'Save Quote'); }
-    get hasShippingAddresses() { return this.shippingAddresses.length > 0; }
     get hasPaymentTerms() { return this.paymentTerms.length > 0; }
     get paymentTermCount() { return this.paymentTerms.length; }
     get totalPercentage() {
@@ -187,11 +174,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 };
             }
 
-            // Fetch shipping addresses for the Account
-            if (this.accountId) {
-                await this.loadShippingAddresses(this.accountId);
-            }
-
             // === AUTO-POPULATE PAYMENT TERMS FROM MASTER ===
             // Match on Opportunity vertical vs Payment_Terms_Master.Type; blank Type acts as fallback.
             if (!this.isEditMode && data.defaultPaymentTerms && data.defaultPaymentTerms.length > 0) {
@@ -236,10 +218,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 postalCode: data.shippingPostalCode || '',
                 country: data.shippingCountry || 'IN'
             };
-
-            if (this.accountId) {
-                await this.loadShippingAddresses(this.accountId);
-            }
 
             if (data.lineItems && data.lineItems.length > 0) {
                 this.lineItems = data.lineItems.map((item, index) => {
@@ -302,44 +280,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         } catch (error) {
             this.showError('Error loading quote', this.reduceErrors(error));
         }
-    }
-
-    async loadShippingAddresses(accountId) {
-        try {
-            const addresses = await getShippingAddresses({ accountId: accountId });
-            this.shippingAddresses = addresses || [];
-
-            // === AUTO-SELECT FIRST SHIPPING ADDRESS FOR NEW QUOTES ===
-            if (!this.isEditMode && this.shippingAddresses.length > 0) {
-                this.selectedShippingAddressId = this.shippingAddresses[0].addressId;
-                this.applyShippingAddress(this.shippingAddresses[0]);
-            }
-        } catch (error) {
-            console.warn('Could not load shipping addresses:', error);
-            this.shippingAddresses = [];
-        }
-    }
-
-
-    // ===== SHIPPING ADDRESS HANDLER =====
-
-    handleShippingAddressSelect(event) {
-        this.selectedShippingAddressId = event.detail.value;
-        const selected = this.shippingAddresses.find(a => a.addressId === this.selectedShippingAddressId);
-        if (selected) {
-            this.applyShippingAddress(selected);
-        }
-    }
-
-    applyShippingAddress(addr) {
-        this.shippingAddress = {
-            name: addr.name || '',
-            street: addr.street || '',
-            city: addr.city || '',
-            state: addr.state || '',
-            postalCode: addr.postalCode || '',
-            country: addr.country || 'IN'
-        };
     }
 
     // ===== ADDRESS CHANGE HANDLERS =====

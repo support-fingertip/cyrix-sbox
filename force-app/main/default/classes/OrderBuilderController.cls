@@ -163,6 +163,7 @@ public with sharing class OrderBuilderController {
     public static OrderEditContext getOrderForEdit(Id orderId) {
         Order o = [
             SELECT Id, AccountId, Account.Name, OpportunityId, Opportunity.Name,
+                   QuoteId, Quote.QuoteNumber,
                    Pricebook2Id, EffectiveDate, Status, Description,
                    BillingStreet, BillingCity, BillingStateCode,
                    BillingPostalCode, BillingCountryCode,
@@ -183,6 +184,8 @@ public with sharing class OrderBuilderController {
         ctx.effectiveDate = o.EffectiveDate;
         ctx.status = o.Status;
         ctx.description = o.Description;
+        ctx.sourceQuoteId = o.QuoteId;
+        ctx.sourceQuoteName = o.Quote != null ? o.Quote.QuoteNumber : null;
 
         ctx.billingStreet = o.BillingStreet;
         ctx.billingCity = o.BillingCity;
