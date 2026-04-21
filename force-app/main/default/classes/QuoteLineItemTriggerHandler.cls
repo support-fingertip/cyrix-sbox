@@ -162,10 +162,10 @@ public with sharing class QuoteLineItemTriggerHandler {
             qli.Source_Pricebook_Ref__c = applied.entry.Pricebook2Id;
             qli.Price_Status__c = 'Approval Required';
         } else {
-            // Above PL4 (or no tier data) — keep the default reference
-            // (PL5 if present, else whatever the client passed) and mark
-            // the line Not Required.
-            PricebookEntry tier5 = tiers == null ? null : tiers.tier(PricebookTierService.TIER5);
+            // Above PL4 (or no tier data) — keep the Standard / PL5
+            // reference that was resolved earlier (tier5 is still in
+            // scope from the top of this method) and mark the line as
+            // Not Required.
             if (tier5 != null) {
                 qli.Source_Pricebook_Ref__c = tier5.Pricebook2Id;
             }
