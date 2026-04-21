@@ -304,17 +304,24 @@ public with sharing class QuoteBuilderController {
 
             PricebookTierService.ProductTierMap tiers = tierMaps.get(prod.Id);
             PricebookEntry tier5 = tiers == null ? null : tiers.tier(PricebookTierService.TIER5);
-            if (tier5 == null) {
-                // Non-service product without Price list5 - cannot be added.
-                // The LWC drops these via the null PricebookEntryId check.
-                continue;
-            }
 
             psr.pricebookEntryId = stdEntry.Id;
-            psr.unitPrice = tier5.UnitPrice;
-            psr.sourcePricebookId = tier5.Pricebook2Id;
-            psr.sourcePricebook = PricebookTierService.TIER5;
-            psr.sourcePricebookType = PricebookTierService.TIER5;
+            if (tier5 != null) {
+                // Tier 5 exists — use it as the displayed Sales Price.
+                psr.unitPrice = tier5.UnitPrice;
+                psr.sourcePricebookId = tier5.Pricebook2Id;
+                psr.sourcePricebook = PricebookTierService.TIER5;
+                psr.sourcePricebookType = PricebookTierService.TIER5;
+            } else {
+                // No tier set up yet — fall back to the Standard PBE price so
+                // the product still surfaces in search. The trigger will reject
+                // the save if the org requires a tier entry, but at least the
+                // rep can see the product instead of it vanishing silently.
+                psr.unitPrice = stdEntry.UnitPrice;
+                psr.sourcePricebookId = stdEntry.Pricebook2Id;
+                psr.sourcePricebook = 'Standard';
+                psr.sourcePricebookType = 'Standard';
+            }
 
             results.add(psr);
         }
