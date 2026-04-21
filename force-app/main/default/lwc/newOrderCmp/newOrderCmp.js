@@ -129,15 +129,23 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         }, 0);
     }
 
+    get totalDiscount() {
+        return this.lineItems.reduce((sum, item) => {
+            const base = (item.unitPrice || 0) * (item.quantity || 0);
+            return sum + (base * ((item.discount || 0) / 100));
+        }, 0);
+    }
+
     get totalTax() {
         return this.lineItems.reduce((sum, item) => {
             const base = (item.unitPrice || 0) * (item.quantity || 0);
-            return sum + (base * ((item.taxPercent || 0) / 100));
+            const afterDiscount = base - (base * ((item.discount || 0) / 100));
+            return sum + (afterDiscount * ((item.taxPercent || 0) / 100));
         }, 0);
     }
 
     get grandTotal() {
-        return this.subtotal + this.totalTax;
+        return this.subtotal - this.totalDiscount + this.totalTax;
     }
 
     // ===== LIFECYCLE =====
@@ -257,6 +265,9 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 rowCounter++;
                 const base = (item.unitPrice || 0) * (item.quantity || 0);
                 const taxAmt = base * ((item.taxPercent || 0) / 100);
+                const disc = item.discount || 0;
+                const discountedBase = base - (base * (disc / 100));
+                const taxOnAfterDisc = discountedBase * ((item.taxPercent || 0) / 100);
                 return {
                     rowId: 'row-' + rowCounter,
                     rowNumber: index + 1,
@@ -268,10 +279,11 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                     quantity: item.quantity,
                     listPrice: item.listPrice || item.unitPrice,
                     unitPrice: item.unitPrice,
+                    discount: disc,
                     taxPercent: item.taxPercent || 0,
                     taxPercentDisplay: (item.taxPercent || 0) + '%',
                     isServiceItem: item.isServiceItem === true,
-                    lineTotal: base + taxAmt
+                    lineTotal: discountedBase + taxOnAfterDisc
                 };
             });
         }
@@ -322,6 +334,9 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 const base = (item.unitPrice || 0) * (item.quantity || 0);
                 const taxAmt = base * ((item.taxPercent || 0) / 100);
 
+                const disc = item.discount || 0;
+                const discountedBase = base - (base * (disc / 100));
+                const taxOnAfterDisc = discountedBase * ((item.taxPercent || 0) / 100);
                 return {
                     rowId: 'row-' + rowCounter,
                     rowNumber: index + 1,
@@ -333,10 +348,11 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                     quantity: item.quantity,
                     listPrice: item.listPrice || item.unitPrice,
                     unitPrice: item.unitPrice,
+                    discount: disc,
                     taxPercent: item.taxPercent || 0,
                     taxPercentDisplay: (item.taxPercent || 0) + '%',
                     isServiceItem: item.isServiceItem === true,
-                    lineTotal: base + taxAmt
+                    lineTotal: discountedBase + taxOnAfterDisc
                 };
             });
         }
@@ -427,6 +443,14 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     handleFormSubmit(event) {
         event.preventDefault();
 
+        if (!this.sourceQuoteId && !(event.detail.fields && event.detail.fields.QuoteId)) {
+            this.showError(
+                'Quote required',
+                'Select a Quote before saving the order. Orders must be created from a quote.'
+            );
+            return;
+        }
+
         const errors = this.validateLineItems();
         if (errors.length > 0) {
             this.showError('Validation Error', errors.join('\n'));
@@ -465,7 +489,8 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 productId: item.productId,
                 pricebookEntryId: item.pricebookEntryId,
                 quantity: item.quantity,
-                unitPrice: item.unitPrice
+                unitPrice: item.unitPrice,
+                discount: item.discount || 0
             }));
 
             if (this.isEditMode) {
@@ -615,6 +640,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
             quantity: 1,
             listPrice: product.unitPrice || 0,
             unitPrice: product.unitPrice || 0,
+            discount: 0,
             taxPercent: product.taxPercent || 0,
             taxPercentDisplay: (product.taxPercent || 0) + '%',
             isServiceItem: isService,
@@ -655,11 +681,18 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 } else {
                     updated.unitPrice = raw;
                 }
+            } else if (field === 'discount') {
+                let d = parseFloat(value) || 0;
+                if (d < 0) d = 0;
+                if (d > 100) d = 100;
+                updated.discount = d;
             }
 
-            const base = updated.unitPrice * updated.quantity;
-            const taxAmt = base * ((updated.taxPercent || 0) / 100);
-            updated.lineTotal = base + taxAmt;
+            const base = (updated.unitPrice || 0) * (updated.quantity || 0);
+            const discAmt = base * ((updated.discount || 0) / 100);
+            const afterDisc = base - discAmt;
+            const taxAmt = afterDisc * ((updated.taxPercent || 0) / 100);
+            updated.lineTotal = afterDisc + taxAmt;
 
             return updated;
         });
