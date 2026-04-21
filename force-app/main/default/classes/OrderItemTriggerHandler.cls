@@ -73,15 +73,17 @@ public with sharing class OrderItemTriggerHandler {
             Decimal discount  = oi.Discount__c == null ? 0 : oi.Discount__c;
             Decimal taxPct    = p.Tax__c != null ? p.Tax__c : 0;
 
-            // Final line total after discount AND tax. Compared against
-            // PL4..PL1 by resolveAppliedTier to pick the applied tier.
+            // Per-unit final price after discount AND tax. PBE.UnitPrice
+            // on the tier pricebooks is a per-unit value, so we compare
+            // at the same granularity. A line-total comparison would be
+            // off by a factor of Qty.
             Decimal discountedUnit = unitPrice * (1 - (discount / 100));
-            Decimal lineTotal      = qty * discountedUnit * (1 + (taxPct / 100));
+            Decimal finalUnit      = discountedUnit * (1 + (taxPct / 100));
 
             PricebookTierService.ProductTierMap tiers = tierMaps.get(p.Id);
             PricebookTierService.TierResolution applied = null;
             if (tiers != null && !tiers.byTier.isEmpty()) {
-                applied = PricebookTierService.resolveAppliedTier(tiers, lineTotal);
+                applied = PricebookTierService.resolveAppliedTier(tiers, finalUnit);
             }
 
             if (applied != null && applied.entry != null) {

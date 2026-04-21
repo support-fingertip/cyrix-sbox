@@ -163,20 +163,22 @@ public with sharing class QuoteLineItemTriggerHandler {
         Decimal taxPct   = qli.Tax__c != null ? qli.Tax__c
                          : (p.Tax__c != null ? p.Tax__c : 0);
 
-        // Final *line total* after discount AND tax — this is the value
-        // we compare against the discount pricebooks PL4..PL1. Tier PBE
-        // prices (per the spec) already represent the "after discount
-        // and tax" amount, so the comparison is dimensionally consistent.
+        // Final *per-unit* price after discount AND tax — compared
+        // against the per-unit list prices stored on the tier PBEs.
+        // PricebookEntry.UnitPrice is a per-unit value by definition,
+        // so the comparison must happen at that granularity; line
+        // total would be off by a factor of Qty and the tier flip
+        // would only engage on 1-unit lines.
         Decimal discountedUnit = unitPrice * (1 - (discount / 100));
-        Decimal lineTotal      = qty * discountedUnit * (1 + (taxPct / 100));
+        Decimal finalUnit      = discountedUnit * (1 + (taxPct / 100));
 
         // Applied-pricebook selection: walk PL4 -> PL1 and pick the
-        // highest tier whose list price is still <= lineTotal. If
-        // lineTotal is above PL4, the line stays at Standard and no
+        // highest tier whose list price is still <= finalUnit. If
+        // finalUnit is above PL4, the line stays at Standard and no
         // approval is needed.
         PricebookTierService.TierResolution applied = null;
         if (tiers != null && !tiers.byTier.isEmpty()) {
-            applied = PricebookTierService.resolveAppliedTier(tiers, lineTotal);
+            applied = PricebookTierService.resolveAppliedTier(tiers, finalUnit);
         }
 
         Boolean hitsDiscountTier = (applied != null && applied.entry != null);
@@ -195,6 +197,12 @@ public with sharing class QuoteLineItemTriggerHandler {
 
         // Source tax from Product2, not PricebookEntry.
         qli.Tax__c = p.Tax__c;
+
+        // Tax Amount = (Qty x UnitPrice x (1 - Discount/100)) x (Tax%/100).
+        // Precomputed here so the Quote page + reports don't need a
+        // formula — matches the OrderItem.Tax_Amount__c behavior.
+        Decimal taxRate = p.Tax__c != null ? p.Tax__c : 0;
+        qli.Tax_Amount__c = (qty * discountedUnit) * (taxRate / 100);
     }
 
     /**
