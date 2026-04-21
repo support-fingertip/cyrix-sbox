@@ -45,12 +45,17 @@ public with sharing class OrderItemTriggerHandler {
             WHERE Id IN :productIds
         ]);
 
-        // Tier pricing (Price list5 is the standard list price). The Quote
-        // builder stamps Approval Required whenever the discounted unit
-        // price drops below Price list5; we mirror that here so the Order
-        // save path agrees with the UI's live tier preview.
+        // Tier pricing (tier PBEs already hold post-discount-and-tax
+        // list prices per the Product admin spec). The applied tier
+        // is chosen by comparing the line's *total* final amount
+        // (qty * unit * (1 - disc) * (1 + tax)) against PL4..PL1.
         Map<Id, PricebookTierService.ProductTierMap> tierMaps =
             PricebookTierService.loadTiers(tierProductIds);
+
+        // Standard pricebook (IsStandard = true) — tagged on
+        // Source_Pricebook_Ref__c whenever the line total is above PL4.
+        List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
+        Id standardPbId = stdPbs.isEmpty() ? null : stdPbs[0].Id;
 
         for (OrderItem oi : items) {
             Product2 p = prodMap.get(oi.Product2Id);
@@ -63,20 +68,20 @@ public with sharing class OrderItemTriggerHandler {
                 continue;
             }
 
+            Decimal qty       = oi.Quantity == null ? 0 : oi.Quantity;
             Decimal unitPrice = oi.UnitPrice == null ? 0 : oi.UnitPrice;
             Decimal discount  = oi.Discount__c == null ? 0 : oi.Discount__c;
             Decimal taxPct    = p.Tax__c != null ? p.Tax__c : 0;
 
-            // Final per-unit amount after discount AND tax. Matches the
-            // Quote-side rule used to pick the applied pricebook and flip
-            // the approval flag.
+            // Final line total after discount AND tax. Compared against
+            // PL4..PL1 by resolveAppliedTier to pick the applied tier.
             Decimal discountedUnit = unitPrice * (1 - (discount / 100));
-            Decimal finalAmount    = discountedUnit * (1 + (taxPct / 100));
+            Decimal lineTotal      = qty * discountedUnit * (1 + (taxPct / 100));
 
             PricebookTierService.ProductTierMap tiers = tierMaps.get(p.Id);
             PricebookTierService.TierResolution applied = null;
             if (tiers != null && !tiers.byTier.isEmpty()) {
-                applied = PricebookTierService.resolveAppliedTier(tiers, finalAmount);
+                applied = PricebookTierService.resolveAppliedTier(tiers, lineTotal);
             }
 
             if (applied != null && applied.entry != null) {
@@ -87,11 +92,11 @@ public with sharing class OrderItemTriggerHandler {
                 continue;
             }
 
-            // Above PL4 (or no tier data). Reference Standard / PL5 when
-            // available so the downstream UI still shows the default tier.
-            PricebookEntry tier5 = tiers == null ? null : tiers.tier(PricebookTierService.TIER5);
-            if (tier5 != null) {
-                oi.Source_Pricebook_Ref__c = tier5.Pricebook2Id;
+            // Above PL4 (or no tier data). Tag the org's Standard
+            // Pricebook (IsStandard = true) so the Source Pricebook
+            // reference reflects the default starting point.
+            if (standardPbId != null) {
+                oi.Source_Pricebook_Ref__c = standardPbId;
             }
 
             // Discount-threshold fallback stays as a safety net for orgs

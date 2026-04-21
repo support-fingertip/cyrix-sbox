@@ -69,6 +69,11 @@ public with sharing class QuoteLineItemTriggerHandler {
         // Product2Id.
         Map<Id, Decimal> stdPriceByProduct = loadStandardPrices(nonServiceIds);
 
+        // One Id lookup for the org's Standard pricebook — used as the
+        // default Source_Pricebook_Ref__c when the QLI's final amount is
+        // above Price list4 (i.e. no discount tier applies).
+        Id standardPbId = loadStandardPricebookId();
+
         for (QuoteLineItem qli : newList) {
             Product2 p = prodMap.get(qli.Product2Id);
             if (p == null) continue;
@@ -76,9 +81,17 @@ public with sharing class QuoteLineItemTriggerHandler {
             if (p.Service_Item__c == 'Yes') {
                 stampServiceLine(qli);
             } else {
-                stampTieredLine(qli, p, tierMaps.get(p.Id), stdPriceByProduct.get(p.Id));
+                stampTieredLine(qli, p, tierMaps.get(p.Id),
+                    stdPriceByProduct.get(p.Id), standardPbId);
             }
         }
+    }
+
+    private static Id loadStandardPricebookId() {
+        List<Pricebook2> pbs = [
+            SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1
+        ];
+        return pbs.isEmpty() ? null : pbs[0].Id;
     }
 
     private static Map<Id, Decimal> loadStandardPrices(Set<Id> productIds) {
@@ -112,7 +125,8 @@ public with sharing class QuoteLineItemTriggerHandler {
         QuoteLineItem qli,
         Product2 p,
         PricebookTierService.ProductTierMap tiers,
-        Decimal stdPriceFallback
+        Decimal stdPriceFallback,
+        Id standardPbId
     ) {
         // Figure out the "standard" list price to compare against. Prefer
         // the Price list5 tier; fall back to the Standard pricebook entry
@@ -144,22 +158,25 @@ public with sharing class QuoteLineItemTriggerHandler {
             return;
         }
 
+        Decimal qty      = qli.Quantity == null ? 0 : qli.Quantity;
         Decimal discount = qli.Discount == null ? 0 : qli.Discount;
-        Decimal taxPct = qli.Tax__c != null ? qli.Tax__c
-                        : (p.Tax__c != null ? p.Tax__c : 0);
+        Decimal taxPct   = qli.Tax__c != null ? qli.Tax__c
+                         : (p.Tax__c != null ? p.Tax__c : 0);
 
-        // "Final" per-unit price after discount AND tax — this is the
-        // value we compare against the discount pricebooks PL4..PL1.
+        // Final *line total* after discount AND tax — this is the value
+        // we compare against the discount pricebooks PL4..PL1. Tier PBE
+        // prices (per the spec) already represent the "after discount
+        // and tax" amount, so the comparison is dimensionally consistent.
         Decimal discountedUnit = unitPrice * (1 - (discount / 100));
-        Decimal finalAmount = discountedUnit * (1 + (taxPct / 100));
+        Decimal lineTotal      = qty * discountedUnit * (1 + (taxPct / 100));
 
         // Applied-pricebook selection: walk PL4 -> PL1 and pick the
-        // highest tier whose list price is still <= finalAmount. If
-        // finalAmount is above PL4 the product stays at Standard / PL5
-        // and no approval is needed.
+        // highest tier whose list price is still <= lineTotal. If
+        // lineTotal is above PL4, the line stays at Standard and no
+        // approval is needed.
         PricebookTierService.TierResolution applied = null;
         if (tiers != null && !tiers.byTier.isEmpty()) {
-            applied = PricebookTierService.resolveAppliedTier(tiers, finalAmount);
+            applied = PricebookTierService.resolveAppliedTier(tiers, lineTotal);
         }
 
         Boolean hitsDiscountTier = (applied != null && applied.entry != null);
@@ -167,12 +184,11 @@ public with sharing class QuoteLineItemTriggerHandler {
             qli.Source_Pricebook_Ref__c = applied.entry.Pricebook2Id;
             qli.Price_Status__c = 'Approval Required';
         } else {
-            // Above PL4 (or no tier data) — keep the Standard / PL5
-            // reference that was resolved earlier (tier5 is still in
-            // scope from the top of this method) and mark the line as
+            // Above PL4 (or no tier data) — tag the org's Standard
+            // Pricebook (IsStandard = true) and mark the line as
             // Not Required.
-            if (tier5 != null) {
-                qli.Source_Pricebook_Ref__c = tier5.Pricebook2Id;
+            if (standardPbId != null) {
+                qli.Source_Pricebook_Ref__c = standardPbId;
             }
             qli.Price_Status__c = 'Not Required';
         }

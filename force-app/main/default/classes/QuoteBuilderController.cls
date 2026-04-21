@@ -347,7 +347,7 @@ public with sharing class QuoteBuilderController {
      * same floor the trigger enforces.
      */
     @AuraEnabled(cacheable=false)
-    public static PricingPreview getProductPricingPreview(Id productId, Decimal unitPrice, Decimal discount) {
+    public static PricingPreview getProductPricingPreview(Id productId, Decimal unitPrice, Decimal discount, Decimal quantity) {
         PricingPreview out = new PricingPreview();
         if (productId == null) return out;
 
@@ -398,13 +398,14 @@ public with sharing class QuoteBuilderController {
         }
         Decimal d = discount == null ? 0 : discount;
         Decimal taxPct = p.Tax__c != null ? p.Tax__c : 0;
+        Decimal qty    = quantity == null ? 1 : quantity;
         Decimal upVal = up == null ? 0 : up;
-        Decimal discounted = upVal * (1 - (d / 100));
-        Decimal finalAmount = discounted * (1 + (taxPct / 100));
+        Decimal discountedUnit = upVal * (1 - (d / 100));
+        // Final *line total* after discount AND tax — compared against
+        // PL4..PL1 (tier PBE prices already represent post-discount and
+        // post-tax amounts).
+        Decimal finalAmount = qty * discountedUnit * (1 + (taxPct / 100));
 
-        // Applied-pricebook selection (PL4 -> PL1, highest tier whose list
-        // price is <= final amount). If final is above PL4, no tier is
-        // applied and the line stays on Standard / PL5 with Not Required.
         out.standardPrice = standard;
 
         if (tiers != null && !tiers.byTier.isEmpty()) {
@@ -419,12 +420,13 @@ public with sharing class QuoteBuilderController {
             }
         }
 
-        // Above the top discount tier (or no tier data) — keep the
-        // Standard / PL5 reference and mark Not Required.
-        if (tier5 != null) {
-            out.resolvedTier = PricebookTierService.TIER5;
-            out.resolvedTierListPrice = tier5.UnitPrice;
-            out.resolvedPricebookId = tier5.Pricebook2Id;
+        // Above the top discount tier (or no tier data) — tag the org's
+        // Standard pricebook (IsStandard = true) and mark Not Required.
+        List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
+        if (!stdPbs.isEmpty()) {
+            out.resolvedTier = 'Standard';
+            out.resolvedTierListPrice = standard;
+            out.resolvedPricebookId = stdPbs[0].Id;
         }
         out.priceStatus = PricebookTierService.STATUS_NOT_REQUIRED;
         return out;
