@@ -73,6 +73,18 @@ public with sharing class OrderItemTriggerHandler {
             Decimal discount  = oi.Discount__c == null ? 0 : oi.Discount__c;
             Decimal taxPct    = p.Tax__c != null ? p.Tax__c : 0;
 
+            // Sales Price on non-service lines is locked to the Standard
+            // list price (the tier's PL5 entry or the Standard PBE).
+            // Snap to it silently if the incoming value differs.
+            PricebookTierService.ProductTierMap snapTiers = tierMaps.get(p.Id);
+            PricebookEntry snapTier5 = snapTiers == null ? null
+                                     : snapTiers.tier(PricebookTierService.TIER5);
+            Decimal lockedStandard = snapTier5 != null ? snapTier5.UnitPrice : null;
+            if (lockedStandard != null && unitPrice != lockedStandard) {
+                oi.UnitPrice = lockedStandard;
+                unitPrice = lockedStandard;
+            }
+
             // Per-unit final price after discount AND tax. PBE.UnitPrice
             // on the tier pricebooks is a per-unit value, so we compare
             // at the same granularity. A line-total comparison would be

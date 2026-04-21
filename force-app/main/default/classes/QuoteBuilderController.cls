@@ -330,6 +330,27 @@ public with sharing class QuoteBuilderController {
                 psr.sourcePricebookType = 'Standard';
             }
 
+            // Export the discount-tier PBE prices (PL4 -> PL1, skipping
+            // the Standard pricebook and Price list5) so the LWC can run
+            // the live Price_Status decision client-side against the
+            // actual tier ladder without round-tripping to Apex on every
+            // keystroke.
+            for (String t : new List<String>{
+                PricebookTierService.TIER4,
+                PricebookTierService.TIER3,
+                PricebookTierService.TIER2,
+                PricebookTierService.TIER1
+            }) {
+                PricebookEntry tierPbe = tiers == null ? null : tiers.tier(t);
+                if (tierPbe == null || tierPbe.UnitPrice == null) continue;
+                PriceOption po = new PriceOption();
+                po.pricebookType = t;
+                po.pricebookName = tierPbe.Pricebook2.Name;
+                po.price = tierPbe.UnitPrice;
+                po.isSelected = false;
+                psr.availablePrices.add(po);
+            }
+
             results.add(psr);
         }
         return results;
@@ -390,11 +411,12 @@ public with sharing class QuoteBuilderController {
             standard = stdPbe.isEmpty() ? null : stdPbe[0].UnitPrice;
         }
 
+        // Sales Price is locked to the Standard list price on
+        // non-service lines. If the LWC passes anything else (above or
+        // below), snap to Standard silently instead of erroring.
         Decimal up = unitPrice == null ? standard : unitPrice;
-        if (standard != null && up != null && up < standard) {
-            throw new AuraHandledException(
-                'Sales Price cannot be below the standard list price (' + standard + ').'
-            );
+        if (standard != null && up != null && up != standard) {
+            up = standard;
         }
         Decimal d = discount == null ? 0 : discount;
         Decimal taxPct = p.Tax__c != null ? p.Tax__c : 0;
