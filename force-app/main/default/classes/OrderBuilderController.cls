@@ -134,7 +134,8 @@ public with sharing class OrderBuilderController {
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
                    Product2.QuantityUnitOfMeasure, Product2.Service_Item__c,
                    PricebookEntryId, PricebookEntry.Tax__c,
-                   Quantity, ListPrice, UnitPrice, Discount
+                   Quantity, ListPrice, UnitPrice, Discount,
+                   Source_Pricebook_Ref__c, Source_Pricebook_Ref__r.Name
             FROM QuoteLineItem
             WHERE QuoteId = :quoteId
             ORDER BY SortOrder ASC, Id ASC
@@ -151,6 +152,9 @@ public with sharing class OrderBuilderController {
             item.discount = qli.Discount != null ? qli.Discount : 0;
             item.taxPercent = qli.PricebookEntry.Tax__c != null ? qli.PricebookEntry.Tax__c : 0;
             item.isServiceItem = (qli.Product2.Service_Item__c == 'Yes');
+            item.sourcePricebookId = qli.Source_Pricebook_Ref__c;
+            item.sourcePricebookName = qli.Source_Pricebook_Ref__r != null
+                ? qli.Source_Pricebook_Ref__r.Name : null;
             ctx.lineItems.add(item);
         }
 
@@ -219,7 +223,8 @@ public with sharing class OrderBuilderController {
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
                    Product2.QuantityUnitOfMeasure, Product2.Service_Item__c,
                    PricebookEntryId, PricebookEntry.Tax__c,
-                   Quantity, ListPrice, UnitPrice, Discount__c
+                   Quantity, ListPrice, UnitPrice, Discount__c,
+                   Source_Pricebook_Ref__c, Source_Pricebook_Ref__r.Name
             FROM OrderItem
             WHERE OrderId = :orderId
             ORDER BY Id ASC
@@ -237,6 +242,9 @@ public with sharing class OrderBuilderController {
             item.discount = oi.Discount__c != null ? oi.Discount__c : 0;
             item.taxPercent = oi.PricebookEntry.Tax__c != null ? oi.PricebookEntry.Tax__c : 0;
             item.isServiceItem = (oi.Product2.Service_Item__c == 'Yes');
+            item.sourcePricebookId = oi.Source_Pricebook_Ref__c;
+            item.sourcePricebookName = oi.Source_Pricebook_Ref__r != null
+                ? oi.Source_Pricebook_Ref__r.Name : null;
             ctx.lineItems.add(item);
         }
 
@@ -496,5 +504,7 @@ public with sharing class OrderBuilderController {
         @AuraEnabled public Decimal discount;
         @AuraEnabled public Decimal taxPercent;
         @AuraEnabled public Boolean isServiceItem;
+        @AuraEnabled public Id sourcePricebookId;
+        @AuraEnabled public String sourcePricebookName;
     }
 }
