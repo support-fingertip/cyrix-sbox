@@ -292,12 +292,16 @@ public with sharing class OrderBuilderController {
                 throw new AuraHandledException('At least one order item is required.');
             }
 
+            Map<Id, Id> pbeByProduct = resolvePricebookEntries(orderId, lineItems);
+
             List<OrderItem> items = new List<OrderItem>();
             for (LineInput li : lineItems) {
                 OrderItem oi = new OrderItem();
                 oi.OrderId = orderId;
                 oi.Product2Id = li.productId;
-                oi.PricebookEntryId = li.pricebookEntryId;
+                oi.PricebookEntryId = pbeByProduct.containsKey(li.productId)
+                    ? pbeByProduct.get(li.productId)
+                    : li.pricebookEntryId;
                 oi.Quantity = li.quantity;
                 oi.UnitPrice = li.unitPrice;
                 items.add(oi);
@@ -321,12 +325,16 @@ public with sharing class OrderBuilderController {
             List<OrderItem> existing = [SELECT Id FROM OrderItem WHERE OrderId = :orderId];
             if (!existing.isEmpty()) delete existing;
 
+            Map<Id, Id> pbeByProduct = resolvePricebookEntries(orderId, lineItems);
+
             List<OrderItem> items = new List<OrderItem>();
             for (LineInput li : lineItems) {
                 OrderItem oi = new OrderItem();
                 oi.OrderId = orderId;
                 oi.Product2Id = li.productId;
-                oi.PricebookEntryId = li.pricebookEntryId;
+                oi.PricebookEntryId = pbeByProduct.containsKey(li.productId)
+                    ? pbeByProduct.get(li.productId)
+                    : li.pricebookEntryId;
                 oi.Quantity = li.quantity;
                 oi.UnitPrice = li.unitPrice;
                 items.add(oi);
@@ -337,6 +345,41 @@ public with sharing class OrderBuilderController {
         } catch (Exception e) {
             throw new AuraHandledException('Order item update failed: ' + e.getMessage());
         }
+    }
+
+    /**
+     * For each incoming line, make sure the PricebookEntryId we insert
+     * against OrderItem lives on the Order's Pricebook2Id. If the caller
+     * passed a QuoteLineItem.PricebookEntryId that happens to be on a
+     * different pricebook (e.g. the Quote used a tier pricebook while the
+     * Order was set to another), re-resolve to the PBE for the same
+     * Product on the Order's pricebook. Falls back to the incoming id so
+     * downstream DML raises the original mismatch if nothing fits.
+     */
+    private static Map<Id, Id> resolvePricebookEntries(Id orderId, List<LineInput> lineItems) {
+        Map<Id, Id> out = new Map<Id, Id>();
+        if (lineItems == null || lineItems.isEmpty()) return out;
+
+        List<Order> orders = [SELECT Id, Pricebook2Id FROM Order WHERE Id = :orderId LIMIT 1];
+        if (orders.isEmpty() || orders[0].Pricebook2Id == null) return out;
+        Id orderPbId = orders[0].Pricebook2Id;
+
+        Set<Id> productIds = new Set<Id>();
+        for (LineInput li : lineItems) {
+            if (li.productId != null) productIds.add(li.productId);
+        }
+        if (productIds.isEmpty()) return out;
+
+        for (PricebookEntry pbe : [
+            SELECT Id, Product2Id
+            FROM PricebookEntry
+            WHERE Pricebook2Id = :orderPbId
+              AND Product2Id IN :productIds
+              AND IsActive = true
+        ]) {
+            out.put(pbe.Product2Id, pbe.Id);
+        }
+        return out;
     }
 
     // ===== Inner Classes =====
