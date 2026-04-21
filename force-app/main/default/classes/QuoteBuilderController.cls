@@ -247,7 +247,7 @@ public with sharing class QuoteBuilderController {
 
         Map<Id, PricebookEntry> stdEntryMap = new Map<Id, PricebookEntry>();
         for (PricebookEntry pbe : [
-            SELECT Id, Product2Id, UnitPrice
+            SELECT Id, Product2Id, Pricebook2Id, UnitPrice
             FROM PricebookEntry
             WHERE Pricebook2Id = :stdPbId
               AND Product2Id IN :productIds
