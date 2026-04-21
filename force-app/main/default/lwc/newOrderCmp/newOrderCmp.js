@@ -497,7 +497,8 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 pricebookEntryId: item.pricebookEntryId,
                 quantity: item.quantity,
                 unitPrice: item.unitPrice,
-                discount: item.discount || 0
+                discount: item.discount || 0,
+                taxPercent: item.taxPercent || 0
             }));
 
             if (this.isEditMode) {

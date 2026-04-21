@@ -536,7 +536,14 @@ public with sharing class QuoteBuilderController {
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
                 qli.Source_Pricebook_Ref__c = item.sourcePricebookId;
-                // Price_Status__c and Tax__c are stamped by the QuoteLineItem trigger.
+                // Tax__c carries the Product's tax rate from the LWC. The
+                // tiered-line trigger will re-stamp it from Product2.Tax__c
+                // for non-service rows; service rows keep the value the
+                // rep entered (trigger is a no-op on Tax for services).
+                if (item.taxPercent != null) {
+                    qli.Tax__c = item.taxPercent;
+                }
+                // Price_Status__c is stamped by the QuoteLineItem trigger.
                 qliList.add(qli);
             }
             insert qliList;
@@ -574,7 +581,14 @@ public with sharing class QuoteBuilderController {
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
                 qli.Source_Pricebook_Ref__c = item.sourcePricebookId;
-                // Price_Status__c and Tax__c are stamped by the QuoteLineItem trigger.
+                // Tax__c carries the Product's tax rate from the LWC. The
+                // tiered-line trigger will re-stamp it from Product2.Tax__c
+                // for non-service rows; service rows keep the value the
+                // rep entered (trigger is a no-op on Tax for services).
+                if (item.taxPercent != null) {
+                    qli.Tax__c = item.taxPercent;
+                }
+                // Price_Status__c is stamped by the QuoteLineItem trigger.
                 qliList.add(qli);
             }
             insert qliList;
@@ -638,6 +652,7 @@ public with sharing class QuoteBuilderController {
         public Decimal unitPrice;
         public Decimal discount;
         public Decimal maxDiscount;
+        public Decimal taxPercent;
         public String lineDescription;
         public String detailedDescription;
         public Id sourcePricebookId;
