@@ -194,10 +194,12 @@ public with sharing class PricebookTierService {
     }
 
     /**
-     * Service-line shortcut: service items never carry a tiered price and
-     * their Price_Status__c is always Not Required.
+     * Service-line shortcut: service items have no tiered list price to
+     * compare against, and the business rule is 'approval required except
+     * when the Product's Service_Item field is No'. So every service line
+     * lands on Approval Required and needs a human sign-off.
      */
     public static String priceStatusForService() {
-        return STATUS_NOT_REQUIRED;
+        return STATUS_APPROVAL_REQUIRED;
     }
 }

@@ -69,9 +69,13 @@ public with sharing class QuoteLineItemTriggerHandler {
     }
 
     private static void stampServiceLine(QuoteLineItem qli) {
-        // Service items: Sales Price and Tax are user-entered.
-        // Price_Status__c is always Not Required - no approval path for services.
-        qli.Price_Status__c = PricebookTierService.priceStatusForService();
+        // Service items: Sales Price and Tax are user-entered, and there is
+        // no list-price tier to compare against. Force Approval Required so
+        // every service line goes through the approval path — the business
+        // rule is "approval required except when the product's Service_Item
+        // field is No" (i.e. regular products continue using tier logic in
+        // stampTieredLine below).
+        qli.Price_Status__c = 'Approval Required';
         // Do not touch Tax__c, UnitPrice, Discount, PricebookEntryId,
         // or Source_Pricebook_Ref__c - trust the user input.
     }

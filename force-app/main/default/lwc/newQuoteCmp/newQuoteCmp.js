@@ -765,11 +765,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // ===== PRICE STATUS =====
 
     // Mirrors PricebookTierService.computePriceStatus on the server.
-    // Service lines are always 'Not Required' regardless of discount.
+    // Service lines are always 'Approval Required' (no tier to compare
+    // against, business rule flips every service line into approval).
     // Non-service lines compare final unit price against Price list5 list
     // price (listPrice): below -> Approval Required, otherwise Not Required.
     computePriceStatus(unitPrice, discount, listPrice, isServiceItem) {
-        if (isServiceItem) return 'Not Required';
+        if (isServiceItem) return 'Approval Required';
         if (listPrice == null) return 'Not Required';
         const up = unitPrice == null ? 0 : unitPrice;
         const d = discount == null ? 0 : discount;
