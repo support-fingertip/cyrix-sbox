@@ -230,12 +230,21 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
                     const disc = item.discount || 0;
                     const isService = item.isServiceItem === true;
+                    // Edit-mode doesn't re-run the product search, so
+                    // tier PBE prices aren't available on the payload.
+                    // computePriceStatus will fall back to the listPrice
+                    // comparison for these lines; the live preview will
+                    // refresh the status on the first change.
+                    const tierPricesFromDb = [];
                     // Legacy QLIs may still carry Quote-level values like 'Draft' or
                     // 'Rejected' that aren't valid on the restricted line-item picklist.
                     const VALID_LINE_STATUSES = ['Not Required', 'Approval Required', 'Approved'];
                     const priceStatus = VALID_LINE_STATUSES.includes(item.priceStatus)
                         ? item.priceStatus
-                        : this.computePriceStatus(item.unitPrice, disc, item.listPrice, isService);
+                        : this.computePriceStatus(
+                            item.unitPrice, disc, item.listPrice, isService,
+                            item.taxPercent, tierPricesFromDb
+                        );
 
                     return {
                         rowId: 'row-' + rowCounter,
@@ -260,6 +269,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                         detailedDescription: item.detailedDescription || '',
                         sourcePricebookId: item.sourcePricebookId || null,
                         sourcePricebookName: item.sourcePricebookName || '',
+                        tierPrices: tierPricesFromDb,
                         priceBadgeClass: this.getPriceBadgeClass(item.sourcePricebookName),
                         priceBadgeLabel: this.getPriceBadgeLabel(item.sourcePricebookName),
                         hasPriceSource: !!item.sourcePricebookName
@@ -556,7 +566,16 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }
 
         rowCounter++;
-        const priceStatus = this.computePriceStatus(product.unitPrice, 0, product.unitPrice, isService);
+        // Extract the discount-tier PBE prices (PL4 -> PL1) from the
+        // search result so computePriceStatus can iterate them without
+        // a server round-trip.
+        const tierPrices = Array.isArray(product.availablePrices)
+            ? product.availablePrices.map(p => p.price).filter(v => v != null)
+            : [];
+        const priceStatus = this.computePriceStatus(
+            product.unitPrice, 0, product.unitPrice, isService,
+            product.taxPercent, tierPrices
+        );
         const newItem = {
             rowId: 'row-' + rowCounter,
             rowNumber: this.lineItems.length + 1,
@@ -582,7 +601,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             sourcePricebookName: product.sourcePricebook || (isService ? 'Service' : ''),
             priceBadgeClass: this.getPriceBadgeClass(product.sourcePricebookType),
             priceBadgeLabel: this.getPriceBadgeLabel(product.sourcePricebookType),
-            hasPriceSource: !!product.sourcePricebookType
+            hasPriceSource: !!product.sourcePricebookType,
+            tierPrices: tierPrices
         };
 
         this.lineItems = [...this.lineItems, newItem];
@@ -642,12 +662,17 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             const taxAmt = afterDiscount * ((updated.taxPercent || 0) / 100);
             updated.lineTotal = afterDiscount + taxAmt;
 
-            // Recompute price status from the standard-price comparison.
-            // Preserves an already-Approved line so approvers' decisions are
-            // not silently undone by a downstream edit.
+            // Recompute price status against the product's tier PBE
+            // prices (PL4..PL1). Preserves an already-Approved line so
+            // approvers' decisions aren't silently undone by a later edit.
             if (updated.priceStatus !== 'Approved') {
                 const live = this.computePriceStatus(
-                    updated.unitPrice, updated.discount, updated.listPrice, updated.isServiceItem
+                    updated.unitPrice,
+                    updated.discount,
+                    updated.listPrice,
+                    updated.isServiceItem,
+                    updated.taxPercent,
+                    updated.tierPrices
                 );
                 updated.priceStatus = live;
                 updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(live);
@@ -770,18 +795,46 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
     // ===== PRICE STATUS =====
 
-    // Mirrors PricebookTierService.computePriceStatus on the server.
-    // Service lines are always 'Approval Required' (no tier to compare
-    // against, business rule flips every service line into approval).
-    // Non-service lines compare final unit price against Price list5 list
-    // price (listPrice): below -> Approval Required, otherwise Not Required.
-    computePriceStatus(unitPrice, discount, listPrice, isServiceItem) {
+    // Client-side mirror of the server's Price_Status decision.
+    //
+    // Non-service logic:
+    //   finalPrice = unitPrice
+    //              - (discount% of unitPrice)
+    //              - (tax% of unitPrice)
+    //   Walk the product's existing discount-tier pricebooks (Price list4
+    //   down to Price list1, excluding the Standard pricebook). If
+    //   finalPrice is <= any of those tier list prices, return
+    //   'Approval Required'. Otherwise compare to listPrice (the Standard
+    //   / Price list5 anchor) as the last-resort fallback for products
+    //   that don't have any tier pricebooks populated.
+    //
+    // Service lines always return 'Approval Required' per the business
+    // rule ("approval required except when Service_Item is No").
+    computePriceStatus(unitPrice, discount, listPrice, isServiceItem, taxpercentage, tierPrices) {
         if (isServiceItem) return 'Approval Required';
+
+        const tax = taxpercentage == null ? 0 : taxpercentage;
+        const up  = unitPrice == null ? 0 : unitPrice;
+        const d   = discount == null ? 0 : discount;
+        const taxprice = (up * tax) / 100;
+        const finalPrice = up - ((d * up) / 100) - taxprice;
+
+        // Iterate the product's tier PBE prices (PL4 -> PL1, already
+        // excludes Standard). If any tier price is >= finalPrice, the
+        // discount has dropped the line into that tier's band and the
+        // status flips to Approval Required.
+        if (Array.isArray(tierPrices)) {
+            for (const tp of tierPrices) {
+                if (tp != null && finalPrice <= tp) return 'Approval Required';
+            }
+            // No tier matched and tier data was actually supplied —
+            // final price is above every discount tier; no approval.
+            if (tierPrices.length > 0) return 'Not Required';
+        }
+
+        // Fallback for products with no tier PBEs configured.
         if (listPrice == null) return 'Not Required';
-        const up = unitPrice == null ? 0 : unitPrice;
-        const d = discount == null ? 0 : discount;
-        const finalPrice = up * (1 - d / 100);
-        return finalPrice < listPrice ? 'Approval Required' : 'Not Required';
+        return finalPrice <= listPrice ? 'Approval Required' : 'Not Required';
     }
 
     getPriceStatusBadgeClass(priceStatus) {
