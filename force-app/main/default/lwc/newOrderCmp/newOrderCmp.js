@@ -62,6 +62,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
 
     // Defaults carried from source Quote (create mode) or edited record
     carryBusinessVertical = null;
+    carrySubVertical = null;
     carryShippingMode = null;
     carryDelivery = null;
     carryContractFrom = null;
@@ -107,6 +108,9 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     get isQuoteLocked() { return this.isEditMode; }
     get defaultBusinessVertical() {
         return this.isEditMode ? undefined : (this.carryBusinessVertical || undefined);
+    }
+    get defaultSubVertical() {
+        return this.isEditMode ? undefined : (this.carrySubVertical || undefined);
     }
     get defaultShippingMode() {
         return this.isEditMode ? undefined : (this.carryShippingMode || undefined);
@@ -237,6 +241,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         this.defaultAccountId = data.accountId;
         this.defaultOpportunityId = data.opportunityId;
         this.carryBusinessVertical = data.businessVertical;
+        this.carrySubVertical = data.subVertical;
         this.carryShippingMode = data.shippingMode;
         this.carryDelivery = data.delivery;
         this.carryContractFrom = data.contractPeriodFrom;
@@ -428,6 +433,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         this.defaultAccountId = null;
         this.defaultOpportunityId = null;
         this.carryBusinessVertical = null;
+        this.carrySubVertical = null;
         this.carryShippingMode = null;
         this.carryDelivery = null;
         this.carryContractFrom = null;
