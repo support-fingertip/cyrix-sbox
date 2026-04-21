@@ -398,13 +398,13 @@ public with sharing class QuoteBuilderController {
         }
         Decimal d = discount == null ? 0 : discount;
         Decimal taxPct = p.Tax__c != null ? p.Tax__c : 0;
-        Decimal qty    = quantity == null ? 1 : quantity;
         Decimal upVal = up == null ? 0 : up;
         Decimal discountedUnit = upVal * (1 - (d / 100));
-        // Final *line total* after discount AND tax — compared against
-        // PL4..PL1 (tier PBE prices already represent post-discount and
-        // post-tax amounts).
-        Decimal finalAmount = qty * discountedUnit * (1 + (taxPct / 100));
+        // Per-unit final price after discount AND tax — compared against
+        // PL4..PL1 per-unit list prices. quantity is still accepted on
+        // the signature so the LWC can keep passing it, but it isn't
+        // folded into the tier-comparison amount.
+        Decimal finalAmount = discountedUnit * (1 + (taxPct / 100));
 
         out.standardPrice = standard;
 
