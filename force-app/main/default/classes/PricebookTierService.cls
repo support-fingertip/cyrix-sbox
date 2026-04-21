@@ -194,6 +194,77 @@ public with sharing class PricebookTierService {
     }
 
     /**
+     * Applied-pricebook selection (per spec): starting from Price list5 as
+     * the default (standard) price, a discounted line falls into one of
+     * the lower tiers depending on the final per-unit amount *after
+     * discount and tax*. Walk 4 -> 3 -> 2 -> 1 and pick the HIGHEST tier
+     * whose list price is still <= the final amount. That is the tier
+     * whose "range" contains the final amount.
+     *
+     *   final amount > Price list4 list price  -> no tier matches
+     *                                             (caller marks Not Required,
+     *                                              keeps the Standard / PL5
+     *                                              reference)
+     *   Price list3 <= final <= Price list4     -> tag PL4
+     *   Price list2 <= final <= Price list3     -> tag PL3
+     *   Price list1 <= final <= Price list2     -> tag PL2
+     *   final <= Price list1                    -> tag PL1
+     *
+     * When a tier in the sequence is absent the helper skips it; if every
+     * tier is absent the helper returns null and the caller should leave
+     * the line untagged.
+     */
+    public static TierResolution resolveAppliedTier(ProductTierMap tiers, Decimal finalAmount) {
+        TierResolution r = new TierResolution();
+        r.underFloor = false;
+        if (tiers == null || tiers.byTier.isEmpty()) return r;
+        if (finalAmount == null) finalAmount = 0;
+
+        List<String> order = new List<String>{ TIER4, TIER3, TIER2, TIER1 };
+
+        // Is the final amount above Price list4 (or above whichever the
+        // highest available of PL4..PL1 is)? If so, no tier matches.
+        PricebookEntry topExisting = null;
+        for (String t : order) {
+            PricebookEntry e = tiers.tier(t);
+            if (e != null) { topExisting = e; break; }
+        }
+        if (topExisting == null) return r;
+        Decimal topPrice = topExisting.UnitPrice == null ? 0 : topExisting.UnitPrice;
+        if (finalAmount > topPrice) {
+            // Above the top discount tier — caller keeps 'Not Required'.
+            return r;
+        }
+
+        // Walk high-to-low, pick the first tier (highest list price) whose
+        // list price is <= finalAmount. That's the tier the amount has
+        // "dropped into".
+        PricebookEntry lowestExisting = null;
+        String lowestExistingTier = null;
+        for (String t : order) {
+            PricebookEntry e = tiers.tier(t);
+            if (e == null) continue;
+            lowestExisting = e;
+            lowestExistingTier = t;
+            Decimal p = e.UnitPrice == null ? 0 : e.UnitPrice;
+            if (p <= finalAmount) {
+                r.entry = e;
+                r.tierName = t;
+                r.tierListPrice = p;
+                return r;
+            }
+        }
+
+        // finalAmount is below every tier we have — default to the lowest
+        // existing tier (typically Price list1).
+        r.entry = lowestExisting;
+        r.tierName = lowestExistingTier;
+        r.tierListPrice = lowestExisting.UnitPrice;
+        r.underFloor = true;
+        return r;
+    }
+
+    /**
      * Service-line shortcut: service items have no tiered list price to
      * compare against, and the business rule is 'approval required except
      * when the Product's Service_Item field is No'. So every service line

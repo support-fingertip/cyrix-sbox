@@ -140,35 +140,40 @@ public with sharing class QuoteLineItemTriggerHandler {
         }
 
         Decimal discount = qli.Discount == null ? 0 : qli.Discount;
-        Decimal discountedUnit = unitPrice * (1 - (discount / 100));
+        Decimal taxPct = qli.Tax__c != null ? qli.Tax__c
+                        : (p.Tax__c != null ? p.Tax__c : 0);
 
-        // Tier tagging: walk the existing tier entries (whatever is set up
-        // for this product, whether that's 1, 2, 3, 4, or 5 tiers) and
-        // tag the tightest-fitting one — i.e. the tier whose list price is
-        // the smallest value still >= discountedUnit. That's equivalent to
-        // "amount after discount is <= tier's list price".
+        // "Final" per-unit price after discount AND tax — this is the
+        // value we compare against the discount pricebooks PL4..PL1.
+        Decimal discountedUnit = unitPrice * (1 - (discount / 100));
+        Decimal finalAmount = discountedUnit * (1 + (taxPct / 100));
+
+        // Applied-pricebook selection: walk PL4 -> PL1 and pick the
+        // highest tier whose list price is still <= finalAmount. If
+        // finalAmount is above PL4 the product stays at Standard / PL5
+        // and no approval is needed.
+        PricebookTierService.TierResolution applied = null;
         if (tiers != null && !tiers.byTier.isEmpty()) {
-            PricebookTierService.TierResolution r =
-                PricebookTierService.resolveTier(tiers, discountedUnit);
-            if (r != null && r.entry != null) {
-                qli.Source_Pricebook_Ref__c = r.entry.Pricebook2Id;
+            applied = PricebookTierService.resolveAppliedTier(tiers, finalAmount);
+        }
+
+        Boolean hitsDiscountTier = (applied != null && applied.entry != null);
+        if (hitsDiscountTier) {
+            qli.Source_Pricebook_Ref__c = applied.entry.Pricebook2Id;
+            qli.Price_Status__c = 'Approval Required';
+        } else {
+            // Above PL4 (or no tier data) — keep the default reference
+            // (PL5 if present, else whatever the client passed) and mark
+            // the line Not Required.
+            PricebookEntry tier5 = tiers == null ? null : tiers.tier(PricebookTierService.TIER5);
+            if (tier5 != null) {
+                qli.Source_Pricebook_Ref__c = tier5.Pricebook2Id;
             }
+            qli.Price_Status__c = 'Not Required';
         }
 
         // Source tax from Product2, not PricebookEntry.
         qli.Tax__c = p.Tax__c;
-
-        // Price_Status: below the standard -> Approval Required, otherwise
-        // Not Required. The underFloor flag is only meaningful when we
-        // actually had tier data, so compute it locally.
-        Boolean underFloor = false;
-        if (tiers != null && !tiers.byTier.isEmpty()) {
-            underFloor =
-                PricebookTierService.resolveTier(tiers, discountedUnit).underFloor;
-        }
-        qli.Price_Status__c = PricebookTierService.computePriceStatus(
-            unitPrice, discount, standardPrice, underFloor
-        );
     }
 
     /**

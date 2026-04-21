@@ -65,13 +65,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
     get categoryOptions() {
         return [
-            { label: 'All Categories', value: '' },
-            { label: 'Medical Equipment', value: 'Medical Equipment' },
-            { label: 'Surgical Instruments', value: 'Surgical Instruments' },
-            { label: 'Lab Equipment', value: 'Lab Equipment' },
-            { label: 'Consumables', value: 'Consumables' },
-            { label: 'Services', value: 'Services' },
-            { label: 'Spares', value: 'Spares' }
+            { label: 'All Product Types', value: '' },
+            { label: 'Equipment', value: 'Equipment' },
+            { label: 'Spare', value: 'Spare' },
+            { label: 'Accessories', value: 'Accessories' },
+            { label: 'Consumables', value: 'Consumables' }
         ];
     }
 

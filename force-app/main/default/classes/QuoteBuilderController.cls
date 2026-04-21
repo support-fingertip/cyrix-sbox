@@ -216,7 +216,11 @@ public with sharing class QuoteBuilderController {
 
         String searchKey = '%' + String.escapeSingleQuotes(searchTerm.trim()) + '%';
 
-        String prodQuery = 'SELECT Id, Name, ProductCode, Product_Category__c, Make__c, Model__c, ' +
+        // The LWC filter dropdown now exposes Product2.Product_Type__c
+        // (Equipment / Spare / Accessories / Consumables). Older callers
+        // sending the Product_Category label will fall through without
+        // matching, but won't break the query.
+        String prodQuery = 'SELECT Id, Name, ProductCode, Product_Category__c, Product_Type__c, Make__c, Model__c, ' +
             'Description, HSN_Code__c, Standard_Price__c, QuantityUnitOfMeasure, ' +
             'Line_Description__c, Detailed_Description__c, ' +
             'Service_Item__c, Tax__c ' +
@@ -224,7 +228,7 @@ public with sharing class QuoteBuilderController {
             'WHERE IsActive = true ' +
             'AND (Name LIKE :searchKey OR ProductCode LIKE :searchKey)';
         if (String.isNotBlank(category)) {
-            prodQuery += ' AND Product_Category__c = :category';
+            prodQuery += ' AND Product_Type__c = :category';
         }
         prodQuery += ' ORDER BY Name ASC LIMIT 20';
 
@@ -390,19 +394,37 @@ public with sharing class QuoteBuilderController {
             );
         }
         Decimal d = discount == null ? 0 : discount;
-        Decimal discounted = (up == null ? 0 : up) * (1 - (d / 100));
+        Decimal taxPct = p.Tax__c != null ? p.Tax__c : 0;
+        Decimal upVal = up == null ? 0 : up;
+        Decimal discounted = upVal * (1 - (d / 100));
+        Decimal finalAmount = discounted * (1 + (taxPct / 100));
+
+        // Applied-pricebook selection (PL4 -> PL1, highest tier whose list
+        // price is <= final amount). If final is above PL4, no tier is
+        // applied and the line stays on Standard / PL5 with Not Required.
+        PricebookEntry tier5 = tiers == null ? null : tiers.tier(PricebookTierService.TIER5);
+        out.standardPrice = standard;
 
         if (tiers != null && !tiers.byTier.isEmpty()) {
-            PricebookTierService.TierResolution r = PricebookTierService.resolveTier(tiers, discounted);
-            out.resolvedTier = r.tierName;
-            out.resolvedTierListPrice = r.tierListPrice;
-            out.resolvedPricebookId = r.entry == null ? null : r.entry.Pricebook2Id;
-            out.standardPrice = standard;
-            out.priceStatus = PricebookTierService.computePriceStatus(up, d, standard, r.underFloor);
-        } else {
-            out.standardPrice = standard;
-            out.priceStatus = PricebookTierService.computePriceStatus(up, d, standard, false);
+            PricebookTierService.TierResolution applied =
+                PricebookTierService.resolveAppliedTier(tiers, finalAmount);
+            if (applied != null && applied.entry != null) {
+                out.resolvedTier = applied.tierName;
+                out.resolvedTierListPrice = applied.tierListPrice;
+                out.resolvedPricebookId = applied.entry.Pricebook2Id;
+                out.priceStatus = PricebookTierService.STATUS_APPROVAL_REQUIRED;
+                return out;
+            }
         }
+
+        // Above the top discount tier (or no tier data) — keep the
+        // Standard / PL5 reference and mark Not Required.
+        if (tier5 != null) {
+            out.resolvedTier = PricebookTierService.TIER5;
+            out.resolvedTierListPrice = tier5.UnitPrice;
+            out.resolvedPricebookId = tier5.Pricebook2Id;
+        }
+        out.priceStatus = PricebookTierService.STATUS_NOT_REQUIRED;
         return out;
     }
 
