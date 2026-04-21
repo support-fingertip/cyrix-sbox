@@ -132,7 +132,7 @@ public with sharing class OrderBuilderController {
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
                    Product2.QuantityUnitOfMeasure, Product2.Service_Item__c,
                    PricebookEntryId, PricebookEntry.Tax__c,
-                   Quantity, ListPrice, UnitPrice
+                   Quantity, ListPrice, UnitPrice, Discount
             FROM QuoteLineItem
             WHERE QuoteId = :quoteId
             ORDER BY SortOrder ASC, Id ASC
@@ -146,6 +146,7 @@ public with sharing class OrderBuilderController {
             item.quantity = qli.Quantity;
             item.listPrice = qli.ListPrice;
             item.unitPrice = qli.UnitPrice;
+            item.discount = qli.Discount != null ? qli.Discount : 0;
             item.taxPercent = qli.PricebookEntry.Tax__c != null ? qli.PricebookEntry.Tax__c : 0;
             item.isServiceItem = (qli.Product2.Service_Item__c == 'Yes');
             ctx.lineItems.add(item);
@@ -216,7 +217,7 @@ public with sharing class OrderBuilderController {
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
                    Product2.QuantityUnitOfMeasure, Product2.Service_Item__c,
                    PricebookEntryId, PricebookEntry.Tax__c,
-                   Quantity, ListPrice, UnitPrice
+                   Quantity, ListPrice, UnitPrice, Discount__c
             FROM OrderItem
             WHERE OrderId = :orderId
             ORDER BY Id ASC
@@ -231,6 +232,7 @@ public with sharing class OrderBuilderController {
             item.quantity = oi.Quantity;
             item.listPrice = oi.ListPrice;
             item.unitPrice = oi.UnitPrice;
+            item.discount = oi.Discount__c != null ? oi.Discount__c : 0;
             item.taxPercent = oi.PricebookEntry.Tax__c != null ? oi.PricebookEntry.Tax__c : 0;
             item.isServiceItem = (oi.Product2.Service_Item__c == 'Yes');
             ctx.lineItems.add(item);
@@ -304,6 +306,7 @@ public with sharing class OrderBuilderController {
                     : li.pricebookEntryId;
                 oi.Quantity = li.quantity;
                 oi.UnitPrice = li.unitPrice;
+                oi.Discount__c = li.discount != null ? li.discount : 0;
                 items.add(oi);
             }
             insert items;
@@ -337,6 +340,7 @@ public with sharing class OrderBuilderController {
                     : li.pricebookEntryId;
                 oi.Quantity = li.quantity;
                 oi.UnitPrice = li.unitPrice;
+                oi.Discount__c = li.discount != null ? li.discount : 0;
                 items.add(oi);
             }
             insert items;
@@ -388,6 +392,7 @@ public with sharing class OrderBuilderController {
         public Id pricebookEntryId;
         public Decimal quantity;
         public Decimal unitPrice;
+        public Decimal discount;
     }
 
     public class PaymentTermInput {
@@ -460,6 +465,7 @@ public with sharing class OrderBuilderController {
         @AuraEnabled public Decimal quantity;
         @AuraEnabled public Decimal listPrice;
         @AuraEnabled public Decimal unitPrice;
+        @AuraEnabled public Decimal discount;
         @AuraEnabled public Decimal taxPercent;
         @AuraEnabled public Boolean isServiceItem;
     }

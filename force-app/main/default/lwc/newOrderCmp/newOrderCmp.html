@@ -54,6 +54,7 @@
                                 field-name="QuoteId"
                                 value={defaultSourceQuoteId}
                                 disabled={isQuoteLocked}
+                                required
                                 onchange={handleQuoteChange}>
                             </lightning-input-field>
                         </div>
@@ -256,12 +257,13 @@
                                     <tr class="slds-line-height_reset">
                                         <th scope="col" style="width:35px"><div class="slds-truncate">#</div></th>
                                         <th scope="col" style="min-width:160px"><div class="slds-truncate">Product</div></th>
-                                        <th scope="col" style="width:60px"><div class="slds-truncate">UOM</div></th>
-                                        <th scope="col" style="width:85px"><div class="slds-truncate">Qty</div></th>
-                                        <th scope="col" style="width:110px"><div class="slds-truncate">List Price</div></th>
-                                        <th scope="col" style="width:110px"><div class="slds-truncate">Sales Price</div></th>
-                                        <th scope="col" style="width:90px"><div class="slds-truncate">Tax %</div></th>
-                                        <th scope="col" style="width:115px"><div class="slds-truncate">Line Total</div></th>
+                                        <th scope="col" style="width:55px"><div class="slds-truncate">UOM</div></th>
+                                        <th scope="col" style="width:75px"><div class="slds-truncate">Qty</div></th>
+                                        <th scope="col" style="width:100px"><div class="slds-truncate">List Price</div></th>
+                                        <th scope="col" style="width:100px"><div class="slds-truncate">Sales Price</div></th>
+                                        <th scope="col" style="width:85px"><div class="slds-truncate">Disc. %</div></th>
+                                        <th scope="col" style="width:75px"><div class="slds-truncate">Tax %</div></th>
+                                        <th scope="col" style="width:110px"><div class="slds-truncate">Line Total</div></th>
                                         <th scope="col" style="width:45px"><div class="slds-truncate"></div></th>
                                     </tr>
                                 </thead>
@@ -317,6 +319,19 @@
                                                     </lightning-formatted-number>
                                                 </template>
                                             </td>
+                                            <td>
+                                                <lightning-input
+                                                    type="number"
+                                                    value={item.discount}
+                                                    min="0"
+                                                    max="100"
+                                                    step="0.01"
+                                                    variant="label-hidden"
+                                                    data-row-id={item.rowId}
+                                                    data-field="discount"
+                                                    onchange={handleLineItemChange}>
+                                                </lightning-input>
+                                            </td>
                                             <td class="slds-text-align_center">
                                                 {item.taxPercentDisplay}
                                             </td>
@@ -368,6 +383,12 @@
                             <span class="total-label">Subtotal</span>
                             <span class="total-value">
                                 <lightning-formatted-number value={subtotal} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                            </span>
+                        </div>
+                        <div class="total-row">
+                            <span class="total-label">Total Discount</span>
+                            <span class="total-value discount-value">
+                                - <lightning-formatted-number value={totalDiscount} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
                             </span>
                         </div>
                         <div class="total-row">

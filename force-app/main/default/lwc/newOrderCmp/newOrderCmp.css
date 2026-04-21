@@ -284,6 +284,10 @@
     color: var(--text-primary);
 }
 
+.discount-value {
+    color: var(--error-color);
+}
+
 .grand-total {
     margin-top: 0.5rem;
     padding-top: 0.75rem;
