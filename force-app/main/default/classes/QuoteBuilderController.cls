@@ -390,11 +390,12 @@ public with sharing class QuoteBuilderController {
             standard = stdPbe.isEmpty() ? null : stdPbe[0].UnitPrice;
         }
 
+        // Sales Price is locked to the Standard list price on
+        // non-service lines. If the LWC passes anything else (above or
+        // below), snap to Standard silently instead of erroring.
         Decimal up = unitPrice == null ? standard : unitPrice;
-        if (standard != null && up != null && up < standard) {
-            throw new AuraHandledException(
-                'Sales Price cannot be below the standard list price (' + standard + ').'
-            );
+        if (standard != null && up != null && up != standard) {
+            up = standard;
         }
         Decimal d = discount == null ? 0 : discount;
         Decimal taxPct = p.Tax__c != null ? p.Tax__c : 0;

@@ -681,13 +681,14 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 updated.quantity = parseFloat(value) || 0;
             } else if (field === 'unitPrice') {
                 const raw = parseFloat(value) || 0;
-                if (raw < updated.listPrice) {
-                    this.showError(
-                        'Sales Price below standard',
-                        'Sales Price cannot be below the list price (' +
-                        this.formatCurrency(updated.listPrice) + ').'
-                    );
-                    updated.unitPrice = updated.listPrice;
+                // Sales Price is locked to the Standard list price on
+                // non-service lines — any value other than list price
+                // snaps back to list price silently. Discount is the
+                // lever to lower the effective price.
+                if (!updated.isServiceItem) {
+                    updated.unitPrice = raw === updated.listPrice
+                        ? raw
+                        : updated.listPrice;
                 } else {
                     updated.unitPrice = raw;
                 }

@@ -611,17 +611,17 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 updated.quantity = parseFloat(value) || 0;
             } else if (field === 'unitPrice') {
                 const raw = parseFloat(value) || 0;
-                // Sales Price floor: non-service lines cannot go below Price list5.
-                // Users must use Discount to lower the effective price so approval
-                // is engaged. Service lines have no floor.
-                if (!updated.isServiceItem && raw < updated.listPrice) {
-                    this.showError(
-                        'Sales Price below standard',
-                        'Sales Price cannot be below the standard list price (' +
-                        this.formatCurrency(updated.listPrice) + '). Use Discount instead.'
-                    );
-                    // Snap back to the floor so server-side DML never rejects the save.
-                    updated.unitPrice = updated.listPrice;
+                // For non-service lines Sales Price is locked to the
+                // Standard list price. If the rep types something else
+                // (either above or below the Standard) the input snaps
+                // back to list price without an error — Discount is the
+                // lever used to lower the effective price.
+                if (!updated.isServiceItem) {
+                    if (raw !== updated.listPrice) {
+                        updated.unitPrice = updated.listPrice;
+                    } else {
+                        updated.unitPrice = raw;
+                    }
                 } else {
                     updated.unitPrice = raw;
                 }

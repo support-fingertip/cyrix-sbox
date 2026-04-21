@@ -6,7 +6,9 @@
  *     no Price list5 entry, the Standard pricebook's PBE is used as the
  *     fallback standard so the save still succeeds (no more
  *     'active pricebook tier not found' hard error).
- *   - Enforces sales-price floor: UnitPrice cannot be below the standard.
+ *   - Sales Price is locked to the Standard list price. Any value other
+ *     than the Standard (above OR below) is silently snapped back —
+ *     Discount is the lever used to lower the effective price.
  *   - Stamps Tax__c from Product2.Tax__c (ignores PricebookEntry.Tax__c).
  *   - Resolves the tightest-fitting tier for the discounted unit price and
  *     writes that tier's Pricebook2 id into Source_Pricebook_Ref__c.
@@ -147,15 +149,13 @@ public with sharing class QuoteLineItemTriggerHandler {
 
         Decimal unitPrice = qli.UnitPrice == null ? 0 : qli.UnitPrice;
 
-        // Sales-price floor: Sales Price may be raised above standard, but
-        // never lowered below it. Users must use Discount for lower effective
-        // prices so the approval path is engaged.
-        if (unitPrice < standardPrice) {
-            qli.addError(
-                'Sales Price (' + unitPrice + ') cannot be below the standard list price (' +
-                standardPrice + '). Use Discount instead of lowering Sales Price.'
-            );
-            return;
+        // Sales Price on non-service lines is locked to the Standard
+        // list price. Any value other than the Standard — above OR
+        // below — snaps back silently. Discount is the lever used to
+        // lower the effective price and engage the approval path.
+        if (unitPrice != standardPrice) {
+            qli.UnitPrice = standardPrice;
+            unitPrice = standardPrice;
         }
 
         Decimal qty      = qli.Quantity == null ? 0 : qli.Quantity;
