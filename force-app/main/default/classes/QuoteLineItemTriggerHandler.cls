@@ -195,6 +195,12 @@ public with sharing class QuoteLineItemTriggerHandler {
 
         // Source tax from Product2, not PricebookEntry.
         qli.Tax__c = p.Tax__c;
+
+        // Tax Amount = (Qty x UnitPrice x (1 - Discount/100)) x (Tax%/100).
+        // Precomputed here so the Quote page + reports don't need a
+        // formula — matches the OrderItem.Tax_Amount__c behavior.
+        Decimal taxRate = p.Tax__c != null ? p.Tax__c : 0;
+        qli.Tax_Amount__c = (qty * discountedUnit) * (taxRate / 100);
     }
 
     /**
