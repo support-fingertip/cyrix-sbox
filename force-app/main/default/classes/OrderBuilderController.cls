@@ -320,6 +320,13 @@ public with sharing class OrderBuilderController {
                 items.add(oi);
             }
             insert items;
+
+            // Belt-and-suspenders: ensure Order.Price_Status__c reflects
+            // the freshly inserted OrderItem Price_Status__c values. The
+            // after-insert trigger handles this for most paths; calling
+            // it explicitly here closes the window where the UI navigates
+            // to the Order record page before the rollup update lands.
+            OrderItemTriggerHandler.rollupOrders(new Set<Id>{ orderId });
         } catch (AuraHandledException e) {
             throw e;
         } catch (Exception e) {
@@ -362,6 +369,7 @@ public with sharing class OrderBuilderController {
                 items.add(oi);
             }
             insert items;
+            OrderItemTriggerHandler.rollupOrders(new Set<Id>{ orderId });
         } catch (AuraHandledException e) {
             throw e;
         } catch (Exception e) {

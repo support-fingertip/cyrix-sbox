@@ -119,14 +119,25 @@ public with sharing class OrderItemTriggerHandler {
                 || prev.OrderId != oi.OrderId;
             if (changed && oi.OrderId != null) affectedOrderIds.add(oi.OrderId);
         }
-        if (affectedOrderIds.isEmpty()) return;
+        rollupOrders(affectedOrderIds);
+    }
+
+    /**
+     * Public entry point so Apex callers (e.g. OrderBuilderController's
+     * saveOrderItems / updateOrderItems) can force a rollup without
+     * depending on the trigger fire order. Safe to call after a bulk
+     * OrderItem DML: re-queries siblings and only updates Orders whose
+     * computed Price_Status differs from the stored one.
+     */
+    public static void rollupOrders(Set<Id> orderIds) {
+        if (orderIds == null || orderIds.isEmpty()) return;
 
         // Load every sibling OrderItem for each affected Order.
         Map<Id, List<OrderItem>> itemsByOrder = new Map<Id, List<OrderItem>>();
         for (OrderItem oi : [
             SELECT Id, OrderId, Price_Status__c
             FROM OrderItem
-            WHERE OrderId IN :affectedOrderIds
+            WHERE OrderId IN :orderIds
         ]) {
             if (!itemsByOrder.containsKey(oi.OrderId)) {
                 itemsByOrder.put(oi.OrderId, new List<OrderItem>());
@@ -137,11 +148,11 @@ public with sharing class OrderItemTriggerHandler {
         // Compute rollup and compare against current Order.Price_Status__c
         // so we only update when something actually changes.
         Map<Id, Order> currentOrders = new Map<Id, Order>([
-            SELECT Id, Price_Status__c FROM Order WHERE Id IN :affectedOrderIds
+            SELECT Id, Price_Status__c FROM Order WHERE Id IN :orderIds
         ]);
 
         List<Order> toUpdate = new List<Order>();
-        for (Id oid : affectedOrderIds) {
+        for (Id oid : orderIds) {
             String rolled = computeRollup(itemsByOrder.get(oid));
             Order curr = currentOrders.get(oid);
             if (curr == null) continue;
