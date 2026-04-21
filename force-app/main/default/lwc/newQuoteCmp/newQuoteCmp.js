@@ -407,6 +407,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 quantity: item.quantity,
                 unitPrice: item.unitPrice,
                 discount: item.discount,
+                taxPercent: item.taxPercent,
                 lineDescription: item.lineDescription,
                 detailedDescription: item.detailedDescription,
                 sourcePricebookId: item.sourcePricebookId || null,

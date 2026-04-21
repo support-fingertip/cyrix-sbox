@@ -309,6 +309,14 @@ public with sharing class OrderBuilderController {
                 oi.Quantity = li.quantity;
                 oi.UnitPrice = li.unitPrice;
                 oi.Discount__c = li.discount != null ? li.discount : 0;
+                if (li.taxPercent != null) {
+                    oi.Tax__c = li.taxPercent;
+                    Decimal qty = li.quantity != null ? li.quantity : 0;
+                    Decimal up = li.unitPrice != null ? li.unitPrice : 0;
+                    Decimal disc = li.discount != null ? li.discount : 0;
+                    Decimal afterDiscount = (qty * up) * (1 - (disc / 100));
+                    oi.Tax_Amount__c = afterDiscount * (li.taxPercent / 100);
+                }
                 items.add(oi);
             }
             insert items;
@@ -343,6 +351,14 @@ public with sharing class OrderBuilderController {
                 oi.Quantity = li.quantity;
                 oi.UnitPrice = li.unitPrice;
                 oi.Discount__c = li.discount != null ? li.discount : 0;
+                if (li.taxPercent != null) {
+                    oi.Tax__c = li.taxPercent;
+                    Decimal qty = li.quantity != null ? li.quantity : 0;
+                    Decimal up = li.unitPrice != null ? li.unitPrice : 0;
+                    Decimal disc = li.discount != null ? li.discount : 0;
+                    Decimal afterDiscount = (qty * up) * (1 - (disc / 100));
+                    oi.Tax_Amount__c = afterDiscount * (li.taxPercent / 100);
+                }
                 items.add(oi);
             }
             insert items;
@@ -395,6 +411,7 @@ public with sharing class OrderBuilderController {
         public Decimal quantity;
         public Decimal unitPrice;
         public Decimal discount;
+        public Decimal taxPercent;
     }
 
     public class PaymentTermInput {
