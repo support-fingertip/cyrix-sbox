@@ -402,7 +402,6 @@ public with sharing class QuoteBuilderController {
         // Applied-pricebook selection (PL4 -> PL1, highest tier whose list
         // price is <= final amount). If final is above PL4, no tier is
         // applied and the line stays on Standard / PL5 with Not Required.
-        PricebookEntry tier5 = tiers == null ? null : tiers.tier(PricebookTierService.TIER5);
         out.standardPrice = standard;
 
         if (tiers != null && !tiers.byTier.isEmpty()) {
