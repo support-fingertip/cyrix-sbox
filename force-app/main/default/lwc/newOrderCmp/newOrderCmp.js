@@ -221,7 +221,9 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
 
     async loadQuoteContext() {
         const data = await getQuoteContext({ quoteId: this.sourceQuoteId });
-        this.pricebookId = data.standardPricebookId || data.pricebookId;
+        // Carry the source Quote's pricebook onto the Order so QLI
+        // PricebookEntryIds map cleanly to OrderItem rows.
+        this.pricebookId = data.pricebookId || data.standardPricebookId;
         this.accountId = data.accountId;
         this.accountName = data.accountName || '';
         this.defaultAccountId = data.accountId;
