@@ -85,6 +85,8 @@ public with sharing class OrderBuilderController {
                    Opportunity.AccountId, Opportunity.Account.Name,
                    Opportunity.Buisness_Vertical__c, Opportunity.Region__c,
                    Pricebook2Id, CurrencyIsoCode,
+                   Business_Vertical__c, Shipping_Mode__c, Delivery__c,
+                   Contract_Period_From_Date__c, Contract_Period_End_Date__c,
                    BillingName, BillingStreet, BillingCity,
                    BillingStateCode, BillingPostalCode, BillingCountryCode,
                    ShippingName, ShippingStreet, ShippingCity,
@@ -103,6 +105,11 @@ public with sharing class OrderBuilderController {
         ctx.pricebookId = q.Pricebook2Id;
         ctx.sourceQuoteId = q.Id;
         ctx.sourceQuoteName = q.QuoteNumber;
+        ctx.businessVertical = q.Business_Vertical__c;
+        ctx.shippingMode = q.Shipping_Mode__c;
+        ctx.delivery = q.Delivery__c;
+        ctx.contractPeriodFrom = q.Contract_Period_From_Date__c;
+        ctx.contractPeriodEnd = q.Contract_Period_End_Date__c;
 
         ctx.billingStreet = q.BillingStreet;
         ctx.billingCity = q.BillingCity;
@@ -379,6 +386,11 @@ public with sharing class OrderBuilderController {
         @AuraEnabled public String description;
         @AuraEnabled public Id sourceQuoteId;
         @AuraEnabled public String sourceQuoteName;
+        @AuraEnabled public String businessVertical;
+        @AuraEnabled public String shippingMode;
+        @AuraEnabled public String delivery;
+        @AuraEnabled public Date contractPeriodFrom;
+        @AuraEnabled public Date contractPeriodEnd;
         @AuraEnabled public String billingStreet;
         @AuraEnabled public String billingCity;
         @AuraEnabled public String billingState;

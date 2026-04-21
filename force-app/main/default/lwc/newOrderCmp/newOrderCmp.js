@@ -60,6 +60,13 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     // Source quote (when creating from a Quote)
     sourceQuoteId = null;
 
+    // Defaults carried from source Quote (create mode) or edited record
+    carryBusinessVertical = null;
+    carryShippingMode = null;
+    carryDelivery = null;
+    carryContractFrom = null;
+    carryContractEnd = null;
+
     // ===== PICKLIST OPTIONS =====
 
     get categoryOptions() {
@@ -98,6 +105,21 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     }
     get defaultStatus() { return this.isEditMode ? undefined : 'Draft'; }
     get defaultSourceQuoteId() { return this.sourceQuoteId || undefined; }
+    get defaultBusinessVertical() {
+        return this.isEditMode ? undefined : (this.carryBusinessVertical || undefined);
+    }
+    get defaultShippingMode() {
+        return this.isEditMode ? undefined : (this.carryShippingMode || undefined);
+    }
+    get defaultDelivery() {
+        return this.isEditMode ? undefined : (this.carryDelivery || undefined);
+    }
+    get defaultContractFrom() {
+        return this.isEditMode ? undefined : (this.carryContractFrom || undefined);
+    }
+    get defaultContractEnd() {
+        return this.isEditMode ? undefined : (this.carryContractEnd || undefined);
+    }
 
     // ===== CALCULATIONS =====
 
@@ -204,6 +226,11 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         this.accountName = data.accountName || '';
         this.defaultAccountId = data.accountId;
         this.defaultOpportunityId = data.opportunityId;
+        this.carryBusinessVertical = data.businessVertical;
+        this.carryShippingMode = data.shippingMode;
+        this.carryDelivery = data.delivery;
+        this.carryContractFrom = data.contractPeriodFrom;
+        this.carryContractEnd = data.contractPeriodEnd;
 
         this.billingAddress = {
             name: data.accountName || '',
