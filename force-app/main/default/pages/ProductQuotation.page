@@ -700,7 +700,7 @@
                 <tr>
                     <td style="vertical-align: top;">
                         <br/>
-                        {!quote.account.Name}<br/>{!quote.Billing_Address__c}
+                        {!quote.account.Name}<br/>address
                     </td>
                     <td style="vertical-align: top; padding-left: 80px;">
                         <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 50px; max-width: 50px;" /><br/>

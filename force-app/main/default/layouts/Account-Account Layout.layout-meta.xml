@@ -454,13 +454,6 @@
         <relatedList>Outstanding__c.Account__c</relatedList>
     </relatedLists>
     <relatedLists>
-        <fields>PRODUCT.NAME</fields>
-        <fields>PRODUCT.CUSTOMER_PRODUCT_ID</fields>
-        <fields>PRODUCT.DEFAULT_PRICE</fields>
-        <fields>PRODUCT.ACTIVE</fields>
-        <relatedList>PricebookEntry.Customer__c</relatedList>
-    </relatedLists>
-    <relatedLists>
         <fields>CreatedDate</fields>
         <fields>StepStatus</fields>
         <fields>OriginalActor</fields>

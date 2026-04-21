@@ -274,12 +274,6 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 const disc = item.discount || 0;
                 const discountedBase = base - (base * (disc / 100));
                 const taxOnAfterDisc = discountedBase * ((item.taxPercent || 0) / 100);
-                const isService = item.isServiceItem === true;
-                const tierPricesFromDb = [];
-                const priceStatus = this.computePriceStatus(
-                    item.unitPrice, disc, item.listPrice, isService,
-                    item.taxPercent, tierPricesFromDb
-                );
                 return {
                     rowId: 'row-' + rowCounter,
                     rowNumber: index + 1,
@@ -294,10 +288,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                     discount: disc,
                     taxPercent: item.taxPercent || 0,
                     taxPercentDisplay: (item.taxPercent || 0) + '%',
-                    isServiceItem: isService,
-                    priceStatus: priceStatus,
-                    priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
-                    tierPrices: tierPricesFromDb,
+                    isServiceItem: item.isServiceItem === true,
                     lineTotal: discountedBase + taxOnAfterDisc
                 };
             });
@@ -352,12 +343,6 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 const disc = item.discount || 0;
                 const discountedBase = base - (base * (disc / 100));
                 const taxOnAfterDisc = discountedBase * ((item.taxPercent || 0) / 100);
-                const isService = item.isServiceItem === true;
-                const tierPricesFromDb = [];
-                const priceStatus = this.computePriceStatus(
-                    item.unitPrice, disc, item.listPrice, isService,
-                    item.taxPercent, tierPricesFromDb
-                );
                 return {
                     rowId: 'row-' + rowCounter,
                     rowNumber: index + 1,
@@ -372,10 +357,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                     discount: disc,
                     taxPercent: item.taxPercent || 0,
                     taxPercentDisplay: (item.taxPercent || 0) + '%',
-                    isServiceItem: isService,
-                    priceStatus: priceStatus,
-                    priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
-                    tierPrices: tierPricesFromDb,
+                    isServiceItem: item.isServiceItem === true,
                     lineTotal: discountedBase + taxOnAfterDisc
                 };
             });
@@ -655,17 +637,6 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         const base = (product.unitPrice || 0);
         const tax = base * ((product.taxPercent || 0) / 100);
 
-        // Pull discount-tier PBE prices (PL4..PL1, Standard excluded)
-        // out of the search result so the local Price_Status decision
-        // can iterate them without a server round-trip.
-        const tierPrices = Array.isArray(product.availablePrices)
-            ? product.availablePrices.map(p => p.price).filter(v => v != null)
-            : [];
-        const priceStatus = this.computePriceStatus(
-            product.unitPrice, 0, product.unitPrice, isService,
-            product.taxPercent, tierPrices
-        );
-
         const newItem = {
             rowId: 'row-' + rowCounter,
             rowNumber: this.lineItems.length + 1,
@@ -681,9 +652,6 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
             taxPercent: product.taxPercent || 0,
             taxPercentDisplay: (product.taxPercent || 0) + '%',
             isServiceItem: isService,
-            priceStatus: priceStatus,
-            priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
-            tierPrices: tierPrices,
             lineTotal: base + tax
         };
 
@@ -713,14 +681,13 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 updated.quantity = parseFloat(value) || 0;
             } else if (field === 'unitPrice') {
                 const raw = parseFloat(value) || 0;
-                // Sales Price is locked to the Standard list price on
-                // non-service lines — any value other than list price
-                // snaps back to list price silently. Discount is the
-                // lever to lower the effective price.
-                if (!updated.isServiceItem) {
-                    updated.unitPrice = raw === updated.listPrice
-                        ? raw
-                        : updated.listPrice;
+                if (raw < updated.listPrice) {
+                    this.showError(
+                        'Sales Price below standard',
+                        'Sales Price cannot be below the list price (' +
+                        this.formatCurrency(updated.listPrice) + ').'
+                    );
+                    updated.unitPrice = updated.listPrice;
                 } else {
                     updated.unitPrice = raw;
                 }
@@ -736,22 +703,6 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
             const afterDisc = base - discAmt;
             const taxAmt = afterDisc * ((updated.taxPercent || 0) / 100);
             updated.lineTotal = afterDisc + taxAmt;
-
-            // Re-run the tier-based Price Status locally against the
-            // stored tierPrices. Preserves an already-Approved line so
-            // approvers' decisions aren't undone by a later edit.
-            if (updated.priceStatus !== 'Approved') {
-                const live = this.computePriceStatus(
-                    updated.unitPrice,
-                    updated.discount,
-                    updated.listPrice,
-                    updated.isServiceItem,
-                    updated.taxPercent,
-                    updated.tierPrices
-                );
-                updated.priceStatus = live;
-                updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(live);
-            }
 
             return updated;
         });
@@ -776,12 +727,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 quantity: item.quantity || 1
             });
 
-            // Apex returns resolvedTier = 'Standard' when the per-unit
-            // final is above PL4, or 'Price list4'..'Price list1' when
-            // it lands on a discount tier. Fall back to 'Standard' so
-            // the UI matches the save-time stamp (Source_Pricebook_Ref__c
-            // is the Standard Pricebook id in the above-PL4 case).
-            const resolvedPb = preview.resolvedTier || 'Standard';
+            const resolvedPb = preview.resolvedTier || 'Price list5';
             this.lineItems = this.lineItems.map(it => {
                 if (it.rowId !== rowId) return it;
                 const updated = { ...it };
@@ -798,40 +744,6 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         }
     }
 
-    // Client-side mirror of the server's Price_Status decision.
-    //
-    // Non-service logic:
-    //   finalPrice = unitPrice
-    //              - (discount% of unitPrice)
-    //              - (tax% of unitPrice)
-    //   Walk the product's discount-tier PBEs (Price list4 -> Price
-    //   list1, Standard excluded). If finalPrice <= any tier price,
-    //   return 'Approval Required'. Otherwise 'Not Required'. Falls
-    //   back to comparing finalPrice <= listPrice for products that
-    //   don't have any tier pricebooks configured.
-    //
-    // Service lines always return 'Approval Required' — the business
-    // rule flips every service line into approval.
-    computePriceStatus(unitPrice, discount, listPrice, isServiceItem, taxpercentage, tierPrices) {
-        if (isServiceItem) return 'Approval Required';
-
-        const tax = taxpercentage == null ? 0 : taxpercentage;
-        const up  = unitPrice == null ? 0 : unitPrice;
-        const d   = discount == null ? 0 : discount;
-        const taxprice = (up * tax) / 100;
-        const finalPrice = up - ((d * up) / 100) - taxprice;
-
-        if (Array.isArray(tierPrices)) {
-            for (const tp of tierPrices) {
-                if (tp != null && finalPrice <= tp) return 'Approval Required';
-            }
-            if (tierPrices.length > 0) return 'Not Required';
-        }
-
-        if (listPrice == null) return 'Not Required';
-        return finalPrice <= listPrice ? 'Approval Required' : 'Not Required';
-    }
-
     getPriceStatusBadgeClass(status) {
         const base = 'slds-badge';
         switch (status) {
@@ -845,7 +757,6 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     getTierBadgeLabel(pricebookType) {
         if (!pricebookType) return '';
         switch (pricebookType) {
-            case 'Standard':    return 'Standard';
             case 'Price list5': return 'Tier 5';
             case 'Price list4': return 'Tier 4';
             case 'Price list3': return 'Tier 3';
@@ -862,9 +773,8 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
             case 'Price list3': return base + ' tier-3';
             case 'Price list2': return base + ' tier-2';
             case 'Price list1': return base + ' tier-1';
-            case 'Price list5': return base + ' tier-5';
-            case 'Standard':
-            default:            return base + ' tier-standard';
+            case 'Price list5':
+            default:            return base + ' tier-5';
         }
     }
 

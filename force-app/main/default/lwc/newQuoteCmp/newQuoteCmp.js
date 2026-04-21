@@ -572,10 +572,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         const tierPrices = Array.isArray(product.availablePrices)
             ? product.availablePrices.map(p => p.price).filter(v => v != null)
             : [];
-        const priceStatus = this.computePriceStatus(
-            product.unitPrice, 0, product.unitPrice, isService,
-            product.taxPercent, tierPrices
-        );
+        const priceStatus = 'Not Required';
         const newItem = {
             rowId: 'row-' + rowCounter,
             rowNumber: this.lineItems.length + 1,
@@ -811,7 +808,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // Service lines always return 'Approval Required' per the business
     // rule ("approval required except when Service_Item is No").
     computePriceStatus(unitPrice, discount, listPrice, isServiceItem, taxpercentage, tierPrices) {
-        if (isServiceItem) return 'Approval Required';
+        if (isServiceItem) return 'Not Required';
 
         const tax = taxpercentage == null ? 0 : taxpercentage;
         const up  = unitPrice == null ? 0 : unitPrice;
@@ -825,6 +822,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         // status flips to Approval Required.
         if (Array.isArray(tierPrices)) {
             for (const tp of tierPrices) {
+               
                 if (tp != null && finalPrice <= tp) return 'Approval Required';
             }
             // No tier matched and tier data was actually supplied —

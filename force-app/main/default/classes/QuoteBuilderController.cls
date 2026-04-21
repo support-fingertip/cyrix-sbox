@@ -604,7 +604,7 @@ public with sharing class QuoteBuilderController {
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
                 qli.Source_Pricebook_Ref__c = item.sourcePricebookId;
-                qli.Opted_Price_Book__c = optedPbByProduct.get(item.productId);
+              //  qli.Opted_Price_Book__c = optedPbByProduct.get(item.productId);
                 // Tax__c carries the Product's tax rate from the LWC. The
                 // tiered-line trigger will re-stamp it from Product2.Tax__c
                 // for non-service rows; service rows keep the value the

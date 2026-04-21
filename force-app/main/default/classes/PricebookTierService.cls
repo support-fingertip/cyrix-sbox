@@ -24,11 +24,11 @@
  */
 public with sharing class PricebookTierService {
 
-    public static final String TIER5 = 'Price list5';
-    public static final String TIER4 = 'Price list4';
-    public static final String TIER3 = 'Price list3';
-    public static final String TIER2 = 'Price list2';
-    public static final String TIER1 = 'Price list1';
+    public static final String TIER5 = 'Price List 5';
+    public static final String TIER4 = 'Price List 4';
+    public static final String TIER3 = 'Price List 3';
+    public static final String TIER2 = 'Price List 2';
+    public static final String TIER1 = 'Price List 1';
 
     // Walked from highest to lowest list price.
     public static final List<String> TIER_ORDER_HIGH_TO_LOW = new List<String>{

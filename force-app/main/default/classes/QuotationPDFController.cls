@@ -38,9 +38,9 @@ public with sharing class QuotationPDFController {
     private void loadData(Id quoteId) {
         // Query Quote with parent relationships
         List<Quote> quotes = [
-            SELECT Id, Name, QuoteNumber, Quote_Id__c, Quote_Date__c, Valid_Till__c,
-                   Status, Price_Status__c, is_Active__c, Vertical__c,
-                   Billing_Address__c, Shipping_Mode__c,
+            SELECT Id, Name, QuoteNumber, Quote_Id__c, Quote_Date__c,
+                   Status, Price_Status__c, is_Active__c,
+                    Shipping_Mode__c,
                    Quote_Valid_Till_in_days__c,
                    Delivery__c,
                    Subtotal, TotalPrice, GrandTotal, Discount, Tax, ShippingHandling,
@@ -54,8 +54,7 @@ public with sharing class QuotationPDFController {
                    Account.BillingPostalCode, Account.BillingCountry,
             BillingCity,BillingAddress,BillingCountry,BillingState,Business_Vertical__c,
                    Account.Payment_Terms__c,Additional_Warranty__c,Notes__c,Sub_Vertical__c,
-                  
-                   ContactId, Contact.Name, Contact.Email, Contact.Phone, Contact.Title, owner.Name,Owner_Designation__c,Owner_Phone__c
+         ContactId, Contact.Name, Contact.Email, Contact.Phone, Contact.Title, owner.Name,Owner_Designation__c,Owner_Phone__c
             FROM Quote
             WHERE Id = :quoteId
             LIMIT 1

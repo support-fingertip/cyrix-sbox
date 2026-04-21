@@ -9,7 +9,7 @@
         var pageRef = {
             type: "standard__navItemPage",
             attributes: {
-                apiName: "New_Order"
+                apiName: "Order"
             },
             state: {
                 c__recordId: component.get("v.recordId")

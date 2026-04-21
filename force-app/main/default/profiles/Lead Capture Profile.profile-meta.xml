@@ -434,6 +434,10 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>OrderBuilderController</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>OrderItemTriggerHandler</apexClass>
         <enabled>false</enabled>
     </classAccesses>
@@ -475,14 +479,6 @@
     </classAccesses>
     <classAccesses>
         <apexClass>QuotationPDFControllerTest</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>QuoteApprovalController</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>QuoteApprovalControllerTest</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
@@ -793,36 +789,6 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Asset__c.Customer__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Bank__c.Account_No__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Bank__c.Bank_Name__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Bank__c.Beneficiary_Name__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Bank__c.Branch_Address__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Bank__c.Branch_Name__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Bank__c.IFSC_CODE__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -2167,21 +2133,6 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
-        <field>Notes__c.Note__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Notes__c.Order_No__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Notes__c.Quote__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
         <field>Opportunity.Advance_Payment_Mode__c</field>
         <readable>false</readable>
     </fieldPermissions>
@@ -2507,11 +2458,6 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
-        <field>Order.Billing_Address__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
         <field>Order.Branch__c</field>
         <readable>false</readable>
     </fieldPermissions>
@@ -2567,17 +2513,17 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>Order.Order_Cancellation_date_and_Time__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>Order.PO_Received_Date__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
         <field>Order.PO_Received__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Order.Packing_Charge__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -2593,6 +2539,11 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Order.Shipping_Mode__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Order.Sub_Vertical__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -2657,6 +2608,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>Payment_Term__c.Order__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>Payment_Term__c.Payment_Term__c</field>
         <readable>false</readable>
     </fieldPermissions>
@@ -2687,17 +2643,7 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
-        <field>PricebookEntry.Customer__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
         <field>PricebookEntry.Effective_Customer_Price_INR__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>PricebookEntry.Effective_Customer_Price_INR_with_Tax__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -2977,11 +2923,6 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
-        <field>Quote.Billing_Address__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
         <field>Quote.Branch__c</field>
         <readable>false</readable>
     </fieldPermissions>
@@ -3033,16 +2974,6 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Quote.Owner_Phone__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Quote.Packing_Charge__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Quote.Price_Book__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -3107,17 +3038,7 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
-        <field>Quote.Valid_Till__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
         <field>Quote.Version_Nmber__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Quote.Vertical__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -3132,7 +3053,7 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
-        <field>Quote.test__c</field>
+        <field>QuoteLineItem.Opted_Price_Book__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -3705,6 +3626,10 @@
     </flowAccesses>
     <flowAccesses>
         <enabled>false</enabled>
+        <flow>Order_line_item</flow>
+    </flowAccesses>
+    <flowAccesses>
+        <enabled>false</enabled>
         <flow>Quote_Approval_Status_Update</flow>
     </flowAccesses>
     <flowAccesses>
@@ -3755,9 +3680,6 @@
     </layoutAssignments>
     <layoutAssignments>
         <layout>Asset__c-Asset Layout</layout>
-    </layoutAssignments>
-    <layoutAssignments>
-        <layout>Bank__c-Bank Layout</layout>
     </layoutAssignments>
     <layoutAssignments>
         <layout>Branch__c-Branch Layout</layout>
@@ -3878,9 +3800,6 @@
     </layoutAssignments>
     <layoutAssignments>
         <layout>MessagingEndUser-Messaging User Layout</layout>
-    </layoutAssignments>
-    <layoutAssignments>
-        <layout>Notes__c-Notes Layout</layout>
     </layoutAssignments>
     <layoutAssignments>
         <layout>Opportunity-Opportunity Layout</layout>
@@ -4153,10 +4072,6 @@
         <visibility>Hidden</visibility>
     </tabVisibilities>
     <tabVisibilities>
-        <tab>Bank__c</tab>
-        <visibility>Hidden</visibility>
-    </tabVisibilities>
-    <tabVisibilities>
         <tab>Branch__c</tab>
         <visibility>Hidden</visibility>
     </tabVisibilities>
@@ -4166,10 +4081,6 @@
     </tabVisibilities>
     <tabVisibilities>
         <tab>Daily_Log__c</tab>
-        <visibility>Hidden</visibility>
-    </tabVisibilities>
-    <tabVisibilities>
-        <tab>Edit_Order</tab>
         <visibility>Hidden</visibility>
     </tabVisibilities>
     <tabVisibilities>
@@ -4194,6 +4105,10 @@
     </tabVisibilities>
     <tabVisibilities>
         <tab>New_Quote</tab>
+        <visibility>Hidden</visibility>
+    </tabVisibilities>
+    <tabVisibilities>
+        <tab>Order</tab>
         <visibility>Hidden</visibility>
     </tabVisibilities>
     <tabVisibilities>

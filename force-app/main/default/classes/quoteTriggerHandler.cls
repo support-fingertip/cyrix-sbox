@@ -219,18 +219,6 @@ public with sharing class quoteTriggerHandler {
             }
             if (!newPts.isEmpty()) insert newPts;
 
-            // Clone Notes__c
-            List<Notes__c> newNotes = new List<Notes__c>();
-            for (Notes__c nt : [
-                SELECT Id, Quote__c, Note__c, Order_No__c
-                FROM Notes__c
-                WHERE Quote__c IN :orderedOrigIds
-            ]) {
-                Notes__c n = nt.clone(false, true, false, false);
-                n.Quote__c = originalToSnapshot.get(nt.Quote__c);
-                newNotes.add(n);
-            }
-            if (!newNotes.isEmpty()) insert newNotes;
 
             // Clone Exclusions__c
             List<Exclusions__c> newEx = new List<Exclusions__c>();
