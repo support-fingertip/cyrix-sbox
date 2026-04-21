@@ -539,8 +539,18 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
 
     // ===== SEARCH HANDLERS =====
 
-    handleSearchTermChange(event) { this.searchTerm = event.target.value; }
+    handleSearchTermChange(event) {
+        this.searchTerm = event.detail ? event.detail.value : event.target.value;
+    }
     handleCategoryFilterChange(event) { this.categoryFilter = event.detail.value; }
+
+    handleSearchKeydown(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            event.stopPropagation();
+            this.handleSearch();
+        }
+    }
 
     async handleSearch() {
         if (this.isSearchDisabled) return;

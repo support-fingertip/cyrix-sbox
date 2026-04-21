@@ -488,8 +488,19 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
     // ===== SEARCH HANDLERS =====
 
-    handleSearchTermChange(event) { this.searchTerm = event.target.value; }
+    handleSearchTermChange(event) {
+        this.searchTerm = event.detail ? event.detail.value : event.target.value;
+    }
     handleCategoryFilterChange(event) { this.categoryFilter = event.detail.value; }
+
+    handleSearchKeydown(event) {
+        if (event.key === 'Enter') {
+            // Prevent Enter from submitting the outer lightning-record-edit-form
+            event.preventDefault();
+            event.stopPropagation();
+            this.handleSearch();
+        }
+    }
 
     async handleSearch() {
         if (this.isSearchDisabled) return;

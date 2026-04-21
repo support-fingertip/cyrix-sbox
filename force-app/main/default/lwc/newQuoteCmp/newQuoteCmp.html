@@ -153,8 +153,9 @@
                                 label="Search Products"
                                 value={searchTerm}
                                 onchange={handleSearchTermChange}
+                                onkeydown={handleSearchKeydown}
                                 placeholder="Search by name or code..."
-                                type="search">
+                                type="text">
                             </lightning-input>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-p-around_x-small">
