@@ -12,6 +12,11 @@
  * the price below Price list1), the line stays on Price list1 and the caller
  * must flag it as Approval Required.
  *
+ * resolveAppliedTier (newer rule): compares the final per-unit amount
+ * *after discount and tax* against PL4 -> PL1 and returns the highest tier
+ * whose list price is still <= that amount. Used by QuoteLineItem /
+ * OrderItem triggers and the LWC live preview.
+ *
  * Service items (Product2.Service_Item__c = 'Yes') bypass all tier logic.
  * They carry a pricebook entry against a dummy pricebook whose UnitPrice is
  * 0; Sales Price and Tax are user-entered and Price_Status__c is always
