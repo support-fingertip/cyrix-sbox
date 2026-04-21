@@ -138,6 +138,14 @@
     flex: 1;
 }
 
+.quote-lookup-row {
+    background: var(--brand-light);
+    border: 1px solid var(--brand-primary);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem !important;
+    margin-bottom: 0.5rem;
+}
+
 .address-block {
     background: var(--input-bg);
     border: 1px solid var(--border-color);

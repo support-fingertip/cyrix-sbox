@@ -49,6 +49,9 @@
                         <lightning-input-field field-name="Name" value={orderName}></lightning-input-field>
                     </div>
                     <div class="slds-grid slds-wrap slds-gutters_small">
+                        <div class="slds-col slds-size_1-of-1 slds-p-around_x-small quote-lookup-row">
+                            <lightning-input-field field-name="QuoteId" value={defaultSourceQuoteId}></lightning-input-field>
+                        </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
                             <lightning-input-field field-name="EffectiveDate" value={defaultEffectiveDate} required></lightning-input-field>
                         </div>
@@ -56,25 +59,28 @@
                             <lightning-input-field field-name="Status" value={defaultStatus} required></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="AccountId" value={defaultAccountId} required></lightning-input-field>
+                            <lightning-input-field field-name="AccountId" value={defaultAccountId} disabled required></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
                             <lightning-input-field field-name="OpportunityId" value={defaultOpportunityId}></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="QuoteId" value={defaultSourceQuoteId}></lightning-input-field>
+                            <lightning-input-field field-name="Business_Vertical__c" value={defaultBusinessVertical}></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="Business_Vertical__c"></lightning-input-field>
+                            <lightning-input-field field-name="Shipping_Mode__c" value={defaultShippingMode}></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                            <lightning-input-field field-name="Delivery__c" value={defaultDelivery}></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                            <lightning-input-field field-name="Contract_Period_From_Date__c" value={defaultContractFrom}></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                            <lightning-input-field field-name="Contract_Period_End_Date__c" value={defaultContractEnd}></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
                             <lightning-input-field field-name="Type"></lightning-input-field>
-                        </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="Contract_Period_From_Date__c"></lightning-input-field>
-                        </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="Contract_Period_End_Date__c"></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
                             <lightning-input-field field-name="EndDate"></lightning-input-field>
