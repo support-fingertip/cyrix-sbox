@@ -723,7 +723,8 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
             const preview = await getProductPricingPreview({
                 productId: item.productId,
                 unitPrice: item.unitPrice,
-                discount: item.discount || 0
+                discount: item.discount || 0,
+                quantity: item.quantity || 1
             });
 
             const resolvedPb = preview.resolvedTier || 'Price list5';
