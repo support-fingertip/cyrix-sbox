@@ -184,7 +184,10 @@ public with sharing class OrderItemTriggerHandler {
 
     @TestVisible
     private static String computeRollup(List<OrderItem> items) {
-        if (items == null || items.isEmpty()) return ORDER_STATUS_DRAFT;
+        // Order.Price_Status__c uses the Approval Required / Approved /
+        // Not Required picklist — 'Draft' is not a valid value, so the
+        // rollup defaults to Not Required when no child needs approval.
+        if (items == null || items.isEmpty()) return STATUS_NOT_REQUIRED;
         Boolean anyApprovalRequired = false;
         Boolean allApproved = true;
         for (OrderItem oi : items) {
@@ -193,6 +196,6 @@ public with sharing class OrderItemTriggerHandler {
         }
         if (anyApprovalRequired) return STATUS_APPROVAL_REQUIRED;
         if (allApproved) return STATUS_APPROVED;
-        return ORDER_STATUS_DRAFT;
+        return STATUS_NOT_REQUIRED;
     }
 }
