@@ -71,6 +71,8 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
 
     // ===== PICKLIST OPTIONS =====
 
+    // Product Type filter (not Product Category). Values mirror the
+    // Product_Type__c global value set on Product2.
     get categoryOptions() {
         return [
             { label: 'All Product Types', value: '' },

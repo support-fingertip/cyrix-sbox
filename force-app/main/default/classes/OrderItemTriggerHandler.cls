@@ -19,7 +19,11 @@ public with sharing class OrderItemTriggerHandler {
     private static final String STATUS_APPROVED          = 'Approved';
     private static final String ORDER_STATUS_DRAFT       = 'Draft';
 
-    /** BEFORE insert/update. Mutates records in-place. */
+    /**
+     * BEFORE insert/update. Mutates records in-place. Same tier-applied
+     * pricebook rule used on Quote Line Items: final unit amount after
+     * discount + tax, compared against PL4..PL1.
+     */
     public static void evaluateDiscountThresholds(List<OrderItem> items) {
         if (items == null || items.isEmpty()) return;
 
