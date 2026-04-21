@@ -728,7 +728,12 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 quantity: item.quantity || 1
             });
 
-            const resolvedPb = preview.resolvedTier || 'Price list5';
+            // Apex returns resolvedTier = 'Standard' when the per-unit
+            // final is above PL4, or 'Price list4'..'Price list1' when
+            // it lands on a discount tier. Fall back to 'Standard' so
+            // the UI matches the save-time stamp (Source_Pricebook_Ref__c
+            // is the Standard Pricebook id in the above-PL4 case).
+            const resolvedPb = preview.resolvedTier || 'Standard';
             this.lineItems = this.lineItems.map(it => {
                 if (it.rowId !== rowId) return it;
                 const updated = { ...it };
@@ -758,6 +763,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     getTierBadgeLabel(pricebookType) {
         if (!pricebookType) return '';
         switch (pricebookType) {
+            case 'Standard':    return 'Standard';
             case 'Price list5': return 'Tier 5';
             case 'Price list4': return 'Tier 4';
             case 'Price list3': return 'Tier 3';
@@ -774,8 +780,9 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
             case 'Price list3': return base + ' tier-3';
             case 'Price list2': return base + ' tier-2';
             case 'Price list1': return base + ' tier-1';
-            case 'Price list5':
-            default:            return base + ' tier-5';
+            case 'Price list5': return base + ' tier-5';
+            case 'Standard':
+            default:            return base + ' tier-standard';
         }
     }
 
