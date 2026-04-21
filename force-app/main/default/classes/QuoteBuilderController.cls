@@ -283,10 +283,16 @@ public with sharing class QuoteBuilderController {
             psr.availablePrices = new List<PriceOption>();
 
             if (psr.isServiceItem) {
-                // Service item: no PricebookEntry required here - the user
-                // picks a service PricebookEntry separately (or the LWC looks
-                // up the dummy service pricebook). Block auto-population of a
-                // default PBE so the LWC can prompt.
+                // Service items live on the Standard Pricebook. Map the
+                // Standard PBE (if present) so downstream Quote/Order saves
+                // can satisfy the required PricebookEntryId without hitting
+                // a pricebook mismatch. Unit price is 0 — the user enters
+                // the service price on the line.
+                PricebookEntry svcEntry = stdEntryMap.get(prod.Id);
+                if (svcEntry != null) {
+                    psr.pricebookEntryId = svcEntry.Id;
+                    psr.sourcePricebookId = svcEntry.Pricebook2Id;
+                }
                 psr.unitPrice = 0;
                 psr.sourcePricebookType = 'Service';
                 results.add(psr);
