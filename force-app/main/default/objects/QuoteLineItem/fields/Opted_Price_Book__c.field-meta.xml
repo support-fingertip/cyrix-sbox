@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Opted_Price_Book__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>The discount pricebook the line item lands in based on the final amount after discount and tax. Populated by QuoteBuilderController on save / update using the PL4 -&gt; PL1 selection rule.</description>
+    <externalId>false</externalId>
+    <label>Opted Price Book</label>
+    <referenceTo>Pricebook2</referenceTo>
+    <relationshipLabel>Quote Line Items (Opted)</relationshipLabel>
+    <relationshipName>Quote_Line_Items_Opted</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

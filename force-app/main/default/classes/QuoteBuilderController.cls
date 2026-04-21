@@ -588,6 +588,7 @@ public with sharing class QuoteBuilderController {
             }
 
             Map<Id, Id> pbeByProduct = resolveQuotePricebookEntries(quoteId, lineItems);
+            Map<Id, Id> optedPbByProduct = resolveOptedPricebooks(lineItems);
 
             List<QuoteLineItem> qliList = new List<QuoteLineItem>();
             for (LineItemInput item : lineItems) {
@@ -603,6 +604,7 @@ public with sharing class QuoteBuilderController {
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
                 qli.Source_Pricebook_Ref__c = item.sourcePricebookId;
+                qli.Opted_Price_Book__c = optedPbByProduct.get(item.productId);
                 // Tax__c carries the Product's tax rate from the LWC. The
                 // tiered-line trigger will re-stamp it from Product2.Tax__c
                 // for non-service rows; service rows keep the value the
@@ -633,6 +635,7 @@ public with sharing class QuoteBuilderController {
             if (!oldItems.isEmpty()) delete oldItems;
 
             Map<Id, Id> pbeByProduct = resolveQuotePricebookEntries(quoteId, lineItems);
+            Map<Id, Id> optedPbByProduct = resolveOptedPricebooks(lineItems);
 
             List<QuoteLineItem> qliList = new List<QuoteLineItem>();
             for (LineItemInput item : lineItems) {
@@ -648,6 +651,7 @@ public with sharing class QuoteBuilderController {
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
                 qli.Source_Pricebook_Ref__c = item.sourcePricebookId;
+                qli.Opted_Price_Book__c = optedPbByProduct.get(item.productId);
                 // Tax__c carries the Product's tax rate from the LWC. The
                 // tiered-line trigger will re-stamp it from Product2.Tax__c
                 // for non-service rows; service rows keep the value the
@@ -664,6 +668,57 @@ public with sharing class QuoteBuilderController {
         } catch (Exception e) {
             throw new AuraHandledException('Line item update failed: ' + e.getMessage());
         }
+    }
+
+    /**
+     * For each incoming line, resolve the product's opted discount
+     * pricebook using the rule:
+     *
+     *   finalPrice = UnitPrice
+     *              - (Discount% * UnitPrice)
+     *              - (Tax% * UnitPrice)
+     *
+     *   Walk PL4 -> PL3 -> PL2 -> PL1 and return the HIGHEST tier
+     *   whose list price is <= finalPrice. If finalPrice is below
+     *   every configured tier, return PL1 (floor). If finalPrice is
+     *   above the top existing tier (no discount tier applies),
+     *   return null so the caller leaves Opted_Price_Book__c blank.
+     *
+     * Returns a productId -> Pricebook2 id map (only populated for
+     * lines whose product has tier pricebooks and whose final amount
+     * actually hits one).
+     */
+    private static Map<Id, Id> resolveOptedPricebooks(List<LineItemInput> lineItems) {
+        Map<Id, Id> out = new Map<Id, Id>();
+        if (lineItems == null || lineItems.isEmpty()) return out;
+
+        Set<Id> productIds = new Set<Id>();
+        for (LineItemInput li : lineItems) {
+            if (li.productId != null) productIds.add(li.productId);
+        }
+        if (productIds.isEmpty()) return out;
+
+        Map<Id, PricebookTierService.ProductTierMap> tierMaps =
+            PricebookTierService.loadTiers(productIds);
+
+        for (LineItemInput li : lineItems) {
+            if (li.productId == null) continue;
+            PricebookTierService.ProductTierMap tiers = tierMaps.get(li.productId);
+            if (tiers == null || tiers.byTier.isEmpty()) continue;
+
+            Decimal up  = li.unitPrice  == null ? 0 : li.unitPrice;
+            Decimal d   = li.discount   == null ? 0 : li.discount;
+            Decimal tax = li.taxPercent == null ? 0 : li.taxPercent;
+            Decimal taxprice = (up * tax) / 100;
+            Decimal finalPrice = up - ((d * up) / 100) - taxprice;
+
+            PricebookTierService.TierResolution applied =
+                PricebookTierService.resolveAppliedTier(tiers, finalPrice);
+            if (applied != null && applied.entry != null) {
+                out.put(li.productId, applied.entry.Pricebook2Id);
+            }
+        }
+        return out;
     }
 
     // Price_Status__c and Tax__c on QuoteLineItem and the Quote rollup are
