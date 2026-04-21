@@ -280,6 +280,9 @@
                                                     {item.productName}
                                                 </div>
                                                 <div class="slds-text-body_small slds-text-color_weak">{item.productCode}</div>
+                                                <template if:true={item.hasPriceSource}>
+                                                    <span class={item.priceBadgeClass}>{item.priceBadgeLabel}</span>
+                                                </template>
                                             </td>
                                             <td class="slds-text-body_small">{item.uom}</td>
                                             <td>
@@ -342,11 +345,6 @@
                                             <td class="slds-text-align_center">
                                                 <template if:true={item.priceStatus}>
                                                     <span class={item.priceStatusBadgeClass}>{item.priceStatus}</span>
-                                                </template>
-                                                <template if:true={item.tierBadgeLabel}>
-                                                    <div class="tier-tag-row">
-                                                        <span class={item.tierBadgeClass}>{item.tierBadgeLabel}</span>
-                                                    </div>
                                                 </template>
                                             </td>
                                             <td class="line-total-cell">

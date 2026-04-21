@@ -274,6 +274,12 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 const disc = item.discount || 0;
                 const discountedBase = base - (base * (disc / 100));
                 const taxOnAfterDisc = discountedBase * ((item.taxPercent || 0) / 100);
+                const isService = item.isServiceItem === true;
+                const tierPricesFromDb = [];
+                const priceStatus = this.computePriceStatus(
+                    item.unitPrice, disc, item.listPrice, isService,
+                    item.taxPercent, tierPricesFromDb
+                );
                 return {
                     rowId: 'row-' + rowCounter,
                     rowNumber: index + 1,
@@ -288,7 +294,15 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                     discount: disc,
                     taxPercent: item.taxPercent || 0,
                     taxPercentDisplay: (item.taxPercent || 0) + '%',
-                    isServiceItem: item.isServiceItem === true,
+                    isServiceItem: isService,
+                    priceStatus: priceStatus,
+                    priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
+                    tierPrices: tierPricesFromDb,
+                    sourcePricebookId: item.sourcePricebookId || null,
+                    sourcePricebookName: item.sourcePricebookName || '',
+                    priceBadgeClass: this.getPriceBadgeClass(item.sourcePricebookName),
+                    priceBadgeLabel: this.getPriceBadgeLabel(item.sourcePricebookName),
+                    hasPriceSource: !!item.sourcePricebookName,
                     lineTotal: discountedBase + taxOnAfterDisc
                 };
             });
@@ -343,6 +357,12 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 const disc = item.discount || 0;
                 const discountedBase = base - (base * (disc / 100));
                 const taxOnAfterDisc = discountedBase * ((item.taxPercent || 0) / 100);
+                const isService = item.isServiceItem === true;
+                const tierPricesFromDb = [];
+                const priceStatus = this.computePriceStatus(
+                    item.unitPrice, disc, item.listPrice, isService,
+                    item.taxPercent, tierPricesFromDb
+                );
                 return {
                     rowId: 'row-' + rowCounter,
                     rowNumber: index + 1,
@@ -357,7 +377,15 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                     discount: disc,
                     taxPercent: item.taxPercent || 0,
                     taxPercentDisplay: (item.taxPercent || 0) + '%',
-                    isServiceItem: item.isServiceItem === true,
+                    isServiceItem: isService,
+                    priceStatus: priceStatus,
+                    priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
+                    tierPrices: tierPricesFromDb,
+                    sourcePricebookId: item.sourcePricebookId || null,
+                    sourcePricebookName: item.sourcePricebookName || '',
+                    priceBadgeClass: this.getPriceBadgeClass(item.sourcePricebookName),
+                    priceBadgeLabel: this.getPriceBadgeLabel(item.sourcePricebookName),
+                    hasPriceSource: !!item.sourcePricebookName,
                     lineTotal: discountedBase + taxOnAfterDisc
                 };
             });
@@ -602,7 +630,10 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
             this.searchResults = results.map(r => ({
                 ...r,
                 formattedPrice: this.formatCurrency(r.unitPrice),
-                formattedTax: r.taxPercent != null ? r.taxPercent + '%' : '0%'
+                formattedTax: r.taxPercent != null ? r.taxPercent + '%' : '0%',
+                priceBadgeClass: this.getPriceBadgeClass(r.sourcePricebookType),
+                priceBadgeLabel: this.getPriceBadgeLabel(r.sourcePricebookType),
+                hasPriceSource: !!r.sourcePricebookType
             }));
         } catch (error) {
             this.showError('Search failed', this.reduceErrors(error));
@@ -637,6 +668,17 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         const base = (product.unitPrice || 0);
         const tax = base * ((product.taxPercent || 0) / 100);
 
+        // Pull discount-tier PBE prices (PL4..PL1, Standard excluded)
+        // out of the search result so the local Price_Status decision
+        // can iterate them without a server round-trip.
+        const tierPrices = Array.isArray(product.availablePrices)
+            ? product.availablePrices.map(p => p.price).filter(v => v != null)
+            : [];
+        const priceStatus = this.computePriceStatus(
+            product.unitPrice, 0, product.unitPrice, isService,
+            product.taxPercent, tierPrices
+        );
+
         const newItem = {
             rowId: 'row-' + rowCounter,
             rowNumber: this.lineItems.length + 1,
@@ -652,6 +694,14 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
             taxPercent: product.taxPercent || 0,
             taxPercentDisplay: (product.taxPercent || 0) + '%',
             isServiceItem: isService,
+            priceStatus: priceStatus,
+            priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
+            tierPrices: tierPrices,
+            sourcePricebookId: product.sourcePricebookId || null,
+            sourcePricebookName: product.sourcePricebook || (isService ? 'Service' : ''),
+            priceBadgeClass: this.getPriceBadgeClass(product.sourcePricebookType),
+            priceBadgeLabel: this.getPriceBadgeLabel(product.sourcePricebookType),
+            hasPriceSource: !!product.sourcePricebookType,
             lineTotal: base + tax
         };
 
@@ -704,6 +754,22 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
             const taxAmt = afterDisc * ((updated.taxPercent || 0) / 100);
             updated.lineTotal = afterDisc + taxAmt;
 
+            // Re-run the tier-based Price Status locally against the
+            // stored tierPrices. Preserves an already-Approved line so
+            // approvers' decisions aren't undone by a later edit.
+            if (updated.priceStatus !== 'Approved') {
+                const live = this.computePriceStatus(
+                    updated.unitPrice,
+                    updated.discount,
+                    updated.listPrice,
+                    updated.isServiceItem,
+                    updated.taxPercent,
+                    updated.tierPrices
+                );
+                updated.priceStatus = live;
+                updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(live);
+            }
+
             return updated;
         });
 
@@ -727,7 +793,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 quantity: item.quantity || 1
             });
 
-            const resolvedPb = preview.resolvedTier || 'Price list5';
+            const resolvedPb = preview.resolvedTier || 'Standard';
             this.lineItems = this.lineItems.map(it => {
                 if (it.rowId !== rowId) return it;
                 const updated = { ...it };
@@ -735,13 +801,48 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(updated.priceStatus);
                 updated.sourcePricebookId = preview.resolvedPricebookId || updated.sourcePricebookId;
                 updated.sourcePricebookName = resolvedPb;
-                updated.tierBadgeLabel = this.getTierBadgeLabel(resolvedPb);
-                updated.tierBadgeClass = this.getTierBadgeClass(resolvedPb);
+                updated.priceBadgeClass = this.getPriceBadgeClass(resolvedPb);
+                updated.priceBadgeLabel = this.getPriceBadgeLabel(resolvedPb);
+                updated.hasPriceSource = !!resolvedPb;
                 return updated;
             });
         } catch (error) {
             console.warn('Pricing preview unavailable:', error && error.body ? error.body.message : error);
         }
+    }
+
+    // Client-side mirror of the server's Price_Status decision.
+    //
+    // Non-service logic:
+    //   finalPrice = unitPrice
+    //              - (discount% of unitPrice)
+    //              - (tax% of unitPrice)
+    //   Walk the product's discount-tier PBEs (Price list4 -> Price
+    //   list1, Standard excluded). If finalPrice <= any tier price,
+    //   return 'Approval Required'. Otherwise 'Not Required'. Falls
+    //   back to comparing finalPrice <= listPrice for products that
+    //   don't have any tier pricebooks configured.
+    //
+    // Service lines stay 'Not Required' on the order — order service
+    // lines don't go through the same approval gate as quote lines.
+    computePriceStatus(unitPrice, discount, listPrice, isServiceItem, taxpercentage, tierPrices) {
+        if (isServiceItem) return 'Not Required';
+
+        const tax = taxpercentage == null ? 0 : taxpercentage;
+        const up  = unitPrice == null ? 0 : unitPrice;
+        const d   = discount == null ? 0 : discount;
+        const taxprice = (up * tax) / 100;
+        const finalPrice = up - ((d * up) / 100) - taxprice;
+
+        if (Array.isArray(tierPrices)) {
+            for (const tp of tierPrices) {
+                if (tp != null && finalPrice <= tp) return 'Approval Required';
+            }
+            if (tierPrices.length > 0) return 'Not Required';
+        }
+
+        if (listPrice == null) return 'Not Required';
+        return finalPrice <= listPrice ? 'Approval Required' : 'Not Required';
     }
 
     getPriceStatusBadgeClass(status) {
@@ -754,27 +855,34 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         }
     }
 
-    getTierBadgeLabel(pricebookType) {
+    // ===== PRICING BADGE HELPERS =====
+
+    getPriceBadgeClass(pricebookType) {
+        const base = 'price-source-badge';
+        if (!pricebookType) return base + ' price-source-standard';
+        switch (pricebookType) {
+            case 'Standard':    return base + ' price-source-standard';
+            case 'Price list5': return base + ' price-source-standard';
+            case 'Price list4': return base + ' price-source-tier4';
+            case 'Price list3': return base + ' price-source-tier3';
+            case 'Price list2': return base + ' price-source-tier2';
+            case 'Price list1': return base + ' price-source-tier1';
+            case 'Service':     return base + ' price-source-service';
+            default:            return base + ' price-source-standard';
+        }
+    }
+
+    getPriceBadgeLabel(pricebookType) {
         if (!pricebookType) return '';
         switch (pricebookType) {
+            case 'Standard':    return 'Standard';
             case 'Price list5': return 'Tier 5';
             case 'Price list4': return 'Tier 4';
             case 'Price list3': return 'Tier 3';
             case 'Price list2': return 'Tier 2';
             case 'Price list1': return 'Tier 1';
+            case 'Service':     return 'Service';
             default:            return pricebookType;
-        }
-    }
-
-    getTierBadgeClass(pricebookType) {
-        const base = 'tier-badge';
-        switch (pricebookType) {
-            case 'Price list4': return base + ' tier-4';
-            case 'Price list3': return base + ' tier-3';
-            case 'Price list2': return base + ' tier-2';
-            case 'Price list1': return base + ' tier-1';
-            case 'Price list5':
-            default:            return base + ' tier-5';
         }
     }
 
