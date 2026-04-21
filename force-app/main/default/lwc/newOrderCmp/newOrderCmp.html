@@ -50,7 +50,12 @@
                     </div>
                     <div class="slds-grid slds-wrap slds-gutters_small">
                         <div class="slds-col slds-size_1-of-1 slds-p-around_x-small quote-lookup-row">
-                            <lightning-input-field field-name="QuoteId" value={defaultSourceQuoteId}></lightning-input-field>
+                            <lightning-input-field
+                                field-name="QuoteId"
+                                value={defaultSourceQuoteId}
+                                disabled={isQuoteLocked}
+                                onchange={handleQuoteChange}>
+                            </lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
                             <lightning-input-field field-name="EffectiveDate" value={defaultEffectiveDate} required></lightning-input-field>
@@ -62,10 +67,10 @@
                             <lightning-input-field field-name="AccountId" value={defaultAccountId} disabled required></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="OpportunityId" value={defaultOpportunityId}></lightning-input-field>
+                            <lightning-input-field field-name="OpportunityId" value={defaultOpportunityId} disabled></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="Business_Vertical__c" value={defaultBusinessVertical}></lightning-input-field>
+                            <lightning-input-field field-name="Business_Vertical__c" value={defaultBusinessVertical} disabled></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
                             <lightning-input-field field-name="Shipping_Mode__c" value={defaultShippingMode}></lightning-input-field>
@@ -74,10 +79,10 @@
                             <lightning-input-field field-name="Delivery__c" value={defaultDelivery}></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="Contract_Period_From_Date__c" value={defaultContractFrom}></lightning-input-field>
+                            <lightning-input-field field-name="Contract_Period_From_Date__c" value={defaultContractFrom} disabled></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="Contract_Period_End_Date__c" value={defaultContractEnd}></lightning-input-field>
+                            <lightning-input-field field-name="Contract_Period_End_Date__c" value={defaultContractEnd} disabled></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
                             <lightning-input-field field-name="Type"></lightning-input-field>
@@ -339,96 +344,6 @@
                         <div class="empty-state slds-text-align_center slds-p-around_large">
                             <lightning-icon icon-name="utility:cart" size="large" class="slds-m-bottom_small empty-icon"></lightning-icon>
                             <p class="slds-text-color_weak">No products added yet. Use the search above to find and add products.</p>
-                        </div>
-                    </template>
-                </div>
-            </div>
-
-            <!-- ===== SECTION: PAYMENT TERMS ===== -->
-            <div class="section-card">
-                <div class="section-header">
-                    <lightning-icon icon-name="utility:money" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                    <span>Payment Terms ({paymentTermCount})</span>
-                    <lightning-button
-                        label="Add Term"
-                        variant="brand"
-                        icon-name="utility:add"
-                        onclick={handleAddPaymentTerm}
-                        class="slds-m-left_auto">
-                    </lightning-button>
-                </div>
-                <div class="section-body">
-                    <template if:true={hasPaymentTerms}>
-                        <div class="table-scroll">
-                            <table class="slds-table slds-table_cell-buffer slds-table_bordered">
-                                <thead>
-                                    <tr class="slds-line-height_reset">
-                                        <th scope="col" style="width:35px"><div class="slds-truncate">#</div></th>
-                                        <th scope="col"><div class="slds-truncate">Payment Term</div></th>
-                                        <th scope="col" style="width:130px"><div class="slds-truncate">Percentage %</div></th>
-                                        <th scope="col" style="width:45px"><div class="slds-truncate"></div></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template for:each={paymentTerms} for:item="term">
-                                        <tr key={term.ptId}>
-                                            <td class="row-number">{term.rowNumber}</td>
-                                            <td>
-                                                <lightning-input
-                                                    type="text"
-                                                    value={term.paymentTerm}
-                                                    variant="label-hidden"
-                                                    placeholder="e.g. 30% Advance"
-                                                    data-pt-id={term.ptId}
-                                                    data-field="paymentTerm"
-                                                    onchange={handlePaymentTermChange}>
-                                                </lightning-input>
-                                            </td>
-                                            <td>
-                                                <lightning-input
-                                                    type="number"
-                                                    value={term.percentage}
-                                                    min="0"
-                                                    max="100"
-                                                    step="1"
-                                                    variant="label-hidden"
-                                                    data-pt-id={term.ptId}
-                                                    data-field="percentage"
-                                                    onchange={handlePaymentTermChange}>
-                                                </lightning-input>
-                                            </td>
-                                            <td>
-                                                <lightning-button-icon
-                                                    icon-name="utility:delete"
-                                                    alternative-text="Remove"
-                                                    variant="bare"
-                                                    class="delete-btn"
-                                                    data-pt-id={term.ptId}
-                                                    onclick={handleRemovePaymentTerm}>
-                                                </lightning-button-icon>
-                                            </td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td></td>
-                                        <td class="slds-text-align_right"><strong>Total</strong></td>
-                                        <td>
-                                            <strong>{totalPercentage}%</strong>
-                                            <template if:true={percentageOverflow}>
-                                                <span class="slds-text-color_error slds-text-body_small"> (exceeds 100%)</span>
-                                            </template>
-                                        </td>
-                                        <td></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </template>
-                    <template if:false={hasPaymentTerms}>
-                        <div class="slds-text-align_center slds-p-around_medium slds-text-color_weak">
-                            No payment terms added. Click "Add Term" to define payment terms.
                         </div>
                     </template>
                 </div>
