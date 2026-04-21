@@ -103,7 +103,6 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         const d = new Date();
         return d.toISOString().slice(0, 10);
     }
-    get defaultStatus() { return this.isEditMode ? undefined : 'Draft'; }
     get defaultSourceQuoteId() { return this.sourceQuoteId || undefined; }
     get isQuoteLocked() { return this.isEditMode; }
     get defaultBusinessVertical() {
@@ -269,6 +268,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                     unitPrice: item.unitPrice,
                     taxPercent: item.taxPercent || 0,
                     taxPercentDisplay: (item.taxPercent || 0) + '%',
+                    isServiceItem: item.isServiceItem === true,
                     lineTotal: base + taxAmt
                 };
             });
@@ -333,6 +333,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                     unitPrice: item.unitPrice,
                     taxPercent: item.taxPercent || 0,
                     taxPercentDisplay: (item.taxPercent || 0) + '%',
+                    isServiceItem: item.isServiceItem === true,
                     lineTotal: base + taxAmt
                 };
             });
@@ -434,6 +435,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
 
         if (!this.isEditMode) {
             fields.Pricebook2Id = this.pricebookId;
+            fields.Status = 'Draft';
         }
 
         fields.BillingStreet = this.billingAddress.street || '';
@@ -603,6 +605,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
             unitPrice: product.unitPrice || 0,
             taxPercent: product.taxPercent || 0,
             taxPercentDisplay: (product.taxPercent || 0) + '%',
+            isServiceItem: isService,
             lineTotal: base + tax
         };
 

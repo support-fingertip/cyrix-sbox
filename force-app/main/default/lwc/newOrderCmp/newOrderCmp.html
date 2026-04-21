@@ -57,13 +57,10 @@
                                 onchange={handleQuoteChange}>
                             </lightning-input-field>
                         </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_x-small">
                             <lightning-input-field field-name="EffectiveDate" value={defaultEffectiveDate} required></lightning-input-field>
                         </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="Status" value={defaultStatus} required></lightning-input-field>
-                        </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_x-small">
                             <lightning-input-field field-name="AccountId" value={defaultAccountId} disabled required></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
@@ -83,9 +80,6 @@
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
                             <lightning-input-field field-name="Contract_Period_End_Date__c" value={defaultContractEnd} disabled></lightning-input-field>
-                        </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="Type"></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
                             <lightning-input-field field-name="EndDate"></lightning-input-field>
@@ -301,17 +295,26 @@
                                                 </lightning-formatted-number>
                                             </td>
                                             <td>
-                                                <lightning-input
-                                                    type="number"
-                                                    value={item.unitPrice}
-                                                    min="0"
-                                                    step="0.01"
-                                                    variant="label-hidden"
-                                                    formatter="currency"
-                                                    data-row-id={item.rowId}
-                                                    data-field="unitPrice"
-                                                    onchange={handleLineItemChange}>
-                                                </lightning-input>
+                                                <template if:true={item.isServiceItem}>
+                                                    <lightning-input
+                                                        type="number"
+                                                        value={item.unitPrice}
+                                                        min="0"
+                                                        step="0.01"
+                                                        variant="label-hidden"
+                                                        formatter="currency"
+                                                        data-row-id={item.rowId}
+                                                        data-field="unitPrice"
+                                                        onchange={handleLineItemChange}>
+                                                    </lightning-input>
+                                                </template>
+                                                <template if:false={item.isServiceItem}>
+                                                    <lightning-formatted-number
+                                                        value={item.unitPrice}
+                                                        format-style="currency"
+                                                        currency-code={currencyCode}>
+                                                    </lightning-formatted-number>
+                                                </template>
                                             </td>
                                             <td class="slds-text-align_center">
                                                 {item.taxPercentDisplay}

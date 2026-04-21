@@ -130,7 +130,7 @@ public with sharing class OrderBuilderController {
         ctx.lineItems = new List<OrderLineResult>();
         for (QuoteLineItem qli : [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
-                   Product2.QuantityUnitOfMeasure,
+                   Product2.QuantityUnitOfMeasure, Product2.Service_Item__c,
                    PricebookEntryId, PricebookEntry.Tax__c,
                    Quantity, ListPrice, UnitPrice
             FROM QuoteLineItem
@@ -147,6 +147,7 @@ public with sharing class OrderBuilderController {
             item.listPrice = qli.ListPrice;
             item.unitPrice = qli.UnitPrice;
             item.taxPercent = qli.PricebookEntry.Tax__c != null ? qli.PricebookEntry.Tax__c : 0;
+            item.isServiceItem = (qli.Product2.Service_Item__c == 'Yes');
             ctx.lineItems.add(item);
         }
 
@@ -213,7 +214,7 @@ public with sharing class OrderBuilderController {
         ctx.lineItems = new List<OrderLineResult>();
         for (OrderItem oi : [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
-                   Product2.QuantityUnitOfMeasure,
+                   Product2.QuantityUnitOfMeasure, Product2.Service_Item__c,
                    PricebookEntryId, PricebookEntry.Tax__c,
                    Quantity, ListPrice, UnitPrice
             FROM OrderItem
@@ -231,6 +232,7 @@ public with sharing class OrderBuilderController {
             item.listPrice = oi.ListPrice;
             item.unitPrice = oi.UnitPrice;
             item.taxPercent = oi.PricebookEntry.Tax__c != null ? oi.PricebookEntry.Tax__c : 0;
+            item.isServiceItem = (oi.Product2.Service_Item__c == 'Yes');
             ctx.lineItems.add(item);
         }
 
@@ -416,5 +418,6 @@ public with sharing class OrderBuilderController {
         @AuraEnabled public Decimal listPrice;
         @AuraEnabled public Decimal unitPrice;
         @AuraEnabled public Decimal taxPercent;
+        @AuraEnabled public Boolean isServiceItem;
     }
 }
