@@ -5,6 +5,7 @@ import { CloseActionScreenEvent } from 'lightning/actions';
 import getOpportunityContext from '@salesforce/apex/QuoteBuilderController.getOpportunityContext';
 import getQuoteForEdit from '@salesforce/apex/QuoteBuilderController.getQuoteForEdit';
 import searchProductsWithBestPrice from '@salesforce/apex/QuoteBuilderController.searchProductsWithBestPrice';
+import getProductPricingPreview from '@salesforce/apex/QuoteBuilderController.getProductPricingPreview';
 import saveQuoteLineItems from '@salesforce/apex/QuoteBuilderController.saveQuoteLineItems';
 import updateQuoteLineItems from '@salesforce/apex/QuoteBuilderController.updateQuoteLineItems';
 import savePaymentTerms from '@salesforce/apex/QuoteBuilderController.savePaymentTerms';
@@ -599,6 +600,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         const field = event.currentTarget.dataset.field;
         const value = event.target.value;
 
+        const refreshTier = field === 'discount' || field === 'unitPrice' || field === 'quantity';
+
         this.lineItems = this.lineItems.map(item => {
             if (item.rowId !== rowId) return item;
             const updated = { ...item };
@@ -652,6 +655,47 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
             return updated;
         });
+
+        if (refreshTier) this.refreshPricingPreview(rowId);
+    }
+
+    // Asks the server for the tightest-fitting tier based on the current
+    // unit price and discount. The server answer is authoritative for the
+    // tier badge + Price_Status — matches what the QLI trigger will stamp
+    // on save. Skipped for service lines and for already-Approved lines.
+    async refreshPricingPreview(rowId) {
+        const item = this.lineItems.find(it => it.rowId === rowId);
+        if (!item || item.isServiceItem || item.priceStatus === 'Approved') return;
+        if (!item.productId || item.unitPrice == null) return;
+
+        try {
+            const preview = await getProductPricingPreview({
+                productId: item.productId,
+                unitPrice: item.unitPrice,
+                discount: item.discount || 0
+            });
+
+            const resolvedPb = preview.resolvedTier || 'Price list5';
+            this.lineItems = this.lineItems.map(it => {
+                if (it.rowId !== rowId) return it;
+                const updated = { ...it };
+                updated.priceStatus = preview.priceStatus || updated.priceStatus;
+                updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(updated.priceStatus);
+                updated.isApprovalRequired = updated.priceStatus === 'Approval Required';
+                updated.sourcePricebookId = preview.resolvedPricebookId || updated.sourcePricebookId;
+                updated.sourcePricebookName = resolvedPb;
+                updated.priceBadgeClass = this.getPriceBadgeClass(resolvedPb);
+                updated.priceBadgeLabel = this.getPriceBadgeLabel(resolvedPb);
+                updated.hasPriceSource = !!resolvedPb;
+                return updated;
+            });
+        } catch (error) {
+            // Server rejects UnitPrice < Price list5 by throwing — the
+            // client floor already caught that; any other rejection is
+            // non-fatal for the live UI (the save trigger remains the
+            // source of truth). Log quietly to the console.
+            console.warn('Pricing preview unavailable:', error && error.body ? error.body.message : error);
+        }
     }
 
     // ===== CANCEL =====

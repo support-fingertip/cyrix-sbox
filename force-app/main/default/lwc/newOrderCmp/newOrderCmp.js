@@ -10,6 +10,7 @@ import saveOrderItems from '@salesforce/apex/OrderBuilderController.saveOrderIte
 import updateOrderItems from '@salesforce/apex/OrderBuilderController.updateOrderItems';
 import savePaymentTerms from '@salesforce/apex/OrderBuilderController.savePaymentTerms';
 import searchProductsWithBestPrice from '@salesforce/apex/QuoteBuilderController.searchProductsWithBestPrice';
+import getProductPricingPreview from '@salesforce/apex/QuoteBuilderController.getProductPricingPreview';
 
 let rowCounter = 0;
 let ptCounter = 0;
@@ -62,6 +63,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
 
     // Defaults carried from source Quote (create mode) or edited record
     carryBusinessVertical = null;
+    carrySubVertical = null;
     carryShippingMode = null;
     carryDelivery = null;
     carryContractFrom = null;
@@ -107,6 +109,9 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     get isQuoteLocked() { return this.isEditMode; }
     get defaultBusinessVertical() {
         return this.isEditMode ? undefined : (this.carryBusinessVertical || undefined);
+    }
+    get defaultSubVertical() {
+        return this.isEditMode ? undefined : (this.carrySubVertical || undefined);
     }
     get defaultShippingMode() {
         return this.isEditMode ? undefined : (this.carryShippingMode || undefined);
@@ -237,6 +242,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         this.defaultAccountId = data.accountId;
         this.defaultOpportunityId = data.opportunityId;
         this.carryBusinessVertical = data.businessVertical;
+        this.carrySubVertical = data.subVertical;
         this.carryShippingMode = data.shippingMode;
         this.carryDelivery = data.delivery;
         this.carryContractFrom = data.contractPeriodFrom;
@@ -428,6 +434,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         this.defaultAccountId = null;
         this.defaultOpportunityId = null;
         this.carryBusinessVertical = null;
+        this.carrySubVertical = null;
         this.carryShippingMode = null;
         this.carryDelivery = null;
         this.carryContractFrom = null;
@@ -663,6 +670,8 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         const field = event.currentTarget.dataset.field;
         const value = event.target.value;
 
+        const refreshTier = field === 'discount' || field === 'unitPrice' || field === 'quantity';
+
         this.lineItems = this.lineItems.map(item => {
             if (item.rowId !== rowId) return item;
             const updated = { ...item };
@@ -696,6 +705,75 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
 
             return updated;
         });
+
+        if (refreshTier) this.refreshPricingPreview(rowId);
+    }
+
+    // Ask the server for the tightest-fitting tier + Price_Status for the
+    // current unit price + discount. Lets the rep see Approval Required
+    // and the matching tier badge live — the OrderItem trigger will stamp
+    // the same values authoritatively on save.
+    async refreshPricingPreview(rowId) {
+        const item = this.lineItems.find(it => it.rowId === rowId);
+        if (!item || item.isServiceItem || item.priceStatus === 'Approved') return;
+        if (!item.productId || item.unitPrice == null) return;
+
+        try {
+            const preview = await getProductPricingPreview({
+                productId: item.productId,
+                unitPrice: item.unitPrice,
+                discount: item.discount || 0
+            });
+
+            const resolvedPb = preview.resolvedTier || 'Price list5';
+            this.lineItems = this.lineItems.map(it => {
+                if (it.rowId !== rowId) return it;
+                const updated = { ...it };
+                updated.priceStatus = preview.priceStatus || updated.priceStatus;
+                updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(updated.priceStatus);
+                updated.sourcePricebookId = preview.resolvedPricebookId || updated.sourcePricebookId;
+                updated.sourcePricebookName = resolvedPb;
+                updated.tierBadgeLabel = this.getTierBadgeLabel(resolvedPb);
+                updated.tierBadgeClass = this.getTierBadgeClass(resolvedPb);
+                return updated;
+            });
+        } catch (error) {
+            console.warn('Pricing preview unavailable:', error && error.body ? error.body.message : error);
+        }
+    }
+
+    getPriceStatusBadgeClass(status) {
+        const base = 'slds-badge';
+        switch (status) {
+            case 'Approval Required': return base + ' slds-theme_error';
+            case 'Approved':          return base + ' slds-theme_success';
+            case 'Not Required':
+            default:                  return base + ' slds-theme_shade';
+        }
+    }
+
+    getTierBadgeLabel(pricebookType) {
+        if (!pricebookType) return '';
+        switch (pricebookType) {
+            case 'Price list5': return 'Tier 5';
+            case 'Price list4': return 'Tier 4';
+            case 'Price list3': return 'Tier 3';
+            case 'Price list2': return 'Tier 2';
+            case 'Price list1': return 'Tier 1';
+            default:            return pricebookType;
+        }
+    }
+
+    getTierBadgeClass(pricebookType) {
+        const base = 'tier-badge';
+        switch (pricebookType) {
+            case 'Price list4': return base + ' tier-4';
+            case 'Price list3': return base + ' tier-3';
+            case 'Price list2': return base + ' tier-2';
+            case 'Price list1': return base + ' tier-1';
+            case 'Price list5':
+            default:            return base + ' tier-5';
+        }
     }
 
     // ===== CANCEL =====

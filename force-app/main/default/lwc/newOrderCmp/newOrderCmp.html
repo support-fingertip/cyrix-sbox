@@ -71,6 +71,9 @@
                             <lightning-input-field field-name="Business_Vertical__c" value={defaultBusinessVertical} disabled></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                            <lightning-input-field field-name="Sub_Vertical__c" value={defaultSubVertical} disabled></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
                             <lightning-input-field field-name="Shipping_Mode__c" value={defaultShippingMode}></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
@@ -263,6 +266,7 @@
                                         <th scope="col" style="width:100px"><div class="slds-truncate">Sales Price</div></th>
                                         <th scope="col" style="width:85px"><div class="slds-truncate">Disc. %</div></th>
                                         <th scope="col" style="width:75px"><div class="slds-truncate">Tax %</div></th>
+                                        <th scope="col" style="width:100px"><div class="slds-truncate">Price Status</div></th>
                                         <th scope="col" style="width:110px"><div class="slds-truncate">Line Total</div></th>
                                         <th scope="col" style="width:45px"><div class="slds-truncate"></div></th>
                                     </tr>
@@ -334,6 +338,16 @@
                                             </td>
                                             <td class="slds-text-align_center">
                                                 {item.taxPercentDisplay}
+                                            </td>
+                                            <td class="slds-text-align_center">
+                                                <template if:true={item.priceStatus}>
+                                                    <span class={item.priceStatusBadgeClass}>{item.priceStatus}</span>
+                                                </template>
+                                                <template if:true={item.tierBadgeLabel}>
+                                                    <div class="tier-tag-row">
+                                                        <span class={item.tierBadgeClass}>{item.tierBadgeLabel}</span>
+                                                    </div>
+                                                </template>
                                             </td>
                                             <td class="line-total-cell">
                                                 <lightning-formatted-number
