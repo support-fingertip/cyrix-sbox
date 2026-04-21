@@ -194,27 +194,21 @@ public with sharing class OrderTriggerHandler {
     }
 
     private static void sendCancellationNotifications(Set<Id> orderIds) {
-        // Re-query to pull Account.Name + cancellation reason + owner email
-        // (trigger.new fields may not include related parent fields reliably).
+        // Re-query to pull Account.Name + cancellation reason + Opportunity
+        // email (source of truth for external cancellation emails, including
+        // ERP-pushed status updates). trigger.new fields may not include
+        // related parent fields reliably after DML.
         List<Order> orders = [
             SELECT Id, OrderNumber, OwnerId, Cancellation_Reason__c,
-                   Account.Name
+                   Account.Name,
+                   OpportunityId, Opportunity.Email__c, Opportunity.Secondary_Email__c
             FROM Order
             WHERE Id IN :orderIds
         ];
         if (orders.isEmpty()) return;
 
-        // Build Id -> Email map for each Owner that is a User (Queues don't
-        // have User records and are skipped for email).
-        Set<Id> ownerIds = new Set<Id>();
-        for (Order o : orders) if (o.OwnerId != null) ownerIds.add(o.OwnerId);
-        Map<Id, String> emailByOwnerId = new Map<Id, String>();
-        for (User u : [SELECT Id, Email FROM User WHERE Id IN :ownerIds]) {
-            if (String.isNotBlank(u.Email)) emailByOwnerId.put(u.Id, u.Email);
-        }
-
         sendInAppNotifications(orders);
-        sendCancellationEmails(orders, emailByOwnerId);
+        sendCancellationEmails(orders);
     }
 
     private static void sendInAppNotifications(List<Order> orders) {
@@ -249,20 +243,32 @@ public with sharing class OrderTriggerHandler {
     }
 
     /**
-     * Sends a cancellation email to the Order Owner's email address AND
-     * logs a Task record on the Order so the email appears in the
-     * Activity panel. Wrapped in try/catch so an email failure never
+     * Sends a cancellation email to the Opportunity's email address (with
+     * the secondary email CC'd when present) AND logs a Task record on the
+     * Order so the email shows up in the Activity panel. The Opportunity
+     * email is the source of truth: whether the cancellation came from a
+     * user marking the order cancelled in the UI or from the ERP pushing
+     * the status via the integration endpoint, the notification goes to
+     * the same address. Wrapped in try/catch so an email failure never
      * blocks the save or the bell notification that ran before it.
      */
-    private static void sendCancellationEmails(List<Order> orders, Map<Id, String> emailByOwnerId) {
-        if (emailByOwnerId == null || emailByOwnerId.isEmpty()) return;
+    private static void sendCancellationEmails(List<Order> orders) {
+        if (orders == null || orders.isEmpty()) return;
 
         List<Messaging.SingleEmailMessage> messages = new List<Messaging.SingleEmailMessage>();
         List<Task> activityTasks = new List<Task>();
 
         for (Order o : orders) {
-            String toEmail = emailByOwnerId.get(o.OwnerId);
-            if (String.isBlank(toEmail)) continue;
+            String toEmail = (o.Opportunity != null)
+                ? o.Opportunity.Email__c : null;
+            String ccEmail = (o.Opportunity != null)
+                ? o.Opportunity.Secondary_Email__c : null;
+            if (String.isBlank(toEmail)) {
+                System.debug(LoggingLevel.WARN,
+                    'OrderTriggerHandler: Opportunity email missing for Order '
+                    + o.Id + '. Skipping cancellation email.');
+                continue;
+            }
 
             String acctName = (o.Account != null && String.isNotBlank(o.Account.Name))
                 ? o.Account.Name : 'the customer';
@@ -283,6 +289,9 @@ public with sharing class OrderTriggerHandler {
 
             Messaging.SingleEmailMessage msg = new Messaging.SingleEmailMessage();
             msg.setToAddresses(new List<String>{ toEmail });
+            if (String.isNotBlank(ccEmail) && ccEmail != toEmail) {
+                msg.setCcAddresses(new List<String>{ ccEmail });
+            }
             msg.setSubject(subject);
             msg.setPlainTextBody(body);
             msg.setSaveAsActivity(false);
@@ -294,7 +303,11 @@ public with sharing class OrderTriggerHandler {
             Task t = new Task();
             t.WhatId       = o.Id;
             t.Subject      = 'Email: ' + subject;
-            t.Description  = 'To: ' + toEmail + '\n\n' + body;
+            String recipients = 'To: ' + toEmail;
+            if (String.isNotBlank(ccEmail) && ccEmail != toEmail) {
+                recipients += '\nCc: ' + ccEmail;
+            }
+            t.Description  = recipients + '\n\n' + body;
             t.Status       = 'Completed';
             t.Priority     = 'Normal';
             t.ActivityDate = Date.today();
