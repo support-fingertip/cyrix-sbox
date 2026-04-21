@@ -105,6 +105,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     }
     get defaultStatus() { return this.isEditMode ? undefined : 'Draft'; }
     get defaultSourceQuoteId() { return this.sourceQuoteId || undefined; }
+    get isQuoteLocked() { return this.isEditMode; }
     get defaultBusinessVertical() {
         return this.isEditMode ? undefined : (this.carryBusinessVertical || undefined);
     }
@@ -376,45 +377,46 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         };
     }
 
-    // ===== PAYMENT TERM HANDLERS =====
+    // ===== QUOTE LOOKUP HANDLER =====
 
-    handleAddPaymentTerm() {
-        ptCounter++;
-        this.paymentTerms = [
-            ...this.paymentTerms,
-            {
-                ptId: 'pt-' + ptCounter,
-                rowNumber: this.paymentTerms.length + 1,
-                paymentTerm: '',
-                percentage: 0
-            }
-        ];
+    async handleQuoteChange(event) {
+        if (this.isEditMode) return;
+        const newQuoteId = event.detail && event.detail.value && event.detail.value.length
+            ? event.detail.value[0]
+            : null;
+        if (newQuoteId === (this.sourceQuoteId || null)) return;
+
+        if (!newQuoteId) {
+            this.resetQuoteCarriedData();
+            return;
+        }
+
+        this.sourceQuoteId = newQuoteId;
+        this.isLoading = true;
+        try {
+            await this.loadQuoteContext();
+        } catch (error) {
+            this.showError('Error loading quote', this.reduceErrors(error));
+        } finally {
+            this.isLoading = false;
+        }
     }
 
-    handleRemovePaymentTerm(event) {
-        const ptId = event.currentTarget.dataset.ptId;
-        this.paymentTerms = this.paymentTerms
-            .filter(t => t.ptId !== ptId)
-            .map((t, index) => ({ ...t, rowNumber: index + 1 }));
-    }
-
-    handlePaymentTermChange(event) {
-        const ptId = event.currentTarget.dataset.ptId;
-        const field = event.currentTarget.dataset.field;
-        const value = event.target.value;
-
-        this.paymentTerms = this.paymentTerms.map(t => {
-            if (t.ptId === ptId) {
-                const updated = { ...t };
-                if (field === 'paymentTerm') {
-                    updated.paymentTerm = value;
-                } else if (field === 'percentage') {
-                    updated.percentage = parseFloat(value) || 0;
-                }
-                return updated;
-            }
-            return t;
-        });
+    resetQuoteCarriedData() {
+        this.sourceQuoteId = null;
+        this.accountId = null;
+        this.accountName = '';
+        this.defaultAccountId = null;
+        this.defaultOpportunityId = null;
+        this.carryBusinessVertical = null;
+        this.carryShippingMode = null;
+        this.carryDelivery = null;
+        this.carryContractFrom = null;
+        this.carryContractEnd = null;
+        this.billingAddress = { name: '', street: '', city: '', state: '', postalCode: '', country: 'IN' };
+        this.shippingAddress = { name: '', street: '', city: '', state: '', postalCode: '', country: 'IN' };
+        this.lineItems = [];
+        this.paymentTerms = [];
     }
 
     // ===== FORM HANDLERS =====
