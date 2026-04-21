@@ -364,26 +364,45 @@ public with sharing class QuoteBuilderController {
             PricebookTierService.loadTiers(new Set<Id>{p.Id});
         PricebookTierService.ProductTierMap tiers = tierMaps.get(p.Id);
         PricebookEntry tier5 = tiers == null ? null : tiers.tier(PricebookTierService.TIER5);
-        if (tier5 == null) {
-            throw new AuraHandledException('Price list5 entry is required for this product.');
+
+        // Determine the standard price: prefer Price list5, fall back to
+        // the Standard pricebook's PBE so products without a tier entry
+        // can still be previewed / saved.
+        Decimal standard;
+        if (tier5 != null && tier5.UnitPrice != null) {
+            standard = tier5.UnitPrice;
+        } else {
+            List<PricebookEntry> stdPbe = [
+                SELECT UnitPrice
+                FROM PricebookEntry
+                WHERE Product2Id = :p.Id
+                  AND IsActive = true
+                  AND Pricebook2.IsStandard = true
+                LIMIT 1
+            ];
+            standard = stdPbe.isEmpty() ? null : stdPbe[0].UnitPrice;
         }
 
-        Decimal up = unitPrice == null ? tier5.UnitPrice : unitPrice;
-        Decimal standard = tier5.UnitPrice;
-        if (up < standard) {
+        Decimal up = unitPrice == null ? standard : unitPrice;
+        if (standard != null && up != null && up < standard) {
             throw new AuraHandledException(
                 'Sales Price cannot be below the standard list price (' + standard + ').'
             );
         }
         Decimal d = discount == null ? 0 : discount;
-        Decimal discounted = up * (1 - (d / 100));
+        Decimal discounted = (up == null ? 0 : up) * (1 - (d / 100));
 
-        PricebookTierService.TierResolution r = PricebookTierService.resolveTier(tiers, discounted);
-        out.resolvedTier = r.tierName;
-        out.resolvedTierListPrice = r.tierListPrice;
-        out.resolvedPricebookId = r.entry == null ? null : r.entry.Pricebook2Id;
-        out.standardPrice = standard;
-        out.priceStatus = PricebookTierService.computePriceStatus(up, d, standard, r.underFloor);
+        if (tiers != null && !tiers.byTier.isEmpty()) {
+            PricebookTierService.TierResolution r = PricebookTierService.resolveTier(tiers, discounted);
+            out.resolvedTier = r.tierName;
+            out.resolvedTierListPrice = r.tierListPrice;
+            out.resolvedPricebookId = r.entry == null ? null : r.entry.Pricebook2Id;
+            out.standardPrice = standard;
+            out.priceStatus = PricebookTierService.computePriceStatus(up, d, standard, r.underFloor);
+        } else {
+            out.standardPrice = standard;
+            out.priceStatus = PricebookTierService.computePriceStatus(up, d, standard, false);
+        }
         return out;
     }
 
