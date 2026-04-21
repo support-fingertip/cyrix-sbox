@@ -24,15 +24,16 @@ public with sharing class OrderItemTriggerHandler {
         if (items == null || items.isEmpty()) return;
 
         Set<Id> productIds = new Set<Id>();
+        Set<Id> tierProductIds = new Set<Id>();
         for (OrderItem oi : items) {
-            if (oi.Product2Id != null && oi.Discount__c != null && oi.Discount__c > 0) {
-                productIds.add(oi.Product2Id);
-            }
+            if (oi.Product2Id == null) continue;
+            productIds.add(oi.Product2Id);
+            tierProductIds.add(oi.Product2Id);
         }
         if (productIds.isEmpty()) return;
 
         Map<Id, Product2> prodMap = new Map<Id, Product2>([
-            SELECT Id,
+            SELECT Id, Service_Item__c,
                    Manager_Discount_Up_to__c,
                    VP_Sales_Discount_Up_to__c,
                    CEO_Sales_Discount_Up_to__c
@@ -40,22 +41,64 @@ public with sharing class OrderItemTriggerHandler {
             WHERE Id IN :productIds
         ]);
 
-        for (OrderItem oi : items) {
-            if (oi.Discount__c == null || oi.Discount__c == 0) continue;
+        // Tier pricing (Price list5 is the standard list price). The Quote
+        // builder stamps Approval Required whenever the discounted unit
+        // price drops below Price list5; we mirror that here so the Order
+        // save path agrees with the UI's live tier preview.
+        Map<Id, PricebookTierService.ProductTierMap> tierMaps =
+            PricebookTierService.loadTiers(tierProductIds);
 
+        for (OrderItem oi : items) {
             Product2 p = prodMap.get(oi.Product2Id);
             if (p == null) continue;
 
-            Decimal discount    = oi.Discount__c / 100;
+            // Service items: always Approval Required (no tier to compare
+            // against). Matches QuoteLineItemTriggerHandler.stampServiceLine.
+            if (p.Service_Item__c == 'Yes') {
+                oi.Price_Status__c = STATUS_APPROVAL_REQUIRED;
+                continue;
+            }
+
+            Decimal unitPrice = oi.UnitPrice == null ? 0 : oi.UnitPrice;
+            Decimal discount  = oi.Discount__c == null ? 0 : oi.Discount__c;
+            Decimal finalPrice = unitPrice * (1 - (discount / 100));
+
+            // Tier-based approval: discounted price below Price list5.
+            PricebookTierService.ProductTierMap tiers = tierMaps.get(p.Id);
+            PricebookEntry tier5 = tiers == null ? null : tiers.tier(PricebookTierService.TIER5);
+            Decimal standardPrice = tier5 == null ? null : tier5.UnitPrice;
+
+            Boolean belowStandard = standardPrice != null && finalPrice < standardPrice;
+
+            if (belowStandard) {
+                // Tighten the tier ref onto the line so reps see which
+                // tier the discount landed in, matching QLI behavior.
+                PricebookTierService.TierResolution r =
+                    PricebookTierService.resolveTier(tiers, finalPrice);
+                if (r != null && r.entry != null) {
+                    oi.Source_Pricebook_Ref__c = r.entry.Pricebook2Id;
+                }
+                oi.Price_Status__c = STATUS_APPROVAL_REQUIRED;
+                continue;
+            }
+
+            // Discount-threshold fallback (Manager / VP / CEO limits from
+            // Product2) — kept so admins that haven't populated tiers still
+            // get approval behavior from the discount-up-to fields.
+            if (discount == null || discount == 0) {
+                oi.Price_Status__c = STATUS_NOT_REQUIRED;
+                continue;
+            }
+            Decimal d           = discount / 100;
             Decimal managerLim  = p.Manager_Discount_Up_to__c   != null ? p.Manager_Discount_Up_to__c   / 100 : 0;
             Decimal vpLim       = p.VP_Sales_Discount_Up_to__c  != null ? p.VP_Sales_Discount_Up_to__c  / 100 : 0;
             Decimal ceoLim      = p.CEO_Sales_Discount_Up_to__c != null ? p.CEO_Sales_Discount_Up_to__c / 100 : 0;
 
-            if (discount > ceoLim && ceoLim > 0) {
+            if (d > ceoLim && ceoLim > 0) {
                 oi.Price_Status__c = STATUS_APPROVAL_REQUIRED;
-            } else if (discount > vpLim && vpLim > 0) {
+            } else if (d > vpLim && vpLim > 0) {
                 oi.Price_Status__c = STATUS_APPROVAL_REQUIRED;
-            } else if (discount > managerLim && managerLim > 0) {
+            } else if (d > managerLim && managerLim > 0) {
                 oi.Price_Status__c = STATUS_APPROVAL_REQUIRED;
             } else {
                 oi.Price_Status__c = STATUS_NOT_REQUIRED;
