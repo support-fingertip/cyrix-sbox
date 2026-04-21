@@ -36,6 +36,11 @@ public with sharing class QuoteLineItemTriggerHandler {
     // Quote trigger's after-update path.
     private static Boolean isRolling = false;
 
+    // Entry point for QuoteLineItemTrigger.before(Insert|Update). Applies
+    // the tier-applied-pricebook rule: final amount after discount + tax
+    // is compared against PL4..PL1 to pick Source_Pricebook_Ref__c and
+    // to flip Price_Status__c to Approval Required when the amount drops
+    // at or below PL4.
     public static void beforeInsertOrUpdate(List<QuoteLineItem> newList, Map<Id, QuoteLineItem> oldMap) {
         if (bypass) return;
         if (newList == null || newList.isEmpty()) return;

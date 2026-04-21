@@ -207,6 +207,9 @@ public with sharing class QuoteBuilderController {
      * used by the new tier model - filtering by account or region is the
      * admin's responsibility via Pricebook2 activation.
      */
+    // Product search now filters on Product2.Product_Type__c (Equipment /
+    // Spare / Accessories / Consumables). Results use the tier model for
+    // display price + resolveAppliedTier for the save-time approval flip.
     @AuraEnabled
     public static List<ProductSearchResult> searchProductsWithBestPrice(
         String searchTerm, String category, Id accountId, Id regionId
