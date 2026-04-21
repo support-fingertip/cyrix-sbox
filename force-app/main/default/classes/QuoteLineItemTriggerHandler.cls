@@ -2,8 +2,11 @@
  * Authoritative server-side stamp for QuoteLineItem.
  *
  * For non-service lines:
- *   - Validates product has a Price list5 PricebookEntry (blocks insert if not).
- *   - Enforces sales-price floor: UnitPrice cannot be below Price list5.
+ *   - Prefers Price list5 as the standard list price. If the product has
+ *     no Price list5 entry, the Standard pricebook's PBE is used as the
+ *     fallback standard so the save still succeeds (no more
+ *     'active pricebook tier not found' hard error).
+ *   - Enforces sales-price floor: UnitPrice cannot be below the standard.
  *   - Stamps Tax__c from Product2.Tax__c (ignores PricebookEntry.Tax__c).
  *   - Resolves the tightest-fitting tier for the discounted unit price and
  *     writes that tier's Pricebook2 id into Source_Pricebook_Ref__c.
@@ -11,8 +14,8 @@
  *     PBE because Salesforce requires QLI.PricebookEntry.Pricebook2 to match
  *     the parent Quote.Pricebook2 - the Quote is on Standard Pricebook.)
  *   - Sets Price_Status__c = Approval Required when the final unit price is
- *     below the Price list5 list price OR when the discount pushes it below
- *     every existing tier.
+ *     below the standard price OR when the discount pushes it below every
+ *     existing tier.
  *
  * For service lines (Product2.Service_Item__c = 'Yes'):
  *   - Tier logic and floor enforcement are skipped.
@@ -56,6 +59,11 @@ public with sharing class QuoteLineItemTriggerHandler {
         Map<Id, PricebookTierService.ProductTierMap> tierMaps =
             PricebookTierService.loadTiers(nonServiceIds);
 
+        // Fallback list prices from the Standard pricebook for products
+        // that don't have a Price list5 tier entry set up yet. Keyed by
+        // Product2Id.
+        Map<Id, Decimal> stdPriceByProduct = loadStandardPrices(nonServiceIds);
+
         for (QuoteLineItem qli : newList) {
             Product2 p = prodMap.get(qli.Product2Id);
             if (p == null) continue;
@@ -63,9 +71,24 @@ public with sharing class QuoteLineItemTriggerHandler {
             if (p.Service_Item__c == 'Yes') {
                 stampServiceLine(qli);
             } else {
-                stampTieredLine(qli, p, tierMaps.get(p.Id));
+                stampTieredLine(qli, p, tierMaps.get(p.Id), stdPriceByProduct.get(p.Id));
             }
         }
+    }
+
+    private static Map<Id, Decimal> loadStandardPrices(Set<Id> productIds) {
+        Map<Id, Decimal> out = new Map<Id, Decimal>();
+        if (productIds == null || productIds.isEmpty()) return out;
+        for (PricebookEntry pbe : [
+            SELECT Product2Id, UnitPrice
+            FROM PricebookEntry
+            WHERE Product2Id IN :productIds
+              AND IsActive = true
+              AND Pricebook2.IsStandard = true
+        ]) {
+            if (pbe.UnitPrice != null) out.put(pbe.Product2Id, pbe.UnitPrice);
+        }
+        return out;
     }
 
     private static void stampServiceLine(QuoteLineItem qli) {
@@ -83,27 +106,27 @@ public with sharing class QuoteLineItemTriggerHandler {
     private static void stampTieredLine(
         QuoteLineItem qli,
         Product2 p,
-        PricebookTierService.ProductTierMap tiers
+        PricebookTierService.ProductTierMap tiers,
+        Decimal stdPriceFallback
     ) {
-        if (tiers == null || tiers.byTier.isEmpty()) {
-            qli.addError(
-                'No active tier PricebookEntry found for product "' + p.Id +
-                '". A Price list5 entry is required before adding this product to a quote.'
-            );
-            return;
-        }
-
-        PricebookEntry tier5 = tiers.tier(PricebookTierService.TIER5);
-        if (tier5 == null) {
-            qli.addError(
-                'Price list5 entry is required for this product. ' +
-                'Create a Price list5 PricebookEntry before adding to a quote.'
-            );
+        // Figure out the "standard" list price to compare against. Prefer
+        // the Price list5 tier; fall back to the Standard pricebook entry
+        // so products that don't have a Price list5 entry yet can still be
+        // saved without hitting 'active pricebook tier not found'.
+        PricebookEntry tier5 = tiers == null ? null : tiers.tier(PricebookTierService.TIER5);
+        Decimal standardPrice;
+        if (tier5 != null && tier5.UnitPrice != null) {
+            standardPrice = tier5.UnitPrice;
+        } else if (stdPriceFallback != null) {
+            standardPrice = stdPriceFallback;
+        } else {
+            // No tier and no Standard PBE — can't infer a standard price,
+            // so leave Price_Status untouched and trust the caller.
+            qli.Tax__c = p.Tax__c;
             return;
         }
 
         Decimal unitPrice = qli.UnitPrice == null ? 0 : qli.UnitPrice;
-        Decimal standardPrice = tier5.UnitPrice == null ? 0 : tier5.UnitPrice;
 
         // Sales-price floor: Sales Price may be raised above standard, but
         // never lowered below it. Users must use Discount for lower effective
@@ -117,25 +140,40 @@ public with sharing class QuoteLineItemTriggerHandler {
         }
 
         Decimal discount = qli.Discount == null ? 0 : qli.Discount;
+        Decimal taxPct = qli.Tax__c != null ? qli.Tax__c
+                        : (p.Tax__c != null ? p.Tax__c : 0);
+
+        // "Final" per-unit price after discount AND tax — this is the
+        // value we compare against the discount pricebooks PL4..PL1.
         Decimal discountedUnit = unitPrice * (1 - (discount / 100));
+        Decimal finalAmount = discountedUnit * (1 + (taxPct / 100));
 
-        PricebookTierService.TierResolution r =
-            PricebookTierService.resolveTier(tiers, discountedUnit);
+        // Applied-pricebook selection: walk PL4 -> PL1 and pick the
+        // highest tier whose list price is still <= finalAmount. If
+        // finalAmount is above PL4 the product stays at Standard / PL5
+        // and no approval is needed.
+        PricebookTierService.TierResolution applied = null;
+        if (tiers != null && !tiers.byTier.isEmpty()) {
+            applied = PricebookTierService.resolveAppliedTier(tiers, finalAmount);
+        }
 
-        // Track the resolved tier on the line. Salesforce forbids pointing
-        // QLI.PricebookEntryId at a pricebook other than the Quote's
-        // Pricebook2 (the Standard pricebook) - use Source_Pricebook_Ref__c
-        // as the resolved-tier audit field instead.
-        if (r.entry != null) {
-            qli.Source_Pricebook_Ref__c = r.entry.Pricebook2Id;
+        Boolean hitsDiscountTier = (applied != null && applied.entry != null);
+        if (hitsDiscountTier) {
+            qli.Source_Pricebook_Ref__c = applied.entry.Pricebook2Id;
+            qli.Price_Status__c = 'Approval Required';
+        } else {
+            // Above PL4 (or no tier data) — keep the default reference
+            // (PL5 if present, else whatever the client passed) and mark
+            // the line Not Required.
+            PricebookEntry tier5 = tiers == null ? null : tiers.tier(PricebookTierService.TIER5);
+            if (tier5 != null) {
+                qli.Source_Pricebook_Ref__c = tier5.Pricebook2Id;
+            }
+            qli.Price_Status__c = 'Not Required';
         }
 
         // Source tax from Product2, not PricebookEntry.
         qli.Tax__c = p.Tax__c;
-
-        qli.Price_Status__c = PricebookTierService.computePriceStatus(
-            unitPrice, discount, standardPrice, r.underFloor
-        );
     }
 
     /**
