@@ -184,7 +184,7 @@ public with sharing class QuoteLineItemTriggerHandler {
     /**
      * Roll up line-item price status to the parent Quote.
      * - If any line is Approval Required, Quote.Price_Status__c = Approval Required.
-     * - Otherwise Draft.
+     * - Otherwise Not Required.
      * - Never regresses an already-Approved Quote (approvers' decision is sticky
      *   until Quote is resubmitted or marked for revision).
      */
@@ -214,7 +214,11 @@ public with sharing class QuoteLineItemTriggerHandler {
         List<Quote> toUpdate = new List<Quote>();
         for (Quote q : quotes) {
             if (q.Price_Status__c == 'Approved') continue;
-            String target = approvalQuoteIds.contains(q.Id) ? 'Approval Required' : 'Draft';
+            // 'Draft' is not a valid Quote.Price_Status__c picklist value
+            // in this org — the allowed set is Approval Required /
+            // Approved / Not Required. Use 'Not Required' as the default
+            // when no child line currently needs approval.
+            String target = approvalQuoteIds.contains(q.Id) ? 'Approval Required' : 'Not Required';
             if (q.Price_Status__c != target) {
                 q.Price_Status__c = target;
                 toUpdate.add(q);
