@@ -90,7 +90,7 @@
 
 .main-content-grid {
     display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 0;
     align-items: start;
 }
@@ -100,17 +100,23 @@
     min-width: 0;
 }
 
-.main-content-right .section-card {
-    margin-left: 0;
-}
+@media (min-width: 1280px) {
+    .main-content-grid {
+        grid-template-columns: minmax(0, 3.5fr) minmax(260px, 1fr);
+    }
 
-.main-content-left .section-card {
-    margin-right: 0.25rem;
-}
+    .main-content-right .section-card {
+        margin-left: 0;
+    }
 
-.summary-sticky {
-    position: sticky;
-    top: 0.75rem;
+    .main-content-left .section-card {
+        margin-right: 0.25rem;
+    }
+
+    .summary-sticky {
+        position: sticky;
+        top: 0.75rem;
+    }
 }
 
 .section-card:hover {
@@ -340,20 +346,6 @@ lightning-combobox {
 .full-width-btn {
     width: 100%;
     justify-content: center;
-}
-
-@media (max-width: 1024px) {
-    .main-content-grid {
-        grid-template-columns: 1fr;
-    }
-    .main-content-left .section-card,
-    .main-content-right .section-card {
-        margin-left: 1rem;
-        margin-right: 1rem;
-    }
-    .summary-sticky {
-        position: static;
-    }
 }
 
 @media (max-width: 640px) {
