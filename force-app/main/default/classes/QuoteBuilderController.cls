@@ -513,12 +513,16 @@ public with sharing class QuoteBuilderController {
                 throw new AuraHandledException('At least one line item is required.');
             }
 
+            Map<Id, Id> pbeByProduct = resolveQuotePricebookEntries(quoteId, lineItems);
+
             List<QuoteLineItem> qliList = new List<QuoteLineItem>();
             for (LineItemInput item : lineItems) {
                 QuoteLineItem qli = new QuoteLineItem();
                 qli.QuoteId = quoteId;
                 qli.Product2Id = item.productId;
-                qli.PricebookEntryId = item.pricebookEntryId;
+                qli.PricebookEntryId = pbeByProduct.containsKey(item.productId)
+                    ? pbeByProduct.get(item.productId)
+                    : item.pricebookEntryId;
                 qli.Quantity = item.quantity;
                 qli.UnitPrice = item.unitPrice;
                 qli.Discount = item.discount;
@@ -547,12 +551,16 @@ public with sharing class QuoteBuilderController {
             List<QuoteLineItem> oldItems = [SELECT Id FROM QuoteLineItem WHERE QuoteId = :quoteId];
             if (!oldItems.isEmpty()) delete oldItems;
 
+            Map<Id, Id> pbeByProduct = resolveQuotePricebookEntries(quoteId, lineItems);
+
             List<QuoteLineItem> qliList = new List<QuoteLineItem>();
             for (LineItemInput item : lineItems) {
                 QuoteLineItem qli = new QuoteLineItem();
                 qli.QuoteId = quoteId;
                 qli.Product2Id = item.productId;
-                qli.PricebookEntryId = item.pricebookEntryId;
+                qli.PricebookEntryId = pbeByProduct.containsKey(item.productId)
+                    ? pbeByProduct.get(item.productId)
+                    : item.pricebookEntryId;
                 qli.Quantity = item.quantity;
                 qli.UnitPrice = item.unitPrice;
                 qli.Discount = item.discount;
@@ -574,6 +582,46 @@ public with sharing class QuoteBuilderController {
     // now owned by QuoteLineItemTriggerHandler. The controller passes
     // user-provided UnitPrice / Discount / Product2Id / PricebookEntryId
     // straight through and lets the trigger stamp everything derived.
+
+    /**
+     * Make sure every incoming line's PricebookEntryId lives on the
+     * Quote's Pricebook2Id. Service items in particular sometimes arrive
+     * with a null PBE (older saves, external callers) — in that case
+     * find the Standard PBE for the product and use it. Falls back to
+     * the incoming id if nothing fits so downstream DML surfaces the
+     * original error.
+     */
+    private static Map<Id, Id> resolveQuotePricebookEntries(Id quoteId, List<LineItemInput> lineItems) {
+        Map<Id, Id> out = new Map<Id, Id>();
+        if (lineItems == null || lineItems.isEmpty()) return out;
+
+        List<Quote> quotes = [SELECT Id, Pricebook2Id FROM Quote WHERE Id = :quoteId LIMIT 1];
+        Id quotePbId = (!quotes.isEmpty() && quotes[0].Pricebook2Id != null)
+            ? quotes[0].Pricebook2Id : null;
+
+        if (quotePbId == null) {
+            List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
+            if (!stdPbs.isEmpty()) quotePbId = stdPbs[0].Id;
+        }
+        if (quotePbId == null) return out;
+
+        Set<Id> productIds = new Set<Id>();
+        for (LineItemInput li : lineItems) {
+            if (li.productId != null) productIds.add(li.productId);
+        }
+        if (productIds.isEmpty()) return out;
+
+        for (PricebookEntry pbe : [
+            SELECT Id, Product2Id
+            FROM PricebookEntry
+            WHERE Pricebook2Id = :quotePbId
+              AND Product2Id IN :productIds
+              AND IsActive = true
+        ]) {
+            out.put(pbe.Product2Id, pbe.Id);
+        }
+        return out;
+    }
 
     // ===== Inner Classes =====
     public class LineItemInput {
