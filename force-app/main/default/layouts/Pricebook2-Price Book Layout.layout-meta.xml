@@ -38,18 +38,6 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Region__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Valid_From__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>Valid_Till__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
                 <field>IsActive</field>
             </layoutItems>
         </layoutColumns>
@@ -72,13 +60,14 @@
         <relatedList>RelatedEntityHistoryList</relatedList>
     </relatedLists>
     <relatedLists>
-        <fields>QUOTE.NAME</fields>
-        <fields>OPPORTUNITY.NAME</fields>
-        <fields>QUOTE.ISSYNCING</fields>
-        <fields>QUOTE.EXPIRATIONDATE</fields>
-        <fields>QUOTE.SUBTOTAL</fields>
-        <fields>QUOTE.TOTALPRICE</fields>
-        <relatedList>Quote.Price_Book__c</relatedList>
+        <fields>QUOTE_LI.PRODUCT2</fields>
+        <fields>QUOTE_LI.QUANTITY</fields>
+        <fields>QUOTE_LI.UNIT_PRICE</fields>
+        <fields>QUOTE_LI.LIST_PRICE</fields>
+        <fields>QUOTE_LI.SUBTOTAL</fields>
+        <fields>QUOTE_LI.TOTAL_PRICE</fields>
+        <fields>QUOTE_LI.DISCOUNT</fields>
+        <relatedList>QuoteLineItem.Opted_Price_Book__c</relatedList>
     </relatedLists>
     <showEmailCheckbox>false</showEmailCheckbox>
     <showRunAssignmentRulesCheckbox>false</showRunAssignmentRulesCheckbox>

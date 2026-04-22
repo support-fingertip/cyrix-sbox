@@ -6,7 +6,7 @@ public with sharing class QuotePDFEmailController {
     @AuraEnabled
     public static QuoteEmailWrapper getQuoteDetails(Id quoteId) {
         List<Quote> quotes = [
-            SELECT Id, Name, QuoteNumber, Quote_Id__c, Vertical__c,
+            SELECT Id, Name, QuoteNumber, Quote_Id__c, 
                    AccountId, Account.Name,
                    ContactId, Contact.Name, Contact.Email,
                    OpportunityId, Opportunity.Name, Opportunity.Email__c,
@@ -26,7 +26,6 @@ public with sharing class QuotePDFEmailController {
         wrapper.quoteId = q.Id;
         wrapper.quoteName = q.Name;
         wrapper.quoteNumber = q.QuoteNumber;
-        wrapper.vertical = q.Vertical__c;
         wrapper.accountName = q.AccountId != null ? q.Account.Name : '';
         wrapper.contactEmail = q.ContactId != null ? q.Contact.Email : '';
         wrapper.opportunityEmail = q.OpportunityId != null ? q.Opportunity.Email__c : '';

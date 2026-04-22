@@ -1,0 +1,59 @@
+<template>
+    <div class="qsp-card">
+        <template if:true={isLoading}>
+            <div class="qsp-loading">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <div class="qsp-header">
+            <div class="qsp-title-block">
+                <lightning-icon icon-name="standard:quotes" size="small" class="qsp-title-icon"></lightning-icon>
+                <div>
+                    <h2 class="qsp-title">Quote Status</h2>
+                    <p class="qsp-subtitle">Current: <strong>{currentStatus}</strong></p>
+                </div>
+            </div>
+            <template if:true={canMark}>
+                <lightning-button
+                    label={markButtonLabel}
+                    variant="brand"
+                    icon-name="utility:check"
+                    icon-position="left"
+                    onclick={handleMarkStatus}
+                    disabled={isSaving}>
+                </lightning-button>
+            </template>
+        </div>
+
+        <div class="qsp-path">
+            <template for:each={pathSteps} for:item="step">
+                <div key={step.value}
+                     class={step.stepClass}
+                     data-value={step.value}
+                     onclick={handleStepClick}
+                     title={step.stepTitle}>
+                    <div class="qsp-step-inner">
+                        <template if:true={step.isCompleted}>
+                            <lightning-icon icon-name="utility:check" size="xx-small" class="qsp-check-icon"></lightning-icon>
+                        </template>
+                        <span class="qsp-step-label">{step.label}</span>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <template if:true={showRevisionReason}>
+            <div class="qsp-revision-block">
+                <lightning-textarea
+                    label="Reason for Revision"
+                    value={revisionReason}
+                    onchange={handleRevisionReasonChange}
+                    placeholder="Describe why this quote is being revised..."
+                    required
+                    message-when-value-missing="Please provide a reason before marking the quote as Revision.">
+                </lightning-textarea>
+            </div>
+        </template>
+    </div>
+</template>

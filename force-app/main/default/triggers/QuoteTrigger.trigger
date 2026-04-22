@@ -9,7 +9,6 @@ trigger QuoteTrigger on Quote (before insert, before update, after insert, after
                 q.Version_Nmber__c=0;
                 integer numberofDays =integer.valueof(q.Quote_Valid_Till_in_days__c);
                 date todayDate =system.today();
-                q.Valid_Till__c = todayDate.addDays(numberofDays);
                 q.ExpirationDate =todayDate.addDays(numberofDays);
             }
             // Generate names for new quotes and for quotes where Branch or Revision_Number changed

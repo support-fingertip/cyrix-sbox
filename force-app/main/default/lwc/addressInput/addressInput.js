@@ -4,6 +4,7 @@ import getPlaceDetails from '@salesforce/apex/AddressSearchController.getPlaceDe
 
 export default class AddressInput extends LightningElement {
     @api label = 'Address';
+    @api hideSearch = false;
 
     // Address values (set externally to pre-populate)
     @api
