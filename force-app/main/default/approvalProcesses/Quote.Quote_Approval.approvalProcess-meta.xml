@@ -24,7 +24,7 @@
         <assignedApprover>
             <approver>
                 <name>L1_Approver__c</name>
-                <type>relatedUser</type>
+                <type>userHierarchyField</type>
             </approver>
             <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
@@ -40,7 +40,7 @@
         <assignedApprover>
             <approver>
                 <name>L2_Approver__c</name>
-                <type>relatedUser</type>
+                <type>userHierarchyField</type>
             </approver>
             <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
@@ -56,7 +56,7 @@
         <assignedApprover>
             <approver>
                 <name>L3_Approver__c</name>
-                <type>relatedUser</type>
+                <type>userHierarchyField</type>
             </approver>
             <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
@@ -86,10 +86,6 @@
             <type>FieldUpdate</type>
         </action>
         <action>
-            <name>Quote_Price_Status_Approved</name>
-            <type>FieldUpdate</type>
-        </action>
-        <action>
             <name>Quote_Stage</name>
             <type>FieldUpdate</type>
         </action>
@@ -98,10 +94,6 @@
     <finalRejectionActions>
         <action>
             <name>Quote_Rejected</name>
-            <type>FieldUpdate</type>
-        </action>
-        <action>
-            <name>Quote_Price_Status_Rejected</name>
             <type>FieldUpdate</type>
         </action>
     </finalRejectionActions>
