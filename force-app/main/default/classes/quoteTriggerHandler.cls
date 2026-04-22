@@ -14,6 +14,52 @@ public with sharing class quoteTriggerHandler {
     private static Boolean isSnapshotInProgress = false;
 
     /**
+     * Auto-populates L1/L2/L3 Approver fields on the Quote based on the
+     * Owner's Manager hierarchy.
+     *   L1 = Owner.Manager                (e.g. ASM)
+     *   L2 = Owner.Manager.Manager        (e.g. TSM)
+     *   L3 = Owner.Manager.Manager.Manager (e.g. Order Acceptance / Finance)
+     *
+     * Only fills in fields that are currently null, so manual overrides
+     * on a Quote are preserved.
+     */
+    public static void populateApproversFromHierarchy(List<Quote> quotes) {
+        if (quotes == null || quotes.isEmpty()) return;
+
+        Set<Id> ownerIds = new Set<Id>();
+        for (Quote q : quotes) {
+            if (q.OwnerId != null) ownerIds.add(q.OwnerId);
+        }
+        if (ownerIds.isEmpty()) return;
+
+        // Pull owner + manager chain in a single SOQL.
+        Map<Id, User> userMap = new Map<Id, User>([
+            SELECT Id, ManagerId,
+                   Manager.ManagerId,
+                   Manager.Manager.ManagerId
+            FROM User
+            WHERE Id IN :ownerIds
+        ]);
+
+        for (Quote q : quotes) {
+            User owner = userMap.get(q.OwnerId);
+            if (owner == null) continue;
+
+            if (q.L1_Approver__c == null && owner.ManagerId != null) {
+                q.L1_Approver__c = owner.ManagerId;
+            }
+            if (q.L2_Approver__c == null && owner.Manager != null && owner.Manager.ManagerId != null) {
+                q.L2_Approver__c = owner.Manager.ManagerId;
+            }
+            if (q.L3_Approver__c == null && owner.Manager != null
+                && owner.Manager.Manager != null
+                && owner.Manager.Manager.ManagerId != null) {
+                q.L3_Approver__c = owner.Manager.Manager.ManagerId;
+            }
+        }
+    }
+
+    /**
      * When a Quote flips is_Active__c to true, mark every other quote on the
      * same Opportunity as inactive and sync the current quote to the
      * Opportunity (Opportunity.SyncedQuoteId -> this Quote). Salesforce then
