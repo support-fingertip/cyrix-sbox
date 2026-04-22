@@ -120,12 +120,6 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
-                <componentName>quoteStatusPath</componentName>
-                <identifier>c_quoteStatusPath</identifier>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
                 <componentInstanceProperties>
                     <name>hideUpdateButton</name>
                     <value>false</value>
