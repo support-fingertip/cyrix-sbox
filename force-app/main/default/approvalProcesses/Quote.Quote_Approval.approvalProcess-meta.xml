@@ -24,7 +24,7 @@
         <assignedApprover>
             <approver>
                 <name>L1_Approver__c</name>
-                <type>relatedUser</type>
+                <type>userHierarchyField</type>
             </approver>
             <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
@@ -40,7 +40,7 @@
         <assignedApprover>
             <approver>
                 <name>L2_Approver__c</name>
-                <type>relatedUser</type>
+                <type>userHierarchyField</type>
             </approver>
             <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
@@ -56,7 +56,7 @@
         <assignedApprover>
             <approver>
                 <name>L3_Approver__c</name>
-                <type>relatedUser</type>
+                <type>userHierarchyField</type>
             </approver>
             <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>

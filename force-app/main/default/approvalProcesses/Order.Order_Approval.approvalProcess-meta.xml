@@ -16,54 +16,57 @@
         <field>Approval_Status__c</field>
         <field>EffectiveDate</field>
         <field>Branch__c</field>
+        <field>L1_Approver__c</field>
+        <field>L2_Approver__c</field>
+        <field>L3_Approver__c</field>
     </approvalPageFields>
     <approvalStep>
         <allowDelegate>true</allowDelegate>
         <assignedApprover>
             <approver>
-                <name>admin@cyrix.com</name>
-                <type>user</type>
+                <name>L1_Approver__c</name>
+                <type>userHierarchyField</type>
             </approver>
             <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
         <rejectBehavior>
             <type>RejectRequest</type>
         </rejectBehavior>
-        <description>Step 1 - Initial Price Approver. Mirrors the Quote approval process.</description>
-        <label>Initial Price Approver</label>
-        <name>Initial_Price_Approver</name>
+        <description>Step 1 - L1 Approver (typically ASM). Routed to the user tagged in Order.L1_Approver__c.</description>
+        <label>L1 Approver</label>
+        <name>L1_Approver</name>
     </approvalStep>
     <approvalStep>
         <allowDelegate>true</allowDelegate>
         <assignedApprover>
             <approver>
-                <name>admin@cyrix.com</name>
-                <type>user</type>
+                <name>L2_Approver__c</name>
+                <type>userHierarchyField</type>
             </approver>
             <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
         <rejectBehavior>
             <type>RejectRequest</type>
         </rejectBehavior>
-        <description>Step 2 - Warehouse / ERP User. Mirrors the Quote approval process.</description>
-        <label>Warehouse / ERP User</label>
-        <name>Warehouse_ERP_User</name>
+        <description>Step 2 - L2 Approver (typically TSM). Routed to the user tagged in Order.L2_Approver__c.</description>
+        <label>L2 Approver</label>
+        <name>L2_Approver</name>
     </approvalStep>
     <approvalStep>
         <allowDelegate>true</allowDelegate>
         <assignedApprover>
             <approver>
-                <name>admin@cyrix.com</name>
-                <type>user</type>
+                <name>L3_Approver__c</name>
+                <type>userHierarchyField</type>
             </approver>
             <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
         <rejectBehavior>
             <type>RejectRequest</type>
         </rejectBehavior>
-        <description>Step 3 - Order Acceptance Approver. Final step before the Order is activated.</description>
-        <label>Order Acceptance Approver</label>
-        <name>Order_Acceptance_Approver</name>
+        <description>Step 3 - L3 Approver (typically Order Acceptance / Finance). Routed to the user tagged in Order.L3_Approver__c.</description>
+        <label>L3 Approver</label>
+        <name>L3_Approver</name>
     </approvalStep>
     <description>Price-based approval for Sales Orders. Mirrors the Quote Approval process with three sequential steps: Initial Price Approver, Warehouse/ERP User, and Order Acceptance Approver (final).</description>
     <enableMobileDeviceAccess>true</enableMobileDeviceAccess>
