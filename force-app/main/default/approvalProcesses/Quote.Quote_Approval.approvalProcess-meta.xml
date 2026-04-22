@@ -86,6 +86,10 @@
             <type>FieldUpdate</type>
         </action>
         <action>
+            <name>Quote_Price_Status_Approved</name>
+            <type>FieldUpdate</type>
+        </action>
+        <action>
             <name>Quote_Stage</name>
             <type>FieldUpdate</type>
         </action>
@@ -94,6 +98,10 @@
     <finalRejectionActions>
         <action>
             <name>Quote_Rejected</name>
+            <type>FieldUpdate</type>
+        </action>
+        <action>
+            <name>Quote_Price_Status_Rejected</name>
             <type>FieldUpdate</type>
         </action>
     </finalRejectionActions>
