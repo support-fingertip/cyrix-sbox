@@ -159,7 +159,7 @@
                 <!-- 2nd page-->
                 
                 
-                <apex:outputPanel rendered="{!and (quote.Sub_Vertical__c!= 'Calibration',quote.Sub_Vertical__c== 'AMC',quote.Sub_Vertical__c== 'CMC')}">
+                <apex:outputPanel rendered="{!and (quote.Sub_Vertical__c!= 'Calibration',quote.Sub_Vertical__c!= 'AMC',quote.Sub_Vertical__c!= 'CMC')}">
                     <div style="text-align: center; font-weight: bold; margin: 6px 0 8px 0; text-decoration: underline; padding-bottom: 20px;">
                         QUOTATION FOR CYRIX <span class="capitalize">{!productName}<apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> &amp; {!quote.Business_Vertical__c}</apex:outputPanel></span>
                     </div>

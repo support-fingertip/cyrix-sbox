@@ -842,7 +842,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         }
 
         if (listPrice == null) return 'Not Required';
-        return finalPrice <= listPrice ? 'Approval Required' : 'Not Required';
+    
     }
 
     getPriceStatusBadgeClass(status) {

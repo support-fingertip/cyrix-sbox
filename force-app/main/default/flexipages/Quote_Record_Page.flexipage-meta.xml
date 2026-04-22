@@ -25,34 +25,67 @@
                         <valueListItems>
                             <value>CustomButton.Quote.Quote_PDF</value>
                             <visibilityRule>
+                                <booleanFilter>1 AND 2</booleanFilter>
                                 <criteria>
                                     <leftValue>{!$Client.formFactor}</leftValue>
                                     <operator>EQUAL</operator>
                                     <rightValue>Large</rightValue>
+                                </criteria>
+                                <criteria>
+                                    <leftValue>{!Record.Price_Status__c}</leftValue>
+                                    <operator>EQUAL</operator>
+                                    <rightValue>Not Required</rightValue>
                                 </criteria>
                             </visibilityRule>
                         </valueListItems>
                         <valueListItems>
                             <value>Quote.QuotePDF</value>
                             <visibilityRule>
+                                <booleanFilter>1 AND 2</booleanFilter>
                                 <criteria>
                                     <leftValue>{!$Client.formFactor}</leftValue>
                                     <operator>EQUAL</operator>
                                     <rightValue>Small</rightValue>
                                 </criteria>
+                                <criteria>
+                                    <leftValue>{!Record.Price_Status__c}</leftValue>
+                                    <operator>EQUAL</operator>
+                                    <rightValue>Not Required</rightValue>
+                                </criteria>
                             </visibilityRule>
                         </valueListItems>
                         <valueListItems>
                             <value>Quote.New_Order</value>
+                            <visibilityRule>
+                                <criteria>
+                                    <leftValue>{!Record.Status}</leftValue>
+                                    <operator>EQUAL</operator>
+                                    <rightValue>Customer Accepted</rightValue>
+                                </criteria>
+                            </visibilityRule>
                         </valueListItems>
                         <valueListItems>
                             <value>Delete</value>
                         </valueListItems>
                         <valueListItems>
                             <value>CustomButton.Quote.Send_Quote_PDF</value>
+                            <visibilityRule>
+                                <criteria>
+                                    <leftValue>{!Record.Price_Status__c}</leftValue>
+                                    <operator>EQUAL</operator>
+                                    <rightValue>Not Required</rightValue>
+                                </criteria>
+                            </visibilityRule>
                         </valueListItems>
                         <valueListItems>
                             <value>Quote.Send_Quote_PDF_Whatsapp</value>
+                            <visibilityRule>
+                                <criteria>
+                                    <leftValue>{!Record.Price_Status__c}</leftValue>
+                                    <operator>EQUAL</operator>
+                                    <rightValue>Not Required</rightValue>
+                                </criteria>
+                            </visibilityRule>
                         </valueListItems>
                     </valueList>
                 </componentInstanceProperties>

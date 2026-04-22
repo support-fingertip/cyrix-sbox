@@ -852,11 +852,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         if (!pricebookType) return base + ' price-source-standard';
         switch (pricebookType) {
             case 'Standard':    return base + ' price-source-standard';
-            case 'Price list5': return base + ' price-source-standard';
-            case 'Price list4': return base + ' price-source-tier4';
-            case 'Price list3': return base + ' price-source-tier3';
-            case 'Price list2': return base + ' price-source-tier2';
-            case 'Price list1': return base + ' price-source-tier1';
+            case 'Price list 5': return base + ' price-source-standard';
+            case 'Price list 4': return base + ' price-source-tier4';
+            case 'Price list 3': return base + ' price-source-tier3';
+            case 'Price list 2': return base + ' price-source-tier2';
+            case 'Price list 1': return base + ' price-source-tier1';
             case 'Service':    return base + ' price-source-service';
             default:           return base + ' price-source-standard';
         }
@@ -866,11 +866,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         if (!pricebookType) return '';
         switch (pricebookType) {
             case 'Standard':    return 'Standard';
-            case 'Price list5': return 'Tier 5';
-            case 'Price list4': return 'Tier 4';
-            case 'Price list3': return 'Tier 3';
-            case 'Price list2': return 'Tier 2';
-            case 'Price list1': return 'Tier 1';
+            case 'Price list 5': return 'Tier 5';
+            case 'Price list 4': return 'Tier 4';
+            case 'Price list 3': return 'Tier 3';
+            case 'Price list 2': return 'Tier 2';
+            case 'Price list 1': return 'Tier 1';
             case 'Service':    return 'Service';
             default:           return pricebookType;
         }
