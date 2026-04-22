@@ -13,7 +13,7 @@
         <label>Information</label>
         <layoutColumns>
             <layoutItems>
-                <behavior>Required</behavior>
+                <behavior>Readonly</behavior>
                 <field>Name</field>
             </layoutItems>
             <layoutItems>
@@ -27,6 +27,10 @@
             <layoutItems>
                 <behavior>Edit</behavior>
                 <field>Same_as_BillingAddress__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Readonly</behavior>
+                <field>Address_Code__c</field>
             </layoutItems>
         </layoutColumns>
         <layoutColumns>
