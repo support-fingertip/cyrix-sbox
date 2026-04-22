@@ -23,8 +23,8 @@
         <allowDelegate>true</allowDelegate>
         <assignedApprover>
             <approver>
-                <name>L1_Approver__c</name>
-                <type>relatedUser</type>
+                <name>admin@cyrix.com</name>
+                <type>user</type>
             </approver>
             <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
@@ -39,8 +39,8 @@
         <allowDelegate>true</allowDelegate>
         <assignedApprover>
             <approver>
-                <name>L2_Approver__c</name>
-                <type>relatedUser</type>
+                <name>admin@cyrix.com</name>
+                <type>user</type>
             </approver>
             <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
@@ -55,8 +55,8 @@
         <allowDelegate>true</allowDelegate>
         <assignedApprover>
             <approver>
-                <name>L3_Approver__c</name>
-                <type>relatedUser</type>
+                <name>admin@cyrix.com</name>
+                <type>user</type>
             </approver>
             <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
