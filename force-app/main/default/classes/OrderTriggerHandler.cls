@@ -16,51 +16,6 @@ public with sharing class OrderTriggerHandler {
     private static final String PRICE_APPROVED = 'Approved';
 
     /**
-     * Auto-populates L1/L2/L3 Approver fields on the Order based on the
-     * Owner's Manager hierarchy.
-     *   L1 = Owner.Manager                (e.g. ASM)
-     *   L2 = Owner.Manager.Manager        (e.g. TSM)
-     *   L3 = Owner.Manager.Manager.Manager (e.g. Order Acceptance / Finance)
-     *
-     * Only fills in fields that are currently null, so manual overrides
-     * and values copied from the source Quote are preserved.
-     */
-    public static void populateApproversFromHierarchy(List<Order> orders) {
-        if (orders == null || orders.isEmpty()) return;
-
-        Set<Id> ownerIds = new Set<Id>();
-        for (Order o : orders) {
-            if (o.OwnerId != null) ownerIds.add(o.OwnerId);
-        }
-        if (ownerIds.isEmpty()) return;
-
-        Map<Id, User> userMap = new Map<Id, User>([
-            SELECT Id, ManagerId,
-                   Manager.ManagerId,
-                   Manager.Manager.ManagerId
-            FROM User
-            WHERE Id IN :ownerIds
-        ]);
-
-        for (Order o : orders) {
-            User owner = userMap.get(o.OwnerId);
-            if (owner == null) continue;
-
-            if (o.L1_Approver__c == null && owner.ManagerId != null) {
-                o.L1_Approver__c = owner.ManagerId;
-            }
-            if (o.L2_Approver__c == null && owner.Manager != null && owner.Manager.ManagerId != null) {
-                o.L2_Approver__c = owner.Manager.ManagerId;
-            }
-            if (o.L3_Approver__c == null && owner.Manager != null
-                && owner.Manager.Manager != null
-                && owner.Manager.Manager.ManagerId != null) {
-                o.L3_Approver__c = owner.Manager.Manager.ManagerId;
-            }
-        }
-    }
-
-    /**
      * Blocks an Order from being cancelled when at least one Invoice
      * already references it via the Invoice.Order__c lookup.
      *
