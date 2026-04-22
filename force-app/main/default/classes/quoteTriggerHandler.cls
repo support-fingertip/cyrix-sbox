@@ -60,6 +60,54 @@ public with sharing class quoteTriggerHandler {
     }
 
     /**
+     * Notifies the Quote Owner when Quote.Price_Status__c transitions to
+     * 'Approved'. Fires regardless of which path flipped the status — the
+     * custom QuoteApprovalController.approveLineItems flow or the standard
+     * Quote_Approval approval process final-approval field updates.
+     */
+    public static void notifyOwnerOnApproval(List<Quote> newQuotes, Map<Id, Quote> oldMap) {
+        if (newQuotes == null || newQuotes.isEmpty() || oldMap == null) return;
+
+        List<Quote> justApproved = new List<Quote>();
+        for (Quote q : newQuotes) {
+            Quote oldQ = oldMap.get(q.Id);
+            if (oldQ == null) continue;
+            if (q.Price_Status__c != 'Approved') continue;
+            if (oldQ.Price_Status__c == 'Approved') continue;
+            if (q.OwnerId == null) continue;
+            justApproved.add(q);
+        }
+        if (justApproved.isEmpty()) return;
+
+        Id notifTypeId;
+        try {
+            notifTypeId = [
+                SELECT Id
+                FROM CustomNotificationType
+                WHERE DeveloperName = 'Quote_Approval_Notification'
+                LIMIT 1
+            ].Id;
+        } catch (Exception e) {
+            System.debug('Quote_Approval_Notification type missing: ' + e.getMessage());
+            return;
+        }
+
+        for (Quote q : justApproved) {
+            try {
+                CustomNotificationService.notificationSend(
+                    'Your Quote has been Approved',
+                    q.Id,
+                    'Your Quote #' + q.QuoteNumber + ' has been approved.',
+                    new Set<String>{ String.valueOf(q.OwnerId) },
+                    notifTypeId
+                );
+            } catch (Exception e) {
+                System.debug('Quote approved notification error: ' + e.getMessage());
+            }
+        }
+    }
+
+    /**
      * When a Quote flips is_Active__c to true, mark every other quote on the
      * same Opportunity as inactive and sync the current quote to the
      * Opportunity (Opportunity.SyncedQuoteId -> this Quote). Salesforce then
