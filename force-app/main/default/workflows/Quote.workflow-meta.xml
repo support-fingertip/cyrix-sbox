@@ -41,26 +41,6 @@
         <reevaluateOnChange>false</reevaluateOnChange>
     </fieldUpdates>
     <fieldUpdates>
-        <fullName>Quote_Price_Status_Approved</fullName>
-        <field>Price_Status__c</field>
-        <literalValue>Approved</literalValue>
-        <name>Quote Price Status Approved</name>
-        <notifyAssignee>false</notifyAssignee>
-        <operation>Literal</operation>
-        <protected>false</protected>
-        <reevaluateOnChange>false</reevaluateOnChange>
-    </fieldUpdates>
-    <fieldUpdates>
-        <fullName>Quote_Price_Status_Rejected</fullName>
-        <field>Price_Status__c</field>
-        <literalValue>Rejected</literalValue>
-        <name>Quote Price Status Rejected</name>
-        <notifyAssignee>false</notifyAssignee>
-        <operation>Literal</operation>
-        <protected>false</protected>
-        <reevaluateOnChange>false</reevaluateOnChange>
-    </fieldUpdates>
-    <fieldUpdates>
         <fullName>Quote_Rejected</fullName>
         <field>Approval_Status__c</field>
         <literalValue>Rejected</literalValue>

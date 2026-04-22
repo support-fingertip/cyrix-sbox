@@ -13,12 +13,9 @@ trigger QuoteTrigger on Quote (before insert, before update, after insert, after
             }
             // Generate names for new quotes and for quotes where Branch or Revision_Number changed
             quoteTriggerHandler.generateQuoteNames(Trigger.new);
-            // Auto-fill L1/L2/L3 Approver from Owner's Manager chain.
-            quoteTriggerHandler.populateApproversFromHierarchy(Trigger.new);
         }
     }
     if(trigger.isBefore && trigger.isUpdate){
-        quoteTriggerHandler.populateApproversFromHierarchy(Trigger.new);
          for(Quote q :trigger.New){
              // If the quote's sync link to the opportunity was turned off,
              // it is no longer the active quote.
