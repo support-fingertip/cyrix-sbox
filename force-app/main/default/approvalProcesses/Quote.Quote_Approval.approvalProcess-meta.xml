@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApprovalProcess xmlns="http://soap.sforce.com/2006/04/metadata">
+    <active>true</active>
+    <allowRecall>true</allowRecall>
+    <allowedSubmitters>
+        <type>owner</type>
+    </allowedSubmitters>
+    <allowedSubmitters>
+        <type>allInternalUsers</type>
+    </allowedSubmitters>
+    <approvalPageFields>
+        <field>QuoteNumber</field>
+        <field>Owner</field>
+        <field>GrandTotal</field>
+        <field>Price_Status__c</field>
+        <field>Approval_Status__c</field>
+        <field>ExpirationDate</field>
+        <field>L1_Approver__c</field>
+        <field>L2_Approver__c</field>
+        <field>L3_Approver__c</field>
+    </approvalPageFields>
+    <approvalStep>
+        <allowDelegate>true</allowDelegate>
+        <assignedApprover>
+            <approver>
+                <name>L1_Approver__c</name>
+                <type>relatedUser</type>
+            </approver>
+            <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
+        </assignedApprover>
+        <rejectBehavior>
+            <type>RejectRequest</type>
+        </rejectBehavior>
+        <description>Step 1 - L1 Approver (typically ASM). Routed to the user tagged in Quote.L1_Approver__c.</description>
+        <label>L1 Approver</label>
+        <name>L1_Approver</name>
+    </approvalStep>
+    <approvalStep>
+        <allowDelegate>true</allowDelegate>
+        <assignedApprover>
+            <approver>
+                <name>L2_Approver__c</name>
+                <type>relatedUser</type>
+            </approver>
+            <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
+        </assignedApprover>
+        <rejectBehavior>
+            <type>RejectRequest</type>
+        </rejectBehavior>
+        <description>Step 2 - L2 Approver (typically TSM). Routed to the user tagged in Quote.L2_Approver__c.</description>
+        <label>L2 Approver</label>
+        <name>L2_Approver</name>
+    </approvalStep>
+    <approvalStep>
+        <allowDelegate>true</allowDelegate>
+        <assignedApprover>
+            <approver>
+                <name>L3_Approver__c</name>
+                <type>relatedUser</type>
+            </approver>
+            <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
+        </assignedApprover>
+        <rejectBehavior>
+            <type>RejectRequest</type>
+        </rejectBehavior>
+        <description>Step 3 - L3 Approver (typically Order Acceptance / Finance). Routed to the user tagged in Quote.L3_Approver__c.</description>
+        <label>L3 Approver</label>
+        <name>L3_Approver</name>
+    </approvalStep>
+    <description>Price-based approval for Quotes. Three sequential steps (L1 -> L2 -> L3) routed dynamically via relatedUser lookups on the Quote record.</description>
+    <enableMobileDeviceAccess>true</enableMobileDeviceAccess>
+    <entryCriteria>
+        <criteriaItems>
+            <field>Quote.Price_Status__c</field>
+            <operation>equals</operation>
+            <value>Approval Required</value>
+        </criteriaItems>
+    </entryCriteria>
+    <finalApprovalActions>
+        <action>
+            <name>Quote_Approved</name>
+            <type>FieldUpdate</type>
+        </action>
+        <action>
+            <name>Approved_Date_Time</name>
+            <type>FieldUpdate</type>
+        </action>
+        <action>
+            <name>Quote_Price_Status_Approved</name>
+            <type>FieldUpdate</type>
+        </action>
+        <action>
+            <name>Quote_Stage</name>
+            <type>FieldUpdate</type>
+        </action>
+    </finalApprovalActions>
+    <finalApprovalRecordLock>true</finalApprovalRecordLock>
+    <finalRejectionActions>
+        <action>
+            <name>Quote_Rejected</name>
+            <type>FieldUpdate</type>
+        </action>
+        <action>
+            <name>Quote_Price_Status_Rejected</name>
+            <type>FieldUpdate</type>
+        </action>
+    </finalRejectionActions>
+    <finalRejectionRecordLock>false</finalRejectionRecordLock>
+    <initialSubmissionActions>
+        <action>
+            <name>Quote_Submitted</name>
+            <type>FieldUpdate</type>
+        </action>
+    </initialSubmissionActions>
+    <label>Quote Approval</label>
+    <recordEditability>AdminOnly</recordEditability>
+    <showApprovalHistory>true</showApprovalHistory>
+</ApprovalProcess>
