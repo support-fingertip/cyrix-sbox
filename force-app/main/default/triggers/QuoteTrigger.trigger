@@ -62,4 +62,9 @@ trigger QuoteTrigger on Quote (before insert, before update, after insert, after
     if (trigger.isAfter && trigger.isUpdate) {
         quoteTriggerHandler.snapshotQuotesOnRevision(trigger.oldMap);
     }
+
+    // Notify Quote Owner when Price_Status__c transitions to 'Approved'.
+    if (trigger.isAfter && trigger.isUpdate) {
+        quoteTriggerHandler.notifyOwnerOnApproval(trigger.new, trigger.oldMap);
+    }
 }
