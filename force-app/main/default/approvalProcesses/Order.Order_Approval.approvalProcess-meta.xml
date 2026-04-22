@@ -25,7 +25,7 @@
         <assignedApprover>
             <approver>
                 <name>L1_Approver__c</name>
-                <type>userHierarchyField</type>
+                <type>relatedUser</type>
             </approver>
             <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
@@ -41,7 +41,7 @@
         <assignedApprover>
             <approver>
                 <name>L2_Approver__c</name>
-                <type>userHierarchyField</type>
+                <type>relatedUser</type>
             </approver>
             <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
@@ -57,7 +57,7 @@
         <assignedApprover>
             <approver>
                 <name>L3_Approver__c</name>
-                <type>userHierarchyField</type>
+                <type>relatedUser</type>
             </approver>
             <whenMultipleApprovers>FirstResponse</whenMultipleApprovers>
         </assignedApprover>
@@ -104,10 +104,6 @@
     </finalRejectionActions>
     <finalRejectionRecordLock>false</finalRejectionRecordLock>
     <label>Order Approval</label>
-    <nextAutomatedApprover>
-        <useApproverFieldOfRecordOwner>true</useApproverFieldOfRecordOwner>
-        <userHierarchyField>ManagerId</userHierarchyField>
-    </nextAutomatedApprover>
     <recordEditability>AdminOnly</recordEditability>
     <showApprovalHistory>true</showApprovalHistory>
 </ApprovalProcess>
