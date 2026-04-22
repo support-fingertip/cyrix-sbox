@@ -19,20 +19,25 @@ public with sharing class OrderItemTriggerHandler {
     private static final String STATUS_APPROVED          = 'Approved';
     private static final String ORDER_STATUS_DRAFT       = 'Draft';
 
-    /** BEFORE insert/update. Mutates records in-place. */
+    /**
+     * BEFORE insert/update. Mutates records in-place. Same tier-applied
+     * pricebook rule used on Quote Line Items: final unit amount after
+     * discount + tax, compared against PL4..PL1.
+     */
     public static void evaluateDiscountThresholds(List<OrderItem> items) {
         if (items == null || items.isEmpty()) return;
 
         Set<Id> productIds = new Set<Id>();
+        Set<Id> tierProductIds = new Set<Id>();
         for (OrderItem oi : items) {
-            if (oi.Product2Id != null && oi.Discount__c != null && oi.Discount__c > 0) {
-                productIds.add(oi.Product2Id);
-            }
+            if (oi.Product2Id == null) continue;
+            productIds.add(oi.Product2Id);
+            tierProductIds.add(oi.Product2Id);
         }
         if (productIds.isEmpty()) return;
 
         Map<Id, Product2> prodMap = new Map<Id, Product2>([
-            SELECT Id,
+            SELECT Id, Service_Item__c, Tax__c,
                    Manager_Discount_Up_to__c,
                    VP_Sales_Discount_Up_to__c,
                    CEO_Sales_Discount_Up_to__c
@@ -40,22 +45,90 @@ public with sharing class OrderItemTriggerHandler {
             WHERE Id IN :productIds
         ]);
 
-        for (OrderItem oi : items) {
-            if (oi.Discount__c == null || oi.Discount__c == 0) continue;
+        // Tier pricing (tier PBEs already hold post-discount-and-tax
+        // list prices per the Product admin spec). The applied tier
+        // is chosen by comparing the line's *total* final amount
+        // (qty * unit * (1 - disc) * (1 + tax)) against PL4..PL1.
+        Map<Id, PricebookTierService.ProductTierMap> tierMaps =
+            PricebookTierService.loadTiers(tierProductIds);
 
+        // Standard pricebook (IsStandard = true) — tagged on
+        // Source_Pricebook_Ref__c whenever the line total is above PL4.
+        List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
+        Id standardPbId = stdPbs.isEmpty() ? null : stdPbs[0].Id;
+
+        for (OrderItem oi : items) {
             Product2 p = prodMap.get(oi.Product2Id);
             if (p == null) continue;
 
-            Decimal discount    = oi.Discount__c / 100;
+            // Service items: always Approval Required (no tier to compare
+            // against). Matches QuoteLineItemTriggerHandler.stampServiceLine.
+            if (p.Service_Item__c == 'Yes') {
+                oi.Price_Status__c = STATUS_APPROVAL_REQUIRED;
+                continue;
+            }
+
+            Decimal qty       = oi.Quantity == null ? 0 : oi.Quantity;
+            Decimal unitPrice = oi.UnitPrice == null ? 0 : oi.UnitPrice;
+            Decimal discount  = oi.Discount__c == null ? 0 : oi.Discount__c;
+            Decimal taxPct    = p.Tax__c != null ? p.Tax__c : 0;
+
+            // Sales Price on non-service lines is locked to the Standard
+            // list price (the tier's PL5 entry or the Standard PBE).
+            // Snap to it silently if the incoming value differs.
+            PricebookTierService.ProductTierMap snapTiers = tierMaps.get(p.Id);
+            PricebookEntry snapTier5 = snapTiers == null ? null
+                                     : snapTiers.tier(PricebookTierService.TIER5);
+            Decimal lockedStandard = snapTier5 != null ? snapTier5.UnitPrice : null;
+            if (lockedStandard != null && unitPrice != lockedStandard) {
+                oi.UnitPrice = lockedStandard;
+                unitPrice = lockedStandard;
+            }
+
+            // Per-unit final price after discount AND tax. PBE.UnitPrice
+            // on the tier pricebooks is a per-unit value, so we compare
+            // at the same granularity. A line-total comparison would be
+            // off by a factor of Qty.
+            Decimal discountedUnit = unitPrice * (1 - (discount / 100));
+            Decimal finalUnit      = discountedUnit * (1 + (taxPct / 100));
+
+            PricebookTierService.ProductTierMap tiers = tierMaps.get(p.Id);
+            PricebookTierService.TierResolution applied = null;
+            if (tiers != null && !tiers.byTier.isEmpty()) {
+                applied = PricebookTierService.resolveAppliedTier(tiers, finalUnit);
+            }
+
+            if (applied != null && applied.entry != null) {
+                // Hit one of PL4..PL1 — tag the matched pricebook and
+                // engage the approval path.
+                oi.Source_Pricebook_Ref__c = applied.entry.Pricebook2Id;
+                oi.Price_Status__c = STATUS_APPROVAL_REQUIRED;
+                continue;
+            }
+
+            // Above PL4 (or no tier data). Tag the org's Standard
+            // Pricebook (IsStandard = true) so the Source Pricebook
+            // reference reflects the default starting point.
+            if (standardPbId != null) {
+                oi.Source_Pricebook_Ref__c = standardPbId;
+            }
+
+            // Discount-threshold fallback stays as a safety net for orgs
+            // that haven't populated tier pricebooks — if the discount
+            // exceeds the Product's Manager/VP/CEO limits, still flip
+            // to Approval Required. Otherwise Not Required.
+            if (discount == null || discount == 0) {
+                oi.Price_Status__c = STATUS_NOT_REQUIRED;
+                continue;
+            }
+            Decimal d           = discount / 100;
             Decimal managerLim  = p.Manager_Discount_Up_to__c   != null ? p.Manager_Discount_Up_to__c   / 100 : 0;
             Decimal vpLim       = p.VP_Sales_Discount_Up_to__c  != null ? p.VP_Sales_Discount_Up_to__c  / 100 : 0;
             Decimal ceoLim      = p.CEO_Sales_Discount_Up_to__c != null ? p.CEO_Sales_Discount_Up_to__c / 100 : 0;
 
-            if (discount > ceoLim && ceoLim > 0) {
-                oi.Price_Status__c = STATUS_APPROVAL_REQUIRED;
-            } else if (discount > vpLim && vpLim > 0) {
-                oi.Price_Status__c = STATUS_APPROVAL_REQUIRED;
-            } else if (discount > managerLim && managerLim > 0) {
+            if ((ceoLim > 0 && d > ceoLim) ||
+                (vpLim > 0 && d > vpLim) ||
+                (managerLim > 0 && d > managerLim)) {
                 oi.Price_Status__c = STATUS_APPROVAL_REQUIRED;
             } else {
                 oi.Price_Status__c = STATUS_NOT_REQUIRED;
@@ -76,14 +149,25 @@ public with sharing class OrderItemTriggerHandler {
                 || prev.OrderId != oi.OrderId;
             if (changed && oi.OrderId != null) affectedOrderIds.add(oi.OrderId);
         }
-        if (affectedOrderIds.isEmpty()) return;
+        rollupOrders(affectedOrderIds);
+    }
+
+    /**
+     * Public entry point so Apex callers (e.g. OrderBuilderController's
+     * saveOrderItems / updateOrderItems) can force a rollup without
+     * depending on the trigger fire order. Safe to call after a bulk
+     * OrderItem DML: re-queries siblings and only updates Orders whose
+     * computed Price_Status differs from the stored one.
+     */
+    public static void rollupOrders(Set<Id> orderIds) {
+        if (orderIds == null || orderIds.isEmpty()) return;
 
         // Load every sibling OrderItem for each affected Order.
         Map<Id, List<OrderItem>> itemsByOrder = new Map<Id, List<OrderItem>>();
         for (OrderItem oi : [
             SELECT Id, OrderId, Price_Status__c
             FROM OrderItem
-            WHERE OrderId IN :affectedOrderIds
+            WHERE OrderId IN :orderIds
         ]) {
             if (!itemsByOrder.containsKey(oi.OrderId)) {
                 itemsByOrder.put(oi.OrderId, new List<OrderItem>());
@@ -94,11 +178,11 @@ public with sharing class OrderItemTriggerHandler {
         // Compute rollup and compare against current Order.Price_Status__c
         // so we only update when something actually changes.
         Map<Id, Order> currentOrders = new Map<Id, Order>([
-            SELECT Id, Price_Status__c FROM Order WHERE Id IN :affectedOrderIds
+            SELECT Id, Price_Status__c FROM Order WHERE Id IN :orderIds
         ]);
 
         List<Order> toUpdate = new List<Order>();
-        for (Id oid : affectedOrderIds) {
+        for (Id oid : orderIds) {
             String rolled = computeRollup(itemsByOrder.get(oid));
             Order curr = currentOrders.get(oid);
             if (curr == null) continue;
@@ -119,7 +203,10 @@ public with sharing class OrderItemTriggerHandler {
 
     @TestVisible
     private static String computeRollup(List<OrderItem> items) {
-        if (items == null || items.isEmpty()) return ORDER_STATUS_DRAFT;
+        // Order.Price_Status__c uses the Approval Required / Approved /
+        // Not Required picklist — 'Draft' is not a valid value, so the
+        // rollup defaults to Not Required when no child needs approval.
+        if (items == null || items.isEmpty()) return STATUS_NOT_REQUIRED;
         Boolean anyApprovalRequired = false;
         Boolean allApproved = true;
         for (OrderItem oi : items) {
@@ -128,6 +215,6 @@ public with sharing class OrderItemTriggerHandler {
         }
         if (anyApprovalRequired) return STATUS_APPROVAL_REQUIRED;
         if (allApproved) return STATUS_APPROVED;
-        return ORDER_STATUS_DRAFT;
+        return STATUS_NOT_REQUIRED;
     }
 }

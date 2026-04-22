@@ -14,125 +14,21 @@
 * -----------------------------------------------------------------------------
 **************************************************************/
 public with sharing class QuotationPDFController {
-
-    // Company constants
-    public static final String COMPANY_NAME = 'Cyrix Healthcare Pvt. Ltd';
-    public static final String COMPANY_ADDRESS = '30/641B, Petta, Poonithura, Ernakulam, Kerala, India';
-    public static final String COMPANY_STATE = 'Kerala';
-    public static final String COMPANY_PHONE = '';
-    public static final String COMPANY_EMAIL = '';
-    public static final String COMPANY_WEBSITE = '';
-    public static final String COMPANY_TAGLINE = 'The X-Factor in Medical Technology Reliability';
-    public static final String COMPANY_CIN = 'CIN: U74140KL2013PTC034081';
-
-    // Bank detail constants (placeholders - to be configured)
-    public static final String BANK_NAME = '';
-    public static final String BANK_ACCOUNT_NUMBER = '';
-    public static final String BANK_IFSC = '';
-    public static final String BANK_BRANCH = '';
-    public static final String BANK_ACCOUNT_HOLDER = 'Cyrix Healthcare Pvt. Ltd';
-
+    public  quote quote{get;set;}
+    public list<QuoteLineItem> lineItems{get;set;}
+    public list<Payment_Term__c> paymentTerms{get;set;}
+    public list<Terms_Condition__c> termsConditions{get;set;}
+   public String productNamesList { get; set; }
     // Default tax rate for Product quotations (5%)
-    private static final Decimal DEFAULT_TAX_RATE = 5.0;
+      public String grandTotalInWords { get; set; }
+    public String productName { get; set; }
+   public  General_Settings__c general{get;set;}  
+     public String productStringify { get; set; }
 
-    // Properties
-    public Quote quote { get; set; }
-    public Account account { get; set; }
-    public Opportunity opportunity { get; set; }
-    public Contact primaryContact { get; set; }
-    public List<QuoteLineItem> lineItems { get; set; }
-
-    public Decimal subtotal { get; set; }
-    public Decimal taxRate { get; set; }
-    public Decimal taxAmount { get; set; }
-    public Decimal cgstRate { get; set; }
-    public Decimal sgstRate { get; set; }
-    public Decimal cgstAmount { get; set; }
-    public Decimal sgstAmount { get; set; }
-    public Decimal igstRate { get; set; }
-    public Decimal igstAmount { get; set; }
-    public Decimal grandTotal { get; set; }
-    public String grandTotalInWords { get; set; }
-    public Boolean isSameState { get; set; }
-    public Boolean isExempt { get; set; }
-
-    public String quoteDate { get; set; }
-    public String validTillDate { get; set; }
-    public String salesEngineerName { get; set; }
-    public String salesEngineerTitle { get; set; }
-    public String salesEngineerPhone { get; set; }
-    public String salesEngineerEmail { get; set; }
-    public String productNamesList { get; set; }
-    public List<String> productNamesNumbered { get; set; }
-    public String quoteRefNumber { get; set; }
-    public String quotationTitle { get; set; }
-
-    // Dynamic T&C fields
-    public String validityDays { get; set; }
-    public String advancePercent { get; set; }
-    public String shippingPercent { get; set; }
-    public String deliveryPercent { get; set; }
-    public String installationPercent { get; set; }
-    public String deliveryWeeks { get; set; }
-    public String installationScope { get; set; }
-    public String gstDisplayRate { get; set; }
-    public String warrantyExtra { get; set; }
-    public List<Payment_Term__c> paymentTerms { get; set; }
-    public List<Terms_Condition__c> termsConditions { get; set; }
-
-    public String companyName { get { return COMPANY_NAME; } }
-    public String companyAddress { get { return COMPANY_ADDRESS; } }
-    public String companyPhone { get { return COMPANY_PHONE; } }
-    public String companyEmail { get { return COMPANY_EMAIL; } }
-    public String companyWebsite { get { return COMPANY_WEBSITE; } }
-    public String companyTagline { get { return COMPANY_TAGLINE; } }
-    public String companyCin { get { return COMPANY_CIN; } }
-
-    public String bankName { get; set; }
-    public String bankAccountNumber { get; set; }
-    public String bankIfsc { get; set; }
-    public String bankBranch { get; set; }
-    public String bankAccountHolder { get; set; }
 
     public QuotationPDFController(ApexPages.StandardController stdController) {
         Id quoteId = stdController.getId();
-        lineItems = new List<QuoteLineItem>();
-        subtotal = 0;
-        taxAmount = 0;
-        cgstAmount = 0;
-        sgstAmount = 0;
-        igstAmount = 0;
-        grandTotal = 0;
-        isSameState = false;
-        isExempt = false;
-        taxRate = DEFAULT_TAX_RATE;
-        cgstRate = 0;
-        sgstRate = 0;
-        igstRate = 0;
-
-        productNamesNumbered = new List<String>();
-        quoteRefNumber = '';
-        quotationTitle = '';
-
-        // Default T&C values
-        validityDays = '30 days';
-        advancePercent = '40%';
-        shippingPercent = '45%';
-        deliveryPercent = '10%';
-        installationPercent = '5%';
-        deliveryWeeks = '12-15 weeks';
-        installationScope = 'installation and commissioning';
-        gstDisplayRate = '';
-        warrantyExtra = '';
-        paymentTerms = new List<Payment_Term__c>();
-        termsConditions = new List<Terms_Condition__c>();
-
-        // Initialize bank details with defaults
-        bankName = BANK_NAME;
-        bankAccountNumber = BANK_ACCOUNT_NUMBER;
-        bankIfsc = BANK_IFSC;
-        bankBranch = BANK_BRANCH;
-        bankAccountHolder = BANK_ACCOUNT_HOLDER;
+       
 
         if (quoteId != null) {
             loadData(quoteId);
@@ -142,9 +38,9 @@ public with sharing class QuotationPDFController {
     private void loadData(Id quoteId) {
         // Query Quote with parent relationships
         List<Quote> quotes = [
-            SELECT Id, Name, QuoteNumber, Quote_Id__c, Quote_Date__c, Valid_Till__c,
-                   Status, Price_Status__c, is_Active__c, Vertical__c,
-                   Billing_Address__c, Shipping_Mode__c,
+            SELECT Id, Name, QuoteNumber, Quote_Id__c, Quote_Date__c,
+                   Status, Price_Status__c, is_Active__c,
+                    Shipping_Mode__c,
                    Quote_Valid_Till_in_days__c,
                    Delivery__c,
                    Subtotal, TotalPrice, GrandTotal, Discount, Tax, ShippingHandling,
@@ -157,11 +53,8 @@ public with sharing class QuotationPDFController {
                    Account.BillingStreet, Account.BillingCity, Account.BillingState,
                    Account.BillingPostalCode, Account.BillingCountry,
             BillingCity,BillingAddress,BillingCountry,BillingState,Business_Vertical__c,
-                   Account.Payment_Terms__c,
-                   Bank_Name__c, Bank_Name__r.Name,
-                   Bank_Name__r.Account_No__c, Bank_Name__r.Bank_Name__c,
-                   Bank_Name__r.Branch_Name__c, Bank_Name__r.IFSC_CODE__c,
-                   ContactId, Contact.Name, Contact.Email, Contact.Phone, Contact.Title
+                   Account.Payment_Terms__c,Additional_Warranty__c,Notes__c,Sub_Vertical__c,
+         ContactId, Contact.Name, Contact.Email, Contact.Phone, Contact.Title, owner.Name,Owner_Designation__c,Owner_Phone__c
             FROM Quote
             WHERE Id = :quoteId
             LIMIT 1
@@ -172,70 +65,10 @@ public with sharing class QuotationPDFController {
         }
 
         quote = quotes[0];
-        account = quote.Account;
-        opportunity = quote.Opportunity;
-        primaryContact = quote.Contact;
+       
 
-        // Format dates
-        quoteDate = quote.Quote_Date__c != null
-            ? formatDate(quote.Quote_Date__c) : '';
-        validTillDate = quote.Valid_Till__c != null
-            ? formatDate(quote.Valid_Till__c) : '';
+        grandTotalInWords = convertNumberToWords(quote.grandTotal);
 
-        // Validity days from Quote_Valid_Till_in_days__c picklist field
-        if (quote.Quote_Valid_Till_in_days__c != null) {
-            validityDays = quote.Quote_Valid_Till_in_days__c;
-        }
-
-        // Bank details from Quote's Bank lookup
-        if (quote.Bank_Name__c != null && quote.Bank_Name__r != null) {
-            bankAccountNumber = quote.Bank_Name__r.Account_No__c != null ? quote.Bank_Name__r.Account_No__c : '';
-            bankName = quote.Bank_Name__r.Bank_Name__c != null ? quote.Bank_Name__r.Bank_Name__c : '';
-            bankBranch = quote.Bank_Name__r.Branch_Name__c != null ? quote.Bank_Name__r.Branch_Name__c : '';
-            bankIfsc = quote.Bank_Name__r.IFSC_CODE__c != null ? quote.Bank_Name__r.IFSC_CODE__c : '';
-        }
-
-        // Delivery weeks from Quote
-        if (quote.Delivery__c != null) {
-            deliveryWeeks = quote.Delivery__c;
-        }
-
-        // Payment terms from Account
-        if (account != null && account.Payment_Terms__c != null) {
-            String pt = account.Payment_Terms__c;
-            if (pt == '100% Advance') {
-                advancePercent = '100%';
-                shippingPercent = '0%';
-                deliveryPercent = '0%';
-                installationPercent = '0%';
-            } else if (pt == '50% Advance - 50% After Installation') {
-                advancePercent = '50%';
-                shippingPercent = '0%';
-                deliveryPercent = '0%';
-                installationPercent = '50%';
-            } else if (pt == '30% Advance - 70% After Installation') {
-                advancePercent = '30%';
-                shippingPercent = '0%';
-                deliveryPercent = '0%';
-                installationPercent = '70%';
-            }
-        }
-
-        // Sales Engineer info from Quote Owner (User object)
-        if (quote.OwnerId != null) {
-            List<User> owners = [
-                SELECT Id, Name, Title, Phone, Email
-                FROM User
-                WHERE Id = :quote.OwnerId
-                LIMIT 1
-            ];
-            if (!owners.isEmpty()) {
-                salesEngineerName = owners[0].Name;
-                salesEngineerTitle = owners[0].Title;
-                salesEngineerPhone = owners[0].Phone;
-                salesEngineerEmail = owners[0].Email;
-            }
-        }
 
         // Query line items
         lineItems = [
@@ -245,7 +78,7 @@ public with sharing class QuotationPDFController {
                    Product2.QuantityUnitOfMeasure,
                    PricebookEntryId, Quantity, UnitPrice, TotalPrice, Discount, ListPrice,
                    Price_Status__c, Tax_Type__c,
-                   Product_Line_Description__c, Product_Detailed_Description__c
+                   Product_Line_Description__c, Product_Detailed_Description__c,Product2.Product_Type__c
             FROM QuoteLineItem
             WHERE QuoteId = :quoteId
             ORDER BY CreatedDate ASC
@@ -266,34 +99,25 @@ public with sharing class QuotationPDFController {
             WHERE Quote__c = :quoteId
             ORDER BY CreatedDate ASC
         ];
-
-        // Build product names list
+general =[select id,Bank_Name__c,Account_No__c,Branch_Code__c,IFSC_Code__c from General_Settings__c limit 1];
+    // Build product names list
         List<String> prodNames = new List<String>();
-        productNamesNumbered = new List<String>();
+    
         Integer prodIndex = 1;
         for (QuoteLineItem qli : lineItems) {
             if (qli.Product2 != null && String.isNotBlank(qli.Product2.Name)) {
                 prodNames.add(qli.Product2.Name);
-                productNamesNumbered.add(qli.Product2.Name);
+ productStringify += qli.Product2.Product_Type__c+','; 
                 prodIndex++;
             }
         }
+        if(lineItems.size() ==1){
+            productName=lineItems[0].Product2.Name;
+        }
         productNamesList = String.join(prodNames, ', ');
-
-        // Build quote reference number: C-KL/<VERTICAL>/<Quote_Id__c>
-        String vertical = quote.Vertical__c != null ? quote.Vertical__c : '';
-        String qtnId = quote.Quote_Id__c != null ? quote.Quote_Id__c : quote.QuoteNumber;
-        quoteRefNumber = 'C-KL/' + vertical + '/' + qtnId;
-
-        // Build quotation title: QUOTATION FOR CYRIX <Product name & Vertical>
-        quotationTitle = 'QUOTATION FOR CYRIX ' + productNamesList +
-            (String.isNotBlank(vertical) ? ' & ' + vertical : '');
-
-        // Compute tax and totals
-        computeTax();
     }
 
-    private void computeTax() {
+  /*  private void computeTax() {
         subtotal = 0;
         for (QuoteLineItem qli : lineItems) {
             subtotal += (qli.TotalPrice != null) ? qli.TotalPrice : 0;
@@ -351,10 +175,10 @@ public with sharing class QuotationPDFController {
                 cgstRate = 0;
                 sgstRate = 0;
             }
-        }
+        }*/
 
         // Use Grand Total from Quote object
-        if (quote.GrandTotal != null) {
+     /*   if (quote.GrandTotal != null) {
             grandTotal = quote.GrandTotal;
         } else {
             grandTotal = (subtotal + taxAmount).setScale(2, RoundingMode.HALF_UP);
@@ -376,8 +200,8 @@ public with sharing class QuotationPDFController {
         if (!isExempt && taxRate != null) {
             Integer rateInt = taxRate.intValue();
             gstDisplayRate = 'GST ' + String.valueOf(rateInt) + '%';
-        }
-    }
+        }*/
+    
 
     private String formatDate(Date d) {
         return String.valueOf(d.day()).leftPad(2, '0') + '-' +

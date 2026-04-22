@@ -11,6 +11,16 @@
         <reevaluateOnChange>false</reevaluateOnChange>
     </fieldUpdates>
     <fieldUpdates>
+        <fullName>Price_Status</fullName>
+        <field>Price_Status__c</field>
+        <literalValue>Not Required</literalValue>
+        <name>Price Status</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Literal</operation>
+        <protected>false</protected>
+        <reevaluateOnChange>false</reevaluateOnChange>
+    </fieldUpdates>
+    <fieldUpdates>
         <fullName>Quote_Approved</fullName>
         <field>Approval_Status__c</field>
         <literalValue>Approved</literalValue>

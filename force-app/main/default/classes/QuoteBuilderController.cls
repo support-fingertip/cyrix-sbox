@@ -186,6 +186,30 @@ public with sharing class QuoteBuilderController {
         return results;
     }
 
+    /**
+     * Product search that defaults non-service products to their Price list5
+     * (standard) PricebookEntry. The resolved tier and final Price_Status are
+     * recomputed server-side by QuoteLineItemTriggerHandler on insert/update.
+     *
+     * Returned row meaning:
+     *   - pricebookEntryId: the Standard PricebookEntry id (needed because
+     *     QuoteLineItem.PricebookEntryId must live on the Quote's pricebook,
+     *     which is Standard). Tier is tracked via Source_Pricebook_Ref__c.
+     *   - unitPrice: Price list5 list price for non-service products; 0 for
+     *     service products (user enters).
+     *   - taxPercent: Product2.Tax__c (NOT PricebookEntry.Tax__c).
+     *   - sourcePricebookId: Price list5 pricebook id for non-service
+     *     products; null for service products.
+     *   - sourcePricebookType: 'Price list5' or 'Service'.
+     *   - isServiceItem: true when Product2.Service_Item__c = 'Yes'.
+     *
+     * accountId / regionId are accepted for API compatibility but are not
+     * used by the new tier model - filtering by account or region is the
+     * admin's responsibility via Pricebook2 activation.
+     */
+    // Product search now filters on Product2.Product_Type__c (Equipment /
+    // Spare / Accessories / Consumables). Results use the tier model for
+    // display price + resolveAppliedTier for the save-time approval flip.
     @AuraEnabled
     public static List<ProductSearchResult> searchProductsWithBestPrice(
         String searchTerm, String category, Id accountId, Id regionId
@@ -195,16 +219,19 @@ public with sharing class QuoteBuilderController {
 
         String searchKey = '%' + String.escapeSingleQuotes(searchTerm.trim()) + '%';
 
-        // Search products directly - not restricted by pricebook
-        String prodQuery = 'SELECT Id, Name, ProductCode, Product_Category__c, Make__c, Model__c, ' +
+        // The LWC filter dropdown now exposes Product2.Product_Type__c
+        // (Equipment / Spare / Accessories / Consumables). Older callers
+        // sending the Product_Category label will fall through without
+        // matching, but won't break the query.
+        String prodQuery = 'SELECT Id, Name, ProductCode, Product_Category__c, Product_Type__c, Make__c, Model__c, ' +
             'Description, HSN_Code__c, Standard_Price__c, QuantityUnitOfMeasure, ' +
-            'Line_Description__c, Detailed_Description__c ' +
+            'Line_Description__c, Detailed_Description__c, ' +
+            'Service_Item__c, Tax__c ' +
             'FROM Product2 ' +
             'WHERE IsActive = true ' +
             'AND (Name LIKE :searchKey OR ProductCode LIKE :searchKey)';
-
         if (String.isNotBlank(category)) {
-            prodQuery += ' AND Product_Category__c = :category';
+            prodQuery += ' AND Product_Type__c = :category';
         }
         prodQuery += ' ORDER BY Name ASC LIMIT 20';
 
@@ -217,70 +244,35 @@ public with sharing class QuoteBuilderController {
         if (products.isEmpty()) return results;
 
         Set<Id> productIds = new Set<Id>();
-        for (Product2 p : products) {
-            productIds.add(p.Id);
-        }
+        for (Product2 p : products) productIds.add(p.Id);
 
-        // Get Standard Pricebook entries (needed for QuoteLineItem.PricebookEntryId)
+        // Standard pricebook entry - used as QLI.PricebookEntryId regardless of
+        // tier, because the Quote lives on the Standard Pricebook.
         List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
         if (stdPbs.isEmpty()) return results;
         Id stdPbId = stdPbs[0].Id;
 
         Map<Id, PricebookEntry> stdEntryMap = new Map<Id, PricebookEntry>();
         for (PricebookEntry pbe : [
-            SELECT Id, Product2Id, UnitPrice, Tax__c
+            SELECT Id, Product2Id, Pricebook2Id, UnitPrice
             FROM PricebookEntry
             WHERE Pricebook2Id = :stdPbId
-            AND Product2Id IN :productIds
-            AND IsActive = true
+              AND Product2Id IN :productIds
+              AND IsActive = true
         ]) {
             stdEntryMap.put(pbe.Product2Id, pbe);
         }
 
-        // Query prices from ALL active pricebooks for these products
-        Date today = Date.today();
-        List<PricebookEntry> allEntries = [
-            SELECT Id, Product2Id, UnitPrice, Tax__c,
-                   Max_Discount_Percentage__c,
-                   Pricebook2Id, Pricebook2.Name, Pricebook2.Price_Book_Type__c,
-                   Pricebook2.Customer__c, Pricebook2.Region__c,
-                   Pricebook2.Valid_From__c, Pricebook2.Valid_Till__c,
-                   Pricebook2.IsStandard
-            FROM PricebookEntry
-            WHERE Product2Id IN :productIds
-            AND Pricebook2.IsActive = true
-            AND Product2.IsActive = true
-        ];
-
-        // Build product -> pricing options map with priority
-        Map<Id, List<PricingOption>> productPricingMap = new Map<Id, List<PricingOption>>();
-        for (PricebookEntry pbe : allEntries) {
-            Integer priority = getPricebookPriority(pbe, accountId, regionId, today);
-            if (priority == 0) continue;
-
-            PricingOption opt = new PricingOption();
-            opt.pricebookId = pbe.Pricebook2Id;
-            opt.pricebookName = pbe.Pricebook2.Name;
-            opt.pricebookType = getPricebookTypeLabel(pbe);
-            opt.price = pbe.UnitPrice;
-            opt.taxPercent = pbe.Tax__c;
-            opt.maxDiscount = pbe.Max_Discount_Percentage__c;
-            opt.priority = priority;
-
-            if (!productPricingMap.containsKey(pbe.Product2Id)) {
-                productPricingMap.put(pbe.Product2Id, new List<PricingOption>());
-            }
-            productPricingMap.get(pbe.Product2Id).add(opt);
+        // Tier 5 (default) - drives the shown Sales Price for non-service products.
+        Set<Id> nonServiceIds = new Set<Id>();
+        for (Product2 p : products) {
+            if (p.Service_Item__c != 'Yes') nonServiceIds.add(p.Id);
         }
+        Map<Id, PricebookTierService.ProductTierMap> tierMaps =
+            PricebookTierService.loadTiers(nonServiceIds);
 
-        // Build results with auto-selected best pricing
         for (Product2 prod : products) {
-            // Must have a Standard Pricebook entry to be added to a quote
-            PricebookEntry stdEntry = stdEntryMap.get(prod.Id);
-            if (stdEntry == null) continue;
-
             ProductSearchResult psr = new ProductSearchResult();
-            psr.pricebookEntryId = stdEntry.Id;
             psr.productId = prod.Id;
             psr.productName = prod.Name;
             psr.productCode = prod.ProductCode;
@@ -293,83 +285,173 @@ public with sharing class QuoteBuilderController {
             psr.uom = prod.QuantityUnitOfMeasure;
             psr.lineDescription = prod.Line_Description__c;
             psr.detailedDescription = prod.Detailed_Description__c;
-
-            // Default to standard pricebook pricing
-            psr.unitPrice = stdEntry.UnitPrice;
-            psr.taxPercent = stdEntry.Tax__c;
-            psr.sourcePricebookId = stdPbId;
-            psr.sourcePricebook = '';
-            psr.sourcePricebookType = '';
+            psr.isServiceItem = (prod.Service_Item__c == 'Yes');
+            psr.taxPercent = prod.Tax__c;
             psr.availablePrices = new List<PriceOption>();
 
-            // Auto-select best price based on priority
-            List<PricingOption> options = productPricingMap.get(prod.Id);
-            if (options != null && !options.isEmpty()) {
-                PricingOption best = null;
-                for (PricingOption opt : options) {
-                    if (best == null || opt.priority < best.priority) {
-                        best = opt;
-                    }
+            if (psr.isServiceItem) {
+                // Service items live on the Standard Pricebook. Map the
+                // Standard PBE (if present) so downstream Quote/Order saves
+                // can satisfy the required PricebookEntryId without hitting
+                // a pricebook mismatch. Unit price is 0 — the user enters
+                // the service price on the line.
+                PricebookEntry svcEntry = stdEntryMap.get(prod.Id);
+                if (svcEntry != null) {
+                    psr.pricebookEntryId = svcEntry.Id;
+                    psr.sourcePricebookId = svcEntry.Pricebook2Id;
                 }
-                if (best != null) {
-                    psr.unitPrice = best.price;
-                    psr.taxPercent = best.taxPercent != null ? best.taxPercent : stdEntry.Tax__c;
-                    psr.maxDiscount = best.maxDiscount;
-                    psr.sourcePricebookId = best.pricebookId;
-                    psr.sourcePricebook = best.pricebookName;
-                    psr.sourcePricebookType = best.pricebookType;
-                }
+                psr.unitPrice = 0;
+                psr.sourcePricebookType = 'Service';
+                results.add(psr);
+                continue;
+            }
 
-                for (PricingOption opt : options) {
-                    PriceOption po = new PriceOption();
-                    po.pricebookName = opt.pricebookName;
-                    po.pricebookType = opt.pricebookType;
-                    po.price = opt.price;
-                    po.isSelected = (best != null && opt.pricebookName == best.pricebookName
-                                     && opt.price == best.price);
-                    psr.availablePrices.add(po);
-                }
+            PricebookEntry stdEntry = stdEntryMap.get(prod.Id);
+            if (stdEntry == null) continue; // cannot be added to a Standard-pricebook quote
+
+            PricebookTierService.ProductTierMap tiers = tierMaps.get(prod.Id);
+            PricebookEntry tier5 = tiers == null ? null : tiers.tier(PricebookTierService.TIER5);
+
+            psr.pricebookEntryId = stdEntry.Id;
+            if (tier5 != null) {
+                // Tier 5 exists — use it as the displayed Sales Price.
+                psr.unitPrice = tier5.UnitPrice;
+                psr.sourcePricebookId = tier5.Pricebook2Id;
+                psr.sourcePricebook = PricebookTierService.TIER5;
+                psr.sourcePricebookType = PricebookTierService.TIER5;
+            } else {
+                // No tier set up yet — fall back to the Standard PBE price so
+                // the product still surfaces in search. The trigger will reject
+                // the save if the org requires a tier entry, but at least the
+                // rep can see the product instead of it vanishing silently.
+                psr.unitPrice = stdEntry.UnitPrice;
+                psr.sourcePricebookId = stdEntry.Pricebook2Id;
+                psr.sourcePricebook = 'Standard';
+                psr.sourcePricebookType = 'Standard';
+            }
+
+            // Export the discount-tier PBE prices (PL4 -> PL1, skipping
+            // the Standard pricebook and Price list5) so the LWC can run
+            // the live Price_Status decision client-side against the
+            // actual tier ladder without round-tripping to Apex on every
+            // keystroke.
+            for (String t : new List<String>{
+                PricebookTierService.TIER4,
+                PricebookTierService.TIER3,
+                PricebookTierService.TIER2,
+                PricebookTierService.TIER1
+            }) {
+                PricebookEntry tierPbe = tiers == null ? null : tiers.tier(t);
+                if (tierPbe == null || tierPbe.UnitPrice == null) continue;
+                PriceOption po = new PriceOption();
+                po.pricebookType = t;
+                po.pricebookName = tierPbe.Pricebook2.Name;
+                po.price = tierPbe.UnitPrice;
+                po.isSelected = false;
+                psr.availablePrices.add(po);
             }
 
             results.add(psr);
         }
-
         return results;
     }
 
-    // Pricing priority: Promotional(1) > Customer Specific(2) > Region Specific(3) > Dealer(4) > Standard(5)
-    private static Integer getPricebookPriority(PricebookEntry pbe, Id accountId, Id regionId, Date today) {
-        String pbType = pbe.Pricebook2.Price_Book_Type__c;
+    /**
+     * Live tier + Price_Status preview for the LWC. Called whenever the user
+     * edits UnitPrice, Discount, or Product on a line so the UI can echo
+     * what the trigger will stamp on save.
+     *
+     * For a service item, returns status=Not Required and resolvedTier=null.
+     * For a non-service item, returns the tightest-fitting tier for the
+     * discounted unit price and the Price_Status that will be written.
+     * Throws AuraHandledException when UnitPrice is below Price list5 - the
+     * same floor the trigger enforces.
+     */
+    @AuraEnabled(cacheable=false)
+    public static PricingPreview getProductPricingPreview(Id productId, Decimal unitPrice, Decimal discount, Decimal quantity) {
+        PricingPreview out = new PricingPreview();
+        if (productId == null) return out;
 
-        // Check date validity
-        Date validFrom = pbe.Pricebook2.Valid_From__c;
-        Date validTill = pbe.Pricebook2.Valid_Till__c;
-        Boolean dateValid = true;
-        if (validFrom != null && today < validFrom) dateValid = false;
-        if (validTill != null && today > validTill) dateValid = false;
+        List<Product2> prods = [
+            SELECT Id, Service_Item__c, Tax__c
+            FROM Product2
+            WHERE Id = :productId
+            LIMIT 1
+        ];
+        if (prods.isEmpty()) return out;
+        Product2 p = prods[0];
+        out.isServiceItem = (p.Service_Item__c == 'Yes');
+        out.taxPercent = p.Tax__c;
 
-        if (pbType == 'Promotional Price') {
-            return dateValid ? 1 : 0;
+        if (out.isServiceItem) {
+            out.priceStatus = PricebookTierService.priceStatusForService();
+            return out;
         }
-        if (pbType == 'Customer Specific' && accountId != null) {
-            return (pbe.Pricebook2.Customer__c == accountId && dateValid) ? 2 : 0;
-        }
-        if (pbType == 'Region Specific' && regionId != null) {
-            return (pbe.Pricebook2.Region__c == regionId && dateValid) ? 3 : 0;
-        }
-        if (pbType == 'Dealer Price') {
-            return 4;
-        }
-        if (pbe.Pricebook2.IsStandard) {
-            return 5;
-        }
-        return 0;
-    }
 
-    private static String getPricebookTypeLabel(PricebookEntry pbe) {
-        if (pbe.Pricebook2.IsStandard) return 'Standard';
-        String pbType = pbe.Pricebook2.Price_Book_Type__c;
-        return String.isNotBlank(pbType) ? pbType : 'Standard';
+        Map<Id, PricebookTierService.ProductTierMap> tierMaps =
+            PricebookTierService.loadTiers(new Set<Id>{p.Id});
+        PricebookTierService.ProductTierMap tiers = tierMaps.get(p.Id);
+        PricebookEntry tier5 = tiers == null ? null : tiers.tier(PricebookTierService.TIER5);
+
+        // Determine the standard price: prefer Price list5, fall back to
+        // the Standard pricebook's PBE so products without a tier entry
+        // can still be previewed / saved.
+        Decimal standard;
+        if (tier5 != null && tier5.UnitPrice != null) {
+            standard = tier5.UnitPrice;
+        } else {
+            List<PricebookEntry> stdPbe = [
+                SELECT UnitPrice
+                FROM PricebookEntry
+                WHERE Product2Id = :p.Id
+                  AND IsActive = true
+                  AND Pricebook2.IsStandard = true
+                LIMIT 1
+            ];
+            standard = stdPbe.isEmpty() ? null : stdPbe[0].UnitPrice;
+        }
+
+        // Sales Price is locked to the Standard list price on
+        // non-service lines. If the LWC passes anything else (above or
+        // below), snap to Standard silently instead of erroring.
+        Decimal up = unitPrice == null ? standard : unitPrice;
+        if (standard != null && up != null && up != standard) {
+            up = standard;
+        }
+        Decimal d = discount == null ? 0 : discount;
+        Decimal taxPct = p.Tax__c != null ? p.Tax__c : 0;
+        Decimal upVal = up == null ? 0 : up;
+        Decimal discountedUnit = upVal * (1 - (d / 100));
+        // Per-unit final price after discount AND tax — compared against
+        // PL4..PL1 per-unit list prices. quantity is still accepted on
+        // the signature so the LWC can keep passing it, but it isn't
+        // folded into the tier-comparison amount.
+        Decimal finalAmount = discountedUnit * (1 + (taxPct / 100));
+
+        out.standardPrice = standard;
+
+        if (tiers != null && !tiers.byTier.isEmpty()) {
+            PricebookTierService.TierResolution applied =
+                PricebookTierService.resolveAppliedTier(tiers, finalAmount);
+            if (applied != null && applied.entry != null) {
+                out.resolvedTier = applied.tierName;
+                out.resolvedTierListPrice = applied.tierListPrice;
+                out.resolvedPricebookId = applied.entry.Pricebook2Id;
+                out.priceStatus = PricebookTierService.STATUS_APPROVAL_REQUIRED;
+                return out;
+            }
+        }
+
+        // Above the top discount tier (or no tier data) — tag the org's
+        // Standard pricebook (IsStandard = true) and mark Not Required.
+        List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
+        if (!stdPbs.isEmpty()) {
+            out.resolvedTier = 'Standard';
+            out.resolvedTierListPrice = standard;
+            out.resolvedPricebookId = stdPbs[0].Id;
+        }
+        out.priceStatus = PricebookTierService.STATUS_NOT_REQUIRED;
+        return out;
     }
 
     @AuraEnabled
@@ -505,23 +587,35 @@ public with sharing class QuoteBuilderController {
                 throw new AuraHandledException('At least one line item is required.');
             }
 
+            Map<Id, Id> pbeByProduct = resolveQuotePricebookEntries(quoteId, lineItems);
+            Map<Id, Id> optedPbByProduct = resolveOptedPricebooks(lineItems);
+
             List<QuoteLineItem> qliList = new List<QuoteLineItem>();
             for (LineItemInput item : lineItems) {
                 QuoteLineItem qli = new QuoteLineItem();
                 qli.QuoteId = quoteId;
                 qli.Product2Id = item.productId;
-                qli.PricebookEntryId = item.pricebookEntryId;
+                qli.PricebookEntryId = pbeByProduct.containsKey(item.productId)
+                    ? pbeByProduct.get(item.productId)
+                    : item.pricebookEntryId;
                 qli.Quantity = item.quantity;
                 qli.UnitPrice = item.unitPrice;
                 qli.Discount = item.discount;
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
                 qli.Source_Pricebook_Ref__c = item.sourcePricebookId;
-                qli.Price_Status__c = normalizeLinePriceStatus(item.priceStatus, item.discount, item.maxDiscount);
+              //  qli.Opted_Price_Book__c = optedPbByProduct.get(item.productId);
+                // Tax__c carries the Product's tax rate from the LWC. The
+                // tiered-line trigger will re-stamp it from Product2.Tax__c
+                // for non-service rows; service rows keep the value the
+                // rep entered (trigger is a no-op on Tax for services).
+                if (item.taxPercent != null) {
+                    qli.Tax__c = item.taxPercent;
+                }
+                // Price_Status__c is stamped by the QuoteLineItem trigger.
                 qliList.add(qli);
             }
             insert qliList;
-            updateQuotePriceStatus(quoteId);
         } catch (AuraHandledException e) {
             throw e;
         } catch (Exception e) {
@@ -540,23 +634,35 @@ public with sharing class QuoteBuilderController {
             List<QuoteLineItem> oldItems = [SELECT Id FROM QuoteLineItem WHERE QuoteId = :quoteId];
             if (!oldItems.isEmpty()) delete oldItems;
 
+            Map<Id, Id> pbeByProduct = resolveQuotePricebookEntries(quoteId, lineItems);
+            Map<Id, Id> optedPbByProduct = resolveOptedPricebooks(lineItems);
+
             List<QuoteLineItem> qliList = new List<QuoteLineItem>();
             for (LineItemInput item : lineItems) {
                 QuoteLineItem qli = new QuoteLineItem();
                 qli.QuoteId = quoteId;
                 qli.Product2Id = item.productId;
-                qli.PricebookEntryId = item.pricebookEntryId;
+                qli.PricebookEntryId = pbeByProduct.containsKey(item.productId)
+                    ? pbeByProduct.get(item.productId)
+                    : item.pricebookEntryId;
                 qli.Quantity = item.quantity;
                 qli.UnitPrice = item.unitPrice;
                 qli.Discount = item.discount;
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
                 qli.Source_Pricebook_Ref__c = item.sourcePricebookId;
-                qli.Price_Status__c = normalizeLinePriceStatus(item.priceStatus, item.discount, item.maxDiscount);
+                qli.Opted_Price_Book__c = optedPbByProduct.get(item.productId);
+                // Tax__c carries the Product's tax rate from the LWC. The
+                // tiered-line trigger will re-stamp it from Product2.Tax__c
+                // for non-service rows; service rows keep the value the
+                // rep entered (trigger is a no-op on Tax for services).
+                if (item.taxPercent != null) {
+                    qli.Tax__c = item.taxPercent;
+                }
+                // Price_Status__c is stamped by the QuoteLineItem trigger.
                 qliList.add(qli);
             }
             insert qliList;
-            updateQuotePriceStatus(quoteId);
         } catch (AuraHandledException e) {
             throw e;
         } catch (Exception e) {
@@ -564,55 +670,100 @@ public with sharing class QuoteBuilderController {
         }
     }
 
-    // Determine Price Status based on discount vs max discount
-    private static String getPriceStatus(Decimal discount, Decimal maxDiscount) {
-        if (discount != null && maxDiscount != null && discount > maxDiscount) {
-            return 'Approval Required';
+    /**
+     * For each incoming line, resolve the product's opted discount
+     * pricebook using the rule:
+     *
+     *   finalPrice = UnitPrice
+     *              - (Discount% * UnitPrice)
+     *              - (Tax% * UnitPrice)
+     *
+     *   Walk PL4 -> PL3 -> PL2 -> PL1 and return the HIGHEST tier
+     *   whose list price is <= finalPrice. If finalPrice is below
+     *   every configured tier, return PL1 (floor). If finalPrice is
+     *   above the top existing tier (no discount tier applies),
+     *   return null so the caller leaves Opted_Price_Book__c blank.
+     *
+     * Returns a productId -> Pricebook2 id map (only populated for
+     * lines whose product has tier pricebooks and whose final amount
+     * actually hits one).
+     */
+    private static Map<Id, Id> resolveOptedPricebooks(List<LineItemInput> lineItems) {
+        Map<Id, Id> out = new Map<Id, Id>();
+        if (lineItems == null || lineItems.isEmpty()) return out;
+
+        Set<Id> productIds = new Set<Id>();
+        for (LineItemInput li : lineItems) {
+            if (li.productId != null) productIds.add(li.productId);
         }
-        return 'Not Required';
+        if (productIds.isEmpty()) return out;
+
+        Map<Id, PricebookTierService.ProductTierMap> tierMaps =
+            PricebookTierService.loadTiers(productIds);
+
+        for (LineItemInput li : lineItems) {
+            if (li.productId == null) continue;
+            PricebookTierService.ProductTierMap tiers = tierMaps.get(li.productId);
+            if (tiers == null || tiers.byTier.isEmpty()) continue;
+
+            Decimal up  = li.unitPrice  == null ? 0 : li.unitPrice;
+            Decimal d   = li.discount   == null ? 0 : li.discount;
+            Decimal tax = li.taxPercent == null ? 0 : li.taxPercent;
+            Decimal taxprice = (up * tax) / 100;
+            Decimal finalPrice = up - ((d * up) / 100) - taxprice;
+
+            PricebookTierService.TierResolution applied =
+                PricebookTierService.resolveAppliedTier(tiers, finalPrice);
+            if (applied != null && applied.entry != null) {
+                out.put(li.productId, applied.entry.Pricebook2Id);
+            }
+        }
+        return out;
     }
 
-    // QuoteLineItem.Price_Status__c is a restricted picklist of
-    // 'Not Required', 'Approval Required', 'Approved'. Legacy payloads
-    // may carry 'Draft' or other values from the Quote-level status
-    // field; coerce those into 'Not Required' or a recomputed value.
-    private static final Set<String> VALID_LINE_PRICE_STATUSES = new Set<String>{
-        'Not Required', 'Approval Required', 'Approved'
-    };
+    // Price_Status__c and Tax__c on QuoteLineItem and the Quote rollup are
+    // now owned by QuoteLineItemTriggerHandler. The controller passes
+    // user-provided UnitPrice / Discount / Product2Id / PricebookEntryId
+    // straight through and lets the trigger stamp everything derived.
 
-    private static String normalizeLinePriceStatus(String requested, Decimal discount, Decimal maxDiscount) {
-        if (String.isNotBlank(requested) && VALID_LINE_PRICE_STATUSES.contains(requested)) {
-            return requested;
+    /**
+     * Make sure every incoming line's PricebookEntryId lives on the
+     * Quote's Pricebook2Id. Service items in particular sometimes arrive
+     * with a null PBE (older saves, external callers) — in that case
+     * find the Standard PBE for the product and use it. Falls back to
+     * the incoming id if nothing fits so downstream DML surfaces the
+     * original error.
+     */
+    private static Map<Id, Id> resolveQuotePricebookEntries(Id quoteId, List<LineItemInput> lineItems) {
+        Map<Id, Id> out = new Map<Id, Id>();
+        if (lineItems == null || lineItems.isEmpty()) return out;
+
+        List<Quote> quotes = [SELECT Id, Pricebook2Id FROM Quote WHERE Id = :quoteId LIMIT 1];
+        Id quotePbId = (!quotes.isEmpty() && quotes[0].Pricebook2Id != null)
+            ? quotes[0].Pricebook2Id : null;
+
+        if (quotePbId == null) {
+            List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
+            if (!stdPbs.isEmpty()) quotePbId = stdPbs[0].Id;
         }
-        return getPriceStatus(discount, maxDiscount);
-    }
+        if (quotePbId == null) return out;
 
-    // Roll up line item price status to the parent Quote.
-    // - If any line item requires approval, Quote.Price_Status__c = 'Approval Required'
-    // - Preserves 'Approved' state (do not regress an already-approved quote)
-    // - Otherwise resets to 'Draft'
-    private static void updateQuotePriceStatus(Id quoteId) {
-        if (quoteId == null) return;
-
-        List<Quote> quotes = [SELECT Id, Price_Status__c FROM Quote WHERE Id = :quoteId LIMIT 1];
-        if (quotes.isEmpty()) return;
-        Quote q = quotes[0];
-
-        if (q.Price_Status__c == 'Approved') return;
-
-        Integer approvalCount = [
-            SELECT COUNT()
-            FROM QuoteLineItem
-            WHERE QuoteId = :quoteId
-            AND Price_Status__c = 'Approval Required'
-        ];
-
-        String newStatus = approvalCount > 0 ? 'Approval Required' : 'Not Required';
-
-        if (q.Price_Status__c != newStatus) {
-            q.Price_Status__c = newStatus;
-            update q;
+        Set<Id> productIds = new Set<Id>();
+        for (LineItemInput li : lineItems) {
+            if (li.productId != null) productIds.add(li.productId);
         }
+        if (productIds.isEmpty()) return out;
+
+        for (PricebookEntry pbe : [
+            SELECT Id, Product2Id
+            FROM PricebookEntry
+            WHERE Pricebook2Id = :quotePbId
+              AND Product2Id IN :productIds
+              AND IsActive = true
+        ]) {
+            out.put(pbe.Product2Id, pbe.Id);
+        }
+        return out;
     }
 
     // ===== Inner Classes =====
@@ -623,6 +774,7 @@ public with sharing class QuoteBuilderController {
         public Decimal unitPrice;
         public Decimal discount;
         public Decimal maxDiscount;
+        public Decimal taxPercent;
         public String lineDescription;
         public String detailedDescription;
         public Id sourcePricebookId;
@@ -681,6 +833,17 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public String sourcePricebook;
         @AuraEnabled public String sourcePricebookType;
         @AuraEnabled public List<PriceOption> availablePrices;
+        @AuraEnabled public Boolean isServiceItem;
+    }
+
+    public class PricingPreview {
+        @AuraEnabled public Boolean isServiceItem;
+        @AuraEnabled public Decimal taxPercent;
+        @AuraEnabled public Decimal standardPrice;
+        @AuraEnabled public String resolvedTier;
+        @AuraEnabled public Decimal resolvedTierListPrice;
+        @AuraEnabled public Id resolvedPricebookId;
+        @AuraEnabled public String priceStatus;
     }
 
     public class PriceOption {
@@ -688,16 +851,6 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public String pricebookType;
         @AuraEnabled public Decimal price;
         @AuraEnabled public Boolean isSelected;
-    }
-
-    private class PricingOption {
-        public String pricebookName;
-        public String pricebookType;
-        public Id pricebookId;
-        public Decimal price;
-        public Decimal taxPercent;
-        public Decimal maxDiscount;
-        public Integer priority;
     }
 
     public class QuoteEditContext {
