@@ -60,10 +60,15 @@ public with sharing class quoteTriggerHandler {
     }
 
     /**
-     * Notifies the Quote Owner when Quote.Price_Status__c transitions to
-     * 'Approved'. Fires regardless of which path flipped the status — the
-     * custom QuoteApprovalController.approveLineItems flow or the standard
-     * Quote_Approval approval process final-approval field updates.
+     * Notifies the Quote Owner when the Quote is approved. Fires when EITHER
+     * Approval_Status__c (set by the standard Quote_Approval process's final
+     * approval field update) OR Price_Status__c (set by the custom
+     * QuoteApprovalController.approveLineItems flow) transitions to
+     * 'Approved'. Two paths are checked because the standard approval flow
+     * updates Approval_Status__c reliably, while Price_Status__c is sometimes
+     * left at 'Not Required' by other automation in the org — relying on
+     * Price_Status__c alone caused the owner to miss the notification on
+     * legitimate L3 approvals.
      */
     public static void notifyOwnerOnApproval(List<Quote> newQuotes, Map<Id, Quote> oldMap) {
         if (newQuotes == null || newQuotes.isEmpty() || oldMap == null) return;
@@ -72,9 +77,14 @@ public with sharing class quoteTriggerHandler {
         for (Quote q : newQuotes) {
             Quote oldQ = oldMap.get(q.Id);
             if (oldQ == null) continue;
-            if (q.Price_Status__c != 'Approved') continue;
-            if (oldQ.Price_Status__c == 'Approved') continue;
             if (q.OwnerId == null) continue;
+
+            Boolean approvalFlipped = (q.Approval_Status__c == 'Approved'
+                                       && oldQ.Approval_Status__c != 'Approved');
+            Boolean priceFlipped    = (q.Price_Status__c == 'Approved'
+                                       && oldQ.Price_Status__c != 'Approved');
+            if (!approvalFlipped && !priceFlipped) continue;
+
             justApproved.add(q);
         }
         if (justApproved.isEmpty()) return;
