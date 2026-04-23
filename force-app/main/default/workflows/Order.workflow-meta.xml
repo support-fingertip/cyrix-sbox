@@ -21,6 +21,16 @@
         <reevaluateOnChange>false</reevaluateOnChange>
     </fieldUpdates>
     <fieldUpdates>
+        <fullName>Order_Approved_Date_Time</fullName>
+        <field>Order_Approved_Date_Time__c</field>
+        <formula>now()</formula>
+        <name>Order Approved Date Time</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Formula</operation>
+        <protected>false</protected>
+        <reevaluateOnChange>false</reevaluateOnChange>
+    </fieldUpdates>
+    <fieldUpdates>
         <fullName>Order_Price_Status_Approved</fullName>
         <field>Price_Status__c</field>
         <literalValue>Approved</literalValue>

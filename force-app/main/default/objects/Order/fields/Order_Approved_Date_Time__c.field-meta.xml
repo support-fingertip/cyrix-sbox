@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Order_Approved_Date_Time__c</fullName>
+    <description>Stamped to NOW() by the Order_Approved_Date_Time workflow field update, invoked from the Order_Approval approval process final-approval action.</description>
+    <externalId>false</externalId>
+    <label>Order Approved Date Time</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>DateTime</type>
+</CustomField>
