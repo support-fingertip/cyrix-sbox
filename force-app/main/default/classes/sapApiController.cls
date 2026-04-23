@@ -11,7 +11,7 @@ global class sapApiController {
         String customerCode = req.params.get('customerCode');
         String orderCode = req.params.get('orderCode');
 
-        getResponse g = new getResponse();
+        List<SObject> records = new List<SObject>();
         String jsonString = '';
 
         if (Label.API_Key != key) {
@@ -58,9 +58,7 @@ global class sapApiController {
                     LIMIT 200
                 ];
             }
-            customerResponseWrapper cw = new customerResponseWrapper();
-            cw.data = aList;
-            g = cw;
+            records.addAll((List<SObject>) aList);
         } else if (objectName == 'order') {
             List<Order> oList;
             if (String.isNotBlank(orderCode)) {
@@ -114,15 +112,19 @@ global class sapApiController {
                     LIMIT 200
                 ];
             }
-            orderResponseWrapper ow = new orderResponseWrapper();
-            ow.data = oList;
-            g = ow;
+            records.addAll((List<SObject>) oList);
         }
 
-        Map<String, Object> dataMap = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(g));
-        Map<String, Object> responseMap = removeAttributes(dataMap);
-        jsonString = JSON.serialize(responseMap);
-        jsonString = jsonString.replace('{"records":', '').replace('"done":true},', '');
+        List<Object> rawList = (List<Object>) JSON.deserializeUntyped(JSON.serialize(records));
+        List<Object> cleaned = new List<Object>();
+        for (Object item : rawList) {
+            if (item instanceof Map<String, Object>) {
+                cleaned.add(removeAttributes((Map<String, Object>) item));
+            } else {
+                cleaned.add(item);
+            }
+        }
+        jsonString = JSON.serialize(cleaned);
 
         res.addHeader('Content-Type', 'application/json');
         res.statusCode = 200;
@@ -153,21 +155,10 @@ global class sapApiController {
         return jsonObj;
     }
 
-    global class customerResponseWrapper extends getResponse {
-        public List<Account> data = new List<Account>();
-    }
-
-    global class orderResponseWrapper extends getResponse {
-        public List<Order> data = new List<Order>();
-    }
-
     public class response {
         public String SF_RecordId;
         public String TallyUniqueId;
         public String Status;
         public String Message;
-    }
-
-    global virtual class getResponse {
     }
 }
