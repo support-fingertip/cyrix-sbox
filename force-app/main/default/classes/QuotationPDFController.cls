@@ -22,8 +22,14 @@ public with sharing class QuotationPDFController {
     // Default tax rate for Product quotations (5%)
       public String grandTotalInWords { get; set; }
     public String productName { get; set; }
-   public  General_Settings__c general{get;set;}  
+   public  General_Settings__c general{get;set;}
      public String productStringify { get; set; }
+
+    // AMC page summary — single-row contract table sums rate/GST/total
+    // across every line item. GST on AMC is fixed at 18%.
+    public Decimal amcTotalRate { get; set; }
+    public Decimal amcGstAmount { get; set; }
+    public Decimal amcGrandTotal { get; set; }
 
 
     public QuotationPDFController(ApexPages.StandardController stdController) {
@@ -54,6 +60,7 @@ public with sharing class QuotationPDFController {
                    Account.BillingPostalCode, Account.BillingCountry,
             BillingCity,BillingAddress,BillingCountry,BillingState,Business_Vertical__c,
                    Account.Payment_Terms__c,Additional_Warranty__c,Notes__c,Sub_Vertical__c,
+                   Contract_Period_From_Date__c, Contract_Period_End_Date__c,
          ContactId, Contact.Name, Contact.Email, Contact.Phone, Contact.Title, owner.Name,Owner_Designation__c,Owner_Phone__c
             FROM Quote
             WHERE Id = :quoteId
@@ -76,6 +83,7 @@ public with sharing class QuotationPDFController {
                    Product2.Item_Code__c, Product2.Make__c, Product2.Model__c,
                    Product2.Description, Product2.HSN_Code__c, Product2.Tax__c,
                    Product2.QuantityUnitOfMeasure,
+                   Product2.Equipment_Name__c, Product2.Parameters__c,
                    PricebookEntryId, Quantity, UnitPrice, TotalPrice, Discount, ListPrice,
                    Price_Status__c, Tax_Type__c,
                    Product_Line_Description__c, Product_Detailed_Description__c,Product2.Product_Type__c
@@ -83,6 +91,16 @@ public with sharing class QuotationPDFController {
             WHERE QuoteId = :quoteId
             ORDER BY CreatedDate ASC
         ];
+
+        // AMC single-row summary: sum of line totals, fixed 18% GST.
+        amcTotalRate = 0;
+        for (QuoteLineItem qli : lineItems) {
+            if (qli.TotalPrice != null) {
+                amcTotalRate += qli.TotalPrice;
+            }
+        }
+        amcGstAmount = (amcTotalRate * 0.18).setScale(2, RoundingMode.HALF_UP);
+        amcGrandTotal = (amcTotalRate + amcGstAmount).setScale(2, RoundingMode.HALF_UP);
 
         // Query Payment Terms for this Quote
         paymentTerms = [

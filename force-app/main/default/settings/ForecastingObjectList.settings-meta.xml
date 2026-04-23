@@ -142,6 +142,10 @@
             <label>Important</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>TERR2_NAME</field>
+            <label>Territory Name</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STAGE_CHANGE</field>
             <label>Last Stage Change Date</label>
         </forecastingObjectListLabelMappings>
@@ -152,6 +156,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PRIVATE</field>
             <label>Private</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>TERR2_DESC</field>
+            <label>Territory Description</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CONTRACT.CONTRACT_NUMBER</field>
@@ -433,6 +441,8 @@
             <field>00NC400000280WL</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
+            <field>TERR2_NAME</field>
+            <field>TERR2_DESC</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -584,6 +594,10 @@
             <label>Important</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>TERR2_NAME</field>
+            <label>Territory Name</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STAGE_CHANGE</field>
             <label>Last Stage Change Date</label>
         </forecastingObjectListLabelMappings>
@@ -594,6 +608,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PRIVATE</field>
             <label>Private</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>TERR2_DESC</field>
+            <label>Territory Description</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CONTRACT.CONTRACT_NUMBER</field>
@@ -875,6 +893,8 @@
             <field>00NC400000280WL</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
+            <field>TERR2_NAME</field>
+            <field>TERR2_DESC</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -1026,6 +1046,10 @@
             <label>Important</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>TERR2_NAME</field>
+            <label>Territory Name</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STAGE_CHANGE</field>
             <label>Last Stage Change Date</label>
         </forecastingObjectListLabelMappings>
@@ -1036,6 +1060,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PRIVATE</field>
             <label>Private</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>TERR2_DESC</field>
+            <label>Territory Description</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CONTRACT.CONTRACT_NUMBER</field>
@@ -1317,6 +1345,8 @@
             <field>00NC400000280WL</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
+            <field>TERR2_NAME</field>
+            <field>TERR2_DESC</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -1472,6 +1502,10 @@
             <label>Important</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>TERR2_NAME</field>
+            <label>Territory Name</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STAGE_CHANGE</field>
             <label>Last Stage Change Date</label>
         </forecastingObjectListLabelMappings>
@@ -1482,6 +1516,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PRIVATE</field>
             <label>Private</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>TERR2_DESC</field>
+            <label>Territory Description</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CONTRACT.CONTRACT_NUMBER</field>
@@ -1764,6 +1802,8 @@
             <field>00NC400000280WL</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
+            <field>TERR2_NAME</field>
+            <field>TERR2_DESC</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -1915,6 +1955,10 @@
             <label>Important</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>TERR2_NAME</field>
+            <label>Territory Name</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STAGE_CHANGE</field>
             <label>Last Stage Change Date</label>
         </forecastingObjectListLabelMappings>
@@ -1925,6 +1969,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PRIVATE</field>
             <label>Private</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>TERR2_DESC</field>
+            <label>Territory Description</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CONTRACT.CONTRACT_NUMBER</field>
@@ -2206,6 +2254,8 @@
             <field>00NC400000280WL</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
+            <field>TERR2_NAME</field>
+            <field>TERR2_DESC</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -2361,6 +2411,10 @@
             <label>Important</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>TERR2_NAME</field>
+            <label>Territory Name</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STAGE_CHANGE</field>
             <label>Last Stage Change Date</label>
         </forecastingObjectListLabelMappings>
@@ -2371,6 +2425,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PRIVATE</field>
             <label>Private</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>TERR2_DESC</field>
+            <label>Territory Description</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CONTRACT.CONTRACT_NUMBER</field>
@@ -2653,6 +2711,8 @@
             <field>00NC400000280WL</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
+            <field>TERR2_NAME</field>
+            <field>TERR2_DESC</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -2804,6 +2864,10 @@
             <label>Important</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>TERR2_NAME</field>
+            <label>Territory Name</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STAGE_CHANGE</field>
             <label>Last Stage Change Date</label>
         </forecastingObjectListLabelMappings>
@@ -2814,6 +2878,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PRIVATE</field>
             <label>Private</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>TERR2_DESC</field>
+            <label>Territory Description</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CONTRACT.CONTRACT_NUMBER</field>
@@ -3095,6 +3163,8 @@
             <field>00NC400000280WL</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
+            <field>TERR2_NAME</field>
+            <field>TERR2_DESC</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -3250,6 +3320,10 @@
             <label>Important</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>TERR2_NAME</field>
+            <label>Territory Name</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STAGE_CHANGE</field>
             <label>Last Stage Change Date</label>
         </forecastingObjectListLabelMappings>
@@ -3260,6 +3334,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PRIVATE</field>
             <label>Private</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>TERR2_DESC</field>
+            <label>Territory Description</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CONTRACT.CONTRACT_NUMBER</field>
@@ -3542,6 +3620,8 @@
             <field>00NC400000280WL</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
+            <field>TERR2_NAME</field>
+            <field>TERR2_DESC</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -3693,6 +3773,10 @@
             <label>Important</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>TERR2_NAME</field>
+            <label>Territory Name</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STAGE_CHANGE</field>
             <label>Last Stage Change Date</label>
         </forecastingObjectListLabelMappings>
@@ -3703,6 +3787,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PRIVATE</field>
             <label>Private</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>TERR2_DESC</field>
+            <label>Territory Description</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CONTRACT.CONTRACT_NUMBER</field>
@@ -3984,6 +4072,8 @@
             <field>00NC400000280WL</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
+            <field>TERR2_NAME</field>
+            <field>TERR2_DESC</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -4139,6 +4229,10 @@
             <label>Important</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>TERR2_NAME</field>
+            <label>Territory Name</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STAGE_CHANGE</field>
             <label>Last Stage Change Date</label>
         </forecastingObjectListLabelMappings>
@@ -4149,6 +4243,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PRIVATE</field>
             <label>Private</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>TERR2_DESC</field>
+            <label>Territory Description</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CONTRACT.CONTRACT_NUMBER</field>
@@ -4431,6 +4529,8 @@
             <field>00NC400000280WL</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
+            <field>TERR2_NAME</field>
+            <field>TERR2_DESC</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -4582,6 +4682,10 @@
             <label>Important</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>TERR2_NAME</field>
+            <label>Territory Name</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STAGE_CHANGE</field>
             <label>Last Stage Change Date</label>
         </forecastingObjectListLabelMappings>
@@ -4592,6 +4696,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PRIVATE</field>
             <label>Private</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>TERR2_DESC</field>
+            <label>Territory Description</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CONTRACT.CONTRACT_NUMBER</field>
@@ -4873,6 +4981,8 @@
             <field>00NC400000280WL</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
+            <field>TERR2_NAME</field>
+            <field>TERR2_DESC</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -5028,6 +5138,10 @@
             <label>Important</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>TERR2_NAME</field>
+            <label>Territory Name</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STAGE_CHANGE</field>
             <label>Last Stage Change Date</label>
         </forecastingObjectListLabelMappings>
@@ -5038,6 +5152,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PRIVATE</field>
             <label>Private</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>TERR2_DESC</field>
+            <label>Territory Description</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CONTRACT.CONTRACT_NUMBER</field>
@@ -5320,6 +5438,8 @@
             <field>00NC400000280WL</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
+            <field>TERR2_NAME</field>
+            <field>TERR2_DESC</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>
@@ -5471,6 +5591,10 @@
             <label>Important</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>TERR2_NAME</field>
+            <label>Territory Name</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.LAST_STAGE_CHANGE</field>
             <label>Last Stage Change Date</label>
         </forecastingObjectListLabelMappings>
@@ -5481,6 +5605,10 @@
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.PRIVATE</field>
             <label>Private</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
+            <field>TERR2_DESC</field>
+            <label>Territory Description</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>CONTRACT.CONTRACT_NUMBER</field>
@@ -5762,6 +5890,8 @@
             <field>00NC400000280WL</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
+            <field>TERR2_NAME</field>
+            <field>TERR2_DESC</field>
             <field>OPPORTUNITY.ISPRIORITYRECORD</field>
             <field>OPPORTUNITY.LAST_STG_CHG_DAYS</field>
             <field>OPPORTUNITY.LAST_ACTIVITY_DAYS</field>

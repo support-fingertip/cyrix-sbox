@@ -155,8 +155,9 @@
     <externalSharingModel>ControlledByParent</externalSharingModel>
     <label>Shipping Address</label>
     <nameField>
+        <displayFormat>sh-{0000}</displayFormat>
         <label>Shipping Address Name</label>
-        <type>Text</type>
+        <type>AutoNumber</type>
     </nameField>
     <pluralLabel>Shipping Addresses</pluralLabel>
     <searchLayouts></searchLayouts>

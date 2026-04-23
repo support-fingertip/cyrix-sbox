@@ -13,9 +13,18 @@ trigger QuoteTrigger on Quote (before insert, before update, after insert, after
             }
             // Generate names for new quotes and for quotes where Branch or Revision_Number changed
             quoteTriggerHandler.generateQuoteNames(Trigger.new);
+            // Auto-fill L1/L2/L3 Approver from Owner's Manager chain.
+            quoteTriggerHandler.populateApproversFromHierarchy(Trigger.new);
+            // BRD: only one active quote per Opportunity. If a sibling is
+            // already active and locked by the approval flow, force the
+            // incoming quote inactive so we never have to update the locked
+            // sibling.
+            quoteTriggerHandler.enforceInactiveWhenSiblingLocked(Trigger.new, null);
         }
     }
     if(trigger.isBefore && trigger.isUpdate){
+        quoteTriggerHandler.populateApproversFromHierarchy(Trigger.new);
+        quoteTriggerHandler.enforceInactiveWhenSiblingLocked(Trigger.new, Trigger.oldMap);
          for(Quote q :trigger.New){
              // If the quote's sync link to the opportunity was turned off,
              // it is no longer the active quote.
@@ -58,5 +67,10 @@ trigger QuoteTrigger on Quote (before insert, before update, after insert, after
     // Clone quote + children as a historical snapshot when Status flipped to 'Revision'.
     if (trigger.isAfter && trigger.isUpdate) {
         quoteTriggerHandler.snapshotQuotesOnRevision(trigger.oldMap);
+    }
+
+    // Notify Quote Owner when Price_Status__c transitions to 'Approved'.
+    if (trigger.isAfter && trigger.isUpdate) {
+        quoteTriggerHandler.notifyOwnerOnApproval(trigger.new, trigger.oldMap);
     }
 }

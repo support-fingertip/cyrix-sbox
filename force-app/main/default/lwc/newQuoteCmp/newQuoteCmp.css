@@ -84,7 +84,9 @@
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-sm);
     margin: 0.75rem 1rem;
-    overflow: hidden;
+    /* Keep overflow visible so combobox / picklist dropdowns (State, Product
+       Type, etc.) can render outside the card without being clipped. */
+    overflow: visible;
     transition: box-shadow 0.2s ease;
 }
 
@@ -136,6 +138,8 @@
     padding: 0.875rem 1rem;
     background: var(--brand-light);
     border-bottom: 2px solid var(--brand-primary);
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
     font-weight: 600;
     font-size: 0.9375rem;
     color: var(--brand-primary-dark);

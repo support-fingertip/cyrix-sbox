@@ -14,10 +14,177 @@ public with sharing class quoteTriggerHandler {
     private static Boolean isSnapshotInProgress = false;
 
     /**
+     * Auto-populates L1/L2/L3 Approver fields on the Quote based on the
+     * Owner's Manager hierarchy.
+     *   L1 = Owner.Manager                 (e.g. ASM)
+     *   L2 = Owner.Manager.Manager         (e.g. TSM)
+     *   L3 = Owner.Manager.Manager.Manager (e.g. Order Acceptance / Finance)
+     *
+     * Only fills fields that are currently null, so manual overrides on a
+     * Quote are preserved.
+     */
+    public static void populateApproversFromHierarchy(List<Quote> quotes) {
+        if (quotes == null || quotes.isEmpty()) return;
+
+        Set<Id> ownerIds = new Set<Id>();
+        for (Quote q : quotes) {
+            if (q.OwnerId != null) ownerIds.add(q.OwnerId);
+        }
+        if (ownerIds.isEmpty()) return;
+
+        Map<Id, User> userMap = new Map<Id, User>([
+            SELECT Id, ManagerId,
+                   Manager.ManagerId,
+                   Manager.Manager.ManagerId
+            FROM User
+            WHERE Id IN :ownerIds
+        ]);
+
+        for (Quote q : quotes) {
+            User owner = userMap.get(q.OwnerId);
+            if (owner == null) continue;
+
+            if (q.L1_Approver__c == null && owner.ManagerId != null) {
+                q.L1_Approver__c = owner.ManagerId;
+            }
+            if (q.L2_Approver__c == null && owner.Manager != null
+                && owner.Manager.ManagerId != null) {
+                q.L2_Approver__c = owner.Manager.ManagerId;
+            }
+            if (q.L3_Approver__c == null && owner.Manager != null
+                && owner.Manager.Manager != null
+                && owner.Manager.Manager.ManagerId != null) {
+                q.L3_Approver__c = owner.Manager.Manager.ManagerId;
+            }
+        }
+    }
+
+    /**
+     * Notifies the Quote Owner when the Quote is approved. Fires when EITHER
+     * Approval_Status__c (set by the standard Quote_Approval process's final
+     * approval field update) OR Price_Status__c (set by the custom
+     * QuoteApprovalController.approveLineItems flow) transitions to
+     * 'Approved'. Two paths are checked because the standard approval flow
+     * updates Approval_Status__c reliably, while Price_Status__c is sometimes
+     * left at 'Not Required' by other automation in the org — relying on
+     * Price_Status__c alone caused the owner to miss the notification on
+     * legitimate L3 approvals.
+     */
+    public static void notifyOwnerOnApproval(List<Quote> newQuotes, Map<Id, Quote> oldMap) {
+        if (newQuotes == null || newQuotes.isEmpty() || oldMap == null) return;
+
+        List<Quote> justApproved = new List<Quote>();
+        for (Quote q : newQuotes) {
+            Quote oldQ = oldMap.get(q.Id);
+            if (oldQ == null) continue;
+            if (q.OwnerId == null) continue;
+
+            Boolean approvalFlipped = (q.Approval_Status__c == 'Approved'
+                                       && oldQ.Approval_Status__c != 'Approved');
+            Boolean priceFlipped    = (q.Price_Status__c == 'Approved'
+                                       && oldQ.Price_Status__c != 'Approved');
+            if (!approvalFlipped && !priceFlipped) continue;
+
+            justApproved.add(q);
+        }
+        if (justApproved.isEmpty()) return;
+
+        Id notifTypeId;
+        try {
+            notifTypeId = [
+                SELECT Id
+                FROM CustomNotificationType
+                WHERE DeveloperName = 'Quote_Approval_Notification'
+                LIMIT 1
+            ].Id;
+        } catch (Exception e) {
+            System.debug('Quote_Approval_Notification type missing: ' + e.getMessage());
+            return;
+        }
+
+        // Whoever clicked Approve in the standard approval process (or the
+        // custom approveLineItems action) is the running user when the
+        // workflow field updates re-fire this trigger, so UserInfo.getName()
+        // identifies the actual final approver to surface in the bell.
+        String approverName = UserInfo.getName();
+
+        for (Quote q : justApproved) {
+            try {
+                CustomNotificationService.notificationSend(
+                    'Your Quote has been Approved',
+                    q.Id,
+                    'Your Quote #' + q.QuoteNumber + ' has been approved by ' + approverName + '.',
+                    new Set<String>{ String.valueOf(q.OwnerId) },
+                    notifTypeId
+                );
+            } catch (Exception e) {
+                System.debug('Quote approved notification error: ' + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * BRD: only one active quote per Opportunity. When a sibling quote is
+     * already active AND in the approval flow ('Approval Required' /
+     * 'Approved'), it is locked by the approval process and cannot be
+     * deactivated by Apex without the org-level approval lock/unlock
+     * preference.
+     *
+     * Per the TL: in that case, do NOT touch the locked sibling. Instead,
+     * force the incoming quote's is_Active__c to false so it is created /
+     * saved as an inactive quote. The previously-active locked quote stays
+     * active and the BRD is preserved (still only one active quote).
+     *
+     * Runs in before insert / before update so trigger.new can be mutated
+     * without DML.
+     */
+    public static void enforceInactiveWhenSiblingLocked(List<Quote> newQuotes, Map<Id, Quote> oldMap) {
+        if (newQuotes == null || newQuotes.isEmpty()) return;
+
+        Set<Id> oppIds = new Set<Id>();
+        List<Quote> candidates = new List<Quote>();
+        for (Quote q : newQuotes) {
+            if (q.OpportunityId == null || q.is_Active__c != true) continue;
+            // For updates, only act when the quote is just being activated.
+            if (oldMap != null) {
+                Quote oldQ = oldMap.get(q.Id);
+                if (oldQ != null && oldQ.is_Active__c == true) continue;
+            }
+            oppIds.add(q.OpportunityId);
+            candidates.add(q);
+        }
+        if (candidates.isEmpty()) return;
+
+        Set<Id> oppsWithLockedActive = new Set<Id>();
+        for (Quote sibling : [
+            SELECT Id, OpportunityId
+            FROM Quote
+            WHERE OpportunityId IN :oppIds
+            AND is_Active__c = true
+            AND Price_Status__c IN ('Approval Required', 'Approved')
+        ]) {
+            oppsWithLockedActive.add(sibling.OpportunityId);
+        }
+        if (oppsWithLockedActive.isEmpty()) return;
+
+        for (Quote q : candidates) {
+            if (oppsWithLockedActive.contains(q.OpportunityId)) {
+                q.is_Active__c = false;
+            }
+        }
+    }
+
+    /**
      * When a Quote flips is_Active__c to true, mark every other quote on the
      * same Opportunity as inactive and sync the current quote to the
      * Opportunity (Opportunity.SyncedQuoteId -> this Quote). Salesforce then
      * sets Quote.IsSyncing = true automatically on the synced quote.
+     *
+     * Locked siblings (Price_Status__c IN 'Approval Required', 'Approved')
+     * are skipped here because the incoming quote was already forced
+     * inactive in before-insert / before-update by
+     * enforceInactiveWhenSiblingLocked, so we never reach this method with a
+     * locked sibling on the same opportunity.
      */
     public static void syncActiveQuote(List<Quote> newQuotes, Map<Id, Quote> oldMap) {
         if (isSyncingActiveQuote) return;

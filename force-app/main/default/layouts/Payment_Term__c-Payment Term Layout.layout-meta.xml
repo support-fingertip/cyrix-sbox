@@ -22,6 +22,10 @@
                 <behavior>Edit</behavior>
                 <field>Quote__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Readonly</behavior>
+                <field>OrderId__c</field>
+            </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>

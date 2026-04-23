@@ -72,6 +72,10 @@
                 <behavior>Edit</behavior>
                 <field>Facility_Type__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>SAP_Response__c</field>
+            </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>
@@ -467,6 +471,10 @@
         <fields>PRICEBOOK2.LAST_UPDATE</fields>
         <fields>PRICEBOOK2.IS_ACTIVE</fields>
         <relatedList>Pricebook2.Customer__c</relatedList>
+    </relatedLists>
+    <relatedLists>
+        <fields>NAME</fields>
+        <relatedList>Invoice__c.Customer__c</relatedList>
     </relatedLists>
     <relatedObjects>ParentId</relatedObjects>
     <showEmailCheckbox>false</showEmailCheckbox>
