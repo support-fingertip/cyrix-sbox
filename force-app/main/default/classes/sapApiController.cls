@@ -9,8 +9,9 @@ global class sapApiController {
         String key = req.params.get('key');
         String objectName = req.params.get('value');
         String customerCode = req.params.get('customerCode');
+        String orderCode = req.params.get('orderCode');
 
-        getResponse g = new getResponse();
+        List<SObject> records = new List<SObject>();
         String jsonString = '';
 
         if (Label.API_Key != key) {
@@ -57,15 +58,73 @@ global class sapApiController {
                     LIMIT 200
                 ];
             }
-            customerResponseWrapper cw = new customerResponseWrapper();
-            cw.data = aList;
-            g = cw;
+            records.addAll((List<SObject>) aList);
+        } else if (objectName == 'order') {
+            List<Order> oList;
+            if (String.isNotBlank(orderCode)) {
+                oList = [
+                    SELECT Id, Name, EffectiveDate, EndDate, OrderId__c, Status,
+                        BillingCity, BillingCountryCode, BillingStateCode, BillingStreet, BillingPostalCode,
+                        ShippingCity, ShippingCountryCode, ShippingStateCode, ShippingStreet, ShippingPostalCode,
+                        CurrencyIsoCode, Customer_Code__c, Business_Vertical__c, Sub_Vertical__c,
+                        Delivery__c, Contract_Period_From_Date__c, Contract_Period_End_Date__c,
+                        Description, Employee_Code__c, TotalAmount,
+                        (SELECT Id, OrderItemNumber, Order.OrderId__c, Product2.ProductCode,
+                            Quantity, UnitPrice, Tax__c, Tax_Amount__c, TotalPrice
+                         FROM OrderItems),
+                        (SELECT Id, OrderId__c, Name, Payment_Term__c, Percentage__c
+                         FROM Payment_Terms__r)
+                    FROM Order
+                    WHERE OrderId__c = :orderCode
+                    LIMIT 200
+                ];
+            } else if (String.isNotBlank(customerCode)) {
+                oList = [
+                    SELECT Id, Name, EffectiveDate, EndDate, OrderId__c, Status,
+                        BillingCity, BillingCountryCode, BillingStateCode, BillingStreet, BillingPostalCode,
+                        ShippingCity, ShippingCountryCode, ShippingStateCode, ShippingStreet, ShippingPostalCode,
+                        CurrencyIsoCode, Customer_Code__c, Business_Vertical__c, Sub_Vertical__c,
+                        Delivery__c, Contract_Period_From_Date__c, Contract_Period_End_Date__c,
+                        Description, Employee_Code__c, TotalAmount,
+                        (SELECT Id, OrderItemNumber, Order.OrderId__c, Product2.ProductCode,
+                            Quantity, UnitPrice, Tax__c, Tax_Amount__c, TotalPrice
+                         FROM OrderItems),
+                        (SELECT Id, OrderId__c, Name, Payment_Term__c, Percentage__c
+                         FROM Payment_Terms__r)
+                    FROM Order
+                    WHERE Customer_Code__c = :customerCode
+                    LIMIT 200
+                ];
+            } else {
+                oList = [
+                    SELECT Id, Name, EffectiveDate, EndDate, OrderId__c, Status,
+                        BillingCity, BillingCountryCode, BillingStateCode, BillingStreet, BillingPostalCode,
+                        ShippingCity, ShippingCountryCode, ShippingStateCode, ShippingStreet, ShippingPostalCode,
+                        CurrencyIsoCode, Customer_Code__c, Business_Vertical__c, Sub_Vertical__c,
+                        Delivery__c, Contract_Period_From_Date__c, Contract_Period_End_Date__c,
+                        Description, Employee_Code__c, TotalAmount,
+                        (SELECT Id, OrderItemNumber, Order.OrderId__c, Product2.ProductCode,
+                            Quantity, UnitPrice, Tax__c, Tax_Amount__c, TotalPrice
+                         FROM OrderItems),
+                        (SELECT Id, OrderId__c, Name, Payment_Term__c, Percentage__c
+                         FROM Payment_Terms__r)
+                    FROM Order
+                    LIMIT 200
+                ];
+            }
+            records.addAll((List<SObject>) oList);
         }
 
-        Map<String, Object> dataMap = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(g));
-        Map<String, Object> responseMap = removeAttributes(dataMap);
-        jsonString = JSON.serialize(responseMap);
-        jsonString = jsonString.replace('{"records":', '').replace('"done":true},', '');
+        List<Object> rawList = (List<Object>) JSON.deserializeUntyped(JSON.serialize(records));
+        List<Object> cleaned = new List<Object>();
+        for (Object item : rawList) {
+            if (item instanceof Map<String, Object>) {
+                cleaned.add(removeAttributes((Map<String, Object>) item));
+            } else {
+                cleaned.add(item);
+            }
+        }
+        jsonString = JSON.serialize(cleaned);
 
         res.addHeader('Content-Type', 'application/json');
         res.statusCode = 200;
@@ -96,17 +155,10 @@ global class sapApiController {
         return jsonObj;
     }
 
-    global class customerResponseWrapper extends getResponse {
-        public List<Account> data = new List<Account>();
-    }
-
     public class response {
         public String SF_RecordId;
         public String TallyUniqueId;
         public String Status;
         public String Message;
-    }
-
-    global virtual class getResponse {
     }
 }
