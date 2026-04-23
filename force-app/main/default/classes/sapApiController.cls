@@ -1,87 +1,96 @@
 @RestResource(urlMapping='/sapapi/*')
 global class sapApiController {
-    
+
     @HttpGet
-    global static void  doGet() {
+    global static void doGet() {
         RestRequest req = RestContext.request;
         RestResponse res = RestContext.response;
-        String url = req.requestURI.substring(req.requestURI.lastIndexOf('/')+1);
-        String key = RestContext.request.params.get('key');
-        system.debug('key:'+ key);
-        String value = RestContext.request.params.get('value');
-        system.debug('value:'+ value);
-       // SObjectType sObjType = ((SObject) Type.forName(objectName).newInstance()).getSObjectType();
-         string query ='',jsonString='';
-        String objectname=RestContext.request.params.get('value');
-     getResponse g = new getResponse();
-        
-        getResponse resp = new getResponse(); 
-        if(Label.API_Key == key){
-             if(objectname == 'customer' || objectname == ''){
-            List<account> aList = new  List<account>();
-            aList = [SELECT Id,Name from account limit 1];
-                      customerResponseWrapper cw = new customerResponseWrapper();
-                    cw.data = aList;
-                    g =cw;
 
+        String key = req.params.get('key');
+        String objectName = req.params.get('value');
+        String customerCode = req.params.get('customerCode');
+
+        getResponse g = new getResponse();
+        String jsonString = '';
+
+        if (Label.API_Key != key) {
+            res.statusCode = 401;
+            res.responseBody = Blob.valueOf('{"message":"Unauthorized"}');
+            return;
         }
-                 
-                Map<String,Object> dataMap = (Map<String,Object>)JSON.deserializeUntyped(JSON.serialize(g));
-                Map<String,Object> responseMap = removeAttributes(dataMap);
-                jsonString = JSON.serialize(responseMap);
-                jsonString = jsonString.replace('{"records":', '').replace('"done":true},','');
-                res.responseBody = Blob.valueOf(jsonString); 
-                Map<String, String> resMap = new Map<String, String>();
-                resMap.put('Content-Type', 'application/json');
-                res.statusCode = 200; // OK
-                
-                
+
+        if (objectName == 'customer' || String.isBlank(objectName)) {
+            String soql =
+                'SELECT Id, Name, Status__c, Customer_Type__c, Customer_Category__c, ' +
+                'Speciality__c, Business_Vertical__c, Region__c, ' +
+                'Purchase_Value_Life_Time__c, Previous_History__c, ' +
+                'Bank_Name__c, Branch_Name__c, Beneficiary_Name__c, Branch_Address__c, ' +
+                'IFSC_CODE__c, GST_Number__c, PAN_Number__c, ' +
+                'Email__c, Country_Code_Phone__c, Phone, Website, ' +
+                'BillingCity, BillingCountry, BillingState, BillingStreet, BillingPostalCode, ' +
+                'SAP_Customer_Code__c, Customer_Code__c, ' +
+                '(SELECT Id, Address_Code__c, ' +
+                'Address__City__s, Address__Street__s, Address__State__s, ' +
+                'Address__PostalCode__s, Address__CountryCode__s ' +
+                'FROM Shipping_Addresses__r) ' +
+                'FROM Account';
+
+            if (String.isNotBlank(customerCode)) {
+                soql += ' WHERE SAP_Customer_Code__c = :customerCode OR Customer_Code__c = :customerCode';
             }
-        
-   
-        res.responseBody = Blob.valueOf(JSON.serialize(g));   
-        
-       
+            soql += ' LIMIT 200';
+
+            List<Account> aList = Database.query(soql);
+            customerResponseWrapper cw = new customerResponseWrapper();
+            cw.data = aList;
+            g = cw;
+        }
+
+        Map<String, Object> dataMap = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(g));
+        Map<String, Object> responseMap = removeAttributes(dataMap);
+        jsonString = JSON.serialize(responseMap);
+        jsonString = jsonString.replace('{"records":', '').replace('"done":true},', '');
+
+        res.addHeader('Content-Type', 'application/json');
+        res.statusCode = 200;
+        res.responseBody = Blob.valueOf(jsonString);
     }
-    
-  private static Map<String,Object> removeAttributes(Map<String,Object> jsonObj)  {
-        for(String key : jsonObj.keySet()) {
-            if(key == 'attributes' || key=='totalSize') {
-                jsonObj.remove(key);
-            } else {
-                if(jsonObj.get(key) == null){
-                    jsonObj.remove(key);
-                }
-                if(jsonObj.get(key) instanceof Map<String,Object>) {
-                    removeAttributes((Map<String,Object>)jsonObj.get(key));
-                }
-                if(jsonObj.get(key) instanceof List<Object>) {
-                    for(Object listItem : (List<Object>)jsonObj.get(key)) {
-                        if(listItem instanceof Map<String,Object>)  {
-                            removeAttributes((Map<String,Object>)listItem);
-                        }
+
+    private static Map<String, Object> removeAttributes(Map<String, Object> jsonObj) {
+        Set<String> keysToRemove = new Set<String>();
+        for (String key : jsonObj.keySet()) {
+            Object val = jsonObj.get(key);
+            if (key == 'attributes' || key == 'totalSize' || val == null) {
+                keysToRemove.add(key);
+                continue;
+            }
+            if (val instanceof Map<String, Object>) {
+                removeAttributes((Map<String, Object>) val);
+            } else if (val instanceof List<Object>) {
+                for (Object item : (List<Object>) val) {
+                    if (item instanceof Map<String, Object>) {
+                        removeAttributes((Map<String, Object>) item);
                     }
                 }
             }
-        }  
+        }
+        for (String k : keysToRemove) {
+            jsonObj.remove(k);
+        }
         return jsonObj;
-    }   
-    
-    
-    
-    
-    //Get customer data  Response
-    global class customerResponseWrapper extends getResponse {
-        public list<account> data = new list<account>();
     }
-       public class response{
+
+    global class customerResponseWrapper extends getResponse {
+        public List<Account> data = new List<Account>();
+    }
+
+    public class response {
         public String SF_RecordId;
         public String TallyUniqueId;
-        public string Status;
-        public string Message;  
-    } 
-      global virtual class getResponse{
-        
+        public String Status;
+        public String Message;
     }
-  
+
+    global virtual class getResponse {
+    }
 }
