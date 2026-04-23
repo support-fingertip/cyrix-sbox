@@ -8,7 +8,7 @@ global class sapApiController {
 
         String key = req.params.get('key');
         String objectName = req.params.get('value');
-        String customerCode = req.params.get('customerCode');
+        String orderCustomerCode = req.params.get('customerCode');
         String orderCode = req.params.get('orderCode');
 
         List<SObject> records = new List<SObject>();
@@ -21,43 +21,22 @@ global class sapApiController {
         }
 
         if (objectName == 'customer' || String.isBlank(objectName)) {
-            List<Account> aList;
-            if (String.isNotBlank(customerCode)) {
-                aList = [
-                    SELECT Id, Name, Status__c, Customer_Type__c, Customer_Category__c,
-                        Speciality__c, Business_Vertical__c, Region__c,
-                        Purchase_Value_Life_Time__c, Previous_History__c,
-                        Bank_Name__c, Branch_Name__c, Beneficiary_Name__c, Branch_Address__c,
-                        IFSC_CODE__c, GST_Number__c, PAN_Number__c,
-                        Email__c, Country_Code_Phone__c, Phone, Website,
-                        BillingCity, BillingCountryCode, BillingStateCode, BillingStreet, BillingPostalCode,
-                        SAP_Customer_Code__c, Customer_Code__c,
-                        (SELECT Id, Address_Code__c,
-                            Address__City__s, Address__Street__s, Address__StateCode__s,
-                            Address__PostalCode__s, Address__CountryCode__s
-                         FROM Shipping_Addresses__r)
-                    FROM Account
-                    WHERE SAP_Customer_Code__c = :customerCode OR Customer_Code__c = :customerCode
-                    LIMIT 200
-                ];
-            } else {
-                aList = [
-                    SELECT Id, Name, Status__c, Customer_Type__c, Customer_Category__c,
-                        Speciality__c, Business_Vertical__c, Region__c,
-                        Purchase_Value_Life_Time__c, Previous_History__c,
-                        Bank_Name__c, Branch_Name__c, Beneficiary_Name__c, Branch_Address__c,
-                        IFSC_CODE__c, GST_Number__c, PAN_Number__c,
-                        Email__c, Country_Code_Phone__c, Phone, Website,
-                        BillingCity, BillingCountryCode, BillingStateCode, BillingStreet, BillingPostalCode,
-                        SAP_Customer_Code__c, Customer_Code__c,
-                        (SELECT Id, Address_Code__c,
-                            Address__City__s, Address__Street__s, Address__StateCode__s,
-                            Address__PostalCode__s, Address__CountryCode__s
-                         FROM Shipping_Addresses__r)
-                    FROM Account
-                    LIMIT 200
-                ];
-            }
+            List<Account> aList = [
+                SELECT Id, Name, Status__c, Customer_Type__c, Customer_Category__c,
+                    Speciality__c, Business_Vertical__c, Region__c,
+                    Purchase_Value_Life_Time__c, Previous_History__c,
+                    Bank_Name__c, Branch_Name__c, Beneficiary_Name__c, Branch_Address__c,
+                    IFSC_CODE__c, GST_Number__c, PAN_Number__c,
+                    Email__c, Country_Code_Phone__c, Phone, Website,
+                    BillingCity, BillingCountryCode, BillingStateCode, BillingStreet, BillingPostalCode,
+                    SAP_Customer_Code__c, Customer_Code__c,
+                    (SELECT Id, Address_Code__c,
+                        Address__City__s, Address__Street__s, Address__StateCode__s,
+                        Address__PostalCode__s, Address__CountryCode__s
+                     FROM Shipping_Addresses__r)
+                FROM Account
+                LIMIT 200
+            ];
             records.addAll((List<SObject>) aList);
         } else if (objectName == 'order') {
             List<Order> oList;
@@ -78,7 +57,7 @@ global class sapApiController {
                     WHERE OrderId__c = :orderCode
                     LIMIT 200
                 ];
-            } else if (String.isNotBlank(customerCode)) {
+            } else if (String.isNotBlank(orderCustomerCode)) {
                 oList = [
                     SELECT Id, Name, EffectiveDate, EndDate, OrderId__c, Status,
                         BillingCity, BillingCountryCode, BillingStateCode, BillingStreet, BillingPostalCode,
@@ -92,7 +71,7 @@ global class sapApiController {
                         (SELECT Id, OrderId__c, Name, Payment_Term__c, Percentage__c
                          FROM Payment_Terms__r)
                     FROM Order
-                    WHERE Customer_Code__c = :customerCode
+                    WHERE Customer_Code__c = :orderCustomerCode
                     LIMIT 200
                 ];
             } else {
@@ -122,6 +101,82 @@ global class sapApiController {
         res.addHeader('Content-Type', 'application/json');
         res.statusCode = 200;
         res.responseBody = Blob.valueOf(jsonString);
+    }
+
+    @HttpPost
+    global static response doPost() {
+        RestRequest req = RestContext.request;
+        RestResponse res = RestContext.response;
+
+        response result = new response();
+
+        String key = req.params.get('key');
+        if (Label.API_Key != key) {
+            res.statusCode = 401;
+            result.Status = 'Failure';
+            result.Message = 'Unauthorized';
+            return result;
+        }
+
+        customerStatusPayload payload;
+        try {
+            payload = (customerStatusPayload) JSON.deserialize(
+                req.requestBody.toString(), customerStatusPayload.class
+            );
+        } catch (Exception e) {
+            res.statusCode = 400;
+            result.Status = 'Failure';
+            result.Message = 'Invalid payload: ' + e.getMessage();
+            return result;
+        }
+
+        if (String.isBlank(payload.CustomerCode)) {
+            res.statusCode = 400;
+            result.Status = 'Failure';
+            result.Message = 'CustomerCode is required';
+            return result;
+        }
+
+        List<Account> matches = [
+            SELECT Id, Customer_Code__c, SAP_Customer_Code__c, SAP_Response__c
+            FROM Account
+            WHERE Customer_Code__c = :payload.CustomerCode
+            LIMIT 1
+        ];
+        if (matches.isEmpty()) {
+            res.statusCode = 404;
+            result.Status = 'Failure';
+            result.Message = 'No Account found for CustomerCode ' + payload.CustomerCode;
+            return result;
+        }
+
+        Account acc = matches[0];
+        acc.SAP_Response__c = payload.SAPResponse;
+        if (payload.Status == 'Success') {
+            acc.SAP_Customer_Code__c = payload.CustomerCode;
+        }
+
+        try {
+            update acc;
+        } catch (DmlException e) {
+            res.statusCode = 500;
+            result.SF_RecordId = acc.Id;
+            result.Status = 'Failure';
+            result.Message = e.getMessage();
+            return result;
+        }
+
+        res.statusCode = 200;
+        result.SF_RecordId = acc.Id;
+        result.Status = 'Success';
+        result.Message = 'Account updated';
+        return result;
+    }
+
+    global class customerStatusPayload {
+        public String CustomerCode;
+        public String SAPResponse;
+        public String Status;
     }
 
     private static Object clean(Object node) {
