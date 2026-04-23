@@ -20,27 +20,43 @@ global class sapApiController {
         }
 
         if (objectName == 'customer' || String.isBlank(objectName)) {
-            String soql =
-                'SELECT Id, Name, Status__c, Customer_Type__c, Customer_Category__c, ' +
-                'Speciality__c, Business_Vertical__c, Region__c, ' +
-                'Purchase_Value_Life_Time__c, Previous_History__c, ' +
-                'Bank_Name__c, Branch_Name__c, Beneficiary_Name__c, Branch_Address__c, ' +
-                'IFSC_CODE__c, GST_Number__c, PAN_Number__c, ' +
-                'Email__c, Country_Code_Phone__c, Phone, Website, ' +
-                'BillingCity, BillingCountry, BillingState, BillingStreet, BillingPostalCode, ' +
-                'SAP_Customer_Code__c, Customer_Code__c, ' +
-                '(SELECT Id, Address_Code__c, ' +
-                'Address__City__s, Address__Street__s, Address__State__s, ' +
-                'Address__PostalCode__s, Address__CountryCode__s ' +
-                'FROM Shipping_Addresses__r) ' +
-                'FROM Account';
-
+            List<Account> aList;
             if (String.isNotBlank(customerCode)) {
-                soql += ' WHERE SAP_Customer_Code__c = :customerCode OR Customer_Code__c = :customerCode';
+                aList = [
+                    SELECT Id, Name, Status__c, Customer_Type__c, Customer_Category__c,
+                        Speciality__c, Business_Vertical__c, Region__c,
+                        Purchase_Value_Life_Time__c, Previous_History__c,
+                        Bank_Name__c, Branch_Name__c, Beneficiary_Name__c, Branch_Address__c,
+                        IFSC_CODE__c, GST_Number__c, PAN_Number__c,
+                        Email__c, Country_Code_Phone__c, Phone, Website,
+                        BillingCity, BillingCountry, BillingState, BillingStreet, BillingPostalCode,
+                        SAP_Customer_Code__c, Customer_Code__c,
+                        (SELECT Id, Address_Code__c,
+                            Address__City__s, Address__Street__s, Address__StateCode__s,
+                            Address__PostalCode__s, Address__CountryCode__s
+                         FROM Shipping_Addresses__r)
+                    FROM Account
+                    WHERE SAP_Customer_Code__c = :customerCode OR Customer_Code__c = :customerCode
+                    LIMIT 200
+                ];
+            } else {
+                aList = [
+                    SELECT Id, Name, Status__c, Customer_Type__c, Customer_Category__c,
+                        Speciality__c, Business_Vertical__c, Region__c,
+                        Purchase_Value_Life_Time__c, Previous_History__c,
+                        Bank_Name__c, Branch_Name__c, Beneficiary_Name__c, Branch_Address__c,
+                        IFSC_CODE__c, GST_Number__c, PAN_Number__c,
+                        Email__c, Country_Code_Phone__c, Phone, Website,
+                        BillingCity, BillingCountry, BillingState, BillingStreet, BillingPostalCode,
+                        SAP_Customer_Code__c, Customer_Code__c,
+                        (SELECT Id, Address_Code__c,
+                            Address__City__s, Address__Street__s, Address__StateCode__s,
+                            Address__PostalCode__s, Address__CountryCode__s
+                         FROM Shipping_Addresses__r)
+                    FROM Account
+                    LIMIT 200
+                ];
             }
-            soql += ' LIMIT 200';
-
-            List<Account> aList = Database.query(soql);
             customerResponseWrapper cw = new customerResponseWrapper();
             cw.data = aList;
             g = cw;
