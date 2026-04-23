@@ -506,6 +506,10 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>SAPsendController</apexClass>
+        <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>SFToSAPIntegrationController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -616,6 +620,10 @@
     <classAccesses>
         <apexClass>quoteTriggerHandler</apexClass>
         <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>sapApiController</apexClass>
+        <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>visitManager</apexClass>
@@ -757,6 +765,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>Account.RegionName__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>Account.Region__c</field>
         <readable>true</readable>
@@ -774,6 +787,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Account.Secondary_Email__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Account.Speciality__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -2652,6 +2670,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>Order.Order_Approved_Date_Time__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>Order.Order_Cancellation_date_and_Time__c</field>
         <readable>true</readable>
@@ -2959,6 +2982,11 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Product2.Packing_Charges_Percent__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Product2.Parameters__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
