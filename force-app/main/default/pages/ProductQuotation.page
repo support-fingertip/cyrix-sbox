@@ -38,9 +38,16 @@
                 position: absolute;
                 top: 15%;
                 left: 10%;
-               
+
                 font-size: 14px;
                 font-weight: bold;
+                }
+
+                /* Force a new PDF page. Used to keep the cover letter on
+                   page 1 so the project costing / quotation table always
+                   starts fresh on page 2. */
+                .page-break {
+                    page-break-before: always;
                 }
                 
                 
@@ -157,8 +164,9 @@
                     
                 </div>
                 <!-- 2nd page-->
-                
-                
+                <div class="page-break"></div>
+
+
                 <apex:outputPanel rendered="{!and (quote.Sub_Vertical__c!= 'Calibration',quote.Sub_Vertical__c!= 'AMC',quote.Sub_Vertical__c!= 'CMC')}">
                     <div style="text-align: center; font-weight: bold; margin: 6px 0 8px 0; text-decoration: underline; padding-bottom: 20px;">
                         QUOTATION FOR CYRIX <span class="capitalize">{!productName}<apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> &amp; {!quote.Business_Vertical__c}</apex:outputPanel></span>
@@ -225,7 +233,7 @@
                         </tbody>
                     </table>
                     <p style="font-weight: bold;">{!grandTotalInWords}</p>
-                    <apex:outputPanel rendered="{!quote.Notes__c != null}"><p style="font-weight: bold; color: #cc0000;">***Note: {quote.Notes__c}</p></apex:outputPanel>
+                    <apex:outputPanel rendered="{!quote.Notes__c != null}"><p style="font-weight: bold; color: #cc0000;">***Note: {!quote.Notes__c}</p></apex:outputPanel>
                     <br/>
                 </apex:outputPanel>
                 
@@ -254,12 +262,14 @@
                                     <td style="text-align: center; border: 1px solid #000; padding: 4px;">
                                         <apex:outputText value="{0, number, 0}"><apex:param value="{!calIdx}" /></apex:outputText>
                                     </td>
-                                    <td style="border: 1px solid #000; padding: 4px; font-weight: bold;">{!calItem.Product2.Name}</td>
+                                    <td style="border: 1px solid #000; padding: 4px; font-weight: bold;">
+                                        <apex:outputText value="{!IF(calItem.Product2.Equipment_Name__c != null, calItem.Product2.Equipment_Name__c, calItem.Product2.Name)}" />
+                                    </td>
                                     <td style="text-align: center; border: 1px solid #000; padding: 4px; font-weight: bold;">
                                         <apex:outputText value="{!IF(calItem.Product2.QuantityUnitOfMeasure != null, calItem.Product2.QuantityUnitOfMeasure, 'NOS')}" />
                                     </td>
                                     <td style="border: 1px solid #000; padding: 4px; font-weight: bold; text-decoration: underline;">
-                                        <apex:outputText value="{!IF(calItem.Product_Line_Description__c != null, calItem.Product_Line_Description__c, 'AS PER THE EQUIPMENT TYPE')}" />
+                                        <apex:outputText value="{!IF(calItem.Product2.Parameters__c != null, calItem.Product2.Parameters__c, 'AS PER THE EQUIPMENT TYPE')}" />
                                     </td>
                                     <td style="text-align: center; border: 1px solid #000; padding: 4px;">
                                         <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!calItem.ListPrice}" /></apex:outputText>
@@ -285,12 +295,16 @@
                         </tbody>
                     </table>
                     <p style="font-weight: bold;">{!grandTotalInWords}</p>
-                    <apex:outputPanel rendered="{!quote.Notes__c != null}"><p style="font-weight: bold; color: #cc0000;">***Note: {quote.Notes__c}</p></apex:outputPanel>
+                    <apex:outputPanel rendered="{!quote.Notes__c != null}"><p style="font-weight: bold; color: #cc0000;">***Note: {!quote.Notes__c}</p></apex:outputPanel>
                     <br/>
                 </apex:outputPanel>
                 <br/>
                 
                 <apex:outputPanel rendered="{!quote.Sub_Vertical__c== 'AMC'}">
+                    <div style="text-align: center; font-weight: bold; margin: 6px 0 8px 0; text-decoration: underline; padding-bottom: 20px;">
+                        PROJECT COSTING <apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> - <span class="capitalize">{!quote.Business_Vertical__c}</span></apex:outputPanel>
+                    </div>
+
                     <table class="data-table">
                         <thead>
                             <tr>
@@ -305,36 +319,41 @@
                         <tbody>
                             <tr>
                                 <td style="text-align: center; border: 1px solid #000; padding: 4px;">1.</td>
-                                <td style="border: 1px solid #000; padding: 4px; font-weight: bold;" colspan="5">
+                                <td style="border: 1px solid #000; padding: 4px; font-weight: bold;">
                                     ANNUAL MAINTENANCE CONTRACT (AMC)<br/>
                                     <u>(Annexure A List of Equipment)</u>
                                 </td>
+                                <td style="text-align: center; border: 1px solid #000; padding: 4px;">
+                                    <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!amcTotalRate}" /></apex:outputText>
+                                </td>
+                                <td style="text-align: center; border: 1px solid #000; padding: 4px;">18%</td>
+                                <td style="text-align: center; border: 1px solid #000; padding: 4px;">
+                                    <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!amcGstAmount}" /></apex:outputText>
+                                </td>
+                                <td style="text-align: center; border: 1px solid #000; padding: 4px;">
+                                    <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!amcGrandTotal}" /></apex:outputText>
+                                </td>
                             </tr>
-                            <apex:repeat value="{!lineItems}" var="amcItem">
-                                <tr>
-                                    <td style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
-                                    <td style="border: 1px solid #000; padding: 4px; font-weight: bold;">{!amcItem.Product2.Name}</td>
-                                    <td style="text-align: center; border: 1px solid #000; padding: 4px;">
-                                        <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!amcItem.TotalPrice}" /></apex:outputText>
-                                    </td>
-                                    <td style="text-align: center; border: 1px solid #000; padding: 4px;">
-                                        <apex:outputText value="{!IF(amcItem.Product2.Tax__c != null, TEXT(amcItem.Product2.Tax__c), '18')}"/>%
-                                    </td>
-                                    <td style="text-align: center; border: 1px solid #000; padding: 4px;">
-                                        <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!IF(amcItem.Product2.Tax__c != null, amcItem.TotalPrice * amcItem.Product2.Tax__c / 100, amcItem.TotalPrice * 0.18)}" /></apex:outputText>
-                                    </td>
-                                    <td style="text-align: center; border: 1px solid #000; padding: 4px;">
-                                        <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!IF(amcItem.Product2.Tax__c != null, amcItem.TotalPrice + (amcItem.TotalPrice * amcItem.Product2.Tax__c / 100), amcItem.TotalPrice * 1.18)}" /></apex:outputText>
-                                    </td>
-                                </tr>
-                            </apex:repeat>
                             <tr>
                                 <td colspan="6" style="text-align: center; border: 1px solid #000; padding: 4px;">
-                                    <strong>Contract Period: - 01/01/2026 to 31/12/2026</strong>
+                                    <strong>Contract Period: -
+                                        <apex:outputPanel rendered="{!quote.Contract_Period_From_Date__c != null}">
+                                            <apex:outputText value="{0,date,dd/MM/yyyy}">
+                                                <apex:param value="{!quote.Contract_Period_From_Date__c}" />
+                                            </apex:outputText>
+                                        </apex:outputPanel>
+                                        to
+                                        <apex:outputPanel rendered="{!quote.Contract_Period_End_Date__c != null}">
+                                            <apex:outputText value="{0,date,dd/MM/yyyy}">
+                                                <apex:param value="{!quote.Contract_Period_End_Date__c}" />
+                                            </apex:outputText>
+                                        </apex:outputPanel>
+                                    </strong>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+                    <apex:outputPanel rendered="{!quote.Notes__c != null}"><p style="font-weight: bold; color: #cc0000;">***Note: {!quote.Notes__c}</p></apex:outputPanel>
                 </apex:outputPanel>
                 
                 <apex:outputPanel rendered="{!quote.Sub_Vertical__c== 'CMC'}">
@@ -579,7 +598,7 @@
                     <div style="text-align: center; font-weight: bold; text-decoration: underline; margin: 8px 0;">
                         TERMS &amp; CONDITIONS
                     </div>
-                    
+
                     <p style="font-weight: bold; margin: 8px 0 2px 0;">1. Scope of Services</p>
                     <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;"><strong>Breakdown Support:</strong> Attendance for major or complete system breakdown within <strong>48 hours</strong> of complaint registration.</li>
@@ -588,9 +607,77 @@
                         <li style="margin-bottom: 3px;"><strong>Asset Digital Inventory:</strong> Maintenance of digital asset records for tracking and service history documentation.</li>
                         <li style="margin-bottom: 3px;"><strong>Yearly Calibration:</strong> One annual calibration as per applicable standards.</li>
                     </ul>
-                    
+
                     <p style="font-weight: bold; margin: 8px 0 2px 0;">2. Exclusions</p>
                     <p>The AMC does not cover:</p>
+                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                        <li style="margin-bottom: 3px;"><strong>Spare Parts &amp; Software:</strong> Supply of all spare parts, components, consumables, and software upgrades or updates is excluded from this quotation and shall be provided only upon issuance of a separate Purchase Order by the CLIENT.</li>
+                        <li style="margin-bottom: 3px;">Physical/accidental damage, fire, flood, electrical surge, rodent damage, corrosion, tampering, or misuse.</li>
+                        <li style="margin-bottom: 3px;">Failures due to improper earthing, voltage fluctuation, or faulty power supply.</li>
+                        <li style="margin-bottom: 3px;">Equipment shifting, dismantling, reinstallation, relocation, or major overhauls.</li>
+                        <li style="margin-bottom: 3px;">Any failure or service interruption due to the CLIENT&#8217;s non-compliance with statutory or regulatory requirements (such as AERB, PC-PNDT, etc.) will not be covered under this AMC.</li>
+                    </ul>
+
+                    <p style="font-weight: bold; margin: 8px 0 2px 0;">3. Contract Period</p>
+                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                        <li style="margin-bottom: 3px;">
+                            The contract shall be valid from
+                            <apex:outputPanel rendered="{!quote.Contract_Period_From_Date__c != null}">
+                                <strong><apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!quote.Contract_Period_From_Date__c}" /></apex:outputText></strong>
+                            </apex:outputPanel>
+                            to
+                            <apex:outputPanel rendered="{!quote.Contract_Period_End_Date__c != null}">
+                                <strong><apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!quote.Contract_Period_End_Date__c}" /></apex:outputText></strong>
+                            </apex:outputPanel>, or for such duration as may be mutually agreed upon by both parties.
+                        </li>
+                        <li style="margin-bottom: 3px;">Cyrix Healthcare Pvt. Ltd. agrees to provide maintenance services for the equipment listed in <strong>Annexure-A</strong> installed at the CLIENT premises.</li>
+                    </ul>
+
+                    <p style="font-weight: bold; margin: 8px 0 2px 0;">4. Payment Terms</p>
+                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                        <apex:outputPanel rendered="{!paymentTerms.size > 0}">
+                            <apex:repeat value="{!paymentTerms}" var="ptAmc">
+                                <li style="margin-bottom: 3px;"><strong>{!ptAmc.Percentage__c}%</strong> {!ptAmc.Payment_Term__c}</li>
+                            </apex:repeat>
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!paymentTerms.size == 0}">
+                            <li style="margin-bottom: 3px;"><strong>100% along with the work order</strong></li>
+                        </apex:outputPanel>
+                    </ul>
+
+                    <div style="text-align: center; font-weight: bold; text-decoration: underline; margin: 20px 0 10px 0;">
+                        ANNEXURE &#8211; A
+                    </div>
+                    <table style="width: 90%; margin: 0 auto; border-collapse: collapse;">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px; border: 1px solid #000; padding: 5px;">SI No</th>
+                                <th style="width: 150px; border: 1px solid #000; padding: 5px;">Equipment Name</th>
+                                <th style="width: 60px; border: 1px solid #000; padding: 5px;">Quantity</th>
+                                <th style="width: 80px; border: 1px solid #000; padding: 5px;">Make</th>
+                                <th style="width: 80px; border: 1px solid #000; padding: 5px;">Model</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <apex:variable var="amcAnnexIdx" value="{!1}" />
+                            <apex:repeat value="{!lineItems}" var="amcAnnexItem">
+                                <tr>
+                                    <td style="border: 1px solid #000; padding: 5px; text-align: center;">
+                                        <apex:outputText value="{0, number, 0}"><apex:param value="{!amcAnnexIdx}" /></apex:outputText>
+                                    </td>
+                                    <td style="border: 1px solid #000; padding: 5px;">
+                                        <apex:outputText value="{!IF(amcAnnexItem.Product2.Equipment_Name__c != null, amcAnnexItem.Product2.Equipment_Name__c, amcAnnexItem.Product2.Name)}" />
+                                    </td>
+                                    <td style="border: 1px solid #000; padding: 5px; text-align: center;">
+                                        <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!amcAnnexItem.Quantity}" /></apex:outputText>
+                                    </td>
+                                    <td style="border: 1px solid #000; padding: 5px;">{!amcAnnexItem.Product2.Make__c}</td>
+                                    <td style="border: 1px solid #000; padding: 5px;">{!amcAnnexItem.Product2.Model__c}</td>
+                                </tr>
+                                <apex:variable var="amcAnnexIdx" value="{!amcAnnexIdx + 1}" />
+                            </apex:repeat>
+                        </tbody>
+                    </table>
                 </apex:outputPanel>
            
         
