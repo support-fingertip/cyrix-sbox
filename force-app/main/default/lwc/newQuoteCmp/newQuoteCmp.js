@@ -61,6 +61,10 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // Payment terms
     @track paymentTerms = [];
 
+    // Contract period dates (tracked locally for cross-field validation)
+    contractFromDate = null;
+    contractEndDate = null;
+
     // ===== PICKLIST OPTIONS =====
 
     // Product Type filter (not Product Category). Values mirror the
@@ -82,7 +86,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     get hasSearchResults() { return this.searchResults.length > 0; }
     get noSearchResults() { return this.showSearchResults && this.searchResults.length === 0; }
     get isSearchDisabled() { return !this.searchTerm || this.searchTerm.length < 2; }
-    get isSaveDisabled() { return this.isSaving || this.lineItems.length === 0; }
+    get isSaveDisabled() {
+        if (this.isSaving || this.lineItems.length === 0) return true;
+        if (this.paymentTerms.length > 0 && this.totalPercentage !== 100) return true;
+        if (this.isContractDateInvalid) return true;
+        return false;
+    }
     get pageTitle() { return this.isEditMode ? 'Edit Quote' : 'Create Quote'; }
     get quoteName() { return this.isEditMode ? undefined : 'Auto'; }
     get saveButtonLabel() { return this.isSaving ? 'Saving...' : (this.isEditMode ? 'Update Quote' : 'Save Quote'); }
@@ -92,6 +101,16 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         return this.paymentTerms.reduce((sum, t) => sum + (parseFloat(t.percentage) || 0), 0);
     }
     get percentageOverflow() { return this.totalPercentage > 100; }
+    get percentageUnderflow() { return this.paymentTerms.length > 0 && this.totalPercentage < 100; }
+    get totalPercentageClass() {
+        return (this.paymentTerms.length > 0 && this.totalPercentage !== 100)
+            ? 'slds-text-color_error'
+            : 'slds-text-color_success';
+    }
+    get isContractDateInvalid() {
+        if (!this.contractFromDate || !this.contractEndDate) return false;
+        return new Date(this.contractEndDate) <= new Date(this.contractFromDate);
+    }
     // In edit mode, return undefined so an empty defaultValues object can't
     // interfere with LDS auto-loading the saved Quote address subfields.
     get formDefaultValues() { return this.isEditMode ? undefined : this.defaultValues; }
@@ -319,6 +338,16 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         };
     }
 
+    // ===== CONTRACT DATE HANDLERS =====
+
+    handleContractFromDateChange(event) {
+        this.contractFromDate = event.detail ? event.detail.value : event.target.value;
+    }
+
+    handleContractEndDateChange(event) {
+        this.contractEndDate = event.detail ? event.detail.value : event.target.value;
+    }
+
     // ===== PAYMENT TERM HANDLERS =====
 
     handleAddPaymentTerm() {
@@ -372,6 +401,26 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }
 
         const fields = event.detail.fields;
+
+        // Payment terms (if any) must sum to exactly 100%.
+        if (this.paymentTerms.length > 0 && this.totalPercentage !== 100) {
+            this.showError(
+                'Payment Terms Invalid',
+                'Total percentage of Payment Terms must equal 100% to save the quote.'
+            );
+            return;
+        }
+
+        // Contract Period End Date must be after From Date when both provided.
+        const fromDate = fields.Contract_Period_From_Date__c;
+        const endDate = fields.Contract_Period_End_Date__c;
+        if (fromDate && endDate && new Date(endDate) <= new Date(fromDate)) {
+            this.showError(
+                'Invalid Contract Period',
+                'Contract Period End Date must be greater than Contract Period From Date.'
+            );
+            return;
+        }
 
         // Set placeholder Name (trigger auto-generates the actual quote name)
         if (!this.isEditMode) {
@@ -502,6 +551,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
     handleSearchTermChange(event) {
         this.searchTerm = event.detail ? event.detail.value : event.target.value;
+        // Clearing the search input should also clear the previously-returned
+        // results so the user doesn't see stale products after wiping the term.
+        if (!this.searchTerm || !this.searchTerm.trim()) {
+            this.searchResults = [];
+            this.showSearchResults = false;
+        }
     }
     handleCategoryFilterChange(event) { this.categoryFilter = event.detail.value; }
 
