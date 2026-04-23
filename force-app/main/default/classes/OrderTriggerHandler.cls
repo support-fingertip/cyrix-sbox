@@ -11,9 +11,11 @@
 public with sharing class OrderTriggerHandler {
 
     private static final String NOTIF_DEV_NAME = 'Order_Cancellation_Notification';
+    private static final String APPROVAL_NOTIF_DEV_NAME = 'Order_Approval_Notification';
     private static final String CANCELLED_STATUS = 'Cancelled';
     private static final String APPROVAL_REQUIRED = 'Approval Required';
     private static final String PRICE_APPROVED = 'Approved';
+    private static final String APPROVAL_STATUS_APPROVED = 'Approved';
 
     /**
      * Auto-populates L1/L2/L3 Approver fields on the Order based on the
@@ -121,7 +123,15 @@ public with sharing class OrderTriggerHandler {
                 cancelledIds.add(o.Id);
             }
 
-            if (o.Price_Status__c == PRICE_APPROVED && prev.Price_Status__c != PRICE_APPROVED) {
+            // Mirror Quote: notify on EITHER Approval_Status__c or
+            // Price_Status__c flipping to 'Approved'. Approval_Status__c is
+            // the reliable signal from the standard Order_Approval process,
+            // and Price_Status__c is updated by the line-item rollup path.
+            Boolean approvalFlipped = (o.Approval_Status__c == APPROVAL_STATUS_APPROVED
+                                       && prev.Approval_Status__c != APPROVAL_STATUS_APPROVED);
+            Boolean priceFlipped    = (o.Price_Status__c == PRICE_APPROVED
+                                       && prev.Price_Status__c != PRICE_APPROVED);
+            if (approvalFlipped || priceFlipped) {
                 approvedIds.add(o.Id);
             }
         }
@@ -155,12 +165,20 @@ public with sharing class OrderTriggerHandler {
     }
 
     private static void sendApprovalBellNotifications(List<Order> orders) {
+        // Order approvals use a dedicated Order_Approval_Notification type so
+        // they stay separate from cancellation notifications (which keep
+        // using Order_Cancellation_Notification).
         List<CustomNotificationType> types = [
             SELECT Id FROM CustomNotificationType
-            WHERE DeveloperName = :NOTIF_DEV_NAME LIMIT 1
+            WHERE DeveloperName = :APPROVAL_NOTIF_DEV_NAME LIMIT 1
         ];
         if (types.isEmpty()) return;
         Id notifTypeId = types[0].Id;
+
+        // Whoever clicked Approve in the standard process is the running
+        // user when the workflow field updates re-fire this trigger, so
+        // UserInfo.getName() identifies the actual final approver.
+        String approverName = UserInfo.getName();
 
         for (Order o : orders) {
             try {
@@ -168,7 +186,8 @@ public with sharing class OrderTriggerHandler {
                     ? ' for ' + o.Account.Name : '';
                 Messaging.CustomNotification n = new Messaging.CustomNotification();
                 n.setTitle('Order Approved');
-                n.setBody('Order ' + o.OrderNumber + acctName + ' has been approved.');
+                n.setBody('Order ' + o.OrderNumber + acctName +
+                          ' has been approved by ' + approverName + '.');
                 n.setNotificationTypeId(notifTypeId);
                 n.setTargetId(o.Id);
                 n.send(new Set<String>{ String.valueOf(o.OwnerId) });
