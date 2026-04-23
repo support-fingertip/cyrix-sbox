@@ -115,15 +115,8 @@ global class sapApiController {
             records.addAll((List<SObject>) oList);
         }
 
-        List<Object> rawList = (List<Object>) JSON.deserializeUntyped(JSON.serialize(records));
-        List<Object> cleaned = new List<Object>();
-        for (Object item : rawList) {
-            if (item instanceof Map<String, Object>) {
-                cleaned.add(removeAttributes((Map<String, Object>) item));
-            } else {
-                cleaned.add(item);
-            }
-        }
+        Object raw = JSON.deserializeUntyped(JSON.serialize(records));
+        Object cleaned = clean(raw);
         jsonString = JSON.serialize(cleaned);
 
         res.addHeader('Content-Type', 'application/json');
@@ -131,28 +124,33 @@ global class sapApiController {
         res.responseBody = Blob.valueOf(jsonString);
     }
 
-    private static Map<String, Object> removeAttributes(Map<String, Object> jsonObj) {
-        Set<String> keysToRemove = new Set<String>();
-        for (String key : jsonObj.keySet()) {
-            Object val = jsonObj.get(key);
-            if (key == 'attributes' || key == 'totalSize' || val == null) {
-                keysToRemove.add(key);
-                continue;
+    private static Object clean(Object node) {
+        if (node instanceof Map<String, Object>) {
+            Map<String, Object> m = (Map<String, Object>) node;
+            if (m.containsKey('records')) {
+                return clean(m.get('records'));
             }
-            if (val instanceof Map<String, Object>) {
-                removeAttributes((Map<String, Object>) val);
-            } else if (val instanceof List<Object>) {
-                for (Object item : (List<Object>) val) {
-                    if (item instanceof Map<String, Object>) {
-                        removeAttributes((Map<String, Object>) item);
-                    }
+            Map<String, Object> result = new Map<String, Object>();
+            for (String key : m.keySet()) {
+                if (key == 'attributes' || key == 'totalSize' || key == 'done') {
+                    continue;
                 }
+                Object val = m.get(key);
+                if (val == null) {
+                    continue;
+                }
+                result.put(key, clean(val));
             }
+            return result;
         }
-        for (String k : keysToRemove) {
-            jsonObj.remove(k);
+        if (node instanceof List<Object>) {
+            List<Object> outList = new List<Object>();
+            for (Object item : (List<Object>) node) {
+                outList.add(clean(item));
+            }
+            return outList;
         }
-        return jsonObj;
+        return node;
     }
 
     public class response {
