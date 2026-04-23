@@ -102,12 +102,18 @@ public with sharing class quoteTriggerHandler {
             return;
         }
 
+        // Whoever clicked Approve in the standard approval process (or the
+        // custom approveLineItems action) is the running user when the
+        // workflow field updates re-fire this trigger, so UserInfo.getName()
+        // identifies the actual final approver to surface in the bell.
+        String approverName = UserInfo.getName();
+
         for (Quote q : justApproved) {
             try {
                 CustomNotificationService.notificationSend(
                     'Your Quote has been Approved',
                     q.Id,
-                    'Your Quote #' + q.QuoteNumber + ' has been approved.',
+                    'Your Quote #' + q.QuoteNumber + ' has been approved by ' + approverName + '.',
                     new Set<String>{ String.valueOf(q.OwnerId) },
                     notifTypeId
                 );
