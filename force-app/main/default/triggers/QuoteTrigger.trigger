@@ -15,10 +15,16 @@ trigger QuoteTrigger on Quote (before insert, before update, after insert, after
             quoteTriggerHandler.generateQuoteNames(Trigger.new);
             // Auto-fill L1/L2/L3 Approver from Owner's Manager chain.
             quoteTriggerHandler.populateApproversFromHierarchy(Trigger.new);
+            // BRD: only one active quote per Opportunity. If a sibling is
+            // already active and locked by the approval flow, force the
+            // incoming quote inactive so we never have to update the locked
+            // sibling.
+            quoteTriggerHandler.enforceInactiveWhenSiblingLocked(Trigger.new, null);
         }
     }
     if(trigger.isBefore && trigger.isUpdate){
         quoteTriggerHandler.populateApproversFromHierarchy(Trigger.new);
+        quoteTriggerHandler.enforceInactiveWhenSiblingLocked(Trigger.new, Trigger.oldMap);
          for(Quote q :trigger.New){
              // If the quote's sync link to the opportunity was turned off,
              // it is no longer the active quote.

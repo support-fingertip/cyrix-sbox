@@ -108,10 +108,67 @@ public with sharing class quoteTriggerHandler {
     }
 
     /**
+     * BRD: only one active quote per Opportunity. When a sibling quote is
+     * already active AND in the approval flow ('Approval Required' /
+     * 'Approved'), it is locked by the approval process and cannot be
+     * deactivated by Apex without the org-level approval lock/unlock
+     * preference.
+     *
+     * Per the TL: in that case, do NOT touch the locked sibling. Instead,
+     * force the incoming quote's is_Active__c to false so it is created /
+     * saved as an inactive quote. The previously-active locked quote stays
+     * active and the BRD is preserved (still only one active quote).
+     *
+     * Runs in before insert / before update so trigger.new can be mutated
+     * without DML.
+     */
+    public static void enforceInactiveWhenSiblingLocked(List<Quote> newQuotes, Map<Id, Quote> oldMap) {
+        if (newQuotes == null || newQuotes.isEmpty()) return;
+
+        Set<Id> oppIds = new Set<Id>();
+        List<Quote> candidates = new List<Quote>();
+        for (Quote q : newQuotes) {
+            if (q.OpportunityId == null || q.is_Active__c != true) continue;
+            // For updates, only act when the quote is just being activated.
+            if (oldMap != null) {
+                Quote oldQ = oldMap.get(q.Id);
+                if (oldQ != null && oldQ.is_Active__c == true) continue;
+            }
+            oppIds.add(q.OpportunityId);
+            candidates.add(q);
+        }
+        if (candidates.isEmpty()) return;
+
+        Set<Id> oppsWithLockedActive = new Set<Id>();
+        for (Quote sibling : [
+            SELECT Id, OpportunityId
+            FROM Quote
+            WHERE OpportunityId IN :oppIds
+            AND is_Active__c = true
+            AND Price_Status__c IN ('Approval Required', 'Approved')
+        ]) {
+            oppsWithLockedActive.add(sibling.OpportunityId);
+        }
+        if (oppsWithLockedActive.isEmpty()) return;
+
+        for (Quote q : candidates) {
+            if (oppsWithLockedActive.contains(q.OpportunityId)) {
+                q.is_Active__c = false;
+            }
+        }
+    }
+
+    /**
      * When a Quote flips is_Active__c to true, mark every other quote on the
      * same Opportunity as inactive and sync the current quote to the
      * Opportunity (Opportunity.SyncedQuoteId -> this Quote). Salesforce then
      * sets Quote.IsSyncing = true automatically on the synced quote.
+     *
+     * Locked siblings (Price_Status__c IN 'Approval Required', 'Approved')
+     * are skipped here because the incoming quote was already forced
+     * inactive in before-insert / before-update by
+     * enforceInactiveWhenSiblingLocked, so we never reach this method with a
+     * locked sibling on the same opportunity.
      */
     public static void syncActiveQuote(List<Quote> newQuotes, Map<Id, Quote> oldMap) {
         if (isSyncingActiveQuote) return;
