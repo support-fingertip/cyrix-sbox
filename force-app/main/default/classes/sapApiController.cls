@@ -9,6 +9,7 @@ global class sapApiController {
         String key = req.params.get('key');
         String objectName = req.params.get('value');
         String customerCode = req.params.get('customerCode');
+        String orderCode = req.params.get('orderCode');
 
         getResponse g = new getResponse();
         String jsonString = '';
@@ -60,6 +61,62 @@ global class sapApiController {
             customerResponseWrapper cw = new customerResponseWrapper();
             cw.data = aList;
             g = cw;
+        } else if (objectName == 'order') {
+            List<Order> oList;
+            if (String.isNotBlank(orderCode)) {
+                oList = [
+                    SELECT Id, Name, EffectiveDate, EndDate, OrderId__c, Status,
+                        BillingCity, BillingCountryCode, BillingStateCode, BillingStreet, BillingPostalCode,
+                        ShippingCity, ShippingCountryCode, ShippingStateCode, ShippingStreet, ShippingPostalCode,
+                        CurrencyIsoCode, Customer_Code__c, Business_Vertical__c, Sub_Vertical__c,
+                        Delivery__c, Contract_Period_From_Date__c, Contract_Period_End_Date__c,
+                        Description, Employee_Code__c, TotalAmount,
+                        (SELECT Id, OrderItemNumber, Order.OrderId__c, Product2.ProductCode,
+                            Quantity, UnitPrice, Tax__c, Tax_Amount__c, TotalPrice
+                         FROM OrderItems),
+                        (SELECT Id, OrderId__c, Name, Payment_Term__c, Percentage__c
+                         FROM Payment_Terms__r)
+                    FROM Order
+                    WHERE OrderId__c = :orderCode
+                    LIMIT 200
+                ];
+            } else if (String.isNotBlank(customerCode)) {
+                oList = [
+                    SELECT Id, Name, EffectiveDate, EndDate, OrderId__c, Status,
+                        BillingCity, BillingCountryCode, BillingStateCode, BillingStreet, BillingPostalCode,
+                        ShippingCity, ShippingCountryCode, ShippingStateCode, ShippingStreet, ShippingPostalCode,
+                        CurrencyIsoCode, Customer_Code__c, Business_Vertical__c, Sub_Vertical__c,
+                        Delivery__c, Contract_Period_From_Date__c, Contract_Period_End_Date__c,
+                        Description, Employee_Code__c, TotalAmount,
+                        (SELECT Id, OrderItemNumber, Order.OrderId__c, Product2.ProductCode,
+                            Quantity, UnitPrice, Tax__c, Tax_Amount__c, TotalPrice
+                         FROM OrderItems),
+                        (SELECT Id, OrderId__c, Name, Payment_Term__c, Percentage__c
+                         FROM Payment_Terms__r)
+                    FROM Order
+                    WHERE Customer_Code__c = :customerCode
+                    LIMIT 200
+                ];
+            } else {
+                oList = [
+                    SELECT Id, Name, EffectiveDate, EndDate, OrderId__c, Status,
+                        BillingCity, BillingCountryCode, BillingStateCode, BillingStreet, BillingPostalCode,
+                        ShippingCity, ShippingCountryCode, ShippingStateCode, ShippingStreet, ShippingPostalCode,
+                        CurrencyIsoCode, Customer_Code__c, Business_Vertical__c, Sub_Vertical__c,
+                        Delivery__c, Contract_Period_From_Date__c, Contract_Period_End_Date__c,
+                        Description, Employee_Code__c, TotalAmount,
+                        (SELECT Id, OrderItemNumber, Order.OrderId__c, Product2.ProductCode,
+                            Quantity, UnitPrice, Tax__c, Tax_Amount__c, TotalPrice
+                         FROM OrderItems),
+                        (SELECT Id, OrderId__c, Name, Payment_Term__c, Percentage__c
+                         FROM Payment_Terms__r)
+                    FROM Order
+                    LIMIT 200
+                ];
+            }
+            orderResponseWrapper ow = new orderResponseWrapper();
+            ow.data = oList;
+            g = ow;
         }
 
         Map<String, Object> dataMap = (Map<String, Object>) JSON.deserializeUntyped(JSON.serialize(g));
@@ -98,6 +155,10 @@ global class sapApiController {
 
     global class customerResponseWrapper extends getResponse {
         public List<Account> data = new List<Account>();
+    }
+
+    global class orderResponseWrapper extends getResponse {
+        public List<Order> data = new List<Order>();
     }
 
     public class response {
