@@ -50,6 +50,19 @@
                     page-break-before: always;
                 }
 
+                /* Project costing / quotation data table: collapse borders
+                   so adjacent cells share a single line (no double borders
+                   or gaps). */
+                .data-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+                .data-table th,
+                .data-table td {
+                    border: 1px solid #000;
+                    padding: 4px;
+                }
+
                 /* T&C section headings must stay with their list/body and
                    numbered lists must not split across pages. */
                 .tc-heading { page-break-after: avoid; }
@@ -658,7 +671,7 @@
                         </apex:outputPanel>
                     </ul>
 
-                    <p class="tc-heading" style="font-weight: bold; margin: 8px 0 2px 0;">5. Service Conditions</p>
+                    <p class="tc-heading" style="font-weight: bold; margin: 8px 0 2px 0; page-break-before: always;">5. Service Conditions</p>
                     <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">Service hours: 9:00 AM &#8211; 5:00 PM (Monday&#8211;Saturday), excluding holidays.</li>
                         <li style="margin-bottom: 3px;">Emergency calls outside working hours are chargeable.</li>
@@ -716,7 +729,7 @@
                     </ul>
 
                     <!-- AMC: Second Party / First Party block -->
-                    <table class="signature-table" style="width: 100%; margin-top: 5px;">
+                    <table class="signature-table" style="width: 100%; margin-top: 5px; page-break-before: always;">
                         <tr>
                             <td style="width: 50%; vertical-align: top;"><strong>SECOND PARTY</strong></td>
                             <td style="width: 50%; vertical-align: top; padding-left: 80px;"><strong>FIRST PARTY</strong></td>
@@ -876,14 +889,14 @@
                         </apex:outputPanel>
                     </ul>
             
-                    <p class="tc-heading" style="font-weight: bold; margin: 6px 0 2px 0;">5. Service Conditions</p>
+                    <p class="tc-heading" style="font-weight: bold; margin: 6px 0 2px 0; page-break-before: always;">5. Service Conditions</p>
                     <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">Service hours: 9:00 AM &#8211; 5:00 PM (Monday&#8211;Saturday), excluding holidays.</li>
                         <li style="margin-bottom: 3px;">Emergency calls outside working hours are chargeable.</li>
                         <li style="margin-bottom: 3px;">Delays due to non-availability of spares, natural calamities, strikes, or circumstances beyond control shall not be the responsibility of the service provider.</li>
                         <li style="margin-bottom: 3px;">Equipment may be shifted to workshop for repair if required, at CLIENT&#8217;s risk.</li>
                     </ul>
-            
+
                     <p class="tc-heading" style="font-weight: bold; margin: 6px 0 2px 0;">6. Client Responsibilities</p>
                     <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">Provide proper electrical supply, earthing, UPS, and stabilizer.</li>
@@ -934,7 +947,7 @@
                     </ul>
 
                     <!-- CAMC: Second Party / First Party block -->
-                    <table class="signature-table" style="width: 100%; margin-top: 5px;">
+                    <table class="signature-table" style="width: 100%; margin-top: 5px; page-break-before: always;">
                         <tr>
                             <td style="width: 50%; vertical-align: top;"><strong>SECOND PARTY</strong></td>
                             <td style="width: 50%; vertical-align: top; padding-left: 80px;"><strong>FIRST PARTY</strong></td>
