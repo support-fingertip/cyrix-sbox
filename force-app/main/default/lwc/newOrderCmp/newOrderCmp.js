@@ -823,8 +823,8 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     //   back to comparing finalPrice <= listPrice for products that
     //   don't have any tier pricebooks configured.
     //
-    // Service lines stay 'Not Required' on the order — order service
-    // lines don't go through the same approval gate as quote lines.
+    // Service lines (Product's Service_Item picklist = Yes) always return
+    // 'Not Required' — the tier/list-price approval gate doesn't apply.
     computePriceStatus(unitPrice, discount, listPrice, isServiceItem, taxpercentage, tierPrices) {
         if (isServiceItem) return 'Not Required';
 
@@ -842,7 +842,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         }
 
         if (listPrice == null) return 'Not Required';
-    
+        return finalPrice <= listPrice ? 'Approval Required' : 'Not Required';
     }
 
     getPriceStatusBadgeClass(status) {

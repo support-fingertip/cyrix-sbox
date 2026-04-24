@@ -258,12 +258,19 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                     // Legacy QLIs may still carry Quote-level values like 'Draft' or
                     // 'Rejected' that aren't valid on the restricted line-item picklist.
                     const VALID_LINE_STATUSES = ['Not Required', 'Approval Required', 'Approved'];
-                    const priceStatus = VALID_LINE_STATUSES.includes(item.priceStatus)
-                        ? item.priceStatus
-                        : this.computePriceStatus(
+                    // Service items (Service_Item picklist = Yes) never require
+                    // approval — ignore any stale server value that says otherwise.
+                    let priceStatus;
+                    if (isService) {
+                        priceStatus = 'Not Required';
+                    } else if (VALID_LINE_STATUSES.includes(item.priceStatus)) {
+                        priceStatus = item.priceStatus;
+                    } else {
+                        priceStatus = this.computePriceStatus(
                             item.unitPrice, disc, item.listPrice, isService,
                             item.taxPercent, tierPricesFromDb
                         );
+                    }
 
                     return {
                         rowId: 'row-' + rowCounter,
@@ -860,8 +867,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     //   / Price list5 anchor) as the last-resort fallback for products
     //   that don't have any tier pricebooks populated.
     //
-    // Service lines always return 'Approval Required' per the business
-    // rule ("approval required except when Service_Item is No").
+    // Service lines (Product's Service_Item picklist = Yes) always return
+    // 'Not Required' — the tier/list-price approval gate doesn't apply.
     computePriceStatus(unitPrice, discount, listPrice, isServiceItem, taxpercentage, tierPrices) {
         if (isServiceItem) return 'Not Required';
 
