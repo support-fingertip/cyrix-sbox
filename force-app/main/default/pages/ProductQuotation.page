@@ -63,8 +63,9 @@
                     padding: 4px;
                 }
 
-                /* T&C section headings must stay with their list/body and
-                   numbered lists must not split across pages. */
+                /* Terms and Conditions section headings must stay with
+                   their list/body and numbered lists must not split
+                   across pages. */
                 .tc-heading { page-break-after: avoid; }
                 .tc-list    { page-break-inside: avoid; }
 
