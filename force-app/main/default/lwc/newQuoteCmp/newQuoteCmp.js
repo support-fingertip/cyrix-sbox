@@ -795,26 +795,42 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         this.dispatchEvent(new CloseActionScreenEvent());
 
         setTimeout(() => {
-            if (this.isEditMode) {
+            const target = this.resolveCancelTarget();
+            if (target) {
                 this[NavigationMixin.Navigate]({
                     type: 'standard__recordPage',
                     attributes: {
-                        recordId: this.editRecordId,
-                        objectApiName: 'Quote',
+                        recordId: target.recordId,
+                        objectApiName: target.objectApiName,
                         actionName: 'view'
                     }
                 });
             } else {
+                // No parent record to return to (e.g. launched directly from
+                // the app launcher). Land on the Quote home tab so the user
+                // doesn't see a "page doesn't exist" dead end.
                 this[NavigationMixin.Navigate]({
-                    type: 'standard__recordPage',
+                    type: 'standard__objectPage',
                     attributes: {
-                        recordId: this.recordId,
-                        objectApiName: 'Opportunity',
-                        actionName: 'view'
+                        objectApiName: 'Quote',
+                        actionName: 'home'
                     }
                 });
             }
         }, 300);
+    }
+
+    resolveCancelTarget() {
+        if (this.isEditMode && this.editRecordId) {
+            return { recordId: this.editRecordId, objectApiName: 'Quote' };
+        }
+        const id = this.recordId;
+        if (!id || typeof id !== 'string' || id.length < 3) return null;
+        const prefix = id.substring(0, 3);
+        if (prefix === '006') return { recordId: id, objectApiName: 'Opportunity' };
+        if (prefix === '001') return { recordId: id, objectApiName: 'Account' };
+        if (prefix === '0Q0') return { recordId: id, objectApiName: 'Quote' };
+        return null;
     }
 
     // ===== VALIDATION =====
