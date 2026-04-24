@@ -359,7 +359,7 @@
                         PROJECT COSTING<apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> - <span style="text-transform: uppercase;">{!quote.Business_Vertical__c}</span></apex:outputPanel>
                     </div>
                     
-                    <table class="data-table">
+                    <table class="data-table" style="width: 100%; border-collapse: collapse; border-spacing: 0;">
                         <thead>
                             <tr>
                                 <th style="width: 30px; border: 1px solid #000;text-align: center; padding: 4px;">SN</th>
