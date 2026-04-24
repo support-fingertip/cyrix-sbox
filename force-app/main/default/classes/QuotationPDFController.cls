@@ -31,6 +31,12 @@ public with sharing class QuotationPDFController {
     public Decimal amcGstAmount { get; set; }
     public Decimal amcGrandTotal { get; set; }
 
+    // Per-line GST amount and line grand total, keyed by QuoteLineItem Id.
+    // Used by the Calibration and General tables so GST/TOTAL columns don't
+    // collapse into duplicates of ListPrice/TotalPrice.
+    public Map<Id, Decimal> lineGstAmount { get; set; }
+    public Map<Id, Decimal> lineGrandTotal { get; set; }
+
 
     public QuotationPDFController(ApexPages.StandardController stdController) {
         Id quoteId = stdController.getId();
@@ -98,10 +104,17 @@ BillingPostalCode,Business_Vertical__c,
 
         // AMC single-row summary: sum of line totals, fixed 18% GST.
         amcTotalRate = 0;
+        lineGstAmount = new Map<Id, Decimal>();
+        lineGrandTotal = new Map<Id, Decimal>();
         for (QuoteLineItem qli : lineItems) {
-            if (qli.TotalPrice != null) {
-                amcTotalRate += qli.TotalPrice;
-            }
+            Decimal rate = qli.TotalPrice != null ? qli.TotalPrice : 0;
+            amcTotalRate += rate;
+
+            Decimal taxPct = (qli.Product2 != null && qli.Product2.Tax__c != null)
+                ? qli.Product2.Tax__c : 0;
+            Decimal gst = (rate * taxPct / 100).setScale(2, RoundingMode.HALF_UP);
+            lineGstAmount.put(qli.Id, gst);
+            lineGrandTotal.put(qli.Id, (rate + gst).setScale(2, RoundingMode.HALF_UP));
         }
         amcGstAmount = (amcTotalRate * 0.18).setScale(2, RoundingMode.HALF_UP);
         amcGrandTotal = (amcTotalRate + amcGstAmount).setScale(2, RoundingMode.HALF_UP);
