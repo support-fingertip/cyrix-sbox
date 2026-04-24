@@ -11,13 +11,6 @@
                         </valueListItems>
                         <valueListItems>
                             <value>Submit</value>
-                            <visibilityRule>
-                                <criteria>
-                                    <leftValue>{!Record.Price_Status__c}</leftValue>
-                                    <operator>EQUAL</operator>
-                                    <rightValue>Approval Required</rightValue>
-                                </criteria>
-                            </visibilityRule>
                         </valueListItems>
                         <valueListItems>
                             <value>Edit</value>
@@ -25,16 +18,10 @@
                         <valueListItems>
                             <value>CustomButton.Quote.Quote_PDF</value>
                             <visibilityRule>
-                                <booleanFilter>1 AND 2</booleanFilter>
                                 <criteria>
                                     <leftValue>{!$Client.formFactor}</leftValue>
                                     <operator>EQUAL</operator>
                                     <rightValue>Large</rightValue>
-                                </criteria>
-                                <criteria>
-                                    <leftValue>{!Record.Price_Status__c}</leftValue>
-                                    <operator>EQUAL</operator>
-                                    <rightValue>Not Required</rightValue>
                                 </criteria>
                             </visibilityRule>
                         </valueListItems>

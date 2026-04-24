@@ -36,7 +36,7 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>SF_OrderId__c</field>
+                <field>OrderId__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
