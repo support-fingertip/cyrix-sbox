@@ -345,8 +345,8 @@
             <sortOrder>11</sortOrder>
         </platformActionListItems>
         <platformActionListItems>
-            <actionName>Send_Quote_PDF</actionName>
-            <actionType>CustomButton</actionType>
+            <actionName>Quote.Send_Quote_PDF</actionName>
+            <actionType>QuickAction</actionType>
             <sortOrder>12</sortOrder>
         </platformActionListItems>
         <platformActionListItems>
