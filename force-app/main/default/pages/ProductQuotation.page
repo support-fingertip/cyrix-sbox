@@ -459,7 +459,7 @@
                     </div>
 
                     <!-- Calibration: Additional Terms (clauses 1-11 hardcoded + 12-14 dynamic) -->
-                    <div style="font-weight: bold; text-decoration: underline; margin: 10px 0 6px 0;">
+                    <div style="page-break-before: always; font-weight: bold; text-decoration: underline; margin: 10px 0 6px 0;">
                         ADDITIONAL TERMS TO BE ADDED:
                     </div>
                     <ol style="margin: 0; padding-left: 25px; line-height: 1.6;">
