@@ -506,10 +506,6 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>SAPsendController</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
         <apexClass>SFToSAPIntegrationController</apexClass>
         <enabled>false</enabled>
     </classAccesses>
@@ -1556,6 +1552,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
+        <field>Invoice__c.OrderId__c</field>
+        <readable>false</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
         <field>Invoice__c.Order__c</field>
         <readable>false</readable>
     </fieldPermissions>
@@ -1567,11 +1568,6 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Invoice__c.SAP_OrderId__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Invoice__c.SF_OrderId__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>

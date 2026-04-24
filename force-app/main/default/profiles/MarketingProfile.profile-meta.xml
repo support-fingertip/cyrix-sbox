@@ -506,10 +506,6 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>SAPsendController</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
         <apexClass>SFToSAPIntegrationController</apexClass>
         <enabled>false</enabled>
     </classAccesses>
@@ -1555,6 +1551,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>true</editable>
+        <field>Invoice__c.OrderId__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>false</editable>
         <field>Invoice__c.Order__c</field>
         <readable>false</readable>
@@ -1567,11 +1568,6 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Invoice__c.SAP_OrderId__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Invoice__c.SF_OrderId__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -4487,6 +4483,10 @@
     <userPermissions>
         <enabled>true</enabled>
         <name>ImportPersonal</name>
+    </userPermissions>
+    <userPermissions>
+        <enabled>true</enabled>
+        <name>IntegrationIntelligenceUser</name>
     </userPermissions>
     <userPermissions>
         <enabled>true</enabled>

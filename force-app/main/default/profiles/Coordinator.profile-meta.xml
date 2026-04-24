@@ -127,7 +127,7 @@
     </applicationVisibilities>
     <classAccesses>
         <apexClass>Account360ViewController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>Account360ViewController_Test</apexClass>
@@ -135,7 +135,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>AddressSearchController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>CalculateDistanceAPI</apexClass>
@@ -167,7 +167,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>CommunitiesLandingController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>CommunitiesLandingControllerTest</apexClass>
@@ -175,7 +175,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>CommunitiesLoginController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>CommunitiesLoginControllerTest</apexClass>
@@ -183,7 +183,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>CommunitiesSelfRegConfirmController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>CommunitiesSelfRegConfirmControllerTest</apexClass>
@@ -191,7 +191,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>CommunitiesSelfRegController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>CommunitiesSelfRegControllerTest</apexClass>
@@ -199,7 +199,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>CreateSalesOrderController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>CustomLookupController</apexClass>
@@ -219,7 +219,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>CustomerTriggerHandler</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>Customer_Trigger_Test</apexClass>
@@ -247,7 +247,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>DailyLogVisitMapController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>DailyLogVisitMapControllerTest</apexClass>
@@ -263,7 +263,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>EmailParserUtility</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>ExceptionHandler</apexClass>
@@ -319,7 +319,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>FileUploadController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>ForgotPasswordController</apexClass>
@@ -327,7 +327,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>IndiaMartWebhookLeadApi</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>IndiaMartWebhookLeadApi_Test</apexClass>
@@ -335,7 +335,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>LeadEmailHandler</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>LeadEmailHandlerTest</apexClass>
@@ -359,7 +359,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>LeadShareClass</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>LeadShareClassTest</apexClass>
@@ -387,7 +387,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>LightningForgotPasswordController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>LightningForgotPasswordControllerTest</apexClass>
@@ -395,7 +395,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>LightningLoginFormController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>LightningLoginFormControllerTest</apexClass>
@@ -403,7 +403,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>LightningSelfRegisterController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>LightningSelfRegisterControllerTest</apexClass>
@@ -411,7 +411,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>MicrobatchSelfRegController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>MicrobatchSelfRegControllerTest</apexClass>
@@ -427,7 +427,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>OpportunityTriggerHandler</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>OpportunityTriggerHandlerTest</apexClass>
@@ -435,11 +435,11 @@
     </classAccesses>
     <classAccesses>
         <apexClass>OrderBuilderController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>OrderItemTriggerHandler</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>OrderItemTriggerHandlerTest</apexClass>
@@ -447,7 +447,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>OrderTriggerHandler</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>OrderTriggerHandlerTest</apexClass>
@@ -455,11 +455,11 @@
     </classAccesses>
     <classAccesses>
         <apexClass>PaymentTermTriggerHandler</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>PricebookTierService</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>PricebookTierServiceTest</apexClass>
@@ -467,7 +467,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>ProductTriggerHandler</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>ProductTriggerHandlerTest</apexClass>
@@ -475,7 +475,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>QuotationPDFController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>QuotationPDFControllerTest</apexClass>
@@ -483,7 +483,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>QuoteBuilderController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>QuoteBuilderControllerTest</apexClass>
@@ -491,27 +491,23 @@
     </classAccesses>
     <classAccesses>
         <apexClass>QuoteLineItemTriggerHandler</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>QuotePDFEmailController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>SAPToSFIntegrationController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>SAPToSFIntegrationControllerTest</apexClass>
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>SAPsendController</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
         <apexClass>SFToSAPIntegrationController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>SFToSAPIntegrationControllerTest</apexClass>
@@ -527,7 +523,7 @@
     </classAccesses>
     <classAccesses>
         <apexClass>ShippingAddressHandler</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>ShippingAddressHandlerTest</apexClass>
@@ -583,11 +579,11 @@
     </classAccesses>
     <classAccesses>
         <apexClass>WhatsAppQuoteSender</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>WhatsAppWebhookController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>WhatsAppWebhookControllerTest</apexClass>
@@ -619,11 +615,11 @@
     </classAccesses>
     <classAccesses>
         <apexClass>quoteTriggerHandler</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>sapApiController</apexClass>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>visitManager</apexClass>
@@ -1555,6 +1551,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>true</editable>
+        <field>Invoice__c.OrderId__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>false</editable>
         <field>Invoice__c.Order__c</field>
         <readable>false</readable>
@@ -1567,11 +1568,6 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Invoice__c.SAP_OrderId__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Invoice__c.SF_OrderId__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

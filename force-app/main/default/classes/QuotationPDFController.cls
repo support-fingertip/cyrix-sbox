@@ -58,7 +58,11 @@ public with sharing class QuotationPDFController {
                    Account.GST_Number__c, Account.PAN_Number__c,
                    Account.BillingStreet, Account.BillingCity, Account.BillingState,
                    Account.BillingPostalCode, Account.BillingCountry,
-            BillingCity,BillingAddress,BillingCountry,BillingState,Business_Vertical__c,
+          BillingStreet,
+BillingCity,
+BillingState,
+BillingCountry,
+BillingPostalCode,Business_Vertical__c,
                    Account.Payment_Terms__c,Additional_Warranty__c,Notes__c,Sub_Vertical__c,
                    Contract_Period_From_Date__c, Contract_Period_End_Date__c,
          ContactId, Contact.Name, Contact.Email, Contact.Phone, Contact.Title, owner.Name,Owner_Designation__c,Owner_Phone__c

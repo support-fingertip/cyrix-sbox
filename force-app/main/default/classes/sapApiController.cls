@@ -57,7 +57,7 @@ global class sapApiController {
                          FROM OrderItems),
                         (SELECT Id, OrderId__c, Name, Payment_Term__c, Percentage__c
                          FROM Payment_Terms__r)
-                    FROM Order
+                    FROM Order where id='801C400000VAlhFIAT'
                    
                     LIMIT 1
                 ];
