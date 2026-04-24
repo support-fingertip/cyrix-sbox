@@ -40,6 +40,10 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     accountId;
     accountName = '';
     regionId;
+    // Mapped from Opportunity.Buisness_Vertical__c so the Quote form shows
+    // the parent's vertical. The on-form field is disabled; this value is
+    // what the form binds to.
+    businessVertical = null;
 
     // Default values for new quote (is_Active defaults to true so fresh quotes
     // are marked as the active one for the opportunity).
@@ -118,6 +122,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // returning undefined lets lightning-input-field fall back to the saved
     // record value.
     get defaultIsActive() { return this.isEditMode ? undefined : true; }
+    // Prefill Business Vertical from the parent Opportunity on new quotes.
+    // In edit mode fall through to the saved Quote value so we don't
+    // overwrite the record with a blank.
+    get defaultBusinessVertical() {
+        return this.isEditMode ? undefined : (this.businessVertical || undefined);
+    }
 
     // ===== CALCULATIONS =====
 
@@ -181,6 +191,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.accountId = data.accountId;
             this.accountName = data.accountName || '';
             this.regionId = data.regionId;
+            this.businessVertical = data.vertical || null;
 
             // === AUTO-POPULATE BILL TO ADDRESS FROM ACCOUNT ===
             if (!this.isEditMode && this.accountId) {
