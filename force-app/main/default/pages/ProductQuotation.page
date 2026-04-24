@@ -98,7 +98,7 @@
                             </p>
                         </div>
                         <p style="text-align: center; font-weight: bold; margin: 10px 0;">
-                            SUBJECT: QUOTATION FOR <span class="capitalize">{!quote.Business_Vertical__c}</span>
+                            SUBJECT: QUOTATION FOR <span style="text-transform: uppercase;">{!quote.Business_Vertical__c}</span>
                         </p>
                 
                     </div>
@@ -109,7 +109,7 @@
                         <div>
                             We sincerely appreciate your continued trust in our products and services. As per your
                             requirement, we are pleased to submit our proposal for
-                            <strong>{!quote.Business_Vertical__c}</strong> for your kind consideration.
+                            <strong style="text-transform: uppercase;">{!quote.Business_Vertical__c}</strong> for your kind consideration.
                         </div>
                         
                         <apex:variable var="pIdx" value="{!1}" />
@@ -172,7 +172,7 @@
 
                     <!-- Quotation for Cyrix table -->
                     <div style="text-align: center; font-weight: bold; margin: 6px 0 8px 0; text-decoration: underline; padding-bottom: 20px;">
-                        QUOTATION FOR CYRIX <span class="capitalize">{!productName}<apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> &amp; {!quote.Business_Vertical__c}</apex:outputPanel></span>
+                        QUOTATION FOR CYRIX <span style="text-transform: uppercase;">{!productName}<apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> &amp; {!quote.Business_Vertical__c}</apex:outputPanel></span>
                     </div>
                     
                     <table class="data-table">
@@ -218,10 +218,10 @@
                                         <apex:outputText value="{0, number, ###,##0.00}"><apex:param value="{!item.TotalPrice}" /></apex:outputText>
                                     </td>
                                     <td style="border: 1px solid #000; padding: 4px; text-align: right;">
-                                        <apex:outputText value="{0, number, ###,##0.00}"><apex:param value="{!item.TotalPrice}" /></apex:outputText>
+                                        <apex:outputText value="{0, number, ###,##0.00}"><apex:param value="{!lineGstAmount[item.Id]}" /></apex:outputText>
                                     </td>
                                     <td style="border: 1px solid #000; padding: 4px; text-align: right;">
-                                        <apex:outputText value="{0, number, ###,##0.00}"><apex:param value="{!item.TotalPrice}" /></apex:outputText>
+                                        <apex:outputText value="{0, number, ###,##0.00}"><apex:param value="{!lineGrandTotal[item.Id]}" /></apex:outputText>
                                     </td>
                                 </tr>
                                 <apex:variable var="rowNum" value="{!rowNum + 1}" />
@@ -356,7 +356,7 @@
 
                     <!-- Project Costing table -->
                     <div style="text-align: center; font-weight: bold; margin: 6px 0 8px 0; text-decoration: underline; padding-bottom: 20px;">
-                        PROJECT COSTING - CALIBRATION<apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> - <span style="text-transform: uppercase;">{!quote.Business_Vertical__c}</span></apex:outputPanel>
+                        PROJECT COSTING<apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> - <span style="text-transform: uppercase;">{!quote.Business_Vertical__c}</span></apex:outputPanel>
                     </div>
                     
                     <table class="data-table">
@@ -388,17 +388,17 @@
                                     <td style="border: 1px solid #000; padding: 4px; font-weight: bold; text-decoration: underline;">
                                         <apex:outputText value="{!IF(calItem.Product2.Parameters__c != null, calItem.Product2.Parameters__c, 'AS PER THE EQUIPMENT TYPE')}" />
                                     </td>
-                                    <td style="text-align: center; border: 1px solid #000; padding: 4px;">
+                                    <td style="text-align: right; border: 1px solid #000; padding: 4px;">
                                         <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!calItem.ListPrice}" /></apex:outputText>
                                     </td>
                                     <td style="text-align: right; border: 1px solid #000; padding: 4px;">
                                         <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!calItem.TotalPrice}" /></apex:outputText>
                                     </td>
-                                    <td style="text-align: center; border: 1px solid #000; padding: 4px;">
-                                        <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!calItem.ListPrice}" /></apex:outputText>
+                                    <td style="text-align: right; border: 1px solid #000; padding: 4px;">
+                                        <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!lineGstAmount[calItem.Id]}" /></apex:outputText>
                                     </td>
                                     <td style="text-align: right; border: 1px solid #000; padding: 4px;">
-                                        <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!calItem.TotalPrice}" /></apex:outputText>
+                                        <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!lineGrandTotal[calItem.Id]}" /></apex:outputText>
                                     </td>
                                 </tr>
                                 <apex:variable var="calIdx" value="{!calIdx + 1}" />
@@ -540,7 +540,7 @@
 
                     <!-- AMC: Project Costing table -->
                     <div style="text-align: center; font-weight: bold; margin: 6px 0 8px 0; text-decoration: underline; padding-bottom: 20px;">
-                        PROJECT COSTING <apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> - <span class="capitalize">{!quote.Business_Vertical__c}</span></apex:outputPanel>
+                        PROJECT COSTING <apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> - <span style="text-transform: uppercase;">{!quote.Business_Vertical__c}</span></apex:outputPanel>
                     </div>
 
                     <table class="data-table">
@@ -771,7 +771,7 @@
 
                     <!-- CAMC: Project Costing table (separate from AMC) -->
                     <div style="text-align: center; font-weight: bold; margin: 6px 0 8px 0; text-decoration: underline; padding-bottom: 20px;">
-                        PROJECT COSTING <apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> - <span class="capitalize">{!quote.Business_Vertical__c}</span></apex:outputPanel>
+                        PROJECT COSTING <apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> - <span style="text-transform: uppercase;">{!quote.Business_Vertical__c}</span></apex:outputPanel>
                     </div>
 
                     <table class="data-table">
