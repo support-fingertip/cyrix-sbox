@@ -113,7 +113,7 @@ public with sharing class quoteTriggerHandler {
                 CustomNotificationService.notificationSend(
                     'Your Quote has been Approved',
                     q.Id,
-                    'Your Quote #' + q.QuoteNumber + ' has been approved by ' + approverName + '.',
+                    'Your Quote ' + q.Name + ' has been approved by ' + approverName + '.',
                     new Set<String>{ String.valueOf(q.OwnerId) },
                     notifTypeId
                 );
