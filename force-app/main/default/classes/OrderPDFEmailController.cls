@@ -6,7 +6,7 @@ public with sharing class OrderPDFEmailController {
     @AuraEnabled
     public static OrderEmailWrapper getOrderDetails(Id orderId) {
         List<Order> orders = [
-            SELECT Id, Name, OrderNumber, Quote_Id__c,
+            SELECT Id, Name, OrderNumber,
                    AccountId, Account.Name,
                    BillToContactId, BillToContact.Name, BillToContact.Email,
                    OpportunityId, Opportunity.Name, Opportunity.Email__c,
