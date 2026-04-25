@@ -1,7 +1,7 @@
 public with sharing class OrderPDFEmailController {
 
     /**
-     * Get Order details for the email form (mirror of QuotePDFEmailController.getQuoteDetails).
+     * Get Order details for the email form.
      */
     @AuraEnabled
     public static OrderEmailWrapper getOrderDetails(Id orderId) {
@@ -56,7 +56,7 @@ public with sharing class OrderPDFEmailController {
         wrapper.defaultBody =
             '<p>Dear ' + greetingName + ',</p>' +
             '<p>I hope this email finds you well.</p>' +
-            '<p>Please find attached the order document for ' + opportunityName + '.</p>' +
+            '<p>This is regarding the order ' + opportunityName + '.</p>' +
             '<p>Best regards,</p>' +
             '<p><strong>For Cyrix Healthcare Pvt. Ltd</strong></p>' +
             '<p>' + ownerName +
@@ -66,35 +66,16 @@ public with sharing class OrderPDFEmailController {
     }
 
     /**
-     * Generate the Order PDF and send it as an email attachment.
+     * Send an email about the order. No PDF is attached.
      */
     @AuraEnabled
     public static String sendOrderEmail(Id orderId, String toAddress, String ccAddress,
                                          String bccAddress, String subject, String body) {
         try {
-            PageReference pdfPage = new PageReference('/apex/ProductOrder');
-            pdfPage.getParameters().put('id', orderId);
-            Blob pdfBlob;
-
-            if (Test.isRunningTest()) {
-                pdfBlob = Blob.valueOf('Test PDF');
-            } else {
-                pdfBlob = pdfPage.getContentAsPDF();
-            }
-
-            Order o = [SELECT Name, OrderNumber FROM Order WHERE Id = :orderId LIMIT 1];
-            String fileName = o.Name + '_' + o.OrderNumber + '.pdf';
-
-            Messaging.EmailFileAttachment attachment = new Messaging.EmailFileAttachment();
-            attachment.setFileName(fileName);
-            attachment.setBody(pdfBlob);
-            attachment.setContentType('application/pdf');
-
             Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
             email.setToAddresses(parseEmails(toAddress));
             email.setSubject(subject);
             email.setHtmlBody(body);
-            email.setFileAttachments(new Messaging.EmailFileAttachment[]{ attachment });
 
             if (String.isNotBlank(ccAddress)) {
                 email.setCcAddresses(parseEmails(ccAddress));
@@ -106,8 +87,7 @@ public with sharing class OrderPDFEmailController {
             Messaging.SendEmailResult[] results = Messaging.sendEmail(new Messaging.SingleEmailMessage[]{ email });
 
             if (results[0].isSuccess()) {
-                savePDFToOrder(orderId, fileName, pdfBlob);
-                logEmailActivity(orderId, toAddress, ccAddress, bccAddress, subject, body, fileName);
+                logEmailActivity(orderId, toAddress, ccAddress, bccAddress, subject, body);
                 return 'SUCCESS';
             } else {
                 return 'ERROR: ' + results[0].getErrors()[0].getMessage();
@@ -117,26 +97,8 @@ public with sharing class OrderPDFEmailController {
         }
     }
 
-    private static void savePDFToOrder(Id orderId, String fileName, Blob pdfBlob) {
-        ContentVersion cv = new ContentVersion();
-        cv.Title = fileName.removeEnd('.pdf');
-        cv.PathOnClient = fileName;
-        cv.VersionData = pdfBlob;
-        insert cv;
-
-        Id contentDocId = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :cv.Id].ContentDocumentId;
-
-        ContentDocumentLink cdl = new ContentDocumentLink();
-        cdl.ContentDocumentId = contentDocId;
-        cdl.LinkedEntityId = orderId;
-        cdl.ShareType = 'V';
-        cdl.Visibility = 'AllUsers';
-        insert cdl;
-    }
-
     private static void logEmailActivity(Id orderId, String toAddress, String ccAddress,
-                                          String bccAddress, String subject, String body,
-                                          String fileName) {
+                                          String bccAddress, String subject, String body) {
         try {
             String plainBody = body != null
                 ? body.replaceAll('<br\\s*/?>', '\n').replaceAll('</p>', '\n').replaceAll('<[^>]+>', '').trim()
@@ -149,11 +111,11 @@ public with sharing class OrderPDFEmailController {
             if (String.isNotBlank(bccAddress)) {
                 description += 'BCC: ' + bccAddress + '\n';
             }
-            description += 'Attachment: ' + fileName + '\n\n' + plainBody;
+            description += '\n' + plainBody;
 
             Task emailTask = new Task(
                 WhatId = orderId,
-                Subject = 'Email: ' + (String.isNotBlank(subject) ? subject : 'Order PDF'),
+                Subject = 'Email: ' + (String.isNotBlank(subject) ? subject : 'Order Email'),
                 Status = 'Completed',
                 Priority = 'Normal',
                 ActivityDate = Date.today(),

@@ -35,8 +35,6 @@ export default class SendOrderPDF extends LightningElement {
     subject = '';
     body = '';
     isSending = false;
-    showEmailForm = false;
-    cacheBuster = Date.now();
 
     _orderName = '';
     _orderNumber = '';
@@ -109,14 +107,10 @@ export default class SendOrderPDF extends LightningElement {
         this.body =
             '<p>Dear ' + greetingName + ',</p>' +
             '<p>I hope this email finds you well.</p>' +
-            '<p>Please find attached the order document for ' + projectName + ' for your reference.</p>' +
+            '<p>This is regarding the order ' + projectName + '.</p>' +
             '<p>Best regards,</p>' +
             '<p><strong>For Cyrix Healthcare Pvt. Ltd</strong></p>' +
             '<p>' + this._ownerName + signatureTitle + '</p>';
-    }
-
-    get pdfPreviewUrl() {
-        return '/apex/ProductOrder?id=' + this.recordId + '&t=' + this.cacheBuster;
     }
 
     @api invoke() {
@@ -131,16 +125,6 @@ export default class SendOrderPDF extends LightningElement {
         this.ccAddress = '';
         this.bccAddress = '';
         this.isSending = false;
-        this.showEmailForm = false;
-        this.cacheBuster = Date.now();
-    }
-
-    handleShowEmailForm() {
-        this.showEmailForm = true;
-    }
-
-    handleBack() {
-        this.showEmailForm = false;
     }
 
     handleCcChange(event) {
@@ -186,7 +170,7 @@ export default class SendOrderPDF extends LightningElement {
             .then(result => {
                 this.isSending = false;
                 if (result === 'SUCCESS') {
-                    this.showToast('Success', 'Order PDF sent successfully!', 'success');
+                    this.showToast('Success', 'Order email sent successfully!', 'success');
                     this.dispatchEvent(new CloseActionScreenEvent());
                 } else {
                     this.showToast('Error', result, 'error');
