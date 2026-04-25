@@ -1,4 +1,4 @@
-<apex:page standardController="Quote" extensions="QuotationPDFController" renderAs="pdf"  showHeader="false" sidebar="false" applyHtmlTag="false" applyBodyTag="false" standardStylesheets="false">
+<apex:page standardController="Order" extensions="OrderPDFController" renderAs="pdf"  showHeader="false" sidebar="false" applyHtmlTag="false" applyBodyTag="false" standardStylesheets="false">
     <html>
         <head>
             <style type="text/css">
@@ -91,13 +91,13 @@
             <table class="header-inner overlaytext"  style="index:10;">
                 <tr>
                     <td style="width: 80%; text-align: left;">
-                        <span style="color: #C8102E;">{!quoteNamePart1}</span><span style="color: #000000;">/{!quoteNamePart2}/</span><span style="color: #C8102E;">{!quoteNamePart3}</span><span style="color: #000000;">/{!quoteNamePart4}</span>
+                        <span style="color: #C8102E;">{!orderNamePart1}</span><span style="color: #000000;">/{!orderNamePart2}/</span><span style="color: #C8102E;">{!orderNamePart3}</span><span style="color: #000000;">/{!orderNamePart4}</span>
                     </td>
                     <td style="width: 20%; text-align: left; padding-left: 40px;">
                         <span style="color: #000000;">DATE:</span>
                         <span style="color: #C8102E;">
                             <apex:outputText value="{0,date,dd/MM/yyyy}">
-                                <apex:param value="{!quote.Quote_Date__c}" />
+                                <apex:param value="{!order.Quote_Date__c}" />
                             </apex:outputText>
                         </span>
                     </td>
@@ -116,18 +116,18 @@
                         <p>To,</p>
                         <div style="width: 40%;" class="capitalize">
                             <p>
-                                <strong>{!quote.account.Name}</strong><br/>
-                                {!quote.BillingCity}, {!quote.BillingState}<br/>
-                                <apex:outputPanel rendered="{!quote.account.GST_Number__c != null}">
-                                    <strong>GST:</strong> {!quote.account.GST_Number__c}<br/>
+                                <strong>{!order.account.Name}</strong><br/>
+                                {!order.BillingCity}, {!order.BillingState}<br/>
+                                <apex:outputPanel rendered="{!order.account.GST_Number__c != null}">
+                                    <strong>GST:</strong> {!order.account.GST_Number__c}<br/>
                                 </apex:outputPanel>
-                                <apex:outputPanel rendered="{!quote.account.PAN_Number__c != null}">
-                                    <strong>PAN:</strong> {!quote.account.PAN_Number__c}
+                                <apex:outputPanel rendered="{!order.account.PAN_Number__c != null}">
+                                    <strong>PAN:</strong> {!order.account.PAN_Number__c}
                                 </apex:outputPanel>
                             </p>
                         </div>
                         <p style="text-align: center; font-weight: bold; margin: 10px 0;">
-                            SUBJECT: QUOTATION FOR <span style="text-transform: uppercase;">{!quote.Business_Vertical__c}</span>
+                            SUBJECT: QUOTATION FOR <span style="text-transform: uppercase;">{!order.Business_Vertical__c}</span>
                         </p>
                 
                     </div>
@@ -138,7 +138,7 @@
                         <div>
                             We sincerely appreciate your continued trust in our products and services. As per your
                             requirement, we are pleased to submit our proposal for
-                            <strong style="text-transform: uppercase;">{!quote.Business_Vertical__c}</strong> for your kind consideration.
+                            <strong style="text-transform: uppercase;">{!order.Business_Vertical__c}</strong> for your kind consideration.
                         </div>
                         
                         <apex:variable var="pIdx" value="{!1}" />
@@ -173,12 +173,12 @@
                         <div>
                             For queries contact:
                             <div style="text-align: left; font-weight: 700; padding-top: 5px;">
-                                <span>{!quote.Owner.Name}</span><br/>
-                                <apex:outputPanel rendered="{!quote.Owner_Designation__c != null}">
-                                    <span>{!quote.Owner_Designation__c}</span><br/>
+                                <span>{!order.Owner.Name}</span><br/>
+                                <apex:outputPanel rendered="{!order.Owner.Title != null}">
+                                    <span>{!order.Owner.Title}</span><br/>
                                 </apex:outputPanel>
-                                <apex:outputPanel rendered="{!quote.Owner_Phone__c != null}">
-                                    <span>{!quote.Owner_Phone__c}</span>
+                                <apex:outputPanel rendered="{!order.Owner.Phone != null}">
+                                    <span>{!order.Owner.Phone}</span>
                                 </apex:outputPanel>
                             </div>
                         </div>
@@ -197,11 +197,11 @@
                 <!-- GENERAL BRANCH                                                -->
                 <!-- Sub_Vertical != AMC, != CAMC, != Calibration → General       -->
                 <!-- ============================================================ -->
-                <apex:outputPanel rendered="{!AND(quote.Sub_Vertical__c != 'Calibration', quote.Sub_Vertical__c != 'AMC', quote.Sub_Vertical__c != 'CAMC')}">
+                <apex:outputPanel rendered="{!AND(order.Vertical__c != 'Calibration', order.Vertical__c != 'AMC', order.Vertical__c != 'CAMC')}">
 
                     <!-- Quotation for Cyrix table -->
                     <div style="text-align: center; font-weight: bold; margin: 6px 0 8px 0; text-decoration: underline; padding-bottom: 20px;">
-                        QUOTATION FOR CYRIX <span style="text-transform: uppercase;">{!productName}<apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> &amp; {!quote.Business_Vertical__c}</apex:outputPanel></span>
+                        QUOTATION FOR CYRIX <span style="text-transform: uppercase;">{!productName}<apex:outputPanel rendered="{!order.Business_Vertical__c != null}"> &amp; {!order.Business_Vertical__c}</apex:outputPanel></span>
                     </div>
                     
                     <table class="data-table">
@@ -259,13 +259,13 @@
                             <tr>
                                 <td colspan="8" style="border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">Grand Total</td>
                                 <td style="border: 1px solid #000; padding: 4px; text-align: right; font-weight: bold;">
-                                    <apex:outputText value="{0, number, ###,##0.00}"><apex:param value="{!quote.grandTotal}" /></apex:outputText>
+                                    <apex:outputText value="{0, number, ###,##0.00}"><apex:param value="{!order.TotalAmount}" /></apex:outputText>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                     <p style="font-weight: bold;">{!grandTotalInWords}</p>
-                    <apex:outputPanel rendered="{!quote.Notes__c != null}"><p style="font-weight: bold; color: #cc0000;">***Note: {!quote.Notes__c}</p></apex:outputPanel>
+                    <apex:outputPanel rendered="false}"><p style="font-weight: bold; color: #cc0000;">***Note: </p></apex:outputPanel>
                     <br/>
 
                     <!-- General: Standard Terms and Conditions -->
@@ -275,7 +275,7 @@
 
                     <div style="margin: 10px 0 3px 0;">
                         <span style="font-weight: bold; padding-bottom: 12px;">Validity</span><br/>
-                        This quotation is valid for <strong>{!quote.Quote_Valid_Till_in_days__c}</strong> from the date of issue and is subject to reconfirmation thereafter.
+                        This quotation is valid for <strong>{!order.Quote_Valid_Till_in_days__c}</strong> from the date of issue and is subject to reconfirmation thereafter.
                     </div>
 
                     <div style="margin: 10px 0 10px 0;">
@@ -294,7 +294,7 @@
 
                     <div style="margin: 10px 0 10px 0;">
                         <div style="font-weight: bold; padding-bottom: 4px;">DELIVERY</div>
-                        <div>Delivery will be scheduled within <strong>{!quote.Delivery__c}</strong> from receipt of confirmed Purchase Order along with advance payment.</div>
+                        <div>Delivery will be scheduled within <strong>{!order.Delivery__c}</strong> from receipt of confirmed Purchase Order along with advance payment.</div>
                     </div>
 
                     <div style="margin: 10px 0 10px 0;">
@@ -309,7 +309,7 @@
                     <div style="margin: 10px 0 10px 0;">
                         <div style="font-weight: bold; padding-bottom: 4px;"> Warranty</div>
                         <div style=" line-height: 1.4;">
-                            12-month standard warranty <apex:outputPanel rendered="{!quote.Additional_Warranty__c != null}"><strong><u>{!quote.Additional_Warranty__c}</u></strong></apex:outputPanel> from the date of installation covers manufacturing defects only.
+                            12-month standard warranty <apex:outputPanel rendered="{!order.Additional_Warranty__c != null}"><strong><u>{!order.Additional_Warranty__c}</u></strong></apex:outputPanel> from the date of installation covers manufacturing defects only.
                         </div>
                         <div style="text-align:justify; line-height: 1.4;">
                             Repair or replacement of defective components during this period will be at the Company&#8217;s discretion.
@@ -381,11 +381,11 @@
                 <!-- ============================================================ -->
                 <!-- CALIBRATION BRANCH                                            -->
                 <!-- ============================================================ -->
-                <apex:outputPanel rendered="{!quote.Sub_Vertical__c == 'Calibration'}">
+                <apex:outputPanel rendered="{!order.Vertical__c == 'Calibration'}">
 
                     <!-- Project Costing table -->
                     <div style="text-align: center; font-weight: bold; margin: 6px 0 8px 0; text-decoration: underline; padding-bottom: 20px;">
-                        PROJECT COSTING<apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> - <span style="text-transform: uppercase;">{!quote.Business_Vertical__c}</span></apex:outputPanel>
+                        PROJECT COSTING<apex:outputPanel rendered="{!order.Business_Vertical__c != null}"> - <span style="text-transform: uppercase;">{!order.Business_Vertical__c}</span></apex:outputPanel>
                     </div>
                     
                     <table class="data-table" style="width: 100%; border-collapse: collapse; border-spacing: 0;">
@@ -435,13 +435,13 @@
                             <tr>
                                 <td COLSPAN="7" style="border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold;">GRAND TOTAL</td>
                                 <td style="border: 1px solid #000; padding: 4px; text-align: right; font-weight: bold;">
-                                    <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!quote.grandTotal}" /></apex:outputText>
+                                    <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!order.TotalAmount}" /></apex:outputText>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                     <p style="font-weight: bold;">{!grandTotalInWords}</p>
-                    <apex:outputPanel rendered="{!quote.Notes__c != null}"><p style="font-weight: bold; color: #cc0000;">***Note: {!quote.Notes__c}</p></apex:outputPanel>
+                    <apex:outputPanel rendered="false}"><p style="font-weight: bold; color: #cc0000;">***Note: </p></apex:outputPanel>
                     <br/>
 
                     <!-- Calibration: Terms and Conditions header block -->
@@ -456,7 +456,7 @@
 
                     <div style="margin: 10px 0 3px 0;">
                         <span style="font-weight: bold;">Validity</span><br/>
-                        This quotation is valid for <strong>{!quote.Quote_Valid_Till_in_days__c}</strong> from the date of issue and is subject to reconfirmation thereafter.
+                        This quotation is valid for <strong>{!order.Quote_Valid_Till_in_days__c}</strong> from the date of issue and is subject to reconfirmation thereafter.
                     </div>
 
                     <div style="margin: 10px 0 10px 0;">
@@ -565,11 +565,11 @@
                 <!-- ============================================================ -->
                 <!-- AMC BRANCH                                                    -->
                 <!-- ============================================================ -->
-                <apex:outputPanel rendered="{!quote.Sub_Vertical__c == 'AMC'}">
+                <apex:outputPanel rendered="{!order.Vertical__c == 'AMC'}">
 
                     <!-- AMC: Project Costing table -->
                     <div style="text-align: center; font-weight: bold; margin: 6px 0 8px 0; text-decoration: underline; padding-bottom: 20px;">
-                        PROJECT COSTING <apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> - <span style="text-transform: uppercase;">{!quote.Business_Vertical__c}</span></apex:outputPanel>
+                        PROJECT COSTING <apex:outputPanel rendered="{!order.Business_Vertical__c != null}"> - <span style="text-transform: uppercase;">{!order.Business_Vertical__c}</span></apex:outputPanel>
                     </div>
 
                     <table class="data-table">
@@ -603,12 +603,12 @@
                             </tr>
                             <tr>
                                 <td colspan="6" style="text-align: center; border: 1px solid #000; padding: 4px;">
-                                    <strong>Contract Period:&nbsp;<apex:outputPanel rendered="{!quote.Contract_Period_From_Date__c != null}" layout="none"><apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!quote.Contract_Period_From_Date__c}" /></apex:outputText></apex:outputPanel>&nbsp;to&nbsp;<apex:outputPanel rendered="{!quote.Contract_Period_End_Date__c != null}" layout="none"><apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!quote.Contract_Period_End_Date__c}" /></apex:outputText></apex:outputPanel></strong>
+                                    <strong>Contract Period:&nbsp;<apex:outputPanel rendered="{!order.Contract_Period_From_Date__c != null}" layout="none"><apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!order.Contract_Period_From_Date__c}" /></apex:outputText></apex:outputPanel>&nbsp;to&nbsp;<apex:outputPanel rendered="{!order.Contract_Period_End_Date__c != null}" layout="none"><apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!order.Contract_Period_End_Date__c}" /></apex:outputText></apex:outputPanel></strong>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
-                    <apex:outputPanel rendered="{!quote.Notes__c != null}"><p style="font-weight: bold; color: #cc0000;">***Note: {!quote.Notes__c}</p></apex:outputPanel>
+                    <apex:outputPanel rendered="false}"><p style="font-weight: bold; color: #cc0000;">***Note: </p></apex:outputPanel>
 
                     <!-- AMC: Terms and Conditions (all 13 sections) -->
                     <div style="text-align: center; font-weight: bold; text-decoration: underline; margin: 8px 0;">
@@ -638,12 +638,12 @@
                     <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">
                             The contract shall be valid from
-                            <apex:outputPanel rendered="{!quote.Contract_Period_From_Date__c != null}">
-                                <strong><apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!quote.Contract_Period_From_Date__c}" /></apex:outputText></strong>
+                            <apex:outputPanel rendered="{!order.Contract_Period_From_Date__c != null}">
+                                <strong><apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!order.Contract_Period_From_Date__c}" /></apex:outputText></strong>
                             </apex:outputPanel>
                             to
-                            <apex:outputPanel rendered="{!quote.Contract_Period_End_Date__c != null}">
-                                <strong><apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!quote.Contract_Period_End_Date__c}" /></apex:outputText></strong>
+                            <apex:outputPanel rendered="{!order.Contract_Period_End_Date__c != null}">
+                                <strong><apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!order.Contract_Period_End_Date__c}" /></apex:outputText></strong>
                             </apex:outputPanel>, or for such duration as may be mutually agreed upon by both parties.
                         </li>
                         <li style="margin-bottom: 3px;">Cyrix Healthcare Pvt. Ltd. agrees to provide maintenance services for the equipment listed in <strong>Annexure-A</strong> installed at the CLIENT premises.</li>
@@ -728,7 +728,7 @@
                         <tr>
                             <td style="vertical-align: top;">
                                 <br/>
-                                {!quote.account.Name}<br/>{!quote.BillingStreet}<br/>{!quote.BillingCity}
+                                {!order.account.Name}<br/>{!order.BillingStreet}<br/>{!order.BillingCity}
                             </td>
                             <td style="vertical-align: top; padding-left: 80px;">
                                 <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 50px; max-width: 50px;" /><br/>
@@ -782,11 +782,11 @@
                 <!-- ============================================================ -->
                 <!-- CAMC BRANCH                                                   -->
                 <!-- ============================================================ -->
-                <apex:outputPanel rendered="{!quote.Sub_Vertical__c == 'CAMC'}">
+                <apex:outputPanel rendered="{!order.Vertical__c == 'CAMC'}">
 
                     <!-- CAMC: Project Costing table (separate from AMC) -->
                     <div style="text-align: center; font-weight: bold; margin: 6px 0 8px 0; text-decoration: underline; padding-bottom: 20px;">
-                        PROJECT COSTING <apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> - <span style="text-transform: uppercase;">{!quote.Business_Vertical__c}</span></apex:outputPanel>
+                        PROJECT COSTING <apex:outputPanel rendered="{!order.Business_Vertical__c != null}"> - <span style="text-transform: uppercase;">{!order.Business_Vertical__c}</span></apex:outputPanel>
                     </div>
 
                     <table class="data-table">
@@ -820,12 +820,12 @@
                             </tr>
                             <tr>
                                 <td colspan="6" style="text-align: center; border: 1px solid #000; padding: 4px;">
-                                    <strong>Contract Period:&nbsp;<apex:outputPanel rendered="{!quote.Contract_Period_From_Date__c != null}" layout="none"><apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!quote.Contract_Period_From_Date__c}" /></apex:outputText></apex:outputPanel>&nbsp;to&nbsp;<apex:outputPanel rendered="{!quote.Contract_Period_End_Date__c != null}" layout="none"><apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!quote.Contract_Period_End_Date__c}" /></apex:outputText></apex:outputPanel></strong>
+                                    <strong>Contract Period:&nbsp;<apex:outputPanel rendered="{!order.Contract_Period_From_Date__c != null}" layout="none"><apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!order.Contract_Period_From_Date__c}" /></apex:outputText></apex:outputPanel>&nbsp;to&nbsp;<apex:outputPanel rendered="{!order.Contract_Period_End_Date__c != null}" layout="none"><apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!order.Contract_Period_End_Date__c}" /></apex:outputText></apex:outputPanel></strong>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
-                    <apex:outputPanel rendered="{!quote.Notes__c != null}"><p style="font-weight: bold; color: #cc0000;">***Note: {!quote.Notes__c}</p></apex:outputPanel>
+                    <apex:outputPanel rendered="false}"><p style="font-weight: bold; color: #cc0000;">***Note: </p></apex:outputPanel>
 
                     <!-- CAMC: Terms and Conditions (all 13 sections) -->
                     <div style="text-align: center; font-weight: bold; text-decoration: underline; margin: 5px 0 8px 0;">TERMS &amp; CONDITIONS</div>
@@ -934,7 +934,7 @@
                         <tr>
                             <td style="vertical-align: top;">
                                 <br/>
-                                {!quote.account.Name}<br/>{!quote.BillingStreet}<br/>{!quote.BillingCity}
+                                {!order.account.Name}<br/>{!order.BillingStreet}<br/>{!order.BillingCity}
                             </td>
                             <td style="vertical-align: top; padding-left: 80px;">
                                 <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 50px; max-width: 50px;" /><br/>
