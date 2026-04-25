@@ -42,9 +42,9 @@ public with sharing class OrderPDFController {
 
     private void loadData(Id orderId) {
         List<Order> orders = [
-            SELECT Id, Name, OrderNumber, Quote_Date__c,
+            SELECT Id, Name, OrderNumber, EffectiveDate, EndDate,
                    Status, Price_Status__c, is_Active__c,
-                   Shipping_Mode__c, Quote_Valid_Till_in_days__c, Delivery__c,
+                   Shipping_Mode__c, Delivery__c,
                    TotalAmount, CurrencyIsoCode, Description, OwnerId,
                    OpportunityId, Opportunity.Name,
                    Opportunity.OwnerId, Opportunity.Owner.Name,
