@@ -4,6 +4,8 @@ import { CloseActionScreenEvent } from 'lightning/actions';
 import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
 import sendOrderEmail from '@salesforce/apex/OrderPDFEmailController.sendOrderEmail';
 
+// Send Order Email — Order quick action.
+
 import ORDER_NAME from '@salesforce/schema/Order.Name';
 import ORDER_NUMBER from '@salesforce/schema/Order.OrderNumber';
 import ORDER_OWNER_ID from '@salesforce/schema/Order.OwnerId';
