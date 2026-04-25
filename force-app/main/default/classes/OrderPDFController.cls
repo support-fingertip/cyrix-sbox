@@ -43,9 +43,7 @@ public with sharing class OrderPDFController {
     private void loadData(Id orderId) {
         List<Order> orders = [
             SELECT Id, Name, OrderNumber, EffectiveDate, EndDate,
-                   Status, Price_Status__c, is_Active__c,
-                   Shipping_Mode__c, Delivery__c,
-                   TotalAmount, CurrencyIsoCode, Description, OwnerId,
+                   Status, TotalAmount, CurrencyIsoCode, Description, OwnerId,
                    OpportunityId, Opportunity.Name,
                    Opportunity.OwnerId, Opportunity.Owner.Name,
                    Opportunity.Owner.Title, Opportunity.Owner.Phone, Opportunity.Owner.Email,
@@ -55,8 +53,9 @@ public with sharing class OrderPDFController {
                    Account.BillingPostalCode, Account.BillingCountry,
                    BillingStreet, BillingCity, BillingState, BillingCountry, BillingPostalCode,
                    Business_Vertical__c, Vertical__c,
-                   Account.Payment_Terms__c, Additional_Warranty__c,
+                   Additional_Warranty__c,
                    Contract_Period_From_Date__c, Contract_Period_End_Date__c,
+                   Delivery__c,
                    BillToContactId, BillToContact.Name, BillToContact.Email,
                    BillToContact.Phone, BillToContact.Title,
                    Owner.Name, Owner.Title, Owner.Phone
@@ -84,13 +83,11 @@ public with sharing class OrderPDFController {
         lineItems = [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
                    Product2.Item_Code__c, Product2.Make__c, Product2.Model__c,
-                   Product2.Description, Product2.HSN_Code__c, Product2.Tax__c,
-                   Product2.QuantityUnitOfMeasure,
+                   Product2.Tax__c, Product2.QuantityUnitOfMeasure,
                    Product2.Equipment_Name__c, Product2.Parameters__c,
+                   Product2.Product_Type__c,
                    PricebookEntryId, Quantity, UnitPrice, TotalPrice, ListPrice,
-                   Discount__c, Price_Status__c, Tax_Type__c,
-                   Product_Line_Description__c, Product_Detailed_Description__c,
-                   Product2.Product_Type__c
+                   Product_Line_Description__c
             FROM OrderItem
             WHERE OrderId = :orderId
             ORDER BY CreatedDate ASC
