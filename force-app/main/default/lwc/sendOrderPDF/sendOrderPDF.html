@@ -1,108 +1,74 @@
 <template>
-    <lightning-card title="Send Order PDF" icon-name="standard:orders">
+    <lightning-card title="Send Order Email" icon-name="standard:orders">
 
         <div class="slds-p-around_medium">
 
-            <!-- STEP 1: PDF Preview only -->
-            <template if:false={showEmailForm}>
-                <div class="slds-m-bottom_medium">
-                    <h2 class="slds-text-heading_small slds-m-bottom_small">Order PDF Preview</h2>
-                    <div class="pdf-preview-container" style="border: 1px solid #d8dde6; border-radius: 4px; overflow: hidden;">
-                        <iframe src={pdfPreviewUrl} width="100%" height="500px" style="border: none;"></iframe>
-                    </div>
+            <div class="slds-grid slds-wrap slds-gutters">
+                <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                    <lightning-input
+                        label="To"
+                        type="email"
+                        value={toAddress}
+                        disabled
+                        required>
+                    </lightning-input>
                 </div>
 
-                <div class="slds-m-top_medium slds-text-align_right">
-                    <lightning-button
-                        label="Cancel"
-                        onclick={handleCancel}
-                        class="slds-m-right_small">
-                    </lightning-button>
-                    <lightning-button
-                        label="Send Email"
-                        variant="brand"
-                        onclick={handleShowEmailForm}
-                        icon-name="utility:email">
-                    </lightning-button>
-                </div>
-            </template>
-
-            <!-- STEP 2: Email Form -->
-            <template if:true={showEmailForm}>
-                <h2 class="slds-text-heading_small slds-m-bottom_small">Send Email</h2>
-
-                <div class="slds-grid slds-wrap slds-gutters">
-                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
-                        <lightning-input
-                            label="To"
-                            type="email"
-                            value={toAddress}
-                            disabled
-                            required>
-                        </lightning-input>
-                    </div>
-
-                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
-                        <lightning-input
-                            label="CC"
-                            type="text"
-                            value={ccAddress}
-                            onchange={handleCcChange}
-                            placeholder="Separate multiple emails with comma">
-                        </lightning-input>
-                    </div>
-
-                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
-                        <lightning-input
-                            label="BCC"
-                            type="text"
-                            value={bccAddress}
-                            onchange={handleBccChange}
-                            placeholder="Separate multiple emails with comma">
-                        </lightning-input>
-                    </div>
-
-                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
-                        <lightning-input
-                            label="Subject"
-                            type="text"
-                            value={subject}
-                            onchange={handleSubjectChange}
-                            required>
-                        </lightning-input>
-                    </div>
-
-                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
-                        <label class="slds-form-element__label">Email Body</label>
-                        <lightning-input-rich-text
-                            value={body}
-                            onchange={handleBodyChange}
-                            placeholder="Compose your email..."
-                            formats={richTextFormats}>
-                        </lightning-input-rich-text>
-                    </div>
+                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                    <lightning-input
+                        label="CC"
+                        type="text"
+                        value={ccAddress}
+                        onchange={handleCcChange}
+                        placeholder="Separate multiple emails with comma">
+                    </lightning-input>
                 </div>
 
-                <div class="slds-m-top_medium slds-text-align_right">
-                    <lightning-button
-                        label="Back"
-                        onclick={handleBack}
-                        class="slds-m-right_small">
-                    </lightning-button>
-                    <lightning-button
-                        label="Cancel"
-                        onclick={handleCancel}
-                        class="slds-m-right_small">
-                    </lightning-button>
-                    <lightning-button
-                        label="Send Email"
-                        variant="brand"
-                        onclick={handleSendEmail}
-                        disabled={isSending}
-                        icon-name="utility:email">
-                    </lightning-button>
+                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                    <lightning-input
+                        label="BCC"
+                        type="text"
+                        value={bccAddress}
+                        onchange={handleBccChange}
+                        placeholder="Separate multiple emails with comma">
+                    </lightning-input>
                 </div>
-            </template>
+
+                <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                    <lightning-input
+                        label="Subject"
+                        type="text"
+                        value={subject}
+                        onchange={handleSubjectChange}
+                        required>
+                    </lightning-input>
+                </div>
+
+                <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                    <label class="slds-form-element__label">Email Body</label>
+                    <lightning-input-rich-text
+                        value={body}
+                        onchange={handleBodyChange}
+                        placeholder="Compose your email..."
+                        formats={richTextFormats}>
+                    </lightning-input-rich-text>
+                </div>
+            </div>
+
+            <div class="slds-m-top_medium slds-text-align_right">
+                <lightning-button
+                    label="Cancel"
+                    onclick={handleCancel}
+                    class="slds-m-right_small">
+                </lightning-button>
+                <lightning-button
+                    label="Send Email"
+                    variant="brand"
+                    onclick={handleSendEmail}
+                    disabled={isSending}
+                    icon-name="utility:email">
+                </lightning-button>
+            </div>
 
         </div>
 
