@@ -40,8 +40,95 @@ public with sharing class QuoteBuilderController {
         }
 
         ctx.defaultPaymentTerms = getDefaultPaymentTerms(opp.Buisness_Vertical__c);
+        ctx.opportunityLineItems = getOpportunityLineItemsAsQuoteLines(opportunityId, ctx.standardPricebookId);
 
         return ctx;
+    }
+
+    // Maps OpportunityLineItems to quote-line payloads so the new-quote
+    // builder can prefill its grid with the parent Opportunity's products.
+    // Resolves each product's Standard-pricebook PricebookEntry (quotes are
+    // anchored to Standard per loadOpportunityContext), falling back to the
+    // OLI's own PBE for service products that may not have a Standard
+    // entry — the save path tolerates a non-Standard PBE for services.
+    private static List<QuoteLineItemResult> getOpportunityLineItemsAsQuoteLines(Id opportunityId, Id standardPricebookId) {
+        List<QuoteLineItemResult> results = new List<QuoteLineItemResult>();
+        if (opportunityId == null) return results;
+
+        List<OpportunityLineItem> oppLines = [
+            SELECT Id, Product2Id, Quantity, UnitPrice, ListPrice, Description,
+                   PricebookEntryId,
+                   Product2.Name, Product2.ProductCode,
+                   Product2.QuantityUnitOfMeasure, Product2.Service_Item__c,
+                   Product2.Line_Description__c, Product2.Detailed_Description__c
+            FROM OpportunityLineItem
+            WHERE OpportunityId = :opportunityId
+            ORDER BY SortOrder ASC NULLS LAST, Id ASC
+        ];
+        if (oppLines.isEmpty()) return results;
+
+        Set<Id> productIds = new Set<Id>();
+        for (OpportunityLineItem oli : oppLines) {
+            if (oli.Product2Id != null) productIds.add(oli.Product2Id);
+        }
+
+        Map<Id, PricebookEntry> stdPbeByProduct = new Map<Id, PricebookEntry>();
+        if (standardPricebookId != null && !productIds.isEmpty()) {
+            for (PricebookEntry pbe : [
+                SELECT Id, Product2Id, UnitPrice, Tax__c, Max_Discount_Percentage__c,
+                       Pricebook2.Name
+                FROM PricebookEntry
+                WHERE Pricebook2Id = :standardPricebookId
+                  AND Product2Id IN :productIds
+                  AND IsActive = true
+            ]) {
+                stdPbeByProduct.put(pbe.Product2Id, pbe);
+            }
+        }
+
+        for (OpportunityLineItem oli : oppLines) {
+            if (oli.Product2Id == null) continue;
+            Boolean isService = (oli.Product2 != null && oli.Product2.Service_Item__c == 'Yes');
+            PricebookEntry stdPbe = stdPbeByProduct.get(oli.Product2Id);
+
+            // Non-service products require a Standard PricebookEntry to be
+            // quotable. Skip silently so the user can search-add a different
+            // SKU rather than seeing a broken row.
+            if (!isService && stdPbe == null) continue;
+
+            QuoteLineItemResult item = new QuoteLineItemResult();
+            item.productId = oli.Product2Id;
+            item.pricebookEntryId = stdPbe != null ? stdPbe.Id : oli.PricebookEntryId;
+            item.productName = oli.Product2 != null ? oli.Product2.Name : null;
+            item.productCode = oli.Product2 != null ? oli.Product2.ProductCode : null;
+            item.uom = (oli.Product2 != null && oli.Product2.QuantityUnitOfMeasure != null)
+                ? oli.Product2.QuantityUnitOfMeasure : 'Nos';
+            item.quantity = oli.Quantity;
+            item.unitPrice = oli.UnitPrice;
+            item.listPrice = stdPbe != null ? stdPbe.UnitPrice : oli.ListPrice;
+            // OpportunityLineItem.Discount isn't queried (it's read-only on
+            // some org configurations); derive from list-vs-unit instead.
+            if (item.listPrice != null && item.listPrice > 0 && oli.UnitPrice != null) {
+                Decimal delta = item.listPrice - oli.UnitPrice;
+                item.discount = delta > 0 ? (delta / item.listPrice) * 100 : 0;
+            } else {
+                item.discount = 0;
+            }
+            if (stdPbe != null) {
+                item.taxPercent = stdPbe.Tax__c != null ? stdPbe.Tax__c : 0;
+                item.maxDiscount = stdPbe.Max_Discount_Percentage__c;
+                item.sourcePricebookId = stdPbe.Id;
+                item.sourcePricebookName = stdPbe.Pricebook2 != null ? stdPbe.Pricebook2.Name : null;
+            } else {
+                item.taxPercent = 0;
+            }
+            item.isServiceItem = isService;
+            item.priceStatus = isService ? 'Not Required' : null;
+            item.lineDescription = (oli.Product2 != null) ? oli.Product2.Line_Description__c : null;
+            item.detailedDescription = (oli.Product2 != null) ? oli.Product2.Detailed_Description__c : null;
+            results.add(item);
+        }
+        return results;
     }
 
     private static List<PaymentTermResult> getDefaultPaymentTerms(String vertical) {
@@ -501,7 +588,7 @@ public with sharing class QuoteBuilderController {
         ctx.lineItems = new List<QuoteLineItemResult>();
         for (QuoteLineItem qli : [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
-                   Product2.QuantityUnitOfMeasure,
+                   Product2.QuantityUnitOfMeasure, Product2.Service_Item__c,
                    PricebookEntryId, PricebookEntry.Tax__c,
                    PricebookEntry.Max_Discount_Percentage__c,
                    Quantity, ListPrice, UnitPrice, Discount,
@@ -531,6 +618,7 @@ public with sharing class QuoteBuilderController {
             item.detailedDescription = qli.Product_Detailed_Description__c;
             item.sourcePricebookId = qli.Source_Pricebook_Ref__c;
             item.sourcePricebookName = qli.Source_Pricebook_Ref__r != null ? qli.Source_Pricebook_Ref__r.Name : '';
+            item.isServiceItem = (qli.Product2 != null && qli.Product2.Service_Item__c == 'Yes');
             ctx.lineItems.add(item);
         }
 
@@ -798,6 +886,7 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public String billingPostalCode;
         @AuraEnabled public String billingCountry;
         @AuraEnabled public List<PaymentTermResult> defaultPaymentTerms;
+        @AuraEnabled public List<QuoteLineItemResult> opportunityLineItems;
     }
 
     public class ShippingAddressResult {
@@ -911,6 +1000,7 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public String detailedDescription;
         @AuraEnabled public Id sourcePricebookId;
         @AuraEnabled public String sourcePricebookName;
+        @AuraEnabled public Boolean isServiceItem;
     }
 
     // ===== Quote Session (per-Visit) =====

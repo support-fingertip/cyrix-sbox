@@ -218,6 +218,20 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                     };
                 });
             }
+
+            // === PREFILL LINE ITEMS FROM OPPORTUNITY PRODUCTS ===
+            // When the parent Opportunity has products attached, seed the
+            // new-quote grid with them so the rep doesn't re-enter each SKU.
+            // Only runs on fresh quotes and only when the grid is still empty
+            // — never clobber anything the user has already added.
+            if (!this.isEditMode
+                && this.lineItems.length === 0
+                && Array.isArray(data.opportunityLineItems)
+                && data.opportunityLineItems.length > 0) {
+                this.lineItems = data.opportunityLineItems.map(
+                    (item, index) => this.buildRowFromServerItem(item, index)
+                );
+            }
         } catch (error) {
             this.showError('Error loading opportunity', this.reduceErrors(error));
         }
@@ -251,67 +265,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             };
 
             if (data.lineItems && data.lineItems.length > 0) {
-                this.lineItems = data.lineItems.map((item, index) => {
-                    rowCounter++;
-                    const base = (item.unitPrice || 0) * (item.quantity || 0);
-                    const discountAmt = base * ((item.discount || 0) / 100);
-                    const afterDiscount = base - discountAmt;
-                    const taxAmt = afterDiscount * ((item.taxPercent || 0) / 100);
-
-                    const disc = item.discount || 0;
-                    const isService = item.isServiceItem === true;
-                    // Edit-mode doesn't re-run the product search, so
-                    // tier PBE prices aren't available on the payload.
-                    // computePriceStatus will fall back to the listPrice
-                    // comparison for these lines; the live preview will
-                    // refresh the status on the first change.
-                    const tierPricesFromDb = [];
-                    // Legacy QLIs may still carry Quote-level values like 'Draft' or
-                    // 'Rejected' that aren't valid on the restricted line-item picklist.
-                    const VALID_LINE_STATUSES = ['Not Required', 'Approval Required', 'Approved'];
-                    // Service items (Service_Item picklist = Yes) never require
-                    // approval — ignore any stale server value that says otherwise.
-                    let priceStatus;
-                    if (isService) {
-                        priceStatus = 'Not Required';
-                    } else if (VALID_LINE_STATUSES.includes(item.priceStatus)) {
-                        priceStatus = item.priceStatus;
-                    } else {
-                        priceStatus = this.computePriceStatus(
-                            item.unitPrice, disc, item.listPrice, isService,
-                            item.taxPercent, tierPricesFromDb
-                        );
-                    }
-
-                    return {
-                        rowId: 'row-' + rowCounter,
-                        rowNumber: index + 1,
-                        productId: item.productId,
-                        pricebookEntryId: item.pricebookEntryId,
-                        productName: item.productName,
-                        productCode: item.productCode,
-                        uom: item.uom || 'Nos',
-                        quantity: item.quantity,
-                        listPrice: item.listPrice || item.unitPrice,
-                        unitPrice: item.unitPrice,
-                        discount: disc,
-                        taxPercent: item.taxPercent || 0,
-                        taxPercentDisplay: (item.taxPercent || 0) + '%',
-                        isServiceItem: isService,
-                        priceStatus: priceStatus,
-                        priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
-                        isApprovalRequired: priceStatus === 'Approval Required',
-                        lineTotal: afterDiscount + taxAmt,
-                        lineDescription: item.lineDescription || '',
-                        detailedDescription: item.detailedDescription || '',
-                        sourcePricebookId: item.sourcePricebookId || null,
-                        sourcePricebookName: item.sourcePricebookName || '',
-                        tierPrices: tierPricesFromDb,
-                        priceBadgeClass: this.getPriceBadgeClass(item.sourcePricebookName),
-                        priceBadgeLabel: this.getPriceBadgeLabel(item.sourcePricebookName),
-                        hasPriceSource: !!item.sourcePricebookName
-                    };
-                });
+                this.lineItems = data.lineItems.map((item, index) => this.buildRowFromServerItem(item, index));
             }
 
             if (data.paymentTerms && data.paymentTerms.length > 0) {
@@ -877,6 +831,67 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }
 
         return errors;
+    }
+
+    // Shared builder for grid rows sourced from the server — used by
+    // edit-mode QLI loading and by the new-quote flow when prefilling
+    // from the parent Opportunity's products.
+    buildRowFromServerItem(item, index) {
+        rowCounter++;
+        const disc = item.discount || 0;
+        const isService = item.isServiceItem === true;
+        const base = (item.unitPrice || 0) * (item.quantity || 0);
+        const discountAmt = base * (disc / 100);
+        const afterDiscount = base - discountAmt;
+        const taxAmt = afterDiscount * ((item.taxPercent || 0) / 100);
+
+        // Server doesn't ship tier PBE prices on load — computePriceStatus
+        // falls back to the listPrice comparison; the live preview will
+        // refresh the status on the first edit.
+        const tierPricesFromDb = [];
+        const VALID_LINE_STATUSES = ['Not Required', 'Approval Required', 'Approved'];
+        // Service items (Service_Item picklist = Yes) never require
+        // approval — ignore any stale server value that says otherwise.
+        let priceStatus;
+        if (isService) {
+            priceStatus = 'Not Required';
+        } else if (VALID_LINE_STATUSES.includes(item.priceStatus)) {
+            priceStatus = item.priceStatus;
+        } else {
+            priceStatus = this.computePriceStatus(
+                item.unitPrice, disc, item.listPrice, isService,
+                item.taxPercent, tierPricesFromDb
+            );
+        }
+
+        return {
+            rowId: 'row-' + rowCounter,
+            rowNumber: index + 1,
+            productId: item.productId,
+            pricebookEntryId: item.pricebookEntryId,
+            productName: item.productName,
+            productCode: item.productCode,
+            uom: item.uom || 'Nos',
+            quantity: item.quantity,
+            listPrice: item.listPrice || item.unitPrice,
+            unitPrice: item.unitPrice,
+            discount: disc,
+            taxPercent: item.taxPercent || 0,
+            taxPercentDisplay: (item.taxPercent || 0) + '%',
+            isServiceItem: isService,
+            priceStatus: priceStatus,
+            priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
+            isApprovalRequired: priceStatus === 'Approval Required',
+            lineTotal: afterDiscount + taxAmt,
+            lineDescription: item.lineDescription || '',
+            detailedDescription: item.detailedDescription || '',
+            sourcePricebookId: item.sourcePricebookId || null,
+            sourcePricebookName: item.sourcePricebookName || '',
+            tierPrices: tierPricesFromDb,
+            priceBadgeClass: this.getPriceBadgeClass(item.sourcePricebookName),
+            priceBadgeLabel: this.getPriceBadgeLabel(item.sourcePricebookName),
+            hasPriceSource: !!item.sourcePricebookName
+        };
     }
 
     // ===== PRICE STATUS =====
