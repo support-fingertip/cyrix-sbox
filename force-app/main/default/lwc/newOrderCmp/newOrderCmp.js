@@ -823,8 +823,8 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     //   back to comparing finalPrice <= listPrice for products that
     //   don't have any tier pricebooks configured.
     //
-    // Service lines stay 'Not Required' on the order — order service
-    // lines don't go through the same approval gate as quote lines.
+    // Service lines (Product's Service_Item picklist = Yes) always return
+    // 'Not Required' — the tier/list-price approval gate doesn't apply.
     computePriceStatus(unitPrice, discount, listPrice, isServiceItem, taxpercentage, tierPrices) {
         if (isServiceItem) return 'Not Required';
 
@@ -842,7 +842,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         }
 
         if (listPrice == null) return 'Not Required';
-    
+        return finalPrice <= listPrice ? 'Approval Required' : 'Not Required';
     }
 
     getPriceStatusBadgeClass(status) {
@@ -892,31 +892,42 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         this.dispatchEvent(new CloseActionScreenEvent());
 
         setTimeout(() => {
-            if (this.isEditMode) {
+            const target = this.resolveCancelTarget();
+            if (target) {
                 this[NavigationMixin.Navigate]({
                     type: 'standard__recordPage',
                     attributes: {
-                        recordId: this.editRecordId,
-                        objectApiName: 'Order',
+                        recordId: target.recordId,
+                        objectApiName: target.objectApiName,
                         actionName: 'view'
                     }
                 });
-            } else if (this.recordId) {
-                const prefix = this.recordId.substring(0, 3);
-                let objectApiName = 'Order';
-                if (prefix === '006') objectApiName = 'Opportunity';
-                else if (prefix === '001') objectApiName = 'Account';
-                else if (prefix === '0Q0') objectApiName = 'Quote';
+            } else {
+                // No parent record to return to — send the user to the
+                // Order home tab instead of a broken record URL.
                 this[NavigationMixin.Navigate]({
-                    type: 'standard__recordPage',
+                    type: 'standard__objectPage',
                     attributes: {
-                        recordId: this.recordId,
-                        objectApiName: objectApiName,
-                        actionName: 'view'
+                        objectApiName: 'Order',
+                        actionName: 'home'
                     }
                 });
             }
         }, 300);
+    }
+
+    resolveCancelTarget() {
+        if (this.isEditMode && this.editRecordId) {
+            return { recordId: this.editRecordId, objectApiName: 'Order' };
+        }
+        const id = this.recordId;
+        if (!id || typeof id !== 'string' || id.length < 3) return null;
+        const prefix = id.substring(0, 3);
+        if (prefix === '006') return { recordId: id, objectApiName: 'Opportunity' };
+        if (prefix === '001') return { recordId: id, objectApiName: 'Account' };
+        if (prefix === '0Q0') return { recordId: id, objectApiName: 'Quote' };
+        if (prefix === '801') return { recordId: id, objectApiName: 'Order' };
+        return null;
     }
 
     // ===== VALIDATION =====

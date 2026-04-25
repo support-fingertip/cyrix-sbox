@@ -40,6 +40,10 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     accountId;
     accountName = '';
     regionId;
+    // Mapped from Opportunity.Buisness_Vertical__c so the Quote form shows
+    // the parent's vertical. The on-form field is disabled; this value is
+    // what the form binds to.
+    businessVertical = null;
 
     // Default values for new quote (is_Active defaults to true so fresh quotes
     // are marked as the active one for the opportunity).
@@ -118,6 +122,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // returning undefined lets lightning-input-field fall back to the saved
     // record value.
     get defaultIsActive() { return this.isEditMode ? undefined : true; }
+    // Prefill Business Vertical from the parent Opportunity on new quotes.
+    // In edit mode fall through to the saved Quote value so we don't
+    // overwrite the record with a blank.
+    get defaultBusinessVertical() {
+        return this.isEditMode ? undefined : (this.businessVertical || undefined);
+    }
 
     // ===== CALCULATIONS =====
 
@@ -181,6 +191,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.accountId = data.accountId;
             this.accountName = data.accountName || '';
             this.regionId = data.regionId;
+            this.businessVertical = data.vertical || null;
 
             // === AUTO-POPULATE BILL TO ADDRESS FROM ACCOUNT ===
             if (!this.isEditMode && this.accountId) {
@@ -258,12 +269,19 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                     // Legacy QLIs may still carry Quote-level values like 'Draft' or
                     // 'Rejected' that aren't valid on the restricted line-item picklist.
                     const VALID_LINE_STATUSES = ['Not Required', 'Approval Required', 'Approved'];
-                    const priceStatus = VALID_LINE_STATUSES.includes(item.priceStatus)
-                        ? item.priceStatus
-                        : this.computePriceStatus(
+                    // Service items (Service_Item picklist = Yes) never require
+                    // approval — ignore any stale server value that says otherwise.
+                    let priceStatus;
+                    if (isService) {
+                        priceStatus = 'Not Required';
+                    } else if (VALID_LINE_STATUSES.includes(item.priceStatus)) {
+                        priceStatus = item.priceStatus;
+                    } else {
+                        priceStatus = this.computePriceStatus(
                             item.unitPrice, disc, item.listPrice, isService,
                             item.taxPercent, tierPricesFromDb
                         );
+                    }
 
                     return {
                         rowId: 'row-' + rowCounter,
@@ -788,26 +806,42 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         this.dispatchEvent(new CloseActionScreenEvent());
 
         setTimeout(() => {
-            if (this.isEditMode) {
+            const target = this.resolveCancelTarget();
+            if (target) {
                 this[NavigationMixin.Navigate]({
                     type: 'standard__recordPage',
                     attributes: {
-                        recordId: this.editRecordId,
-                        objectApiName: 'Quote',
+                        recordId: target.recordId,
+                        objectApiName: target.objectApiName,
                         actionName: 'view'
                     }
                 });
             } else {
+                // No parent record to return to (e.g. launched directly from
+                // the app launcher). Land on the Quote home tab so the user
+                // doesn't see a "page doesn't exist" dead end.
                 this[NavigationMixin.Navigate]({
-                    type: 'standard__recordPage',
+                    type: 'standard__objectPage',
                     attributes: {
-                        recordId: this.recordId,
-                        objectApiName: 'Opportunity',
-                        actionName: 'view'
+                        objectApiName: 'Quote',
+                        actionName: 'home'
                     }
                 });
             }
         }, 300);
+    }
+
+    resolveCancelTarget() {
+        if (this.isEditMode && this.editRecordId) {
+            return { recordId: this.editRecordId, objectApiName: 'Quote' };
+        }
+        const id = this.recordId;
+        if (!id || typeof id !== 'string' || id.length < 3) return null;
+        const prefix = id.substring(0, 3);
+        if (prefix === '006') return { recordId: id, objectApiName: 'Opportunity' };
+        if (prefix === '001') return { recordId: id, objectApiName: 'Account' };
+        if (prefix === '0Q0') return { recordId: id, objectApiName: 'Quote' };
+        return null;
     }
 
     // ===== VALIDATION =====
@@ -860,8 +894,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     //   / Price list5 anchor) as the last-resort fallback for products
     //   that don't have any tier pricebooks populated.
     //
-    // Service lines always return 'Approval Required' per the business
-    // rule ("approval required except when Service_Item is No").
+    // Service lines (Product's Service_Item picklist = Yes) always return
+    // 'Not Required' — the tier/list-price approval gate doesn't apply.
     computePriceStatus(unitPrice, discount, listPrice, isServiceItem, taxpercentage, tierPrices) {
         if (isServiceItem) return 'Not Required';
 
