@@ -609,7 +609,7 @@
                                                 <apex:param value="{!quote.Contract_Period_From_Date__c}" />
                                             </apex:outputText>
                                         </apex:outputPanel>
-                                        to
+                                        &nbsp;to&nbsp;
                                         <apex:outputPanel rendered="{!quote.Contract_Period_End_Date__c != null}">
                                             <apex:outputText value="{0,date,dd/MM/yyyy}">
                                                 <apex:param value="{!quote.Contract_Period_End_Date__c}" />
@@ -838,7 +838,7 @@
                                                 <apex:param value="{!quote.Contract_Period_From_Date__c}" />
                                             </apex:outputText>
                                         </apex:outputPanel>
-                                        to
+                                        &nbsp;to&nbsp;
                                         <apex:outputPanel rendered="{!quote.Contract_Period_End_Date__c != null}">
                                             <apex:outputText value="{0,date,dd/MM/yyyy}">
                                                 <apex:param value="{!quote.Contract_Period_End_Date__c}" />
