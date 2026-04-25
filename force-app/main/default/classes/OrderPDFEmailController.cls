@@ -1,3 +1,7 @@
+/**
+ * Send Order Email — Apex backend for the sendOrderPDF LWC quick action.
+ * Sends a plain HTML email about the order and logs it as a Task.
+ */
 public with sharing class OrderPDFEmailController {
 
     /**
