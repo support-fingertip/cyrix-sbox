@@ -1,3 +1,5 @@
+// Send Order Email — Order quick action LWC.
+// Calls OrderPDFEmailController.sendOrderEmail to send + log the email.
 import { LightningElement, api, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { CloseActionScreenEvent } from 'lightning/actions';
