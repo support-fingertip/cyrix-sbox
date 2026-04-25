@@ -1,3 +1,5 @@
+// Send Order Email — Order quick action.
+// Bundle redeploy marker.
 import { LightningElement, api, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { CloseActionScreenEvent } from 'lightning/actions';
