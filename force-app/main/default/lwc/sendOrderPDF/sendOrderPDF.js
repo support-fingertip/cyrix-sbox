@@ -6,7 +6,6 @@ import sendOrderEmail from '@salesforce/apex/OrderPDFEmailController.sendOrderEm
 
 import ORDER_NAME from '@salesforce/schema/Order.Name';
 import ORDER_NUMBER from '@salesforce/schema/Order.OrderNumber';
-import ORDER_QUOTE_ID_C from '@salesforce/schema/Order.Quote_Id__c';
 import ORDER_OWNER_ID from '@salesforce/schema/Order.OwnerId';
 import ACCOUNT_NAME from '@salesforce/schema/Order.Account.Name';
 import BILLTO_NAME from '@salesforce/schema/Order.BillToContact.Name';
@@ -19,7 +18,7 @@ import USER_EMAIL from '@salesforce/schema/User.Email';
 import USER_TITLE from '@salesforce/schema/User.Title';
 
 const ORDER_FIELDS = [
-    ORDER_NAME, ORDER_NUMBER, ORDER_QUOTE_ID_C, ORDER_OWNER_ID,
+    ORDER_NAME, ORDER_NUMBER, ORDER_OWNER_ID,
     ACCOUNT_NAME,
     BILLTO_NAME, BILLTO_EMAIL,
     OPPORTUNITY_NAME, OPPORTUNITY_EMAIL
@@ -41,7 +40,6 @@ export default class SendOrderPDF extends LightningElement {
 
     _orderName = '';
     _orderNumber = '';
-    _quoteIdC = '';
     _accountName = '';
     _contactName = '';
     _contactEmail = '';
@@ -64,7 +62,6 @@ export default class SendOrderPDF extends LightningElement {
         if (data) {
             this._orderName = getFieldValue(data, ORDER_NAME) || '';
             this._orderNumber = getFieldValue(data, ORDER_NUMBER) || '';
-            this._quoteIdC = getFieldValue(data, ORDER_QUOTE_ID_C) || '';
             this._accountName = getFieldValue(data, ACCOUNT_NAME) || '';
             this._contactName = getFieldValue(data, BILLTO_NAME) || '';
             this._contactEmail = getFieldValue(data, BILLTO_EMAIL) || '';
@@ -95,7 +92,7 @@ export default class SendOrderPDF extends LightningElement {
     buildDefaults() {
         this.toAddress = this._opportunityEmail || this._contactEmail || this._ownerEmail || '';
 
-        const orderRef = this._quoteIdC || this._orderNumber || this._orderName;
+        const orderRef = this._orderNumber || this._orderName;
         const contextName = this._opportunityName || this._accountName || '';
         if (orderRef && contextName) {
             this.subject = 'Order ' + orderRef + ' - ' + contextName;
