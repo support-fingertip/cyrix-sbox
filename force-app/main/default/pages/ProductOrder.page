@@ -97,7 +97,7 @@
                         <span style="color: #000000;">DATE:</span>
                         <span style="color: #C8102E;">
                             <apex:outputText value="{0,date,dd/MM/yyyy}">
-                                <apex:param value="{!order.Quote_Date__c}" />
+                                <apex:param value="{!order.EffectiveDate}" />
                             </apex:outputText>
                         </span>
                     </td>
@@ -275,7 +275,7 @@
 
                     <div style="margin: 10px 0 3px 0;">
                         <span style="font-weight: bold; padding-bottom: 12px;">Validity</span><br/>
-                        This quotation is valid for <strong>{!order.Quote_Valid_Till_in_days__c}</strong> from the date of issue and is subject to reconfirmation thereafter.
+                        This order is effective from the date of issue and remains in force until completion or supersession by a revised order.
                     </div>
 
                     <div style="margin: 10px 0 10px 0;">
@@ -456,7 +456,7 @@
 
                     <div style="margin: 10px 0 3px 0;">
                         <span style="font-weight: bold;">Validity</span><br/>
-                        This quotation is valid for <strong>{!order.Quote_Valid_Till_in_days__c}</strong> from the date of issue and is subject to reconfirmation thereafter.
+                        This order is effective from the date of issue and remains in force until completion or supersession by a revised order.
                     </div>
 
                     <div style="margin: 10px 0 10px 0;">
