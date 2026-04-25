@@ -13,6 +13,11 @@ import savePaymentTerms from '@salesforce/apex/QuoteBuilderController.savePaymen
 let rowCounter = 0;
 let ptCounter = 0;
 
+const STEP_LABELS = [
+    'Quote info', 'Addresses', 'Products', 'Payment', 'Notes', 'Review'
+];
+const TOTAL_STEPS = STEP_LABELS.length;
+
 export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     @api recordId;
 
@@ -68,6 +73,10 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // Contract period dates (tracked locally for cross-field validation)
     contractFromDate = null;
     contractEndDate = null;
+
+    // Wizard state
+    currentStep = 1;
+    sameAsBilling = false;
 
     // ===== PICKLIST OPTIONS =====
 
@@ -127,6 +136,126 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // overwrite the record with a blank.
     get defaultBusinessVertical() {
         return this.isEditMode ? undefined : (this.businessVertical || undefined);
+    }
+
+    // ===== WIZARD =====
+
+    get currentStepLabel() {
+        return STEP_LABELS[this.currentStep - 1] || '';
+    }
+    get progressPercent() {
+        return Math.round(((this.currentStep - 1) / (TOTAL_STEPS - 1)) * 100);
+    }
+    get progressFillStyle() {
+        return `width: ${this.progressPercent}%;`;
+    }
+    get isFirstStep() { return this.currentStep === 1; }
+    get isLastStep() { return this.currentStep === TOTAL_STEPS; }
+
+    get stepList() {
+        return STEP_LABELS.map((label, idx) => {
+            const num = idx + 1;
+            let cssClass = 'qw-step';
+            if (num === this.currentStep) cssClass += ' active';
+            else if (num < this.currentStep) cssClass += ' done';
+            return { num, label, cssClass };
+        });
+    }
+
+    get step1Class() { return this.stepClass(1); }
+    get step2Class() { return this.stepClass(2); }
+    get step3Class() { return this.stepClass(3); }
+    get step4Class() { return this.stepClass(4); }
+    get step5Class() { return this.stepClass(5); }
+    get step6Class() { return this.stepClass(6); }
+    stepClass(n) {
+        return n === this.currentStep ? 'qw-step-content active' : 'qw-step-content';
+    }
+
+    handleStepNext() {
+        if (this.currentStep >= TOTAL_STEPS) return;
+        const blocker = this.validateCurrentStep();
+        if (blocker) {
+            this.showError('Cannot continue', blocker);
+            return;
+        }
+        this.currentStep += 1;
+        this.scrollShellTop();
+    }
+
+    // Returns a blocker message if the current step isn't ready to leave,
+    // or null when it's safe to advance. Step 6 has no Continue (Submit
+    // takes over) so we don't validate it here.
+    validateCurrentStep() {
+        if (this.currentStep === 1 && this.isContractDateInvalid) {
+            return 'Contract End Date must be greater than From Date.';
+        }
+        if (this.currentStep === 3 && this.lineItems.length === 0) {
+            return 'Add at least one product before continuing.';
+        }
+        if (this.currentStep === 4 && this.paymentTerms.length > 0 && this.totalPercentage !== 100) {
+            return `Payment terms must total 100% (currently ${this.totalPercentage}%).`;
+        }
+        return null;
+    }
+    handleStepBack() {
+        if (this.currentStep > 1) {
+            this.currentStep -= 1;
+            this.scrollShellTop();
+        }
+    }
+    handleStepJump(event) {
+        const target = parseInt(event.currentTarget.dataset.step, 10);
+        if (!target || target === this.currentStep) return;
+        // Allow jumping back freely; only allow forward jumps to steps the
+        // user has already passed (current marker excluded so they can't
+        // skip ahead without going through Continue).
+        if (target < this.currentStep) {
+            this.currentStep = target;
+            this.scrollShellTop();
+        }
+    }
+    scrollShellTop() {
+        // Scroll the wizard shell into view so the user lands at the top
+        // of the new step on long mobile pages.
+        try {
+            const shell = this.template.querySelector('.qw-shell');
+            if (shell && shell.scrollIntoView) {
+                shell.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    handleSameAsBillingChange(event) {
+        this.sameAsBilling = !!event.target.checked;
+        if (this.sameAsBilling) {
+            this.shippingAddress = { ...this.billingAddress };
+        }
+    }
+
+    // ===== REVIEW STEP DISPLAY =====
+
+    get accountNameDisplay() { return this.accountName || '—'; }
+    get businessVerticalDisplay() { return this.businessVertical || '—'; }
+    get contractDateDisplay() {
+        if (!this.contractFromDate && !this.contractEndDate) return '—';
+        return `${this.contractFromDate || '—'} → ${this.contractEndDate || '—'}`;
+    }
+    get billingSummary() { return this.formatAddress(this.billingAddress); }
+    get shippingSummary() { return this.formatAddress(this.shippingAddress); }
+    formatAddress(a) {
+        if (!a) return '—';
+        const parts = [a.street, a.city, a.state, a.postalCode].filter(Boolean);
+        return parts.length ? parts.join(', ') : '—';
+    }
+
+    // ===== PAYMENT TOTAL STRIP =====
+
+    get paymentTotalClass() {
+        return this.totalPercentage === 100 ? 'qw-term-total ok' : 'qw-term-total err';
+    }
+    get paymentTotalText() {
+        return this.totalPercentage === 100 ? 'Ready to proceed' : 'Must equal 100%';
     }
 
     // ===== CALCULATIONS =====
@@ -296,6 +425,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             postalCode: d.postalCode || '',
             country: d.country || 'IN'
         };
+        // When the user has opted in to "same as billing", keep shipping
+        // mirrored as the billing fields are edited.
+        if (this.sameAsBilling) {
+            this.shippingAddress = { ...this.billingAddress };
+        }
     }
 
     handleShippingAddressChange(event) {
@@ -606,6 +740,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             productId: product.productId,
             pricebookEntryId: product.pricebookEntryId,
             productName: product.productName,
+            productInitial: this.getProductInitial(product.productName),
             productCode: product.productCode,
             uom: product.uom || 'Nos',
             quantity: 1,
@@ -617,6 +752,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             isServiceItem: isService,
             priceStatus: priceStatus,
             priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
+            qwStatusClass: this.getQwStatusClass(priceStatus),
             isApprovalRequired: priceStatus === 'Approval Required',
             lineTotal: (product.unitPrice || 0) * (1 + ((product.taxPercent || 0) / 100)),
             lineDescription: product.lineDescription || '',
@@ -700,6 +836,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 );
                 updated.priceStatus = live;
                 updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(live);
+                updated.qwStatusClass = this.getQwStatusClass(live);
                 updated.isApprovalRequired = live === 'Approval Required';
             }
 
@@ -737,6 +874,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 const updated = { ...it };
                 updated.priceStatus = preview.priceStatus || updated.priceStatus;
                 updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(updated.priceStatus);
+                updated.qwStatusClass = this.getQwStatusClass(updated.priceStatus);
                 updated.isApprovalRequired = updated.priceStatus === 'Approval Required';
                 updated.sourcePricebookId = preview.resolvedPricebookId || updated.sourcePricebookId;
                 updated.sourcePricebookName = resolvedPb;
@@ -870,6 +1008,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             productId: item.productId,
             pricebookEntryId: item.pricebookEntryId,
             productName: item.productName,
+            productInitial: this.getProductInitial(item.productName),
             productCode: item.productCode,
             uom: item.uom || 'Nos',
             quantity: item.quantity,
@@ -881,6 +1020,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             isServiceItem: isService,
             priceStatus: priceStatus,
             priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
+            qwStatusClass: this.getQwStatusClass(priceStatus),
             isApprovalRequired: priceStatus === 'Approval Required',
             lineTotal: afterDiscount + taxAmt,
             lineDescription: item.lineDescription || '',
@@ -947,6 +1087,25 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             case 'Not Required':
             default: return base + ' slds-theme_shade';
         }
+    }
+
+    // Wizard-style status pill (qw-status-badge variants).
+    // Approved / Not Required render as the green default; Approval
+    // Required surfaces the amber pending pill so the rep notices.
+    getQwStatusClass(priceStatus) {
+        switch (priceStatus) {
+            case 'Approval Required': return 'qw-status-badge pending';
+            case 'Approved':
+            case 'Not Required':
+            default:                  return 'qw-status-badge';
+        }
+    }
+
+    // First-letter thumbnail label for the line-item card head.
+    getProductInitial(name) {
+        if (!name || typeof name !== 'string') return '?';
+        const ch = name.trim().charAt(0);
+        return ch ? ch.toUpperCase() : '?';
     }
 
     // ===== PRICING BADGE HELPERS =====
