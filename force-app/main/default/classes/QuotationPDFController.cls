@@ -37,6 +37,13 @@ public with sharing class QuotationPDFController {
     public Map<Id, Decimal> lineGstAmount { get; set; }
     public Map<Id, Decimal> lineGrandTotal { get; set; }
 
+    // Quote.Name pre-split on '/' so the PDF header can color each segment
+    // (C-{code} / {vertical} / QTN-{NNN} / {FY}) independently.
+    public String quoteNamePart1 { get; set; }
+    public String quoteNamePart2 { get; set; }
+    public String quoteNamePart3 { get; set; }
+    public String quoteNamePart4 { get; set; }
+
 
     public QuotationPDFController(ApexPages.StandardController stdController) {
         Id quoteId = stdController.getId();
@@ -82,7 +89,14 @@ BillingPostalCode,Business_Vertical__c,
         }
 
         quote = quotes[0];
-       
+
+        if (String.isNotBlank(quote.Name)) {
+            List<String> parts = quote.Name.split('/');
+            quoteNamePart1 = parts.size() > 0 ? parts[0] : '';
+            quoteNamePart2 = parts.size() > 1 ? parts[1] : '';
+            quoteNamePart3 = parts.size() > 2 ? parts[2] : '';
+            quoteNamePart4 = parts.size() > 3 ? parts[3] : '';
+        }
 
         grandTotalInWords = convertNumberToWords(quote.grandTotal);
 

@@ -91,7 +91,7 @@
             <table class="header-inner overlaytext"  style="index:10;">
                 <tr>
                     <td style="width: 80%; text-align: left;">
-                        <span style="color: #C8102E;">{!quote.Name}</span>
+                        <span style="color: #C8102E;">{!quoteNamePart1}</span><span style="color: #000000;">/{!quoteNamePart2}/</span><span style="color: #C8102E;">{!quoteNamePart3}</span><span style="color: #000000;">/{!quoteNamePart4}</span>
                     </td>
                     <td style="width: 20%; text-align: left; padding-left: 40px;">
                         <span style="color: #000000;">DATE:</span>
