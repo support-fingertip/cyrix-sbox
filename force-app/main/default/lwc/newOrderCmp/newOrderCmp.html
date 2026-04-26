@@ -1,115 +1,130 @@
 <template>
-    <!-- LOADING OVERLAY -->
     <template if:true={isLoading}>
         <div class="loading-overlay">
             <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
         </div>
     </template>
 
-    <div class="order-builder">
-        <!-- PAGE HEADER -->
-        <div class="page-header slds-p-around_medium">
-            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
-                <div>
-                    <h1 class="slds-text-heading_medium page-title">{pageTitle}</h1>
-                    <p class="slds-text-body_small slds-m-top_xxx-small page-subtitle">
-                        <template if:false={isEditMode}>Fill in the details below to create a new sales order.</template>
-                        <template if:true={isEditMode}>Modify the order details and save your changes.</template>
-                    </p>
-                </div>
-                <div class="slds-grid slds-grid_vertical-align-center">
-                    <template if:true={accountName}>
-                        <div class="customer-badge slds-m-right_small">
-                            <lightning-icon icon-name="standard:account" size="x-small" class="slds-m-right_xx-small"></lightning-icon>
-                            <span>{accountName}</span>
+    <div class="qw-canvas">
+        <div class="qw-shell">
+
+            <!-- ========== HEADER ========== -->
+            <div class="qw-header">
+                <div class="qw-header-top">
+                    <div class="qw-header-icon">
+                        <lightning-icon icon-name="utility:orders" size="small"></lightning-icon>
+                    </div>
+                    <div class="qw-header-text">
+                        <div class="qw-header-title">{pageTitle}</div>
+                        <div class="qw-header-sub">
+                            <span>Step {currentStep} of 6 · {currentStepLabel}</span>
+                            <template if:true={accountName}>
+                                <span class="qw-customer-chip">
+                                    <lightning-icon icon-name="utility:company" size="xx-small"></lightning-icon>
+                                    {accountName}
+                                </span>
+                            </template>
                         </div>
+                    </div>
+                    <button type="button" class="qw-close-btn" title="Cancel" onclick={handleCancel}>×</button>
+                </div>
+                <div class="qw-progress-track">
+                    <div class="qw-progress-fill" style={progressFillStyle}></div>
+                </div>
+                <div class="qw-progress-meta">
+                    <span>{progressPercent}% complete</span>
+                    <template if:true={isEditMode}>
+                        <span>Editing existing order</span>
                     </template>
-                    <lightning-icon icon-name="standard:orders" size="medium"></lightning-icon>
                 </div>
             </div>
-        </div>
 
-        <!-- RECORD EDIT FORM (HEADER-LEVEL) -->
-        <lightning-record-edit-form
-            object-api-name="Order"
-            record-id={editRecordId}
-            onsubmit={handleFormSubmit}
-            onsuccess={handleFormSuccess}
-            onerror={handleFormError}
-            density="comfy">
+            <!-- ========== STEPPER ========== -->
+            <div class="qw-stepper">
+                <template for:each={stepList} for:item="s">
+                    <div key={s.num} class={s.cssClass} data-step={s.num} onclick={handleStepJump}>
+                        <span class="qw-step-dot">{s.num}</span>
+                        <span class="qw-step-label">{s.label}</span>
+                    </div>
+                </template>
+            </div>
 
-            <!-- ===== SECTION: ORDER INFORMATION ===== -->
-            <div class="section-card">
-                <div class="section-header">
-                    <lightning-icon icon-name="utility:description" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                    <span>Order Information</span>
-                </div>
-                <div class="section-body">
+            <!-- ========== BODY ========== -->
+            <div class="qw-body">
+                <lightning-record-edit-form
+                    object-api-name="Order"
+                    record-id={editRecordId}
+                    onsubmit={handleFormSubmit}
+                    onsuccess={handleFormSuccess}
+                    onerror={handleFormError}
+                    density="comfy">
+
+                    <!-- Hidden Name field -->
                     <div class="slds-hide">
                         <lightning-input-field field-name="Name" value={orderName}></lightning-input-field>
                     </div>
-                    <div class="slds-grid slds-wrap slds-gutters_small">
-                        <div class="slds-col slds-size_1-of-1 slds-p-around_x-small quote-lookup-row">
-                            <lightning-input-field
-                                field-name="QuoteId"
-                                value={defaultSourceQuoteId}
-                                disabled={isQuoteLocked}
-                                required
-                                onchange={handleQuoteChange}>
-                            </lightning-input-field>
-                        </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_x-small">
-                            <lightning-input-field field-name="EffectiveDate" value={defaultEffectiveDate} required></lightning-input-field>
-                        </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_x-small">
-                            <lightning-input-field field-name="AccountId" value={defaultAccountId} disabled required></lightning-input-field>
-                        </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="OpportunityId" value={defaultOpportunityId} disabled></lightning-input-field>
-                        </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="Business_Vertical__c" value={defaultBusinessVertical} disabled></lightning-input-field>
-                        </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="Sub_Vertical__c" value={defaultSubVertical} disabled></lightning-input-field>
-                        </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="Shipping_Mode__c" value={defaultShippingMode}></lightning-input-field>
-                        </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="Delivery__c" value={defaultDelivery}></lightning-input-field>
-                        </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="Contract_Period_From_Date__c" value={defaultContractFrom} disabled></lightning-input-field>
-                        </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="Contract_Period_End_Date__c" value={defaultContractEnd} disabled></lightning-input-field>
-                        </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="EndDate"></lightning-input-field>
-                        </div>
-                        <div class="slds-col slds-size_1-of-1 slds-p-around_x-small">
-                            <lightning-input-field field-name="Description"></lightning-input-field>
+
+                    <!-- ===== STEP 1: ORDER INFO ===== -->
+                    <div class={step1Class}>
+                        <div class="qw-section-title">Order information</div>
+                        <div class="qw-section-sub">Pick the source Quote — account, opportunity, verticals and line items follow.</div>
+                        <div class="qw-grid-2">
+                            <div class="qw-field">
+                                <template if:true={isEditMode}>
+                                    <lightning-input-field
+                                        field-name="QuoteId"
+                                        value={defaultSourceQuoteId}
+                                        disabled
+                                        required>
+                                    </lightning-input-field>
+                                </template>
+                                <template if:false={isEditMode}>
+                                    <lightning-record-picker
+                                        label="Quote"
+                                        placeholder="Search quotes…"
+                                        object-api-name="Quote"
+                                        value={defaultSourceQuoteId}
+                                        onchange={handleQuoteChange}
+                                        required>
+                                    </lightning-record-picker>
+                                </template>
+                            </div>
+                            <div class="qw-field"><lightning-input-field field-name="EffectiveDate" value={defaultEffectiveDate} required></lightning-input-field></div>
+                            <div class="qw-field"><lightning-input-field field-name="EndDate"></lightning-input-field></div>
+                            <div class="qw-field"><lightning-input-field field-name="AccountId" value={defaultAccountId} disabled required></lightning-input-field></div>
+                            <div class="qw-field"><lightning-input-field field-name="OpportunityId" value={defaultOpportunityId} disabled></lightning-input-field></div>
+                            <div class="qw-field">
+                                <div class="qw-field-label">Business Vertical</div>
+                                <div class="qw-readonly-input">{businessVerticalDisplay}</div>
+                            </div>
+                            <div class="qw-field">
+                                <div class="qw-field-label">Sub Vertical</div>
+                                <div class="qw-readonly-input">{subVerticalDisplay}</div>
+                            </div>
+                            <div class="qw-field"><lightning-input-field field-name="Shipping_Mode__c" value={defaultShippingMode}></lightning-input-field></div>
+                            <div class="qw-field"><lightning-input-field field-name="Delivery__c" value={defaultDelivery}></lightning-input-field></div>
+                            <div class="qw-field"><lightning-input-field field-name="Contract_Period_From_Date__c" value={defaultContractFrom} disabled></lightning-input-field></div>
+                            <div class="qw-field"><lightning-input-field field-name="Contract_Period_End_Date__c" value={defaultContractEnd} disabled></lightning-input-field></div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- ===== SECTION: BILL TO / SHIP TO ===== -->
-            <div class="section-card">
-                <div class="section-header">
-                    <lightning-icon icon-name="utility:location" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                    <span>Bill To / Ship To</span>
-                </div>
-                <div class="section-body">
-                    <div class="slds-grid slds-wrap slds-gutters_small">
-                        <!-- Bill To -->
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                            <div class="address-block slds-p-around_x-small">
-                                <h3 class="address-label slds-m-bottom_xx-small">
-                                    <lightning-icon icon-name="utility:company" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
-                                    Bill To
-                                </h3>
+                    <!-- ===== STEP 2: ADDRESSES ===== -->
+                    <div class={step2Class}>
+                        <div class="qw-section-title">Addresses</div>
+                        <div class="qw-section-sub">Where to invoice, where to deliver.</div>
+                        <label class="qw-same-addr">
+                            <input type="checkbox" checked={sameAsBilling} onchange={handleSameAsBillingChange} />
+                            <span>Shipping address is the same as billing</span>
+                        </label>
+                        <div class="qw-bill-ship">
+                            <div class="qw-card">
+                                <div class="qw-card-head">
+                                    <span class="qw-card-icon">
+                                        <lightning-icon icon-name="utility:company" size="xx-small"></lightning-icon>
+                                    </span>
+                                    Bill to
+                                    <span class="qw-card-sub">Invoice recipient</span>
+                                </div>
                                 <c-address-input
                                     label="Billing Address"
                                     name={billingAddress.name}
@@ -122,15 +137,14 @@
                                     onaddresschange={handleBillingAddressChange}>
                                 </c-address-input>
                             </div>
-                        </div>
-
-                        <!-- Ship To -->
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                            <div class="address-block slds-p-around_x-small">
-                                <h3 class="address-label slds-m-bottom_xx-small">
-                                    <lightning-icon icon-name="utility:shipping" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
-                                    Ship To
-                                </h3>
+                            <div class="qw-card">
+                                <div class="qw-card-head">
+                                    <span class="qw-card-icon">
+                                        <lightning-icon icon-name="utility:shipping" size="xx-small"></lightning-icon>
+                                    </span>
+                                    Ship to
+                                    <span class="qw-card-sub">Delivery location</span>
+                                </div>
                                 <c-address-input
                                     label="Shipping Address"
                                     name={shippingAddress.name}
@@ -145,301 +159,306 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- ===== SECTION: PRODUCT SEARCH (filter = Product Type) ===== -->
-            <div class="section-card">
-                <div class="section-header">
-                    <lightning-icon icon-name="utility:search" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                    <span>Add Products</span>
-                </div>
-                <div class="section-body">
-                    <div class="slds-grid slds-wrap slds-gutters_small slds-grid_vertical-align-end">
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12 slds-p-around_x-small">
+                    <!-- ===== STEP 3: PRODUCTS ===== -->
+                    <div class={step3Class}>
+                        <div class="qw-section-title">Products</div>
+                        <div class="qw-section-sub">Edit the inherited line items or search the catalog to add more.</div>
+
+                        <div class="qw-product-search">
                             <lightning-input
-                                label="Search Products"
+                                label="Search products"
                                 value={searchTerm}
                                 onchange={handleSearchTermChange}
                                 onkeydown={handleSearchKeydown}
-                                placeholder="Search by name or code..."
+                                placeholder="Search by name or code…"
                                 type="text">
                             </lightning-input>
-                        </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-p-around_x-small">
                             <lightning-combobox
-                                label="Product Type"
+                                label="Product type"
                                 value={categoryFilter}
                                 options={categoryOptions}
                                 onchange={handleCategoryFilterChange}
-                                placeholder="All Product Types">
+                                placeholder="All types">
                             </lightning-combobox>
+                            <button type="button" class="qw-btn primary" onclick={handleSearch} disabled={isSearchDisabled}>Search</button>
                         </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-p-around_x-small">
-                            <lightning-button
-                                label="Search"
-                                variant="brand"
-                                icon-name="utility:search"
-                                onclick={handleSearch}
-                                disabled={isSearchDisabled}
-                                class="full-width-btn">
-                            </lightning-button>
-                        </div>
-                    </div>
 
-                    <!-- Search Results -->
-                    <template if:true={showSearchResults}>
-                        <div class="search-results slds-m-top_small">
+                        <template if:true={showSearchResults}>
                             <template if:true={hasSearchResults}>
-                                <div class="table-scroll">
-                                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped slds-table_fixed-layout">
-                                        <thead>
-                                            <tr class="slds-line-height_reset">
-                                                <th scope="col" style="width:22%"><div class="slds-truncate">Product Name</div></th>
-                                                <th scope="col" style="width:10%"><div class="slds-truncate">Code</div></th>
-                                                <th scope="col" style="width:12%"><div class="slds-truncate">Category</div></th>
-                                                <th scope="col" style="width:14%"><div class="slds-truncate">Make / Model</div></th>
-                                                <th scope="col" style="width:12%"><div class="slds-truncate">Unit Price</div></th>
-                                                <th scope="col" style="width:10%"><div class="slds-truncate">HSN</div></th>
-                                                <th scope="col" style="width:10%"><div class="slds-truncate">Tax %</div></th>
-                                                <th scope="col" style="width:10%"><div class="slds-truncate">Action</div></th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <template for:each={searchResults} for:item="prod">
-                                                <tr key={prod.pricebookEntryId}>
-                                                    <td><div class="slds-truncate" title={prod.productName}>{prod.productName}</div></td>
-                                                    <td><div class="slds-truncate">{prod.productCode}</div></td>
-                                                    <td><div class="slds-truncate">{prod.category}</div></td>
-                                                    <td><div class="slds-truncate">{prod.make} {prod.model}</div></td>
-                                                    <td><div class="slds-truncate">{prod.formattedPrice}</div></td>
-                                                    <td><div class="slds-truncate">{prod.hsnCode}</div></td>
-                                                    <td><div class="slds-truncate">{prod.formattedTax}</div></td>
-                                                    <td>
-                                                        <lightning-button-icon
-                                                            icon-name="utility:add"
-                                                            alternative-text="Add"
-                                                            variant="brand"
-                                                            size="small"
-                                                            data-id={prod.pricebookEntryId}
-                                                            onclick={handleAddProduct}>
-                                                        </lightning-button-icon>
-                                                    </td>
+                                <div class="qw-search-results">
+                                    <div class="qw-table-scroll">
+                                        <table class="qw-search-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Product</th>
+                                                    <th>Code</th>
+                                                    <th>Category</th>
+                                                    <th>Unit price</th>
+                                                    <th>Tax %</th>
+                                                    <th class="add-cell"></th>
                                                 </tr>
-                                            </template>
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                <template for:each={searchResults} for:item="prod">
+                                                    <tr key={prod.pricebookEntryId}>
+                                                        <td>{prod.productName}</td>
+                                                        <td>{prod.productCode}</td>
+                                                        <td>{prod.category}</td>
+                                                        <td>{prod.formattedPrice}</td>
+                                                        <td>{prod.formattedTax}</td>
+                                                        <td class="add-cell">
+                                                            <button type="button" class="qw-btn primary" data-id={prod.pricebookEntryId} onclick={handleAddProduct}>+ Add</button>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </template>
                             <template if:true={noSearchResults}>
-                                <div class="slds-text-align_center slds-p-around_medium slds-text-color_weak">
-                                    <lightning-icon icon-name="utility:info" size="small" class="slds-m-right_x-small"></lightning-icon>
-                                    No products found matching your search.
-                                </div>
+                                <div class="qw-search-empty">No products found matching your search.</div>
                             </template>
+                        </template>
+
+                        <div class="qw-line-items-label">
+                            Line items
+                            <span class="qw-count-badge">{lineItemCount}</span>
                         </div>
-                    </template>
-                </div>
-            </div>
 
-            <!-- ===== TWO-COLUMN LAYOUT: LINE ITEMS + TERMS (LEFT), SUMMARY (RIGHT) ===== -->
-            <div class="main-content-grid">
-              <div class="main-content-left">
-
-            <!-- ===== SECTION: LINE ITEMS ===== -->
-            <div class="section-card">
-                <div class="section-header">
-                    <lightning-icon icon-name="utility:cart" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                    <span>Order Line Items ({lineItemCount})</span>
-                </div>
-                <div class="section-body">
-                    <template if:true={hasLineItems}>
-                        <div class="table-scroll line-items-table">
-                            <table class="slds-table slds-table_cell-buffer slds-table_bordered">
-                                <thead>
-                                    <tr class="slds-line-height_reset">
-                                        <th scope="col" style="width:35px"><div class="slds-truncate">#</div></th>
-                                        <th scope="col" style="min-width:160px"><div class="slds-truncate">Product</div></th>
-                                        <th scope="col" style="width:55px"><div class="slds-truncate">UOM</div></th>
-                                        <th scope="col" style="width:75px"><div class="slds-truncate">Qty</div></th>
-                                        <th scope="col" style="width:100px"><div class="slds-truncate">List Price</div></th>
-                                        <th scope="col" style="width:100px"><div class="slds-truncate">Sales Price</div></th>
-                                        <th scope="col" style="width:85px"><div class="slds-truncate">Disc. %</div></th>
-                                        <th scope="col" style="width:75px"><div class="slds-truncate">Tax %</div></th>
-                                        <th scope="col" style="width:100px"><div class="slds-truncate">Price Status</div></th>
-                                        <th scope="col" style="width:110px"><div class="slds-truncate">Line Total</div></th>
-                                        <th scope="col" style="width:45px"><div class="slds-truncate"></div></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <template for:each={lineItems} for:item="item">
-                                        <tr key={item.rowId}>
-                                            <td class="row-number">{item.rowNumber}</td>
-                                            <td>
-                                                <div class="slds-truncate product-name" title={item.productName}>
-                                                    {item.productName}
-                                                </div>
-                                                <div class="slds-text-body_small slds-text-color_weak">{item.productCode}</div>
+                        <template if:true={hasLineItems}>
+                            <template for:each={lineItems} for:item="item">
+                                <div key={item.rowId} class="qw-line-item">
+                                    <div class="qw-line-head">
+                                        <div class="qw-line-thumb">{item.productInitial}</div>
+                                        <div>
+                                            <div class="qw-line-name">{item.productName}</div>
+                                            <div class="qw-line-meta">
+                                                <span>{item.productCode}</span>
+                                                <template if:true={item.isServiceItem}>
+                                                    <span class="qw-service-badge">Service item</span>
+                                                </template>
                                                 <template if:true={item.hasPriceSource}>
                                                     <span class={item.priceBadgeClass}>{item.priceBadgeLabel}</span>
                                                 </template>
-                                            </td>
-                                            <td class="slds-text-body_small">{item.uom}</td>
-                                            <td>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="qw-trash" title="Remove" data-row-id={item.rowId} onclick={handleRemoveLineItem}>
+                                            <lightning-icon icon-name="utility:delete" size="xx-small"></lightning-icon>
+                                        </button>
+                                    </div>
+                                    <div class="qw-line-divider"></div>
+                                    <div class="qw-line-fields">
+                                        <div>
+                                            <div class="qw-field-label">UOM</div>
+                                            <div class="qw-field-static muted">{item.uom}</div>
+                                        </div>
+                                        <div>
+                                            <div class="qw-field-label">Qty</div>
+                                            <lightning-input
+                                                type="number" value={item.quantity} min="1" step="1"
+                                                variant="label-hidden"
+                                                data-row-id={item.rowId} data-field="quantity"
+                                                onchange={handleLineItemChange}>
+                                            </lightning-input>
+                                        </div>
+                                        <div>
+                                            <div class="qw-field-label">List price</div>
+                                            <div class="qw-field-static muted">
+                                                <lightning-formatted-number value={item.listPrice} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="qw-field-label">Sales price</div>
+                                            <template if:true={item.isServiceItem}>
                                                 <lightning-input
-                                                    type="number"
-                                                    value={item.quantity}
-                                                    min="1"
-                                                    step="1"
-                                                    variant="label-hidden"
-                                                    data-row-id={item.rowId}
-                                                    data-field="quantity"
+                                                    type="number" value={item.unitPrice} min="0" step="0.01"
+                                                    variant="label-hidden" formatter="currency"
+                                                    data-row-id={item.rowId} data-field="unitPrice"
                                                     onchange={handleLineItemChange}>
                                                 </lightning-input>
-                                            </td>
-                                            <td>
-                                                <lightning-formatted-number
-                                                    value={item.listPrice}
-                                                    format-style="currency"
-                                                    currency-code={currencyCode}>
-                                                </lightning-formatted-number>
-                                            </td>
-                                            <td>
-                                                <template if:true={item.isServiceItem}>
-                                                    <lightning-input
-                                                        type="number"
-                                                        value={item.unitPrice}
-                                                        min="0"
-                                                        step="0.01"
-                                                        variant="label-hidden"
-                                                        formatter="currency"
-                                                        data-row-id={item.rowId}
-                                                        data-field="unitPrice"
-                                                        onchange={handleLineItemChange}>
-                                                    </lightning-input>
-                                                </template>
-                                                <template if:false={item.isServiceItem}>
-                                                    <lightning-formatted-number
-                                                        value={item.unitPrice}
-                                                        format-style="currency"
-                                                        currency-code={currencyCode}>
-                                                    </lightning-formatted-number>
-                                                </template>
-                                            </td>
-                                            <td>
-                                                <lightning-input
-                                                    type="number"
-                                                    value={item.discount}
-                                                    min="0"
-                                                    max="100"
-                                                    step="0.01"
-                                                    variant="label-hidden"
-                                                    data-row-id={item.rowId}
-                                                    data-field="discount"
-                                                    onchange={handleLineItemChange}>
-                                                </lightning-input>
-                                            </td>
-                                            <td class="slds-text-align_center">
-                                                {item.taxPercentDisplay}
-                                            </td>
-                                            <td class="slds-text-align_center">
-                                                <template if:true={item.priceStatus}>
-                                                    <span class={item.priceStatusBadgeClass}>{item.priceStatus}</span>
-                                                </template>
-                                            </td>
-                                            <td class="line-total-cell">
-                                                <lightning-formatted-number
-                                                    value={item.lineTotal}
-                                                    format-style="currency"
-                                                    currency-code={currencyCode}>
-                                                </lightning-formatted-number>
-                                            </td>
-                                            <td>
-                                                <lightning-button-icon
-                                                    icon-name="utility:delete"
-                                                    alternative-text="Remove"
-                                                    variant="bare"
-                                                    class="delete-btn"
-                                                    data-row-id={item.rowId}
-                                                    onclick={handleRemoveLineItem}>
-                                                </lightning-button-icon>
-                                            </td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
-                    </template>
+                                            </template>
+                                            <template if:false={item.isServiceItem}>
+                                                <div class="qw-field-static">
+                                                    <lightning-formatted-number value={item.unitPrice} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                                                </div>
+                                            </template>
+                                        </div>
+                                        <div>
+                                            <div class="qw-field-label">Discount %</div>
+                                            <lightning-input
+                                                type="number" value={item.discount} min="0" max="100" step="0.01"
+                                                variant="label-hidden"
+                                                data-row-id={item.rowId} data-field="discount"
+                                                onchange={handleLineItemChange}>
+                                            </lightning-input>
+                                        </div>
+                                        <div>
+                                            <div class="qw-field-label">Tax %</div>
+                                            <div class="qw-field-static muted">{item.taxPercentDisplay}</div>
+                                            <template if:false={item.isServiceItem}>
+                                                <div class="qw-field-hint">N/A for non-service</div>
+                                            </template>
+                                        </div>
+                                        <div>
+                                            <div class="qw-field-label">Status</div>
+                                            <template if:true={item.priceStatus}>
+                                                <span class={item.qwStatusClass}>{item.priceStatus}</span>
+                                            </template>
+                                        </div>
+                                        <div>
+                                            <div class="qw-field-label">Line total</div>
+                                            <div class="qw-line-total">
+                                                <lightning-formatted-number value={item.lineTotal} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
 
-                    <template if:false={hasLineItems}>
-                        <div class="empty-state slds-text-align_center slds-p-around_large">
-                            <lightning-icon icon-name="utility:cart" size="large" class="slds-m-bottom_small empty-icon"></lightning-icon>
-                            <p class="slds-text-color_weak">No products added yet. Use the search above to find and add products.</p>
-                        </div>
-                    </template>
-                </div>
-            </div>
+                        <template if:false={hasLineItems}>
+                            <div class="qw-empty">No products in this order yet. Pick a Quote on step 1 to inherit its products, or use the search to add products directly.</div>
+                        </template>
 
-              </div>
-              <div class="main-content-right">
-
-            <!-- ===== SECTION: ORDER SUMMARY ===== -->
-            <div class="section-card summary-sticky">
-                <div class="section-header">
-                    <lightning-icon icon-name="utility:summary" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                    <span>Order Summary</span>
-                </div>
-                <div class="section-body">
-                    <div class="totals-box">
-                        <div class="total-row">
-                            <span class="total-label">Subtotal</span>
-                            <span class="total-value">
-                                <lightning-formatted-number value={subtotal} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
-                            </span>
-                        </div>
-                        <div class="total-row">
-                            <span class="total-label">Total Discount</span>
-                            <span class="total-value discount-value">
-                                - <lightning-formatted-number value={totalDiscount} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
-                            </span>
-                        </div>
-                        <div class="total-row">
-                            <span class="total-label">Total Tax</span>
-                            <span class="total-value">
-                                <lightning-formatted-number value={totalTax} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
-                            </span>
-                        </div>
-                        <div class="total-row grand-total">
-                            <span class="total-label">Grand Total</span>
-                            <span class="total-value">
-                                <lightning-formatted-number value={grandTotal} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
-                            </span>
+                        <div class="qw-summary">
+                            <div class="qw-sum-row">
+                                <span>Subtotal</span>
+                                <span class="qw-sum-val"><lightning-formatted-number value={subtotal} format-style="currency" currency-code={currencyCode}></lightning-formatted-number></span>
+                            </div>
+                            <div class="qw-sum-row">
+                                <span>Discount</span>
+                                <span class="qw-sum-val">- <lightning-formatted-number value={totalDiscount} format-style="currency" currency-code={currencyCode}></lightning-formatted-number></span>
+                            </div>
+                            <div class="qw-sum-row">
+                                <span>Tax</span>
+                                <span class="qw-sum-val"><lightning-formatted-number value={totalTax} format-style="currency" currency-code={currencyCode}></lightning-formatted-number></span>
+                            </div>
+                            <div class="qw-sum-row total">
+                                <span>Grand total</span>
+                                <span class="qw-sum-val"><lightning-formatted-number value={grandTotal} format-style="currency" currency-code={currencyCode}></lightning-formatted-number></span>
+                            </div>
                         </div>
                     </div>
-                </div>
+
+                    <!-- ===== STEP 4: PAYMENT ===== -->
+                    <div class={step4Class}>
+                        <div class="qw-section-title">Payment terms</div>
+                        <div class="qw-section-sub">Inherited from the source Quote — adjust if needed. Total must equal 100%.</div>
+
+                        <template if:true={hasPaymentTerms}>
+                            <div class="qw-payment-header">
+                                <div>#</div>
+                                <div>Term description</div>
+                                <div>Percentage</div>
+                                <div></div>
+                            </div>
+                            <template for:each={paymentTerms} for:item="term">
+                                <div key={term.ptId} class="qw-payment-row">
+                                    <div class="qw-payment-idx">{term.rowNumber}</div>
+                                    <lightning-input
+                                        type="text" value={term.paymentTerm} variant="label-hidden"
+                                        placeholder="e.g. 30% Advance"
+                                        data-pt-id={term.ptId} data-field="paymentTerm"
+                                        onchange={handlePaymentTermChange}>
+                                    </lightning-input>
+                                    <lightning-input
+                                        type="number" value={term.percentage} min="0" max="100" step="1"
+                                        variant="label-hidden"
+                                        data-pt-id={term.ptId} data-field="percentage"
+                                        onchange={handlePaymentTermChange}>
+                                    </lightning-input>
+                                    <button type="button" class="qw-trash" title="Remove" data-pt-id={term.ptId} onclick={handleRemovePaymentTerm}>
+                                        <lightning-icon icon-name="utility:delete" size="xx-small"></lightning-icon>
+                                    </button>
+                                </div>
+                            </template>
+                        </template>
+
+                        <button type="button" class="qw-add-row-btn" onclick={handleAddPaymentTerm}>
+                            <lightning-icon icon-name="utility:add" size="xx-small"></lightning-icon>
+                            Add payment term
+                        </button>
+
+                        <template if:true={hasPaymentTerms}>
+                            <div class={paymentTotalClass}>
+                                <span class="dot"></span>
+                                <span>Total {totalPercentage}% · {paymentTotalText}</span>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- ===== STEP 5: NOTES ===== -->
+                    <div class={step5Class}>
+                        <div class="qw-section-title">Notes</div>
+                        <div class="qw-section-sub">Add any notes the order should carry. Surfaced on the order record.</div>
+                        <div class="qw-card" style="padding:16px;">
+                            <lightning-input-field field-name="Description"></lightning-input-field>
+                        </div>
+                    </div>
+
+                    <!-- ===== STEP 6: REVIEW ===== -->
+                    <div class={step6Class}>
+                        <div class="qw-section-title">Review &amp; submit</div>
+                        <div class="qw-section-sub">Quick check before saving the order.</div>
+                        <div class="qw-review-grid">
+                            <div class="qw-review-card">
+                                <div class="qw-review-head">
+                                    Order info
+                                    <button type="button" class="qw-review-edit" data-step="1" onclick={handleStepJump}>Edit</button>
+                                </div>
+                                <div class="qw-review-row"><span class="qw-review-label">Account</span><span class="qw-review-val">{accountNameDisplay}</span></div>
+                                <div class="qw-review-row"><span class="qw-review-label">Vertical</span><span class="qw-review-val">{businessVerticalDisplay}</span></div>
+                                <div class="qw-review-row"><span class="qw-review-label">Effective date</span><span class="qw-review-val">{defaultEffectiveDate}</span></div>
+                            </div>
+                            <div class="qw-review-card">
+                                <div class="qw-review-head">
+                                    Addresses
+                                    <button type="button" class="qw-review-edit" data-step="2" onclick={handleStepJump}>Edit</button>
+                                </div>
+                                <div class="qw-review-row"><span class="qw-review-label">Bill to</span><span class="qw-review-val">{billingSummary}</span></div>
+                                <div class="qw-review-row"><span class="qw-review-label">Ship to</span><span class="qw-review-val">{shippingSummary}</span></div>
+                            </div>
+                            <div class="qw-review-card">
+                                <div class="qw-review-head">
+                                    Products
+                                    <button type="button" class="qw-review-edit" data-step="3" onclick={handleStepJump}>Edit</button>
+                                </div>
+                                <div class="qw-review-row"><span class="qw-review-label">Line items</span><span class="qw-review-val">{lineItemCount}</span></div>
+                                <div class="qw-review-row"><span class="qw-review-label">Grand total</span><span class="qw-review-val"><lightning-formatted-number value={grandTotal} format-style="currency" currency-code={currencyCode}></lightning-formatted-number></span></div>
+                            </div>
+                            <div class="qw-review-card">
+                                <div class="qw-review-head">
+                                    Payment
+                                    <button type="button" class="qw-review-edit" data-step="4" onclick={handleStepJump}>Edit</button>
+                                </div>
+                                <div class="qw-review-row"><span class="qw-review-label">Terms</span><span class="qw-review-val">{paymentTermCount}</span></div>
+                                <div class="qw-review-row"><span class="qw-review-label">Total</span><span class="qw-review-val">{totalPercentage}%</span></div>
+                            </div>
+                        </div>
+                        <div class="qw-info-card">
+                            <lightning-icon icon-name="utility:info" size="x-small"></lightning-icon>
+                            <span>Before you submit, double-check the line items and totals. Use the Edit chips above to jump back to any step.</span>
+                        </div>
+                    </div>
+
+                    <!-- ========== FOOTER ========== -->
+                    <div class="qw-footer">
+                        <div class="qw-footer-actions">
+                            <button type="button" class="qw-btn" onclick={handleStepBack} disabled={isFirstStep}>Back</button>
+                            <template if:true={isLastStep}>
+                                <button type="submit" class="qw-btn success" disabled={isSaveDisabled}>{saveButtonLabel}</button>
+                            </template>
+                            <template if:false={isLastStep}>
+                                <button type="button" class="qw-btn primary" onclick={handleStepNext}>Continue →</button>
+                            </template>
+                        </div>
+                    </div>
+
+                </lightning-record-edit-form>
             </div>
 
-              </div>
-            </div>
-
-            <!-- ===== FOOTER ACTIONS ===== -->
-            <div class="footer-actions slds-p-around_medium">
-                <div class="slds-grid slds-grid_align-end">
-                    <lightning-button
-                        label="Cancel"
-                        onclick={handleCancel}
-                        class="slds-m-right_small">
-                    </lightning-button>
-                    <lightning-button
-                        label={saveButtonLabel}
-                        variant="brand"
-                        type="submit"
-                        disabled={isSaveDisabled}
-                        icon-name="utility:save">
-                    </lightning-button>
-                </div>
-            </div>
-
-        </lightning-record-edit-form>
+        </div>
     </div>
 </template>

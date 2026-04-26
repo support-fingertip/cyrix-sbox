@@ -15,6 +15,11 @@ import getProductPricingPreview from '@salesforce/apex/QuoteBuilderController.ge
 let rowCounter = 0;
 let ptCounter = 0;
 
+const STEP_LABELS = [
+    'Order info', 'Addresses', 'Products', 'Payment', 'Notes', 'Review'
+];
+const TOTAL_STEPS = STEP_LABELS.length;
+
 export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     @api recordId;
 
@@ -68,6 +73,10 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     carryDelivery = null;
     carryContractFrom = null;
     carryContractEnd = null;
+
+    // Wizard state
+    currentStep = 1;
+    sameAsBilling = false;
 
     // ===== PICKLIST OPTIONS =====
 
@@ -124,6 +133,113 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     }
     get defaultContractEnd() {
         return this.isEditMode ? undefined : (this.carryContractEnd || undefined);
+    }
+
+    // ===== WIZARD =====
+
+    get currentStepLabel() {
+        return STEP_LABELS[this.currentStep - 1] || '';
+    }
+    get progressPercent() {
+        return Math.round(((this.currentStep - 1) / (TOTAL_STEPS - 1)) * 100);
+    }
+    get progressFillStyle() {
+        return `width: ${this.progressPercent}%;`;
+    }
+    get isFirstStep() { return this.currentStep === 1; }
+    get isLastStep() { return this.currentStep === TOTAL_STEPS; }
+
+    get stepList() {
+        return STEP_LABELS.map((label, idx) => {
+            const num = idx + 1;
+            let cssClass = 'qw-step';
+            if (num === this.currentStep) cssClass += ' active';
+            else if (num < this.currentStep) cssClass += ' done';
+            return { num, label, cssClass };
+        });
+    }
+
+    get step1Class() { return this.stepClass(1); }
+    get step2Class() { return this.stepClass(2); }
+    get step3Class() { return this.stepClass(3); }
+    get step4Class() { return this.stepClass(4); }
+    get step5Class() { return this.stepClass(5); }
+    get step6Class() { return this.stepClass(6); }
+    stepClass(n) {
+        return n === this.currentStep ? 'qw-step-content active' : 'qw-step-content';
+    }
+
+    handleStepNext() {
+        if (this.currentStep >= TOTAL_STEPS) return;
+        const blocker = this.validateCurrentStep();
+        if (blocker) {
+            this.showError('Cannot continue', blocker);
+            return;
+        }
+        this.currentStep += 1;
+        this.scrollShellTop();
+    }
+    handleStepBack() {
+        if (this.currentStep > 1) {
+            this.currentStep -= 1;
+            this.scrollShellTop();
+        }
+    }
+    handleStepJump(event) {
+        const target = parseInt(event.currentTarget.dataset.step, 10);
+        if (!target || target === this.currentStep) return;
+        if (target < 1 || target > TOTAL_STEPS) return;
+        this.currentStep = target;
+        this.scrollShellTop();
+    }
+    validateCurrentStep() {
+        if (this.currentStep === 1 && !this.isEditMode && !this.sourceQuoteId) {
+            return 'Pick a source Quote before continuing.';
+        }
+        if (this.currentStep === 3 && this.lineItems.length === 0) {
+            return 'Add at least one product before continuing.';
+        }
+        if (this.currentStep === 4 && this.paymentTerms.length > 0 && this.totalPercentage !== 100) {
+            return `Payment terms must total 100% (currently ${this.totalPercentage}%).`;
+        }
+        return null;
+    }
+    scrollShellTop() {
+        try {
+            const shell = this.template.querySelector('.qw-shell');
+            if (shell && shell.scrollIntoView) {
+                shell.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    handleSameAsBillingChange(event) {
+        this.sameAsBilling = !!event.target.checked;
+        if (this.sameAsBilling) {
+            this.shippingAddress = { ...this.billingAddress };
+        }
+    }
+
+    // ===== REVIEW STEP DISPLAY =====
+
+    get accountNameDisplay() { return this.accountName || '—'; }
+    get businessVerticalDisplay() { return this.carryBusinessVertical || '—'; }
+    get subVerticalDisplay() { return this.carrySubVertical || '—'; }
+    get billingSummary() { return this.formatAddress(this.billingAddress); }
+    get shippingSummary() { return this.formatAddress(this.shippingAddress); }
+    formatAddress(a) {
+        if (!a) return '—';
+        const parts = [a.street, a.city, a.state, a.postalCode].filter(Boolean);
+        return parts.length ? parts.join(', ') : '—';
+    }
+
+    // ===== PAYMENT TOTAL STRIP =====
+
+    get paymentTotalClass() {
+        return this.totalPercentage === 100 ? 'qw-term-total ok' : 'qw-term-total err';
+    }
+    get paymentTotalText() {
+        return this.totalPercentage === 100 ? 'Ready to proceed' : 'Must equal 100%';
     }
 
     // ===== CALCULATIONS =====
@@ -286,6 +402,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                     productId: item.productId,
                     pricebookEntryId: item.pricebookEntryId,
                     productName: item.productName,
+                    productInitial: this.getProductInitial(item.productName),
                     productCode: item.productCode,
                     uom: item.uom || 'Nos',
                     quantity: item.quantity,
@@ -297,6 +414,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                     isServiceItem: isService,
                     priceStatus: priceStatus,
                     priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
+                    qwStatusClass: this.getQwStatusClass(priceStatus),
                     tierPrices: tierPricesFromDb,
                     sourcePricebookId: item.sourcePricebookId || null,
                     sourcePricebookName: item.sourcePricebookName || '',
@@ -369,6 +487,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                     productId: item.productId,
                     pricebookEntryId: item.pricebookEntryId,
                     productName: item.productName,
+                    productInitial: this.getProductInitial(item.productName),
                     productCode: item.productCode,
                     uom: item.uom || 'Nos',
                     quantity: item.quantity,
@@ -380,6 +499,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                     isServiceItem: isService,
                     priceStatus: priceStatus,
                     priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
+                    qwStatusClass: this.getQwStatusClass(priceStatus),
                     tierPrices: tierPricesFromDb,
                     sourcePricebookId: item.sourcePricebookId || null,
                     sourcePricebookName: item.sourcePricebookName || '',
@@ -416,6 +536,9 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
             postalCode: d.postalCode || '',
             country: d.country || 'IN'
         };
+        if (this.sameAsBilling) {
+            this.shippingAddress = { ...this.billingAddress };
+        }
     }
 
     handleShippingAddressChange(event) {
@@ -434,9 +557,15 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
 
     async handleQuoteChange(event) {
         if (this.isEditMode) return;
-        const newQuoteId = event.detail && event.detail.value && event.detail.value.length
-            ? event.detail.value[0]
-            : null;
+        // lightning-record-picker dispatches change with event.detail.recordId.
+        // Older lightning-input-field lookups returned event.detail.value as
+        // a 1-element array — keep that shape working too in case the
+        // control gets swapped back.
+        const d = event && event.detail ? event.detail : {};
+        const newQuoteId = d.recordId
+            || (Array.isArray(d.value) && d.value.length ? d.value[0] : null)
+            || (typeof d.value === 'string' ? d.value : null)
+            || null;
         if (newQuoteId === (this.sourceQuoteId || null)) return;
 
         if (!newQuoteId) {
@@ -685,6 +814,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
             productId: product.productId,
             pricebookEntryId: product.pricebookEntryId,
             productName: product.productName,
+            productInitial: this.getProductInitial(product.productName),
             productCode: product.productCode,
             uom: product.uom || 'Nos',
             quantity: 1,
@@ -768,6 +898,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 );
                 updated.priceStatus = live;
                 updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(live);
+                updated.qwStatusClass = this.getQwStatusClass(live);
             }
 
             return updated;
@@ -799,6 +930,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 const updated = { ...it };
                 updated.priceStatus = preview.priceStatus || updated.priceStatus;
                 updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(updated.priceStatus);
+                updated.qwStatusClass = this.getQwStatusClass(updated.priceStatus);
                 updated.sourcePricebookId = preview.resolvedPricebookId || updated.sourcePricebookId;
                 updated.sourcePricebookName = resolvedPb;
                 updated.priceBadgeClass = this.getPriceBadgeClass(resolvedPb);
@@ -853,6 +985,25 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
             case 'Not Required':
             default:                  return base + ' slds-theme_shade';
         }
+    }
+
+    // Wizard-style status pill (qw-status-badge variants). Approved /
+    // Not Required render as the green default; Approval Required
+    // surfaces the amber pending pill so the rep notices.
+    getQwStatusClass(status) {
+        switch (status) {
+            case 'Approval Required': return 'qw-status-badge pending';
+            case 'Approved':
+            case 'Not Required':
+            default:                  return 'qw-status-badge';
+        }
+    }
+
+    // First-letter thumbnail label for the line-item card head.
+    getProductInitial(name) {
+        if (!name || typeof name !== 'string') return '?';
+        const ch = name.trim().charAt(0);
+        return ch ? ch.toUpperCase() : '?';
     }
 
     // ===== PRICING BADGE HELPERS =====
