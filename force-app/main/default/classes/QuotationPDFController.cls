@@ -31,6 +31,14 @@ public with sharing class QuotationPDFController {
     public Decimal amcGstAmount { get; set; }
     public Decimal amcGrandTotal { get; set; }
 
+    // Conditional T&C sections — show "Installation & Approvals" and the
+    // "Warranty" clauses only when the line items actually include
+    // products whose names reference those scopes (e.g. installation
+    // services, warranty add-ons). Service / AMC quotes won't carry
+    // either, so the boilerplate would just confuse the customer.
+    public Boolean showInstallationSection { get; private set; }
+    public Boolean showWarrantySection { get; private set; }
+
 
     public QuotationPDFController(ApexPages.StandardController stdController) {
         Id quoteId = stdController.getId();
@@ -96,11 +104,21 @@ BillingPostalCode,Business_Vertical__c,
             ORDER BY CreatedDate ASC
         ];
 
-        // AMC single-row summary: sum of line totals, fixed 18% GST.
+        // Walk the line items once to derive the AMC totals AND the
+        // T&C section flags (installation / warranty are gated on whether
+        // a line-item product name references those scopes). Keeping
+        // both in one pass avoids a second loop.
         amcTotalRate = 0;
+        showInstallationSection = false;
+        showWarrantySection = false;
         for (QuoteLineItem qli : lineItems) {
             if (qli.TotalPrice != null) {
                 amcTotalRate += qli.TotalPrice;
+            }
+            if (qli.Product2 != null && qli.Product2.Name != null) {
+                String n = qli.Product2.Name.toLowerCase();
+                if (n.contains('installation')) showInstallationSection = true;
+                if (n.contains('warranty'))     showWarrantySection = true;
             }
         }
         amcGstAmount = (amcTotalRate * 0.18).setScale(2, RoundingMode.HALF_UP);
