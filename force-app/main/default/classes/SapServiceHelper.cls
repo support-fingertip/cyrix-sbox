@@ -1,6 +1,6 @@
 /**
  * Performs the actual HTTP POST to SAP. Mirrors the SAPSendData
- * helper from the reference project.
+ * helper from the reference project. Used by SAPsend_TriggerHandler.
  *
  * Configuration:
  *   Custom Label SAP_Endpoint  — POST URL
