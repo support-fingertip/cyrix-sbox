@@ -245,6 +245,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         const sv = (this.subVertical || '').trim();
         return sv === 'AMC' || sv === 'CAMC';
     }
+    // Number of Preventive Maintenance visits is an AMC-only commitment;
+    // CAMC and other sub-verticals don't need it on the form.
+    get showPreventiveMaintenanceCount() {
+        const sv = (this.subVertical || '').trim();
+        return sv === 'AMC';
+    }
     get contractDateDisplay() {
         if (!this.contractFromDate && !this.contractEndDate) return '—';
         return `${this.contractFromDate || '—'} → ${this.contractEndDate || '—'}`;
@@ -331,7 +337,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.businessVertical = data.vertical || null;
             this.subVertical = data.subVertical || null;
 
-            // === AUTO-POPULATE BILL TO ADDRESS FROM ACCOUNT ===
+            // === AUTO-POPULATE BILL TO + SHIP TO FROM ACCOUNT ===
+            // Bill To always comes from the account billing address.
+            // Ship To prefers the account's shipping address; if the
+            // account doesn't have one, fall back to billing so the
+            // ship-to card never starts blank.
             if (!this.isEditMode && this.accountId) {
                 this.billingAddress = {
                     name: data.billingName || '',
@@ -341,6 +351,18 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                     postalCode: data.billingPostalCode || '',
                     country: data.billingCountry || 'IN'
                 };
+                const hasShipping = data.shippingStreet || data.shippingCity
+                    || data.shippingState || data.shippingPostalCode;
+                this.shippingAddress = hasShipping
+                    ? {
+                        name: data.shippingName || data.billingName || '',
+                        street: data.shippingStreet || '',
+                        city: data.shippingCity || '',
+                        state: data.shippingState || '',
+                        postalCode: data.shippingPostalCode || '',
+                        country: data.shippingCountry || 'IN'
+                    }
+                    : { ...this.billingAddress };
             }
 
             // === AUTO-POPULATE PAYMENT TERMS FROM MASTER ===
@@ -493,9 +515,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             if (!data) return;
             this.businessVertical = data.vertical || null;
             this.subVertical = data.subVertical || null;
-            // Auto-fill billing address from the Opportunity's account when
-            // the rep hasn't typed anything yet, mirroring the
-            // launched-from-Opportunity flow.
+            // Auto-fill billing + shipping address from the Opportunity's
+            // account when the rep hasn't typed anything yet, mirroring the
+            // launched-from-Opportunity flow. Ship To uses the account's
+            // shipping address and falls back to billing when shipping
+            // isn't on the account.
             if (data.accountId) {
                 this.accountId = data.accountId;
                 this.accountName = data.accountName || '';
@@ -508,9 +532,23 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                         postalCode: data.billingPostalCode || '',
                         country: data.billingCountry || 'IN'
                     };
-                    if (this.sameAsBilling) {
-                        this.shippingAddress = { ...this.billingAddress };
-                    }
+                }
+                if (!this.shippingAddress.street && !this.shippingAddress.city) {
+                    const hasShipping = data.shippingStreet || data.shippingCity
+                        || data.shippingState || data.shippingPostalCode;
+                    this.shippingAddress = hasShipping
+                        ? {
+                            name: data.shippingName || data.billingName || '',
+                            street: data.shippingStreet || '',
+                            city: data.shippingCity || '',
+                            state: data.shippingState || '',
+                            postalCode: data.shippingPostalCode || '',
+                            country: data.shippingCountry || 'IN'
+                        }
+                        : { ...this.billingAddress };
+                }
+                if (this.sameAsBilling) {
+                    this.shippingAddress = { ...this.billingAddress };
                 }
             }
             // Replace the auto-loaded payment terms with whatever the new

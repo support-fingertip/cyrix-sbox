@@ -103,7 +103,9 @@
                                     </template>
                                 </div>
                             </template>
-                            <div class="qw-field"><lightning-input-field field-name="Number_of_Preventive_Maintenance__c"></lightning-input-field></div>
+                            <template if:true={showPreventiveMaintenanceCount}>
+                                <div class="qw-field"><lightning-input-field field-name="Number_of_Preventive_Maintenance__c"></lightning-input-field></div>
+                            </template>
                             <div class="qw-field"><lightning-input-field field-name="Installation_and_commissioning_required__c"></lightning-input-field></div>
                             <template if:true={isEditMode}>
                                 <div class="qw-field"><lightning-input-field field-name="Status"></lightning-input-field></div>
