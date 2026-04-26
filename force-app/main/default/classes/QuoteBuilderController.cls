@@ -12,6 +12,9 @@ public with sharing class QuoteBuilderController {
             '       Account.BillingStreet, Account.BillingCity,' +
             '       Account.BillingStateCode, Account.BillingPostalCode,' +
             '       Account.BillingCountryCode,' +
+            '       Account.ShippingStreet, Account.ShippingCity,' +
+            '       Account.ShippingStateCode, Account.ShippingPostalCode,' +
+            '       Account.ShippingCountryCode,' +
             '       Pricebook2Id, CurrencyIsoCode, Buisness_Vertical__c,' +
             '       Region__c' +
             (oppHasSubVertical ? ', Sub_Vertical__c' : '') +
@@ -47,6 +50,15 @@ public with sharing class QuoteBuilderController {
             ctx.billingState = opp.Account.BillingStateCode;
             ctx.billingPostalCode = opp.Account.BillingPostalCode;
             ctx.billingCountry = opp.Account.BillingCountryCode;
+            // Account-level Shipping address — used by the new-quote
+            // wizard to prefill the Ship To card. Falls back to the
+            // billing address client-side when shipping isn't filled.
+            ctx.shippingName = opp.Account.Name;
+            ctx.shippingStreet = opp.Account.ShippingStreet;
+            ctx.shippingCity = opp.Account.ShippingCity;
+            ctx.shippingState = opp.Account.ShippingStateCode;
+            ctx.shippingPostalCode = opp.Account.ShippingPostalCode;
+            ctx.shippingCountry = opp.Account.ShippingCountryCode;
         }
 
         ctx.defaultPaymentTerms = getDefaultPaymentTerms(opp.Buisness_Vertical__c, subVertical);
@@ -936,6 +948,12 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public String billingState;
         @AuraEnabled public String billingPostalCode;
         @AuraEnabled public String billingCountry;
+        @AuraEnabled public String shippingName;
+        @AuraEnabled public String shippingStreet;
+        @AuraEnabled public String shippingCity;
+        @AuraEnabled public String shippingState;
+        @AuraEnabled public String shippingPostalCode;
+        @AuraEnabled public String shippingCountry;
         @AuraEnabled public List<PaymentTermResult> defaultPaymentTerms;
         @AuraEnabled public List<QuoteLineItemResult> opportunityLineItems;
     }
