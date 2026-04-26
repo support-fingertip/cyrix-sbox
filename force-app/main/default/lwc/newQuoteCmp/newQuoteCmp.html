@@ -72,7 +72,16 @@
                         <div class="qw-grid-2">
                             <div class="qw-field"><lightning-input-field field-name="Quote_Date__c" required></lightning-input-field></div>
                             <div class="qw-field"><lightning-input-field field-name="Quote_Valid_Till_in_days__c" required></lightning-input-field></div>
-                            <div class="qw-field"><lightning-input-field field-name="OpportunityId" value={defaultOpportunityId} onchange={handleOpportunityChange} required></lightning-input-field></div>
+                            <div class="qw-field">
+                                <lightning-record-picker
+                                    label="Opportunity"
+                                    placeholder="Search opportunities…"
+                                    object-api-name="Opportunity"
+                                    value={defaultOpportunityId}
+                                    onchange={handleOpportunityChange}
+                                    required>
+                                </lightning-record-picker>
+                            </div>
                             <div class="qw-field">
                                 <div class="qw-field-label">Business Vertical <span class="req">*</span></div>
                                 <div class="qw-readonly-input">{businessVerticalDisplay}</div>

@@ -376,6 +376,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.accountName = data.accountName || '';
             this.regionId = data.regionId;
             this.defaultOpportunityId = data.opportunityId;
+            this.businessVertical = data.vertical || null;
+            this.subVertical = data.subVertical || null;
 
             // Populate address objects from saved quote
             this.billingAddress = {
@@ -461,13 +463,49 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // payment-terms list on new quotes; in edit mode we leave existing
     // payment terms alone so a manual override isn't wiped.
     async handleOpportunityChange(event) {
-        const newOppId = event.detail ? event.detail.value : (event.target ? event.target.value : null);
-        if (!newOppId) return;
+        // lightning-record-picker dispatches change with recordId in
+        // event.detail.recordId. Fall through to the older shapes too
+        // (lightning-input-field / native) so this handler stays compatible
+        // if the on-form Opportunity control gets swapped back.
+        const d = event && event.detail ? event.detail : {};
+        const newOppId = d.recordId || d.value || (event.target && event.target.value) || null;
+        // Track the selection so handleFormSubmit can inject it as
+        // fields.OpportunityId — the picker isn't an input-field, so the
+        // form's submit payload doesn't pick it up automatically.
+        this.defaultOpportunityId = newOppId || null;
+        if (!newOppId) {
+            // Selection cleared — wipe verticals so they don't display a
+            // stale value. Payment terms are left as-is so the rep doesn't
+            // lose anything they may have customised.
+            this.businessVertical = null;
+            this.subVertical = null;
+            return;
+        }
         try {
             const data = await getOpportunityContext({ opportunityId: newOppId });
             if (!data) return;
             this.businessVertical = data.vertical || null;
             this.subVertical = data.subVertical || null;
+            // Auto-fill billing address from the Opportunity's account when
+            // the rep hasn't typed anything yet, mirroring the
+            // launched-from-Opportunity flow.
+            if (data.accountId) {
+                this.accountId = data.accountId;
+                this.accountName = data.accountName || '';
+                if (!this.billingAddress.street && !this.billingAddress.city) {
+                    this.billingAddress = {
+                        name: data.billingName || '',
+                        street: data.billingStreet || '',
+                        city: data.billingCity || '',
+                        state: data.billingState || '',
+                        postalCode: data.billingPostalCode || '',
+                        country: data.billingCountry || 'IN'
+                    };
+                    if (this.sameAsBilling) {
+                        this.shippingAddress = { ...this.billingAddress };
+                    }
+                }
+            }
             // Replace the auto-loaded payment terms with whatever the new
             // Opportunity's vertical / sub-vertical pair maps to.
             if (Array.isArray(data.defaultPaymentTerms) && data.defaultPaymentTerms.length > 0) {
@@ -568,6 +606,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
         // Inject Pricebook2Id
         fields.Pricebook2Id = this.pricebookId;
+
+        // Inject OpportunityId from the lightning-record-picker — that
+        // control isn't a lightning-input-field, so the form's submit
+        // payload doesn't include it automatically.
+        if (this.defaultOpportunityId) {
+            fields.OpportunityId = this.defaultOpportunityId;
+        }
 
         // Inject verticals — these are rendered as readonly displays
         // (not lightning-input-fields) so they aren't in event.detail.fields
