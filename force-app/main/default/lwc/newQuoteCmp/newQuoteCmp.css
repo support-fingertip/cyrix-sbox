@@ -306,6 +306,25 @@
 .qw-field { min-width: 0; }
 .qw-field .req { color: var(--danger); margin-left: 2px; }
 
+/* Disabled / system-driven values rendered as plain text instead of
+   lightning-input-field so the displayed value updates whenever the
+   underlying tracked state changes (input-field reads `value` once
+   at mount and caches via LDS, which silently swallows updates
+   triggered by an Opportunity change). */
+.qw-readonly-input {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    background: var(--bg-muted);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    min-height: 36px;
+    line-height: 20px;
+    box-sizing: border-box;
+}
+
 .qw-field-error {
     margin-top: 4px;
     font-size: 12px;

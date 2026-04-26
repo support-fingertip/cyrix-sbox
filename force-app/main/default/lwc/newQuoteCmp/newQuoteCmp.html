@@ -74,14 +74,12 @@
                             <div class="qw-field"><lightning-input-field field-name="Quote_Valid_Till_in_days__c" required></lightning-input-field></div>
                             <div class="qw-field"><lightning-input-field field-name="OpportunityId" value={defaultOpportunityId} onchange={handleOpportunityChange} required></lightning-input-field></div>
                             <div class="qw-field">
-                                <template if:true={verticalsReady}>
-                                    <lightning-input-field field-name="Business_Vertical__c" value={defaultBusinessVertical} disabled required></lightning-input-field>
-                                </template>
+                                <div class="qw-field-label">Business Vertical <span class="req">*</span></div>
+                                <div class="qw-readonly-input">{businessVerticalDisplay}</div>
                             </div>
                             <div class="qw-field">
-                                <template if:true={verticalsReady}>
-                                    <lightning-input-field field-name="Sub_Vertical__c" value={defaultSubVertical} disabled></lightning-input-field>
-                                </template>
+                                <div class="qw-field-label">Sub Vertical</div>
+                                <div class="qw-readonly-input">{subVerticalDisplay}</div>
                             </div>
                             <div class="qw-field"><lightning-input-field field-name="Shipping_Mode__c"></lightning-input-field></div>
                             <div class="qw-field"><lightning-input-field field-name="Delivery__c"></lightning-input-field></div>

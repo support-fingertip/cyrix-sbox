@@ -165,23 +165,35 @@ public with sharing class QuoteBuilderController {
 
         // Tier 2: vertical AND blank sub-vertical — the per-vertical
         // default record set used when the quote's sub-vertical doesn't
-        // have its own dedicated entry.
-        if (matched.isEmpty() && String.isNotBlank(vertical)) {
+        // have its own dedicated entry. Skipped when the master object
+        // doesn't have a Sub_Vertical__c field.
+        if (matched.isEmpty() && String.isNotBlank(vertical) && ptmHasSubVertical) {
             String q2 = 'SELECT ' + fields +
                 ' FROM Payment_Terms_Master__c' +
-                ' WHERE Type__c = :vertical' +
-                (ptmHasSubVertical ? ' AND Sub_Vertical__c = null' : '') +
+                ' WHERE Type__c = :vertical AND Sub_Vertical__c = null' +
                 ' ORDER BY CreatedDate ASC';
             matched = Database.query(q2);
         }
 
-        // Tier 3: records with blank Type (org-wide fallback)
-        if (matched.isEmpty()) {
+        // Tier 3: any record with the matching vertical (regardless of
+        // sub-vertical). Safety net so the rep still gets a sensible
+        // default when the org has no blank-sub-vertical entries and
+        // the quote's sub-vertical doesn't line up with any master row.
+        if (matched.isEmpty() && String.isNotBlank(vertical)) {
             String q3 = 'SELECT ' + fields +
+                ' FROM Payment_Terms_Master__c' +
+                ' WHERE Type__c = :vertical' +
+                ' ORDER BY CreatedDate ASC';
+            matched = Database.query(q3);
+        }
+
+        // Tier 4: records with blank Type (org-wide fallback).
+        if (matched.isEmpty()) {
+            String q4 = 'SELECT ' + fields +
                 ' FROM Payment_Terms_Master__c' +
                 ' WHERE Type__c = null' +
                 ' ORDER BY CreatedDate ASC';
-            matched = Database.query(q3);
+            matched = Database.query(q4);
         }
 
         for (Payment_Terms_Master__c pt : matched) {
