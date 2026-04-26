@@ -67,7 +67,7 @@
         <fullName>SAP_Endpoint</fullName>
         <language>en_US</language>
         <protected>false</protected>
-        <shortDescription>SAP Endpoint URL (callout target for Send to SAP).</shortDescription>
+        <shortDescription>SAP Endpoint URL — POST target for the Send to SAP outbound callout.</shortDescription>
         <value>https://example.sap.endpoint/api/sync</value>
     </labels>
     <labels>
