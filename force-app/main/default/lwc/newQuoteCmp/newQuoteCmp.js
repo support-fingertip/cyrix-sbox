@@ -238,6 +238,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     get accountNameDisplay() { return this.accountName || '—'; }
     get businessVerticalDisplay() { return this.businessVertical || '—'; }
     get subVerticalDisplay() { return this.subVertical || '—'; }
+    // Contract dates are only meaningful for maintenance contracts —
+    // AMC and CAMC sub-verticals. Hide them on every other quote so
+    // the rep doesn't see fields they aren't expected to fill.
+    get showContractDates() {
+        const sv = (this.subVertical || '').trim();
+        return sv === 'AMC' || sv === 'CAMC';
+    }
     get contractDateDisplay() {
         if (!this.contractFromDate && !this.contractEndDate) return '—';
         return `${this.contractFromDate || '—'} → ${this.contractEndDate || '—'}`;
