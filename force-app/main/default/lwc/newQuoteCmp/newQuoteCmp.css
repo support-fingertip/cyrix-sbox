@@ -387,10 +387,13 @@
 }
 .qw-same-addr input { margin: 0; cursor: pointer; }
 
-/* ===== Product search bar ===== */
+/* ===== Product search bar =====
+   Layout: [Type combobox] [Search input] [Search button]. The Type
+   filter is the narrower fixed column on the left so the rep
+   scopes the catalogue first, then types the keyword. */
 .qw-product-search {
     display: grid;
-    grid-template-columns: 1fr 220px auto;
+    grid-template-columns: 220px 1fr auto;
     gap: 12px;
     padding: 16px;
     background: var(--bg-subtle);

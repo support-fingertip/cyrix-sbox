@@ -172,14 +172,6 @@
                         <div class="qw-section-sub">Search the catalog and add line items to the quote.</div>
 
                         <div class="qw-product-search">
-                            <lightning-input
-                                label="Search products"
-                                value={searchTerm}
-                                onchange={handleSearchTermChange}
-                                onkeydown={handleSearchKeydown}
-                                placeholder="Search by name or code…"
-                                type="text">
-                            </lightning-input>
                             <lightning-combobox
                                 label="Product type"
                                 value={categoryFilter}
@@ -187,6 +179,14 @@
                                 onchange={handleCategoryFilterChange}
                                 placeholder="All types">
                             </lightning-combobox>
+                            <lightning-input
+                                label="Search products"
+                                value={searchTerm}
+                                onchange={handleSearchTermChange}
+                                onkeydown={handleSearchKeydown}
+                                placeholder="Search by name, code, or description…"
+                                type="text">
+                            </lightning-input>
                             <button type="button" class="qw-btn primary" onclick={handleSearch} disabled={isSearchDisabled}>Search</button>
                         </div>
 
