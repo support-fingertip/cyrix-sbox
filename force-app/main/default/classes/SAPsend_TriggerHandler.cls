@@ -81,7 +81,7 @@ public without sharing class SAPsend_TriggerHandler {
                        BillingPostalCode, BillingCountry, BillingCountryCode,
                        ShippingStreet, ShippingCity, ShippingState, ShippingStateCode,
                        ShippingPostalCode, ShippingCountry, ShippingCountryCode,
-                       Business_Vertical__c, Vertical__c,
+                       Business_Vertical__c,
                        Contract_Period_From_Date__c, Contract_Period_End_Date__c,
                        Delivery__c,
                        SAP_Code__c, Sync_To_SAP__c,
