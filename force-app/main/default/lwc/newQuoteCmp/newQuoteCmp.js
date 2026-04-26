@@ -45,17 +45,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     accountId;
     accountName = '';
     regionId;
-    // Mapped from Opportunity.Buisness_Vertical__c / .Sub_Vertical__c so
-    // the Quote form shows the parent's vertical / sub-vertical. Both
-    // on-form fields are disabled; these values are what the form
-    // binds to.
+    // Mapped from Opportunity.Buisness_Vertical__c / .Sub_Vertical__c.
+    // Rendered as plain readonly text on the form so updates propagate
+    // (lightning-input-field reads `value` only at mount and caches
+    // via LDS, which silently swallows mid-form Opportunity changes).
+    // handleFormSubmit pulls these into the field payload before save.
     businessVertical = null;
     subVertical = null;
-    // lightning-input-field reads `value` once at mount, so changing
-    // businessVertical / subVertical after a re-fetch wouldn't refresh
-    // the displayed value. We unmount/remount the verticals via this
-    // flag whenever the rep picks a different Opportunity.
-    verticalsReady = true;
 
     // Default values for new quote (is_Active defaults to true so fresh quotes
     // are marked as the active one for the opportunity).
@@ -141,18 +137,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // Prefill Business Vertical from the parent Opportunity on new quotes.
     // In edit mode fall through to the saved Quote value so we don't
     // overwrite the record with a blank.
-    // Returns undefined when nothing has been mapped yet, which lets the
-    // record-edit-form fall through to the saved Quote value on edit-mode
-    // load (we only populate businessVertical / subVertical when an
-    // Opportunity context is fetched). When the rep changes Opportunity
-    // mid-form the new value flows through and the disabled inputs
-    // remount via the verticalsReady toggle.
-    get defaultBusinessVertical() {
-        return this.businessVertical || undefined;
-    }
-    get defaultSubVertical() {
-        return this.subVertical || undefined;
-    }
 
     // ===== WIZARD =====
 
@@ -253,6 +237,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
     get accountNameDisplay() { return this.accountName || '—'; }
     get businessVerticalDisplay() { return this.businessVertical || '—'; }
+    get subVerticalDisplay() { return this.subVertical || '—'; }
     get contractDateDisplay() {
         if (!this.contractFromDate && !this.contractEndDate) return '—';
         return `${this.contractFromDate || '—'} → ${this.contractEndDate || '—'}`;
@@ -483,13 +468,9 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             if (!data) return;
             this.businessVertical = data.vertical || null;
             this.subVertical = data.subVertical || null;
-            // Force the disabled vertical inputs to remount so the freshly
-            // fetched value actually shows — lightning-input-field treats
-            // `value` as init-only. Toggle false → tick → true.
-            this.verticalsReady = false;
-            await Promise.resolve();
-            this.verticalsReady = true;
-            if (!this.isEditMode && Array.isArray(data.defaultPaymentTerms)) {
+            // Replace the auto-loaded payment terms with whatever the new
+            // Opportunity's vertical / sub-vertical pair maps to.
+            if (Array.isArray(data.defaultPaymentTerms) && data.defaultPaymentTerms.length > 0) {
                 this.paymentTerms = data.defaultPaymentTerms.map((t, idx) => {
                     ptCounter++;
                     return {
@@ -587,6 +568,18 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
         // Inject Pricebook2Id
         fields.Pricebook2Id = this.pricebookId;
+
+        // Inject verticals — these are rendered as readonly displays
+        // (not lightning-input-fields) so they aren't in event.detail.fields
+        // by default. Pull from tracked state which mirrors the parent
+        // Opportunity (and re-fetches when the rep changes Opportunity
+        // mid-form).
+        if (this.businessVertical) {
+            fields.Business_Vertical__c = this.businessVertical;
+        }
+        if (this.subVertical) {
+            fields.Sub_Vertical__c = this.subVertical;
+        }
 
         // Inject Billing Address
         fields.BillingName = this.billingAddress.name || '';
