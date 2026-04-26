@@ -51,6 +51,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // binds to.
     businessVertical = null;
     subVertical = null;
+    // lightning-input-field reads `value` once at mount, so changing
+    // businessVertical / subVertical after a re-fetch wouldn't refresh
+    // the displayed value. We unmount/remount the verticals via this
+    // flag whenever the rep picks a different Opportunity.
+    verticalsReady = true;
 
     // Default values for new quote (is_Active defaults to true so fresh quotes
     // are marked as the active one for the opportunity).
@@ -136,14 +141,17 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // Prefill Business Vertical from the parent Opportunity on new quotes.
     // In edit mode fall through to the saved Quote value so we don't
     // overwrite the record with a blank.
+    // Returns undefined when nothing has been mapped yet, which lets the
+    // record-edit-form fall through to the saved Quote value on edit-mode
+    // load (we only populate businessVertical / subVertical when an
+    // Opportunity context is fetched). When the rep changes Opportunity
+    // mid-form the new value flows through and the disabled inputs
+    // remount via the verticalsReady toggle.
     get defaultBusinessVertical() {
-        return this.isEditMode ? undefined : (this.businessVertical || undefined);
+        return this.businessVertical || undefined;
     }
-    // Same pattern as defaultBusinessVertical: prefill on new quotes,
-    // fall through to the saved Quote value in edit mode so we don't
-    // wipe a manual override by submitting a blank.
     get defaultSubVertical() {
-        return this.isEditMode ? undefined : (this.subVertical || undefined);
+        return this.subVertical || undefined;
     }
 
     // ===== WIZARD =====
@@ -475,6 +483,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             if (!data) return;
             this.businessVertical = data.vertical || null;
             this.subVertical = data.subVertical || null;
+            // Force the disabled vertical inputs to remount so the freshly
+            // fetched value actually shows — lightning-input-field treats
+            // `value` as init-only. Toggle false → tick → true.
+            this.verticalsReady = false;
+            await Promise.resolve();
+            this.verticalsReady = true;
             if (!this.isEditMode && Array.isArray(data.defaultPaymentTerms)) {
                 this.paymentTerms = data.defaultPaymentTerms.map((t, idx) => {
                     ptCounter++;
