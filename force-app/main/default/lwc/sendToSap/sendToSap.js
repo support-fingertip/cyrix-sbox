@@ -1,5 +1,5 @@
 /**
- * Send to SAP — headless quick action on Account and Order.
+ * Send to SAP — headless quick action LWC for Account and Order.
  * Calls SAPsend_TriggerHandler.SendToSAP_call(recordId), which fires
  * the @Future SAP callout in the background. Shows a toast based on
  * the integer status code returned synchronously.
