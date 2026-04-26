@@ -926,17 +926,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 updated.quantity = parseFloat(value) || 0;
             } else if (field === 'unitPrice') {
                 const raw = parseFloat(value) || 0;
-                // For non-service lines Sales Price is locked to the
-                // Standard list price. If the rep types something else
-                // (either above or below the Standard) the input snaps
-                // back to list price without an error — Discount is the
-                // lever used to lower the effective price.
+                // For non-service lines, Sales Price can be raised above
+                // list price but never dropped below it — discount is the
+                // lever for going below the list. If the rep types a
+                // value below list, snap back to list silently.
                 if (!updated.isServiceItem) {
-                    if (raw !== updated.listPrice) {
-                        updated.unitPrice = updated.listPrice;
-                    } else {
-                        updated.unitPrice = raw;
-                    }
+                    const lp = updated.listPrice == null ? 0 : updated.listPrice;
+                    updated.unitPrice = raw < lp ? lp : raw;
                 } else {
                     updated.unitPrice = raw;
                 }

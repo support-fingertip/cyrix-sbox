@@ -578,20 +578,38 @@ public with sharing class QuoteBuilderController {
 
         out.standardPrice = standard;
 
-        if (tiers != null && !tiers.byTier.isEmpty()) {
+        // Discount-percentage based tier resolution: the rep entered a
+        // discount, walk PL4 -> PL1 and pick the first tier whose
+        // Max_Discount_Percentage__c covers it. Tag that tier as the
+        // line's source pricebook. Status is Approval Required when the
+        // discount equals or exceeds the tier's max, Not Required when
+        // it sits below.
+        if (d > 0 && tiers != null && !tiers.byTier.isEmpty()) {
             PricebookTierService.TierResolution applied =
-                PricebookTierService.resolveAppliedTier(tiers, finalAmount);
+                PricebookTierService.resolveTierByDiscount(tiers, d);
             if (applied != null && applied.entry != null) {
                 out.resolvedTier = applied.tierName;
                 out.resolvedTierListPrice = applied.tierListPrice;
                 out.resolvedPricebookId = applied.entry.Pricebook2Id;
+                out.priceStatus = PricebookTierService.priceStatusForDiscountTier(applied, d);
+                return out;
+            }
+            if (applied != null && applied.underFloor == true) {
+                // Discount exceeds every tier's Max_Discount_Percentage__c —
+                // the rep has gone past the broadest allowance, so flag
+                // for approval against the Standard pricebook.
+                List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
+                if (!stdPbs.isEmpty()) {
+                    out.resolvedTier = 'Standard';
+                    out.resolvedTierListPrice = standard;
+                    out.resolvedPricebookId = stdPbs[0].Id;
+                }
                 out.priceStatus = PricebookTierService.STATUS_APPROVAL_REQUIRED;
                 return out;
             }
         }
 
-        // Above the top discount tier (or no tier data) — tag the org's
-        // Standard pricebook (IsStandard = true) and mark Not Required.
+        // No discount (or no tier data) — Standard pricebook, no approval.
         List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
         if (!stdPbs.isEmpty()) {
             out.resolvedTier = 'Standard';

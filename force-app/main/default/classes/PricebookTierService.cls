@@ -75,6 +75,7 @@ public with sharing class PricebookTierService {
 
         for (PricebookEntry pbe : [
             SELECT Id, Product2Id, UnitPrice, IsActive,
+                   Max_Discount_Percentage__c,
                    Pricebook2Id, Pricebook2.Name, Pricebook2.Price_Book_Type__c,
                    Pricebook2.IsActive
             FROM PricebookEntry
@@ -267,6 +268,67 @@ public with sharing class PricebookTierService {
         r.tierListPrice = lowestExisting.UnitPrice;
         r.underFloor = true;
         return r;
+    }
+
+    /**
+     * Discount-percentage based tier resolution.
+     *
+     * Walks PL4 -> PL3 -> PL2 -> PL1 (priority high-restriction first)
+     * and picks the first tier whose Max_Discount_Percentage__c covers
+     * the rep's discount. That tier becomes the source pricebook for
+     * the line.
+     *
+     * If the discount equals the tier's Max_Discount_Percentage__c the
+     * caller should treat the line as Approval Required — the rep has
+     * maxed out that tier. A discount strictly below the tier's max
+     * stays Not Required.
+     *
+     * Returns null tier (entry == null) when:
+     *   - discountPercent is null or <= 0 (no discount, Standard pricebook).
+     *   - discountPercent exceeds every tier's Max_Discount_Percentage__c
+     *     (over the broadest allowance — caller should require approval).
+     * In the second case underFloor is set so the caller can distinguish
+     * "no discount" from "discount over max".
+     */
+    public static TierResolution resolveTierByDiscount(ProductTierMap tiers, Decimal discountPercent) {
+        TierResolution r = new TierResolution();
+        r.underFloor = false;
+        if (tiers == null || tiers.byTier.isEmpty()) return r;
+        if (discountPercent == null || discountPercent <= 0) return r;
+
+        List<String> order = new List<String>{ TIER4, TIER3, TIER2, TIER1 };
+        for (String t : order) {
+            PricebookEntry e = tiers.tier(t);
+            if (e == null) continue;
+            Decimal maxDisc = e.Max_Discount_Percentage__c;
+            if (maxDisc == null) continue;
+            if (discountPercent <= maxDisc) {
+                r.entry = e;
+                r.tierName = t;
+                r.tierListPrice = e.UnitPrice;
+                return r;
+            }
+        }
+        // Discount exceeds every tier's max — flag underFloor so the
+        // caller can clamp / require approval. No tier entry returned.
+        r.underFloor = true;
+        return r;
+    }
+
+    /**
+     * Status from the discount-tier resolution. Approval Required when
+     * the rep is at or above the assigned tier's Max_Discount_Percentage__c
+     * (or when the discount overran every tier and underFloor was set);
+     * Not Required when the discount sits below the tier's threshold.
+     */
+    public static String priceStatusForDiscountTier(TierResolution r, Decimal discountPercent) {
+        if (r == null) return STATUS_NOT_REQUIRED;
+        if (r.underFloor == true) return STATUS_APPROVAL_REQUIRED;
+        if (r.entry == null) return STATUS_NOT_REQUIRED;
+        Decimal maxDisc = r.entry.Max_Discount_Percentage__c;
+        if (maxDisc == null) return STATUS_NOT_REQUIRED;
+        if (discountPercent == null) return STATUS_NOT_REQUIRED;
+        return discountPercent >= maxDisc ? STATUS_APPROVAL_REQUIRED : STATUS_NOT_REQUIRED;
     }
 
     /**
