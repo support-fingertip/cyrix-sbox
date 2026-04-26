@@ -585,18 +585,24 @@ public with sharing class QuoteBuilderController {
 
     @AuraEnabled
     public static QuoteEditContext getQuoteForEdit(Id quoteId) {
-        Quote q = [
-            SELECT Id, Pricebook2Id, OpportunityId,
-                   Opportunity.AccountId, Opportunity.Account.Name,
-                   Opportunity.Region__c,
-                   BillingName, BillingStreet, BillingCity,
-                   BillingStateCode, BillingPostalCode, BillingCountryCode,
-                   ShippingName, ShippingStreet, ShippingCity,
-                   ShippingStateCode, ShippingPostalCode, ShippingCountryCode
-            FROM Quote
-            WHERE Id = :quoteId
-            LIMIT 1
-        ];
+        // Business_Vertical__c / Sub_Vertical__c live on the Quote in this
+        // org but may not be deployed everywhere; query them dynamically
+        // and ignore when missing so the controller still compiles.
+        Boolean qHasBV = Schema.SObjectType.Quote.fields.getMap().containsKey('business_vertical__c');
+        Boolean qHasSV = Schema.SObjectType.Quote.fields.getMap().containsKey('sub_vertical__c');
+        String quoteFields =
+            'Id, Pricebook2Id, OpportunityId,' +
+            ' Opportunity.AccountId, Opportunity.Account.Name,' +
+            ' Opportunity.Region__c,' +
+            ' BillingName, BillingStreet, BillingCity,' +
+            ' BillingStateCode, BillingPostalCode, BillingCountryCode,' +
+            ' ShippingName, ShippingStreet, ShippingCity,' +
+            ' ShippingStateCode, ShippingPostalCode, ShippingCountryCode' +
+            (qHasBV ? ', Business_Vertical__c' : '') +
+            (qHasSV ? ', Sub_Vertical__c' : '');
+        Quote q = (Quote) Database.query(
+            'SELECT ' + quoteFields + ' FROM Quote WHERE Id = :quoteId LIMIT 1'
+        );
 
         QuoteEditContext ctx = new QuoteEditContext();
         ctx.quoteId = q.Id;
@@ -606,6 +612,8 @@ public with sharing class QuoteBuilderController {
         ctx.accountName = (q.Opportunity != null && q.Opportunity.Account != null)
             ? q.Opportunity.Account.Name : '';
         ctx.regionId = q.Opportunity != null ? q.Opportunity.Region__c : null;
+        ctx.vertical = qHasBV ? (String) q.get('Business_Vertical__c') : null;
+        ctx.subVertical = qHasSV ? (String) q.get('Sub_Vertical__c') : null;
 
         // Address fields
         ctx.billingName = q.BillingName;
@@ -992,6 +1000,8 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Id accountId;
         @AuraEnabled public String accountName;
         @AuraEnabled public Id regionId;
+        @AuraEnabled public String vertical;
+        @AuraEnabled public String subVertical;
         @AuraEnabled public Id standardPricebookId;
         @AuraEnabled public String billingName;
         @AuraEnabled public String billingStreet;
