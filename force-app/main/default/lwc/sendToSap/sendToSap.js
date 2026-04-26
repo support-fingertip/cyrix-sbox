@@ -1,24 +1,25 @@
 /**
  * Send to SAP — headless quick action on Account and Order.
- * Calls SapSyncController.sendToSap with the current record id and
- * shows a success / error toast. No UI is rendered.
+ * Calls SAPsend_TriggerHandler.SendToSAP_call(recordId), which fires
+ * the @Future SAP callout in the background. Shows a toast based on
+ * the integer status code returned synchronously.
+ *
+ *   1 = send request submitted          -> success toast
+ *   2 = already sent / no-op            -> info toast
+ *   anything else                       -> error toast
  */
 import { LightningElement, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import sendToSap from '@salesforce/apex/SapSyncController.sendToSap';
+import sendToSapCall from '@salesforce/apex/SAPsend_TriggerHandler.SendToSAP_call';
 
 export default class SendToSap extends LightningElement {
     @api recordId;
     @api objectApiName;
 
     @api invoke() {
-        sendToSap({ recordId: this.recordId })
-            .then(result => {
-                if (result && result.startsWith('ERROR:')) {
-                    this.showToast('Error', result.replace('ERROR:', '').trim(), 'error');
-                } else {
-                    this.showToast('Success', result, 'success');
-                }
+        sendToSapCall({ recordId: this.recordId })
+            .then(status => {
+                this.handleStatus(status);
             })
             .catch(error => {
                 const msg = error && error.body && error.body.message
@@ -26,6 +27,27 @@ export default class SendToSap extends LightningElement {
                     : 'Failed to send to SAP';
                 this.showToast('Error', msg, 'error');
             });
+    }
+
+    handleStatus(status) {
+        const isAccount = this.objectApiName === 'Account';
+        const entityLabel = isAccount ? 'Customer' : 'Order';
+
+        if (status === 1) {
+            this.showToast('Success', `${entityLabel} sent successfully`, 'success');
+        } else if (status === 2) {
+            this.showToast(
+                'Info',
+                `${entityLabel} is already marked as sent to SAP`,
+                'info'
+            );
+        } else {
+            this.showToast(
+                'Error',
+                `Could not send ${entityLabel.toLowerCase()} to SAP`,
+                'error'
+            );
+        }
     }
 
     showToast(title, message, variant) {
