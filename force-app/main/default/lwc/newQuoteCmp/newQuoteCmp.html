@@ -72,9 +72,9 @@
                         <div class="qw-grid-2">
                             <div class="qw-field"><lightning-input-field field-name="Quote_Date__c" required></lightning-input-field></div>
                             <div class="qw-field"><lightning-input-field field-name="Quote_Valid_Till_in_days__c" required></lightning-input-field></div>
-                            <div class="qw-field"><lightning-input-field field-name="OpportunityId" value={defaultOpportunityId} required></lightning-input-field></div>
+                            <div class="qw-field"><lightning-input-field field-name="OpportunityId" value={defaultOpportunityId} onchange={handleOpportunityChange} required></lightning-input-field></div>
                             <div class="qw-field"><lightning-input-field field-name="Business_Vertical__c" value={defaultBusinessVertical} disabled required></lightning-input-field></div>
-                            <div class="qw-field"><lightning-input-field field-name="Sub_Vertical__c"></lightning-input-field></div>
+                            <div class="qw-field"><lightning-input-field field-name="Sub_Vertical__c" value={defaultSubVertical} disabled></lightning-input-field></div>
                             <div class="qw-field"><lightning-input-field field-name="Shipping_Mode__c"></lightning-input-field></div>
                             <div class="qw-field"><lightning-input-field field-name="Delivery__c"></lightning-input-field></div>
                             <div class="qw-field"><lightning-input-field field-name="is_Active__c" value={defaultIsActive}></lightning-input-field></div>

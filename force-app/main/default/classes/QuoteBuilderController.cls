@@ -2,17 +2,26 @@ public with sharing class QuoteBuilderController {
 
     @AuraEnabled(cacheable=true)
     public static OpportunityContext getOpportunityContext(Id opportunityId) {
-        Opportunity opp = [
-            SELECT Id, Name, AccountId, Account.Name,
-                   Account.BillingStreet, Account.BillingCity,
-                   Account.BillingStateCode, Account.BillingPostalCode,
-                   Account.BillingCountryCode,
-                   Pricebook2Id, CurrencyIsoCode, Buisness_Vertical__c,
-                   Region__c
-            FROM Opportunity
-            WHERE Id = :opportunityId
-            LIMIT 1
-        ];
+        // Sub_Vertical__c may not exist on Opportunity in every org — keep
+        // the SOQL dynamic so the controller still runs where it's missing.
+        Boolean oppHasSubVertical = Schema.SObjectType.Opportunity.fields.getMap()
+            .containsKey('sub_vertical__c');
+
+        String oppQuery =
+            'SELECT Id, Name, AccountId, Account.Name,' +
+            '       Account.BillingStreet, Account.BillingCity,' +
+            '       Account.BillingStateCode, Account.BillingPostalCode,' +
+            '       Account.BillingCountryCode,' +
+            '       Pricebook2Id, CurrencyIsoCode, Buisness_Vertical__c,' +
+            '       Region__c' +
+            (oppHasSubVertical ? ', Sub_Vertical__c' : '') +
+            ' FROM Opportunity WHERE Id = :opportunityId LIMIT 1';
+        List<Opportunity> oppList = Database.query(oppQuery);
+        if (oppList.isEmpty()) {
+            return new OpportunityContext();
+        }
+        Opportunity opp = oppList[0];
+        String subVertical = oppHasSubVertical ? (String) opp.get('Sub_Vertical__c') : null;
 
         OpportunityContext ctx = new OpportunityContext();
         ctx.opportunityId = opp.Id;
@@ -22,6 +31,7 @@ public with sharing class QuoteBuilderController {
         ctx.pricebookId = opp.Pricebook2Id;
         ctx.currencyCode = opp.CurrencyIsoCode;
         ctx.vertical = opp.Buisness_Vertical__c;
+        ctx.subVertical = subVertical;
         ctx.regionId = opp.Region__c;
 
         // Always provide the Standard Pricebook ID for auto-pricing
@@ -39,7 +49,7 @@ public with sharing class QuoteBuilderController {
             ctx.billingCountry = opp.Account.BillingCountryCode;
         }
 
-        ctx.defaultPaymentTerms = getDefaultPaymentTerms(opp.Buisness_Vertical__c);
+        ctx.defaultPaymentTerms = getDefaultPaymentTerms(opp.Buisness_Vertical__c, subVertical);
         ctx.opportunityLineItems = getOpportunityLineItemsAsQuoteLines(opportunityId, ctx.standardPricebookId);
 
         return ctx;
@@ -131,27 +141,47 @@ public with sharing class QuoteBuilderController {
         return results;
     }
 
-    private static List<PaymentTermResult> getDefaultPaymentTerms(String vertical) {
+    private static List<PaymentTermResult> getDefaultPaymentTerms(String vertical, String subVertical) {
         List<PaymentTermResult> results = new List<PaymentTermResult>();
 
+        // Sub_Vertical__c is optional on Payment_Terms_Master__c — fall
+        // back to vertical-only matching when the field isn't deployed.
+        Boolean ptmHasSubVertical = Schema.SObjectType.Payment_Terms_Master__c.fields.getMap()
+            .containsKey('sub_vertical__c');
+        String fields = 'Id, Payment_Term__c, Percentage__c, Type__c'
+            + (ptmHasSubVertical ? ', Sub_Vertical__c' : '');
+
         List<Payment_Terms_Master__c> matched = new List<Payment_Terms_Master__c>();
-        if (String.isNotBlank(vertical)) {
-            matched = [
-                SELECT Id, Payment_Term__c, Percentage__c, Type__c
-                FROM Payment_Terms_Master__c
-                WHERE Type__c = :vertical
-                ORDER BY CreatedDate ASC
-            ];
+
+        // Tier 1: vertical AND sub-vertical — only when both are present
+        // and the field exists on the master object.
+        if (String.isNotBlank(vertical) && ptmHasSubVertical && String.isNotBlank(subVertical)) {
+            String q1 = 'SELECT ' + fields +
+                ' FROM Payment_Terms_Master__c' +
+                ' WHERE Type__c = :vertical AND Sub_Vertical__c = :subVertical' +
+                ' ORDER BY CreatedDate ASC';
+            matched = Database.query(q1);
         }
 
-        // Fall back to records with blank Type when no vertical match
+        // Tier 2: vertical AND blank sub-vertical — the per-vertical
+        // default record set used when the quote's sub-vertical doesn't
+        // have its own dedicated entry.
+        if (matched.isEmpty() && String.isNotBlank(vertical)) {
+            String q2 = 'SELECT ' + fields +
+                ' FROM Payment_Terms_Master__c' +
+                ' WHERE Type__c = :vertical' +
+                (ptmHasSubVertical ? ' AND Sub_Vertical__c = null' : '') +
+                ' ORDER BY CreatedDate ASC';
+            matched = Database.query(q2);
+        }
+
+        // Tier 3: records with blank Type (org-wide fallback)
         if (matched.isEmpty()) {
-            matched = [
-                SELECT Id, Payment_Term__c, Percentage__c, Type__c
-                FROM Payment_Terms_Master__c
-                WHERE Type__c = null
-                ORDER BY CreatedDate ASC
-            ];
+            String q3 = 'SELECT ' + fields +
+                ' FROM Payment_Terms_Master__c' +
+                ' WHERE Type__c = null' +
+                ' ORDER BY CreatedDate ASC';
+            matched = Database.query(q3);
         }
 
         for (Payment_Terms_Master__c pt : matched) {
@@ -878,6 +908,7 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Id standardPricebookId;
         @AuraEnabled public String currencyCode;
         @AuraEnabled public String vertical;
+        @AuraEnabled public String subVertical;
         @AuraEnabled public Id regionId;
         @AuraEnabled public String billingName;
         @AuraEnabled public String billingStreet;

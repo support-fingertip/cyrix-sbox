@@ -45,10 +45,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     accountId;
     accountName = '';
     regionId;
-    // Mapped from Opportunity.Buisness_Vertical__c so the Quote form shows
-    // the parent's vertical. The on-form field is disabled; this value is
-    // what the form binds to.
+    // Mapped from Opportunity.Buisness_Vertical__c / .Sub_Vertical__c so
+    // the Quote form shows the parent's vertical / sub-vertical. Both
+    // on-form fields are disabled; these values are what the form
+    // binds to.
     businessVertical = null;
+    subVertical = null;
 
     // Default values for new quote (is_Active defaults to true so fresh quotes
     // are marked as the active one for the opportunity).
@@ -137,6 +139,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     get defaultBusinessVertical() {
         return this.isEditMode ? undefined : (this.businessVertical || undefined);
     }
+    // Same pattern as defaultBusinessVertical: prefill on new quotes,
+    // fall through to the saved Quote value in edit mode so we don't
+    // wipe a manual override by submitting a blank.
+    get defaultSubVertical() {
+        return this.isEditMode ? undefined : (this.subVertical || undefined);
+    }
 
     // ===== WIZARD =====
 
@@ -207,13 +215,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     handleStepJump(event) {
         const target = parseInt(event.currentTarget.dataset.step, 10);
         if (!target || target === this.currentStep) return;
-        // Allow jumping back freely; only allow forward jumps to steps the
-        // user has already passed (current marker excluded so they can't
-        // skip ahead without going through Continue).
-        if (target < this.currentStep) {
-            this.currentStep = target;
-            this.scrollShellTop();
-        }
+        if (target < 1 || target > TOTAL_STEPS) return;
+        // Free navigation — clicking any step in the stepper or any
+        // Edit chip on the Review step jumps directly. The form's own
+        // submit-time validation still gates the final save, so we
+        // don't need to forward-lock the wizard.
+        this.currentStep = target;
+        this.scrollShellTop();
     }
     scrollShellTop() {
         // Scroll the wizard shell into view so the user lands at the top
@@ -321,6 +329,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.accountName = data.accountName || '';
             this.regionId = data.regionId;
             this.businessVertical = data.vertical || null;
+            this.subVertical = data.subVertical || null;
 
             // === AUTO-POPULATE BILL TO ADDRESS FROM ACCOUNT ===
             if (!this.isEditMode && this.accountId) {
@@ -452,6 +461,35 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
     handleContractEndDateChange(event) {
         this.contractEndDate = event.detail ? event.detail.value : event.target.value;
+    }
+
+    // Refetch verticals + default payment terms when the rep picks a
+    // different Opportunity on the form. Replaces the auto-loaded
+    // payment-terms list on new quotes; in edit mode we leave existing
+    // payment terms alone so a manual override isn't wiped.
+    async handleOpportunityChange(event) {
+        const newOppId = event.detail ? event.detail.value : (event.target ? event.target.value : null);
+        if (!newOppId) return;
+        try {
+            const data = await getOpportunityContext({ opportunityId: newOppId });
+            if (!data) return;
+            this.businessVertical = data.vertical || null;
+            this.subVertical = data.subVertical || null;
+            if (!this.isEditMode && Array.isArray(data.defaultPaymentTerms)) {
+                this.paymentTerms = data.defaultPaymentTerms.map((t, idx) => {
+                    ptCounter++;
+                    return {
+                        ptId: 'pt-' + ptCounter,
+                        rowNumber: idx + 1,
+                        paymentTerm: t.paymentTerm || '',
+                        percentage: t.percentage || 0
+                    };
+                });
+            }
+        } catch (error) {
+            // Silent — the rep can still finish the form; verticals just
+            // won't auto-update for this opportunity.
+        }
     }
 
     // ===== PAYMENT TERM HANDLERS =====
