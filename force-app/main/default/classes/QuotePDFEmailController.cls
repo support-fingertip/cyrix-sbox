@@ -6,11 +6,11 @@ public with sharing class QuotePDFEmailController {
     @AuraEnabled
     public static QuoteEmailWrapper getQuoteDetails(Id quoteId) {
         List<Quote> quotes = [
-            SELECT Id, Name, QuoteNumber, Quote_Id__c, Vertical__c,
+            SELECT Id, Name, QuoteNumber, Quote_Id__c, 
                    AccountId, Account.Name,
                    ContactId, Contact.Name, Contact.Email,
-                   OpportunityId, Opportunity.Email__c,
-                   OwnerId, Owner.Name, Owner.Email
+                   OpportunityId, Opportunity.Name, Opportunity.Email__c,
+                   OwnerId, Owner.Name, Owner.Email, Owner.Title
             FROM Quote
             WHERE Id = :quoteId
             LIMIT 1
@@ -26,21 +26,47 @@ public with sharing class QuotePDFEmailController {
         wrapper.quoteId = q.Id;
         wrapper.quoteName = q.Name;
         wrapper.quoteNumber = q.QuoteNumber;
-        wrapper.vertical = q.Vertical__c;
         wrapper.accountName = q.AccountId != null ? q.Account.Name : '';
         wrapper.contactEmail = q.ContactId != null ? q.Contact.Email : '';
         wrapper.opportunityEmail = q.OpportunityId != null ? q.Opportunity.Email__c : '';
         wrapper.contactName = q.ContactId != null ? q.Contact.Name : '';
         wrapper.ownerEmail = q.OwnerId != null ? q.Owner.Email : '';
-        wrapper.defaultSubject = 'Quotation for ' +
-            (q.Vertical__c != null ? q.Vertical__c : '') +
-            ' - ' + q.Name;
-        wrapper.defaultBody = 'Dear Sir/Madam,\n\n' +
-            'Please find attached the quotation for your kind consideration.\n\n' +
-            'Should you require any further clarification or technical discussion, ' +
-            'we will be glad to assist at your convenience.\n\n' +
-            'With Regards,\n' +
-            'For Cyrix Healthcare Pvt. Ltd';
+
+        // Default To address: prefer Opportunity email, then Contact email, then Owner email
+        if (String.isNotBlank(wrapper.opportunityEmail)) {
+            wrapper.defaultToAddress = wrapper.opportunityEmail;
+        } else if (String.isNotBlank(wrapper.contactEmail)) {
+            wrapper.defaultToAddress = wrapper.contactEmail;
+        } else if (String.isNotBlank(wrapper.ownerEmail)) {
+            wrapper.defaultToAddress = wrapper.ownerEmail;
+        } else {
+            wrapper.defaultToAddress = '';
+        }
+
+        // Default subject: use Quote Name (e.g. C-KL/Ausum/QTN-009/2026-27)
+        wrapper.defaultSubject = 'Quote ' + q.Name;
+
+        // Default HTML body: professional template populated with quote context
+        String greetingName = String.isNotBlank(wrapper.contactName)
+            ? wrapper.contactName
+            : (String.isNotBlank(wrapper.accountName) ? wrapper.accountName : 'Sir/Madam');
+        String opportunityName = q.OpportunityId != null && String.isNotBlank(q.Opportunity.Name)
+            ? q.Opportunity.Name
+            : q.Name;
+        String ownerName = q.OwnerId != null && String.isNotBlank(q.Owner.Name) ? q.Owner.Name : '';
+        String ownerTitle = q.OwnerId != null && String.isNotBlank(q.Owner.Title) ? q.Owner.Title : '';
+
+        wrapper.defaultBody =
+            '<p>Dear ' + greetingName + ',</p>' +
+            '<p>I hope this email finds you well.</p>' +
+            '<p>Following our recent discussions, I am pleased to present our detailed proposal for ' +
+            opportunityName + '. Attached to this email, you will find the proposal document which ' +
+            'includes a comprehensive estimate for the project.</p>' +
+            '<p>Best regards,</p>' +
+            '<p><strong>For Cyrix Healthcare Pvt. Ltd</strong></p>' +
+            '<p>' + ownerName +
+            (String.isNotBlank(ownerTitle) ? '<br/>' + ownerTitle : '') +
+            '</p>';
         return wrapper;
     }
 
@@ -76,7 +102,7 @@ public with sharing class QuotePDFEmailController {
             Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
             email.setToAddresses(parseEmails(toAddress));
             email.setSubject(subject);
-            email.setPlainTextBody(body);
+            email.setHtmlBody(body);
             email.setFileAttachments(new Messaging.EmailFileAttachment[]{ attachment });
 
             // Set CC if provided
@@ -95,6 +121,8 @@ public with sharing class QuotePDFEmailController {
             if (results[0].isSuccess()) {
                 // Save PDF as file on the Quote
                 savePDFToQuote(quoteId, fileName, pdfBlob);
+                // Log this email on the Quote's Activity timeline
+                logEmailActivity(quoteId, toAddress, ccAddress, bccAddress, subject, body, fileName);
                 return 'SUCCESS';
             } else {
                 return 'ERROR: ' + results[0].getErrors()[0].getMessage();
@@ -122,6 +150,45 @@ public with sharing class QuotePDFEmailController {
         cdl.ShareType = 'V';
         cdl.Visibility = 'AllUsers';
         insert cdl;
+    }
+
+    /**
+     * Log the sent email as a completed Task on the Quote's Activity timeline
+     * so users can see that an email has been sent for this quote.
+     */
+    private static void logEmailActivity(Id quoteId, String toAddress, String ccAddress,
+                                          String bccAddress, String subject, String body,
+                                          String fileName) {
+        try {
+            // Strip HTML tags from body for the task description
+            String plainBody = body != null
+                ? body.replaceAll('<br\\s*/?>', '\n').replaceAll('</p>', '\n').replaceAll('<[^>]+>', '').trim()
+                : '';
+
+            String description = 'To: ' + (toAddress != null ? toAddress : '') + '\n';
+            if (String.isNotBlank(ccAddress)) {
+                description += 'CC: ' + ccAddress + '\n';
+            }
+            if (String.isNotBlank(bccAddress)) {
+                description += 'BCC: ' + bccAddress + '\n';
+            }
+            description += 'Attachment: ' + fileName + '\n\n' + plainBody;
+
+            Task emailTask = new Task(
+                WhatId = quoteId,
+                Subject = 'Email: ' + (String.isNotBlank(subject) ? subject : 'Quote PDF'),
+                Status = 'Completed',
+                Priority = 'Normal',
+                ActivityDate = Date.today(),
+                Description = description,
+                Type = 'Email',
+                TaskSubtype = 'Email'
+            );
+            insert emailTask;
+        } catch (Exception e) {
+            // Don't fail the send if activity logging fails — just log it
+            System.debug('Failed to log email activity: ' + e.getMessage());
+        }
     }
 
     /**
@@ -153,5 +220,6 @@ public with sharing class QuotePDFEmailController {
         @AuraEnabled public String defaultSubject;
         @AuraEnabled public String defaultBody;
         @AuraEnabled public String opportunityEmail;
+        @AuraEnabled public String defaultToAddress;
     }
 }

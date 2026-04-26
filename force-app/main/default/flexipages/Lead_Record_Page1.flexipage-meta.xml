@@ -232,6 +232,12 @@
                 <identifier>RecordPurchaseDate_Last_Updated__cField</identifier>
             </fieldInstance>
         </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldItem>Record.Sub_Vertical__c</fieldItem>
+                <identifier>RecordSub_Vertical__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
         <name>Facet-4d1187e4-0a92-41b2-b625-27526473a035</name>
         <type>Facet</type>
     </flexiPageRegions>

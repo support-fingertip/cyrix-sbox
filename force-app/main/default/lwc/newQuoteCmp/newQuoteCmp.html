@@ -54,15 +54,17 @@
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
                             <lightning-input-field field-name="Quote_Date__c" required></lightning-input-field>
                         </div>
-                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
                             <lightning-input-field field-name="Quote_Valid_Till_in_days__c" required></lightning-input-field>
                         </div>
-                    
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
                             <lightning-input-field field-name="OpportunityId" value={defaultOpportunityId} required></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="Business_Vertical__c" required></lightning-input-field>
+                            <lightning-input-field field-name="Business_Vertical__c" value={defaultBusinessVertical} disabled required></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
+                            <lightning-input-field field-name="Sub_Vertical__c"></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
                             <lightning-input-field field-name="Shipping_Mode__c"></lightning-input-field>
@@ -71,37 +73,32 @@
                             <lightning-input-field field-name="Delivery__c"></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="Bank_Name__c"></lightning-input-field>
+                            <lightning-input-field field-name="Contract_Period_From_Date__c" onchange={handleContractFromDateChange}></lightning-input-field>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="Contract_Period_From_Date__c"></lightning-input-field>
+                            <lightning-input-field field-name="Contract_Period_End_Date__c" onchange={handleContractEndDateChange}></lightning-input-field>
+                            <template if:true={isContractDateInvalid}>
+                                <div class="slds-text-color_error slds-text-body_small slds-m-top_xx-small">
+                                    End Date must be greater than From Date.
+                                </div>
+                            </template>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="Contract_Period_End_Date__c"></lightning-input-field>
-                        </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-combobox
-                                label="Pricebook"
-                                value={pricebookId}
-                                options={pricebookOptions}
-                                onchange={handlePricebookChange}
-                                placeholder="Select a Pricebook..."
-                                required>
-                            </lightning-combobox>
-                        </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
-                            <lightning-input-field field-name="is_Active__c"></lightning-input-field>
+                            <lightning-input-field field-name="is_Active__c" value={defaultIsActive}></lightning-input-field>
                         </div>
                         <template if:true={isEditMode}>
                             <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-p-around_x-small">
                                 <lightning-input-field field-name="Status"></lightning-input-field>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-p-around_x-small">
+                                <lightning-input-field field-name="Reason_for_Revision__c"></lightning-input-field>
                             </div>
                         </template>
                     </div>
                 </div>
             </div>
 
-            <!-- ===== SECTION: BILL TO / SHIP TO (compound address fields) ===== -->
+            <!-- ===== SECTION: BILL TO / SHIP TO ===== -->
             <div class="section-card">
                 <div class="section-header">
                     <lightning-icon icon-name="utility:location" size="x-small" class="slds-m-right_x-small"></lightning-icon>
@@ -116,14 +113,17 @@
                                     <lightning-icon icon-name="utility:company" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
                                     Bill To
                                 </h3>
-                                <div class="slds-grid slds-wrap slds-gutters_xx-small">
-                                    <div class="slds-col slds-size_1-of-1 slds-p-bottom_xx-small">
-                                        <lightning-input-field field-name="BillingName"></lightning-input-field>
-                                    </div>
-                                    <div class="slds-col slds-size_1-of-1 slds-p-bottom_xx-small">
-                                        <lightning-input-field field-name="BillingAddress"></lightning-input-field>
-                                    </div>
-                                </div>
+                                <c-address-input
+                                    label="Billing Address"
+                                    name={billingAddress.name}
+                                    street={billingAddress.street}
+                                    city={billingAddress.city}
+                                    state={billingAddress.state}
+                                    postal-code={billingAddress.postalCode}
+                                    country={billingAddress.country}
+                                    hide-search
+                                    onaddresschange={handleBillingAddressChange}>
+                                </c-address-input>
                             </div>
                         </div>
 
@@ -134,37 +134,24 @@
                                     <lightning-icon icon-name="utility:shipping" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
                                     Ship To
                                 </h3>
-                                <template if:true={hasShippingAddresses}>
-                                    <div class="slds-p-bottom_xx-small">
-                                        <lightning-combobox
-                                            label="Select Shipping Address"
-                                            value={selectedShippingAddressId}
-                                            options={shippingAddressOptions}
-                                            onchange={handleShippingAddressSelect}
-                                            placeholder="Choose a shipping address...">
-                                        </lightning-combobox>
-                                    </div>
-                                </template>
-                                <template if:false={hasShippingAddresses}>
-                                    <div class="slds-text-body_small slds-text-color_weak slds-p-bottom_xx-small no-address-msg">
-                                        No shipping addresses found for this customer. Enter manually below.
-                                    </div>
-                                </template>
-                                <div class="slds-grid slds-wrap slds-gutters_xx-small">
-                                    <div class="slds-col slds-size_1-of-1 slds-p-bottom_xx-small">
-                                        <lightning-input-field field-name="ShippingName"></lightning-input-field>
-                                    </div>
-                                    <div class="slds-col slds-size_1-of-1 slds-p-bottom_xx-small">
-                                        <lightning-input-field field-name="ShippingAddress"></lightning-input-field>
-                                    </div>
-                                </div>
+                                <c-address-input
+                                    label="Shipping Address"
+                                    name={shippingAddress.name}
+                                    street={shippingAddress.street}
+                                    city={shippingAddress.city}
+                                    state={shippingAddress.state}
+                                    postal-code={shippingAddress.postalCode}
+                                    country={shippingAddress.country}
+                                    hide-search
+                                    onaddresschange={handleShippingAddressChange}>
+                                </c-address-input>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ===== SECTION: PRODUCT SEARCH ===== -->
+            <!-- ===== SECTION: PRODUCT SEARCH (filter = Product Type) ===== -->
             <div class="section-card">
                 <div class="section-header">
                     <lightning-icon icon-name="utility:search" size="x-small" class="slds-m-right_x-small"></lightning-icon>
@@ -177,17 +164,18 @@
                                 label="Search Products"
                                 value={searchTerm}
                                 onchange={handleSearchTermChange}
+                                onkeydown={handleSearchKeydown}
                                 placeholder="Search by name or code..."
-                                type="search">
+                                type="text">
                             </lightning-input>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-p-around_x-small">
                             <lightning-combobox
-                                label="Category Filter"
+                                label="Product Type"
                                 value={categoryFilter}
                                 options={categoryOptions}
                                 onchange={handleCategoryFilterChange}
-                                placeholder="All Categories">
+                                placeholder="All Product Types">
                             </lightning-combobox>
                         </div>
                         <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-p-around_x-small">
@@ -210,14 +198,15 @@
                                     <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped slds-table_fixed-layout">
                                         <thead>
                                             <tr class="slds-line-height_reset">
-                                                <th scope="col" style="width:25%"><div class="slds-truncate">Product Name</div></th>
-                                                <th scope="col" style="width:10%"><div class="slds-truncate">Code</div></th>
-                                                <th scope="col" style="width:14%"><div class="slds-truncate">Category</div></th>
-                                                <th scope="col" style="width:14%"><div class="slds-truncate">Make / Model</div></th>
-                                                <th scope="col" style="width:12%"><div class="slds-truncate">Unit Price</div></th>
-                                                <th scope="col" style="width:8%"><div class="slds-truncate">HSN</div></th>
-                                                <th scope="col" style="width:8%"><div class="slds-truncate">Tax %</div></th>
-                                                <th scope="col" style="width:9%"><div class="slds-truncate">Action</div></th>
+                                                <th scope="col" style="width:18%"><div class="slds-truncate">Product Name</div></th>
+                                                <th scope="col" style="width:8%"><div class="slds-truncate">Code</div></th>
+                                                <th scope="col" style="width:10%"><div class="slds-truncate">Category</div></th>
+                                                <th scope="col" style="width:11%"><div class="slds-truncate">Make / Model</div></th>
+                                                <th scope="col" style="width:10%"><div class="slds-truncate">Unit Price</div></th>
+                                                <th scope="col" style="width:11%"><div class="slds-truncate">Tier</div></th>
+                                                <th scope="col" style="width:7%"><div class="slds-truncate">HSN</div></th>
+                                                <th scope="col" style="width:7%"><div class="slds-truncate">Tax %</div></th>
+                                                <th scope="col" style="width:7%"><div class="slds-truncate">Action</div></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -228,6 +217,11 @@
                                                     <td><div class="slds-truncate">{prod.category}</div></td>
                                                     <td><div class="slds-truncate">{prod.make} {prod.model}</div></td>
                                                     <td><div class="slds-truncate">{prod.formattedPrice}</div></td>
+                                                    <td>
+                                                        <template if:true={prod.hasPriceSource}>
+                                                            <span class={prod.priceBadgeClass}>{prod.priceBadgeLabel}</span>
+                                                        </template>
+                                                    </td>
                                                     <td><div class="slds-truncate">{prod.hsnCode}</div></td>
                                                     <td><div class="slds-truncate">{prod.formattedTax}</div></td>
                                                     <td>
@@ -257,6 +251,10 @@
                 </div>
             </div>
 
+            <!-- ===== TWO-COLUMN LAYOUT: LINE ITEMS + TERMS (LEFT), SUMMARY (RIGHT) ===== -->
+            <div class="main-content-grid">
+              <div class="main-content-left">
+
             <!-- ===== SECTION: LINE ITEMS ===== -->
             <div class="section-card">
                 <div class="section-header">
@@ -276,7 +274,8 @@
                                         <th scope="col" style="width:110px"><div class="slds-truncate">List Price</div></th>
                                         <th scope="col" style="width:110px"><div class="slds-truncate">Sales Price</div></th>
                                         <th scope="col" style="width:90px"><div class="slds-truncate">Disc. %</div></th>
-                                        <th scope="col" style="width:70px"><div class="slds-truncate">Tax %</div></th>
+                                        <th scope="col" style="width:90px"><div class="slds-truncate">Tax %</div></th>
+                                        <th scope="col" style="width:100px"><div class="slds-truncate">Price Status</div></th>
                                         <th scope="col" style="width:115px"><div class="slds-truncate">Line Total</div></th>
                                         <th scope="col" style="width:45px"><div class="slds-truncate"></div></th>
                                     </tr>
@@ -290,6 +289,9 @@
                                                     {item.productName}
                                                 </div>
                                                 <div class="slds-text-body_small slds-text-color_weak">{item.productCode}</div>
+                                                <template if:true={item.hasPriceSource}>
+                                                    <span class={item.priceBadgeClass}>{item.priceBadgeLabel}</span>
+                                                </template>
                                             </td>
                                             <td class="slds-text-body_small">{item.uom}</td>
                                             <td>
@@ -337,7 +339,27 @@
                                                     onchange={handleLineItemChange}>
                                                 </lightning-input>
                                             </td>
-                                            <td class="slds-text-align_center">{item.taxPercentDisplay}</td>
+                                            <td class="slds-text-align_center">
+                                                <template if:true={item.isServiceItem}>
+                                                    <lightning-input
+                                                        type="number"
+                                                        value={item.taxPercent}
+                                                        min="0"
+                                                        max="100"
+                                                        step="0.01"
+                                                        variant="label-hidden"
+                                                        data-row-id={item.rowId}
+                                                        data-field="taxPercent"
+                                                        onchange={handleLineItemChange}>
+                                                    </lightning-input>
+                                                </template>
+                                                <template if:false={item.isServiceItem}>
+                                                    {item.taxPercentDisplay}
+                                                </template>
+                                            </td>
+                                            <td class="slds-text-align_center">
+                                                <span class={item.priceStatusBadgeClass}>{item.priceStatus}</span>
+                                            </td>
                                             <td class="line-total-cell">
                                                 <lightning-formatted-number
                                                     value={item.lineTotal}
@@ -371,101 +393,139 @@
                 </div>
             </div>
 
-            <!-- ===== SECTION: CHARGES & TOTALS ===== -->
-            <div class="slds-grid slds-wrap slds-gutters_small charges-totals-row">
-                <!-- Internal Charges -->
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                    <div class="section-card full-height">
-                        <div class="section-header">
-                            <lightning-icon icon-name="utility:money" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                            <span>Internal Charges</span>
-                        </div>
-                        <div class="section-body">
-                            <div class="slds-grid slds-wrap slds-gutters_x-small">
-                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
-                                    <lightning-input type="number" label="Packing Charges" value={packingCharges}
-                                        formatter="currency" step="0.01" min="0"
-                                        data-field="packingCharges" onchange={handleChargeChange}>
-                                    </lightning-input>
-                                </div>
-                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
-                                    <lightning-input type="number" label="Insurance Charges" value={insuranceCost}
-                                        formatter="currency" step="0.01" min="0"
-                                        data-field="insuranceCost" onchange={handleChargeChange}>
-                                    </lightning-input>
-                                </div>
-                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
-                                    <lightning-input type="number" label="Transport Cost" value={transportCharges}
-                                        formatter="currency" step="0.01" min="0"
-                                        data-field="transportCharges" onchange={handleChargeChange}>
-                                    </lightning-input>
-                                </div>
-                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
-                                    <lightning-input type="number" label="Warranty Cost" value={warrantyCost}
-                                        formatter="currency" step="0.01" min="0"
-                                        data-field="warrantyCost" onchange={handleChargeChange}>
-                                    </lightning-input>
-                                </div>
-                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
-                                    <lightning-input type="number" label="Installation Cost" value={installationCost}
-                                        formatter="currency" step="0.01" min="0"
-                                        data-field="installationCost" onchange={handleChargeChange}>
-                                    </lightning-input>
-                                </div>
-                                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-p-around_xx-small">
-                                    <lightning-input type="number" label="Training Cost" value={trainingCost}
-                                        formatter="currency" step="0.01" min="0"
-                                        data-field="trainingCost" onchange={handleChargeChange}>
-                                    </lightning-input>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- ===== SECTION: PAYMENT TERMS ===== -->
+            <div class="section-card">
+                <div class="section-header">
+                    <lightning-icon icon-name="utility:money" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                    <span>Payment Terms ({paymentTermCount})</span>
+                    <lightning-button
+                        label="Add Term"
+                        variant="brand"
+                        icon-name="utility:add"
+                        onclick={handleAddPaymentTerm}
+                        class="slds-m-left_auto">
+                    </lightning-button>
                 </div>
+                <div class="section-body">
+                    <template if:true={hasPaymentTerms}>
+                        <div class="table-scroll">
+                            <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                                <thead>
+                                    <tr class="slds-line-height_reset">
+                                        <th scope="col" style="width:35px"><div class="slds-truncate">#</div></th>
+                                        <th scope="col"><div class="slds-truncate">Payment Term</div></th>
+                                        <th scope="col" style="width:130px"><div class="slds-truncate">Percentage %</div></th>
+                                        <th scope="col" style="width:45px"><div class="slds-truncate"></div></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={paymentTerms} for:item="term">
+                                        <tr key={term.ptId}>
+                                            <td class="row-number">{term.rowNumber}</td>
+                                            <td>
+                                                <lightning-input
+                                                    type="text"
+                                                    value={term.paymentTerm}
+                                                    variant="label-hidden"
+                                                    placeholder="e.g. 30% Advance"
+                                                    data-pt-id={term.ptId}
+                                                    data-field="paymentTerm"
+                                                    onchange={handlePaymentTermChange}>
+                                                </lightning-input>
+                                            </td>
+                                            <td>
+                                                <lightning-input
+                                                    type="number"
+                                                    value={term.percentage}
+                                                    min="0"
+                                                    max="100"
+                                                    step="1"
+                                                    variant="label-hidden"
+                                                    data-pt-id={term.ptId}
+                                                    data-field="percentage"
+                                                    onchange={handlePaymentTermChange}>
+                                                </lightning-input>
+                                            </td>
+                                            <td>
+                                                <lightning-button-icon
+                                                    icon-name="utility:delete"
+                                                    alternative-text="Remove"
+                                                    variant="bare"
+                                                    class="delete-btn"
+                                                    data-pt-id={term.ptId}
+                                                    onclick={handleRemovePaymentTerm}>
+                                                </lightning-button-icon>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td></td>
+                                        <td class="slds-text-align_right"><strong>Total</strong></td>
+                                        <td>
+                                            <span class={totalPercentageClass}><strong>{totalPercentage}%</strong></span>
+                                            <template if:true={percentageOverflow}>
+                                                <span class="slds-text-color_error slds-text-body_small"> (exceeds 100%)</span>
+                                            </template>
+                                            <template if:true={percentageUnderflow}>
+                                                <span class="slds-text-color_error slds-text-body_small"> (must equal 100%)</span>
+                                            </template>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </template>
+                    <template if:false={hasPaymentTerms}>
+                        <div class="slds-text-align_center slds-p-around_medium slds-text-color_weak">
+                            No payment terms added. Click "Add Term" to define payment terms.
+                        </div>
+                    </template>
+                </div>
+            </div>
 
-                <!-- Quote Summary -->
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-                    <div class="section-card full-height">
-                        <div class="section-header">
-                            <lightning-icon icon-name="utility:summary" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                            <span>Quote Summary</span>
+              </div>
+              <div class="main-content-right">
+
+            <!-- ===== SECTION: QUOTE SUMMARY ===== -->
+            <div class="section-card summary-sticky">
+                <div class="section-header">
+                    <lightning-icon icon-name="utility:summary" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                    <span>Quote Summary</span>
+                </div>
+                <div class="section-body">
+                    <div class="totals-box">
+                        <div class="total-row">
+                            <span class="total-label">Subtotal</span>
+                            <span class="total-value">
+                                <lightning-formatted-number value={subtotal} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                            </span>
                         </div>
-                        <div class="section-body">
-                            <div class="totals-box">
-                                <div class="total-row">
-                                    <span class="total-label">Subtotal</span>
-                                    <span class="total-value">
-                                        <lightning-formatted-number value={subtotal} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
-                                    </span>
-                                </div>
-                                <div class="total-row">
-                                    <span class="total-label">Total Discount</span>
-                                    <span class="total-value discount-value">
-                                        - <lightning-formatted-number value={totalDiscount} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
-                                    </span>
-                                </div>
-                                <div class="total-row">
-                                    <span class="total-label">Total Tax</span>
-                                    <span class="total-value">
-                                        <lightning-formatted-number value={totalTax} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
-                                    </span>
-                                </div>
-                                <div class="total-row">
-                                    <span class="total-label">Internal Charges</span>
-                                    <span class="total-value">
-                                        <lightning-formatted-number value={totalCharges} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
-                                    </span>
-                                </div>
-                                <div class="total-row grand-total">
-                                    <span class="total-label">Grand Total</span>
-                                    <span class="total-value">
-                                        <lightning-formatted-number value={grandTotal} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
-                                    </span>
-                                </div>
-                            </div>
+                        <div class="total-row">
+                            <span class="total-label">Total Discount</span>
+                            <span class="total-value discount-value">
+                                - <lightning-formatted-number value={totalDiscount} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                            </span>
+                        </div>
+                        <div class="total-row">
+                            <span class="total-label">Total Tax</span>
+                            <span class="total-value">
+                                <lightning-formatted-number value={totalTax} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                            </span>
+                        </div>
+                        <div class="total-row grand-total">
+                            <span class="total-label">Grand Total</span>
+                            <span class="total-value">
+                                <lightning-formatted-number value={grandTotal} format-style="currency" currency-code={currencyCode}></lightning-formatted-number>
+                            </span>
                         </div>
                     </div>
                 </div>
+            </div>
+
+              </div>
             </div>
 
             <!-- ===== FOOTER ACTIONS ===== -->

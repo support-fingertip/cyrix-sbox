@@ -415,6 +415,10 @@
                 <behavior>Edit</behavior>
                 <field>India_Mart_Phone_No__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Sub_Vertical__c</field>
+            </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>

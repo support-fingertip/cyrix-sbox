@@ -18,28 +18,26 @@
     <tabs>standard-Campaign</tabs>
     <tabs>standard-Lead</tabs>
     <tabs>standard-Account</tabs>
-    <tabs>Visit_Plans</tabs>
     <tabs>standard-Contact</tabs>
     <tabs>standard-Opportunity</tabs>
     <tabs>Daily_Log__c</tabs>
     <tabs>Visit__c</tabs>
     <tabs>standard-Quote</tabs>
+    <tabs>standard-Order</tabs>
     <tabs>Region__c</tabs>
     <tabs>standard-report</tabs>
     <tabs>standard-Dashboard</tabs>
     <tabs>Expense__c</tabs>
-    <tabs>Expenses_Line_Item__c</tabs>
     <tabs>Travel_Eligibility__c</tabs>
     <tabs>Shipping_Address__c</tabs>
     <tabs>standard-Product2</tabs>
     <tabs>Log__c</tabs>
     <tabs>Asset__c</tabs>
     <tabs>General_Settings__c</tabs>
-    <tabs>TestVisit</tabs>
-    <tabs>Bank__c</tabs>
-    <tabs>Payment_Term__c</tabs>
+    <tabs>Visit_Plans</tabs>
     <tabs>Branch__c</tabs>
     <tabs>standard-Pricebook2</tabs>
+    <tabs>Payment_Terms_Master__c</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>CYRIX_UtilityBar</utilityBar>
 </CustomApplication>

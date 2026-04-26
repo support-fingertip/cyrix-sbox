@@ -21,11 +21,6 @@
         <label>Aurum</label>
     </customValue>
     <customValue>
-        <fullName>Care 360 CMC</fullName>
-        <default>false</default>
-        <label>Care 360 CMC</label>
-    </customValue>
-    <customValue>
         <fullName>Ciyan</fullName>
         <default>false</default>
         <label>Ciyan</label>
@@ -99,6 +94,22 @@
         <fullName>Warehouse</fullName>
         <default>false</default>
         <label>Warehouse</label>
+    </customValue>
+    <customValue>
+        <fullName>Calibration</fullName>
+        <default>false</default>
+        <label>Calibration</label>
+    </customValue>
+    <customValue>
+        <fullName>Care 360</fullName>
+        <default>false</default>
+        <label>Care 360</label>
+    </customValue>
+    <customValue>
+        <fullName>Care 360 CMC</fullName>
+        <default>false</default>
+        <isActive>false</isActive>
+        <label>Care 360 CMC</label>
     </customValue>
     <masterLabel>Business Vertical</masterLabel>
     <sorted>false</sorted>

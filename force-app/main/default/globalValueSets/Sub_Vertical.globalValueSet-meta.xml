@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GlobalValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customValue>
+        <fullName>AERB Registration &amp; Renewal</fullName>
+        <default>false</default>
+        <label>AERB Registration &amp; Renewal</label>
+    </customValue>
+    <customValue>
+        <fullName>AMC</fullName>
+        <default>false</default>
+        <label>AMC</label>
+    </customValue>
+    <customValue>
+        <fullName>Asset Tagging</fullName>
+        <default>false</default>
+        <label>Asset Tagging</label>
+    </customValue>
+    <customValue>
+        <fullName>Aurum</fullName>
+        <default>false</default>
+        <label>Aurum</label>
+    </customValue>
+    <customValue>
+        <fullName>Calibration</fullName>
+        <default>false</default>
+        <label>Calibration</label>
+    </customValue>
+    <customValue>
+        <fullName>Calibration NABL</fullName>
+        <default>false</default>
+        <label>Calibration NABL</label>
+    </customValue>
+    <customValue>
+        <fullName>CAMC</fullName>
+        <default>false</default>
+        <label>CAMC</label>
+    </customValue>
+    <customValue>
+        <fullName>Consumables</fullName>
+        <default>false</default>
+        <label>Consumables</label>
+    </customValue>
+    <customValue>
+        <fullName>Govt.BEMP</fullName>
+        <default>false</default>
+        <label>Govt.BEMP</label>
+    </customValue>
+    <customValue>
+        <fullName>One Time Service</fullName>
+        <default>false</default>
+        <label>One Time Service</label>
+    </customValue>
+    <customValue>
+        <fullName>Private BEMP</fullName>
+        <default>false</default>
+        <label>Private BEMP</label>
+    </customValue>
+    <customValue>
+        <fullName>Products</fullName>
+        <default>false</default>
+        <label>Products</label>
+    </customValue>
+    <customValue>
+        <fullName>Quality Assurance (QA)</fullName>
+        <default>false</default>
+        <label>Quality Assurance (QA)</label>
+    </customValue>
+    <customValue>
+        <fullName>Revive Lab</fullName>
+        <default>false</default>
+        <label>Revive Lab</label>
+    </customValue>
+    <customValue>
+        <fullName>Spares</fullName>
+        <default>false</default>
+        <label>Spares</label>
+    </customValue>
+    <customValue>
+        <fullName>Validation</fullName>
+        <default>false</default>
+        <label>Validation</label>
+    </customValue>
+    <masterLabel>Sub Vertical</masterLabel>
+    <sorted>false</sorted>
+</GlobalValueSet>

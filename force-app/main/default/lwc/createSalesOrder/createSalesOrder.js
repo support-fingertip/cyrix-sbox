@@ -1,0 +1,677 @@
+import { LightningElement, api, track, wire } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
+import { CloseActionScreenEvent } from 'lightning/actions';
+import getQuoteDetails from '@salesforce/apex/CreateSalesOrderController.getQuoteDetails';
+import getOrderDetails from '@salesforce/apex/CreateSalesOrderController.getOrderDetails';
+import getPricebookProducts from '@salesforce/apex/CreateSalesOrderController.getPricebookProducts';
+import getPricebookProductsForOrder from '@salesforce/apex/CreateSalesOrderController.getPricebookProductsForOrder';
+import createSalesOrder from '@salesforce/apex/CreateSalesOrderController.createSalesOrder';
+import updateSalesOrder from '@salesforce/apex/CreateSalesOrderController.updateSalesOrder';
+
+export default class CreateSalesOrder extends NavigationMixin(LightningElement) {
+    @api recordId;
+
+    isLoading = true;
+    isSaving = false;
+    isEditMode = false;
+    _orderId = null;
+    @track errorMessage = '';
+
+    @track quoteContext = {};
+    @track displayItems = [];
+    @track productOptions = [];
+    @track productCatalog = [];
+    @track remarks = '';
+    @track isAddProductOpen = false;
+    @track newPricebookEntryId = '';
+    @track newQuantity = 1;
+    @track newDiscount = 0;
+    @track productSearchTerm = '';
+    @track filteredProducts = [];
+    @track showProductResults = false;
+
+    @wire(CurrentPageReference)
+    handlePageRef(pageRef) {
+        if (pageRef && pageRef.state && pageRef.state.c__recordId) {
+            this._orderId = pageRef.state.c__recordId;
+            this.isEditMode = true;
+            this.loadOrderData();
+        }
+    }
+
+    connectedCallback() {
+        this._widenQuickActionModal();
+    }
+
+    renderedCallback() {
+        this._widenQuickActionModal();
+    }
+
+    _widenQuickActionModal() {
+        try {
+            const container =
+                this.template.host &&
+                this.template.host.closest &&
+                this.template.host.closest('.slds-modal__container');
+            if (!container) return;
+            if (container.dataset.csoResized === '1') return;
+            container.style.width = '95vw';
+            container.style.maxWidth = '1600px';
+            container.style.height = 'auto';
+            container.style.maxHeight = '92vh';
+            container.dataset.csoResized = '1';
+        } catch (e) {
+            // Ignore
+        }
+    }
+
+    loadOrderData() {
+        this.isLoading = true;
+        getOrderDetails({ orderId: this._orderId })
+            .then((data) => {
+                this.quoteContext = data;
+                this.remarks = data.description || '';
+                this.displayItems = (data.items || []).map((it, idx) => {
+                    const qty = it.quantity || 0;
+                    const price = it.unitPrice || 0;
+                    const disc = it.discount || 0;
+                    const total = this.calcTotal(qty, price, disc);
+                    return {
+                        ...it,
+                        source: 'existing',
+                        rowNum: idx + 1,
+                        quantity: qty,
+                        discount: disc,
+                        uomDisplay: it.uom || 'Nos',
+                        listPriceDisplay: this.formatCurrency(it.listPrice),
+                        unitPriceDisplay: this.formatCurrency(price),
+                        taxDisplay: it.tax != null ? Number(it.tax).toFixed(0) + '%' : '-',
+                        maxDiscount: it.maxDiscount,
+                        maxDiscountDisplay: it.maxDiscount != null ? it.maxDiscount + '%' : '',
+                        priceStatusBadgeClass: this.priceStatusBadge(it.priceStatus),
+                        totalPrice: total,
+                        totalPriceDisplay: this.formatCurrency(total),
+                        rowKey: it.lineId
+                    };
+                });
+                this.isLoading = false;
+            })
+            .catch((error) => {
+                this.isLoading = false;
+                this.errorMessage = this.reduceError(error);
+                this.showToast('Error', this.errorMessage, 'error');
+            });
+
+        getPricebookProductsForOrder({ orderId: this._orderId })
+            .then((data) => {
+                this.productCatalog = data;
+                this.productOptions = data.map((p) => ({ label: p.label, value: p.value }));
+            })
+            .catch((error) => {
+                this.showToast('Warning', 'Could not load products.', 'warning');
+            });
+    }
+
+    // --- Create mode: wired to Quote ---
+    @wire(getQuoteDetails, { quoteId: '$_quoteId' })
+    wiredQuote({ error, data }) {
+        if (data) {
+            this.quoteContext = data;
+            this.displayItems = (data.items || []).map((it, idx) => {
+                const qty = it.quantity || 0;
+                const price = it.unitPrice || 0;
+                const disc = it.discount || 0;
+                const total = this.calcTotal(qty, price, disc);
+                return {
+                    ...it,
+                    source: 'quote',
+                    rowNum: idx + 1,
+                    quantity: qty,
+                    discount: disc,
+                    uomDisplay: it.uom || 'Nos',
+                    listPriceDisplay: this.formatCurrency(it.listPrice),
+                    unitPriceDisplay: this.formatCurrency(price),
+                    taxDisplay: it.tax != null ? Number(it.tax).toFixed(0) + '%' : '-',
+                    maxDiscount: it.maxDiscount,
+                    maxDiscountDisplay: it.maxDiscount != null ? it.maxDiscount + '%' : '',
+                    priceStatusBadgeClass: this.priceStatusBadge(it.priceStatus),
+                    totalPrice: total,
+                    totalPriceDisplay: this.formatCurrency(total),
+                    rowKey: it.lineId
+                };
+            });
+            this.isLoading = false;
+        } else if (error) {
+            this.isLoading = false;
+            this.showToast('Error', this.reduceError(error), 'error');
+        }
+    }
+
+    get _quoteId() {
+        return this.isEditMode ? null : this.recordId;
+    }
+
+    @wire(getPricebookProducts, { quoteId: '$_quoteId' })
+    wiredProducts({ error, data }) {
+        if (data) {
+            this.productCatalog = data;
+            this.productOptions = data.map((p) => ({ label: p.label, value: p.value }));
+        } else if (error) {
+            this.showToast('Warning', 'Could not load products.', 'warning');
+        }
+    }
+
+    // ===== Getters =====
+
+    get pageTitle() {
+        return this.isEditMode ? 'Edit Sales Order' : 'Sales Order';
+    }
+
+    get confirmButtonLabel() {
+        return this.isEditMode ? 'Save Changes' : 'Confirm Sale';
+    }
+
+    get hasItems() {
+        return this.displayItems && this.displayItems.length > 0;
+    }
+
+    get sourceQuoteDisplay() {
+        return this.quoteContext.quoteName || this.quoteContext.quoteNumber || 'N/A';
+    }
+
+    get quoteDateDisplay() {
+        return this.formatDate(this.quoteContext.quoteDate) || 'N/A';
+    }
+
+    get validTillDaysDisplay() {
+        return this.quoteContext.quoteValidTillInDays || 'N/A';
+    }
+
+    get opportunityNameDisplay() {
+        return this.quoteContext.opportunityName || 'N/A';
+    }
+
+    get businessVerticalDisplay() {
+        return this.quoteContext.businessVertical || this.quoteContext.vertical || 'N/A';
+    }
+
+    get shippingModeDisplay() {
+        return this.quoteContext.shippingMode || 'N/A';
+    }
+
+    get deliveryDisplay() {
+        return this.quoteContext.delivery || 'N/A';
+    }
+
+    get contractPeriodFromDisplay() {
+        return this.formatDate(this.quoteContext.contractPeriodFromDate) || 'N/A';
+    }
+
+    get contractPeriodEndDisplay() {
+        return this.formatDate(this.quoteContext.contractPeriodEndDate) || 'N/A';
+    }
+
+    get statusDisplay() {
+        return this.quoteContext.status || 'N/A';
+    }
+
+    get hasPaymentTerms() {
+        return !!(this.quoteContext && this.quoteContext.paymentTerms && String(this.quoteContext.paymentTerms).trim().length);
+    }
+
+    get billToNameDisplay()       { return this.quoteContext.billToName || this.quoteContext.customerName || 'N/A'; }
+    get billToStreetDisplay()     { return this.quoteContext.billToStreet || 'N/A'; }
+    get billToCityDisplay()       { return this.quoteContext.billToCity || 'N/A'; }
+    get billToStateDisplay()      { return this.quoteContext.billToState || 'N/A'; }
+    get billToPostalCodeDisplay() { return this.quoteContext.billToPostalCode || 'N/A'; }
+    get billToCountryDisplay()    { return this.quoteContext.billToCountry || 'N/A'; }
+
+    get shipToNameDisplay()       { return this.quoteContext.shipToName || this.quoteContext.customerName || 'N/A'; }
+    get shipToStreetDisplay()     { return this.quoteContext.shipToStreet || 'N/A'; }
+    get shipToCityDisplay()       { return this.quoteContext.shipToCity || 'N/A'; }
+    get shipToStateDisplay()      { return this.quoteContext.shipToState || 'N/A'; }
+    get shipToPostalCodeDisplay() { return this.quoteContext.shipToPostalCode || 'N/A'; }
+    get shipToCountryDisplay()    { return this.quoteContext.shipToCountry || 'N/A'; }
+
+    // ===== Internal Charges =====
+    packingCharges = 0;
+    insuranceCharges = 0;
+    transportCharges = 0;
+    warrantyCost = 0;
+    installationCost = 0;
+    trainingCost = 0;
+
+    handleChargeChange(event) {
+        const field = event.target.dataset.field;
+        const val = parseFloat(event.target.value) || 0;
+        this[field] = val;
+    }
+
+    // ===== Order Summary =====
+    get subtotal() {
+        return this.displayItems.reduce((sum, it) => sum + ((it.unitPrice || 0) * (it.quantity || 0)), 0);
+    }
+    get totalDiscount() {
+        return this.displayItems.reduce((sum, it) => {
+            const base = (it.unitPrice || 0) * (it.quantity || 0);
+            return sum + (base * ((it.discount || 0) / 100));
+        }, 0);
+    }
+    get totalTax() {
+        return this.displayItems.reduce((sum, it) => {
+            const base = (it.unitPrice || 0) * (it.quantity || 0);
+            const afterDiscount = base - (base * ((it.discount || 0) / 100));
+            return sum + (afterDiscount * ((it.tax || 0) / 100));
+        }, 0);
+    }
+    get totalCharges() {
+        return (this.packingCharges || 0) + (this.insuranceCharges || 0) +
+               (this.transportCharges || 0) + (this.warrantyCost || 0) +
+               (this.installationCost || 0) + (this.trainingCost || 0);
+    }
+    get grandTotal() {
+        return this.subtotal - this.totalDiscount + this.totalTax + this.totalCharges;
+    }
+    get subtotalDisplay()       { return this.formatCurrency(this.subtotal); }
+    get totalDiscountDisplay()  { return this.formatCurrency(this.totalDiscount); }
+    get totalTaxDisplay()       { return this.formatCurrency(this.totalTax); }
+    get totalChargesDisplay()   { return this.formatCurrency(this.totalCharges); }
+    get grandTotalDisplay()     { return this.formatCurrency(this.grandTotal); }
+
+    get isConfirmDisabled() {
+        return this.isSaving;
+    }
+
+    get addProductButtonLabel() {
+        return this.isAddProductOpen ? 'Close' : 'Add Product';
+    }
+
+    // ===== Helpers =====
+
+    calcTotal(qty, unitPrice, discountPercent) {
+        const q = Number(qty) || 0;
+        const p = Number(unitPrice) || 0;
+        const d = Number(discountPercent) || 0;
+        return q * p * (1 - d / 100);
+    }
+
+    priceStatusBadge(status) {
+        if (!status) return 'cso-badge cso-badge-neutral';
+        const s = String(status).toLowerCase();
+        if (s.indexOf('approval') !== -1) return 'cso-badge cso-badge-warn';
+        if (s === 'approved')             return 'cso-badge cso-badge-ok';
+        if (s === 'rejected')             return 'cso-badge cso-badge-error';
+        return 'cso-badge cso-badge-neutral';
+    }
+
+    formatCurrency(value) {
+        if (value === null || value === undefined) return '';
+        return Number(value).toLocaleString('en-IN', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    formatDate(iso) {
+        if (!iso) return null;
+        try {
+            const d = new Date(iso);
+            if (isNaN(d.getTime())) return iso;
+            const day = String(d.getDate()).padStart(2, '0');
+            const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            return `${day}-${months[d.getMonth()]}-${d.getFullYear()}`;
+        } catch (e) {
+            return String(iso);
+        }
+    }
+
+    // ===== Handlers =====
+
+    handleRemarksChange(event) {
+        this.remarks = event.target.value;
+    }
+
+    handleQuantityChange(event) {
+        const rowKey = event.target.dataset.rowKey;
+        const qty = parseFloat(event.target.value);
+        this.displayItems = this.displayItems.map((it) => {
+            if (it.rowKey !== rowKey) return it;
+            const newQty = isNaN(qty) ? it.quantity : qty;
+            const total = this.calcTotal(newQty, it.unitPrice, it.discount);
+            return {
+                ...it,
+                quantity: newQty,
+                totalPrice: total,
+                totalPriceDisplay: this.formatCurrency(total)
+            };
+        });
+    }
+
+    handleDiscountChange(event) {
+        const rowKey = event.target.dataset.rowKey;
+        const rawDisc = parseFloat(event.target.value);
+        const disc = isNaN(rawDisc) ? 0 : Math.max(0, Math.min(100, rawDisc));
+        this.displayItems = this.displayItems.map((it) => {
+            if (it.rowKey !== rowKey) return it;
+            const total = this.calcTotal(it.quantity, it.unitPrice, disc);
+            return {
+                ...it,
+                discount: disc,
+                totalPrice: total,
+                totalPriceDisplay: this.formatCurrency(total)
+            };
+        });
+    }
+
+    handleDeleteRow(event) {
+        const rowKey = event.target.dataset.rowKey;
+        this.displayItems = this.displayItems
+            .filter((it) => it.rowKey !== rowKey)
+            .map((it, idx) => ({ ...it, rowNum: idx + 1 }));
+    }
+
+    handleToggleAddProduct() {
+        if (this.isAddProductOpen) {
+            this.isAddProductOpen = false;
+            return;
+        }
+        this.newPricebookEntryId = '';
+        this.newQuantity = 1;
+        this.newDiscount = 0;
+        this.productSearchTerm = '';
+        this.filteredProducts = [];
+        this.showProductResults = false;
+        this.isAddProductOpen = true;
+    }
+
+    handleCloseAddProduct() {
+        this.isAddProductOpen = false;
+    }
+
+    get hasFilteredProducts() {
+        return this.filteredProducts.length > 0;
+    }
+
+    handleProductSearch(event) {
+        const term = event.target.value;
+        this.productSearchTerm = term;
+        if (term && term.length >= 2) {
+            const lowerTerm = term.toLowerCase();
+            this.filteredProducts = this.productCatalog.filter(
+                (p) => (p.productName && p.productName.toLowerCase().includes(lowerTerm)) ||
+                       (p.productCode && p.productCode.toLowerCase().includes(lowerTerm))
+            ).slice(0, 20).map((p) => ({
+                ...p,
+                unitPriceDisplay: this.formatCurrency(p.unitPrice),
+                maxDiscountDisplay: p.maxDiscount != null ? p.maxDiscount + '%' : '',
+                taxDisplay: p.tax != null ? Number(p.tax).toFixed(0) + '%' : '-'
+            }));
+            this.showProductResults = true;
+        } else {
+            this.filteredProducts = [];
+            this.showProductResults = false;
+        }
+    }
+
+    handleProductSelect(event) {
+        const val = event.currentTarget.dataset.value;
+        const cat = this.productCatalog.find((p) => p.value === val);
+        if (!cat) return;
+
+        if (this.displayItems.some(
+            (it) => it.source === 'manual' && it.pricebookEntryId === cat.value
+        )) {
+            this.showToast('Warning', 'This product is already in the order.', 'warning');
+            return;
+        }
+
+        const qty = 1;
+        const disc = 0;
+        const unitPrice = cat.unitPrice;
+        const listPrice = cat.listPrice != null ? cat.listPrice : unitPrice;
+        const total = this.calcTotal(qty, unitPrice, disc);
+        const rowKey = 'manual-' + cat.value;
+        const nextRowNum = this.displayItems.length + 1;
+        this.displayItems = [
+            ...this.displayItems,
+            {
+                source: 'manual',
+                rowKey: rowKey,
+                rowNum: nextRowNum,
+                lineId: null,
+                pricebookEntryId: cat.value,
+                pricebookName: cat.priceSource,
+                productId: cat.productId,
+                productName: cat.productName,
+                productCode: cat.productCode,
+                uom: cat.uom,
+                uomDisplay: cat.uom || 'Nos',
+                quantity: qty,
+                unitPrice: unitPrice,
+                unitPriceDisplay: this.formatCurrency(unitPrice),
+                listPrice: listPrice,
+                listPriceDisplay: this.formatCurrency(listPrice),
+                discount: disc,
+                totalPrice: total,
+                totalPriceDisplay: this.formatCurrency(total),
+                tax: cat.tax,
+                taxDisplay: cat.tax != null ? Number(cat.tax).toFixed(0) + '%' : '-',
+                maxDiscount: cat.maxDiscount,
+                maxDiscountDisplay: cat.maxDiscount != null ? cat.maxDiscount + '%' : '',
+                priceStatus: null,
+                priceStatusBadgeClass: this.priceStatusBadge(null)
+            }
+        ];
+        this.showToast('Success', cat.productName + ' added.', 'success');
+    }
+
+    handleNewQuantityChange(event) {
+        const q = parseFloat(event.target.value);
+        this.newQuantity = isNaN(q) ? 1 : Math.max(1, q);
+    }
+
+    handleNewDiscountChange(event) {
+        const d = parseFloat(event.target.value);
+        this.newDiscount = isNaN(d) ? 0 : Math.max(0, Math.min(100, d));
+    }
+
+    handleAddProduct() {
+        if (!this.newPricebookEntryId) {
+            this.showToast('Error', 'Please pick a product to add.', 'error');
+            return;
+        }
+        const cat = this.productCatalog.find((p) => p.value === this.newPricebookEntryId);
+        if (!cat) {
+            this.showToast('Error', 'Selected product is not available.', 'error');
+            return;
+        }
+        if (this.displayItems.some(
+            (it) => it.source === 'manual' && it.pricebookEntryId === cat.value
+        )) {
+            this.showToast('Warning', 'This product is already in the order.', 'warning');
+            return;
+        }
+        const qty = Number(this.newQuantity) || 1;
+        const disc = Number(this.newDiscount) || 0;
+        const unitPrice = cat.unitPrice;
+        const listPrice = cat.listPrice != null ? cat.listPrice : unitPrice;
+        const total = this.calcTotal(qty, unitPrice, disc);
+        const rowKey = 'manual-' + cat.value;
+        const nextRowNum = this.displayItems.length + 1;
+        this.displayItems = [
+            ...this.displayItems,
+            {
+                source: 'manual',
+                rowKey: rowKey,
+                rowNum: nextRowNum,
+                lineId: null,
+                pricebookEntryId: cat.value,
+                pricebookName: null,
+                productId: cat.productId,
+                productName: cat.productName,
+                productCode: cat.productCode,
+                uom: cat.uom,
+                uomDisplay: cat.uom || 'Nos',
+                quantity: qty,
+                unitPrice: unitPrice,
+                unitPriceDisplay: this.formatCurrency(unitPrice),
+                listPrice: listPrice,
+                listPriceDisplay: this.formatCurrency(listPrice),
+                discount: disc,
+                totalPrice: total,
+                totalPriceDisplay: this.formatCurrency(total),
+                tax: cat.tax,
+                taxDisplay: cat.tax != null ? Number(cat.tax).toFixed(0) + '%' : '-',
+                maxDiscount: cat.maxDiscount,
+                maxDiscountDisplay: cat.maxDiscount != null ? cat.maxDiscount + '%' : '',
+                priceStatus: null,
+                priceStatusBadgeClass: this.priceStatusBadge(null)
+            }
+        ];
+        this.isAddProductOpen = false;
+    }
+
+    async handleConfirm() {
+        if (this.isSaving) return;
+
+        if (!this.displayItems.length) {
+            this.showToast('Error', 'Please add at least one product.', 'error');
+            return;
+        }
+
+        this.isSaving = true;
+
+        if (this.isEditMode) {
+            await this._handleUpdate();
+        } else {
+            await this._handleCreate();
+        }
+    }
+
+    async _handleCreate() {
+        const quoteItems = this.displayItems.filter((i) => i.source === 'quote');
+        const manualItems = this.displayItems.filter((i) => i.source === 'manual');
+
+        try {
+            const selectedLineIds = quoteItems.map((i) => i.lineId);
+            const quantityByLineId = {};
+            const discountByLineId = {};
+            quoteItems.forEach((i) => {
+                quantityByLineId[i.lineId] = i.quantity;
+                discountByLineId[i.lineId] = i.discount || 0;
+            });
+
+            const manualPricebookEntryIds = manualItems.map((i) => i.pricebookEntryId);
+            const manualQuantityByPbeId = {};
+            const manualDiscountByPbeId = {};
+            manualItems.forEach((i) => {
+                manualQuantityByPbeId[i.pricebookEntryId] = i.quantity;
+                manualDiscountByPbeId[i.pricebookEntryId] = i.discount || 0;
+            });
+
+            const orderId = await createSalesOrder({
+                quoteId: this.recordId,
+                remarks: this.remarks,
+                selectedLineIds: selectedLineIds,
+                quantityByLineId: quantityByLineId,
+                discountByLineId: discountByLineId,
+                manualPricebookEntryIds: manualPricebookEntryIds,
+                manualQuantityByPbeId: manualQuantityByPbeId,
+                manualDiscountByPbeId: manualDiscountByPbeId
+            });
+
+            this.showToast('Success', 'Sales Order created.', 'success');
+            this.dispatchEvent(new CloseActionScreenEvent());
+
+            this[NavigationMixin.Navigate]({
+                type: 'standard__recordPage',
+                attributes: {
+                    recordId: orderId,
+                    objectApiName: 'Order',
+                    actionName: 'view'
+                }
+            });
+        } catch (err) {
+            this.showToast('Error', this.reduceError(err), 'error');
+        } finally {
+            this.isSaving = false;
+        }
+    }
+
+    async _handleUpdate() {
+        const existingItems = this.displayItems.filter((i) => i.source === 'existing');
+        const manualItems = this.displayItems.filter((i) => i.source === 'manual');
+
+        try {
+            const existingLineIds = existingItems.map((i) => i.lineId);
+            const quantityByLineId = {};
+            const discountByLineId = {};
+            existingItems.forEach((i) => {
+                quantityByLineId[i.lineId] = i.quantity;
+                discountByLineId[i.lineId] = i.discount || 0;
+            });
+
+            const manualPricebookEntryIds = manualItems.map((i) => i.pricebookEntryId);
+            const manualQuantityByPbeId = {};
+            const manualDiscountByPbeId = {};
+            manualItems.forEach((i) => {
+                manualQuantityByPbeId[i.pricebookEntryId] = i.quantity;
+                manualDiscountByPbeId[i.pricebookEntryId] = i.discount || 0;
+            });
+
+            await updateSalesOrder({
+                orderId: this._orderId,
+                remarks: this.remarks,
+                existingLineIds: existingLineIds,
+                quantityByLineId: quantityByLineId,
+                discountByLineId: discountByLineId,
+                manualPricebookEntryIds: manualPricebookEntryIds,
+                manualQuantityByPbeId: manualQuantityByPbeId,
+                manualDiscountByPbeId: manualDiscountByPbeId
+            });
+
+            this.showToast('Success', 'Order updated successfully.', 'success');
+
+            this[NavigationMixin.Navigate]({
+                type: 'standard__recordPage',
+                attributes: {
+                    recordId: this._orderId,
+                    objectApiName: 'Order',
+                    actionName: 'view'
+                }
+            });
+        } catch (err) {
+            this.showToast('Error', this.reduceError(err), 'error');
+        } finally {
+            this.isSaving = false;
+        }
+    }
+
+    handleCancel() {
+        if (this.isEditMode) {
+            this[NavigationMixin.Navigate]({
+                type: 'standard__recordPage',
+                attributes: {
+                    recordId: this._orderId,
+                    objectApiName: 'Order',
+                    actionName: 'view'
+                }
+            });
+        } else {
+            this.dispatchEvent(new CloseActionScreenEvent());
+        }
+    }
+
+    showToast(title, message, variant) {
+        this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
+    }
+
+    reduceError(err) {
+        if (!err) return 'Unknown error';
+        if (typeof err === 'string') return err;
+        if (err.body && err.body.message) return err.body.message;
+        if (err.message) return err.message;
+        return JSON.stringify(err);
+    }
+}

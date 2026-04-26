@@ -265,7 +265,15 @@ handleEnable(e) {
 
         VisitData({})
             .then(result => {
-                this.objData.Lead = result.lead;
+                this.objData.Lead = result.lead.map(lead => ({
+                    Id: lead.Id,
+                    Name: lead.Name,
+                    Phone: lead.Phone,
+                    MobilePhone: lead.MobilePhone,
+                    Company: lead.Company,
+                    Business_Vertical__c: lead.Business_Vertical__c,
+                    ProductName: lead.Product__r ? lead.Product__r.Name : ''
+                }));
                 this.objData.Customer = result.Customer;
                 this.objData.searchItems = this.objData.Lead;
                 this.isSearchValueSelected = true;
@@ -628,7 +636,7 @@ handleEnable(e) {
 
         this.isValueSearched = storeData.length > 0;
         this.objData.searchNameData = storeData;
-        console.log('objData>>' + JSON.stringify(objData));
+        console.log('searchData>>' + JSON.stringify(storeData));
     }
     get isCustomer() {
         return this.visitData.Visit_for__c === 'Customer';

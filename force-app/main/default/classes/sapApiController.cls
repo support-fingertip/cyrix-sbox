@@ -1,0 +1,112 @@
+@RestResource(urlMapping='/sapapi/*')
+global class sapApiController {
+
+    @HttpGet
+    global static void doGet() {
+        RestRequest req = RestContext.request;
+        RestResponse res = RestContext.response;
+
+        String key = req.params.get('key');
+        String objectName = req.params.get('value');
+        String customerCode = req.params.get('customerCode');
+        String orderCode = req.params.get('orderCode');
+
+        List<SObject> records = new List<SObject>();
+        String jsonString = '';
+
+        if (Label.API_Key != key) {
+            res.statusCode = 401;
+            res.responseBody = Blob.valueOf('{"message":"Unauthorized"}');
+            return;
+        }
+
+        if (objectName == 'customer' || String.isBlank(objectName)) {
+            List<Account> aList;
+           
+                aList = [
+                    SELECT Id, Name, Status__c, Customer_Type__c, Customer_Category__c,
+                        Speciality__c, Business_Vertical__c, Region__c,
+                        Purchase_Value_Life_Time__c, Previous_History__c,
+                        Bank_Name__c, Branch_Name__c, Beneficiary_Name__c, Branch_Address__c,
+                        IFSC_CODE__c, GST_Number__c, PAN_Number__c,
+                        Email__c, Country_Code_Phone__c, Phone, Website,
+                        BillingCity, BillingCountryCode, BillingStateCode, BillingStreet, BillingPostalCode,
+                        SAP_Customer_Code__c, Customer_Code__c,
+                        (SELECT Id, Address_Code__c,
+                            Address__City__s, Address__Street__s, Address__StateCode__s,
+                            Address__PostalCode__s, Address__CountryCode__s
+                         FROM Shipping_Addresses__r)
+                    FROM Account
+                   
+                    LIMIT 1
+                ];
+          
+            records.addAll((List<SObject>) aList);
+        } else if (objectName == 'order') {
+            List<Order> oList;
+ 
+                oList = [
+                    SELECT Id, Name, EffectiveDate, EndDate, OrderId__c, Status,
+                        BillingCity, BillingCountryCode, BillingStateCode, BillingStreet, BillingPostalCode,
+                        ShippingCity, ShippingCountryCode, ShippingStateCode, ShippingStreet, ShippingPostalCode,
+                        CurrencyIsoCode, Customer_Code__c, Business_Vertical__c, Sub_Vertical__c,
+                        Delivery__c, Contract_Period_From_Date__c, Contract_Period_End_Date__c,
+                        Description, Employee_Code__c, TotalAmount,
+                        (SELECT Id, OrderItemNumber, Order.OrderId__c, Product2.ProductCode,
+                            Quantity, UnitPrice, Tax__c, Tax_Amount__c, TotalPrice
+                         FROM OrderItems),
+                        (SELECT Id, OrderId__c, Name, Payment_Term__c, Percentage__c
+                         FROM Payment_Terms__r)
+                    FROM Order where id='801C400000VAlhFIAT'
+                   
+                    LIMIT 1
+                ];
+           
+            records.addAll((List<SObject>) oList);
+        }
+
+        Object raw = JSON.deserializeUntyped(JSON.serialize(records));
+        Object cleaned = clean(raw);
+        jsonString = JSON.serialize(cleaned);
+
+        res.addHeader('Content-Type', 'application/json');
+        res.statusCode = 200;
+        res.responseBody = Blob.valueOf(jsonString);
+    }
+
+    private static Object clean(Object node) {
+        if (node instanceof Map<String, Object>) {
+            Map<String, Object> m = (Map<String, Object>) node;
+            if (m.containsKey('records')) {
+                return clean(m.get('records'));
+            }
+            Map<String, Object> result = new Map<String, Object>();
+            for (String key : m.keySet()) {
+                if (key == 'attributes' || key == 'totalSize' || key == 'done') {
+                    continue;
+                }
+                Object val = m.get(key);
+                if (val == null) {
+                    continue;
+                }
+                result.put(key, clean(val));
+            }
+            return result;
+        }
+        if (node instanceof List<Object>) {
+            List<Object> outList = new List<Object>();
+            for (Object item : (List<Object>) node) {
+                outList.add(clean(item));
+            }
+            return outList;
+        }
+        return node;
+    }
+
+    public class response {
+        public String SF_RecordId;
+        public String TallyUniqueId;
+        public String Status;
+        public String Message;
+    }
+}

@@ -1,0 +1,414 @@
+<template>
+    <!-- ================= MAIN CONTENT ================= -->
+    <template if:false={isLoading}>
+        <div>
+            <div class="cso-container">
+
+                <!-- Gradient Header -->
+                <div class="gradient-header">
+                    <h2 class="cso-title">{pageTitle}</h2>
+                </div>
+
+                <!-- Body -->
+                <div class="cso-body">
+
+                    <!-- Order Information (read-only) -->
+                    <div class="cso-section slds-m-bottom_medium">
+                        <div class="cso-section-header">
+                            <lightning-icon icon-name="standard:orders" size="small" class="slds-m-right_small"></lightning-icon>
+                            <span class="slds-text-heading_small">Order Information</span>
+                        </div>
+                        <div class="cso-section-body">
+                            <div class="slds-grid slds-wrap slds-gutters_small">
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Order Date</div>
+                                    <div class="cso-field-value">{quoteDateDisplay}</div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Source Quote</div>
+                                    <div class="cso-field-value">{sourceQuoteDisplay}</div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Quote Valid Till (in days)</div>
+                                    <div class="cso-field-value">{validTillDaysDisplay}</div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Opportunity Name</div>
+                                    <div class="cso-field-value">{opportunityNameDisplay}</div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Business Vertical</div>
+                                    <div class="cso-field-value">{businessVerticalDisplay}</div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Shipping Mode</div>
+                                    <div class="cso-field-value">{shippingModeDisplay}</div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Delivery</div>
+                                    <div class="cso-field-value">{deliveryDisplay}</div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Contract Period From Date</div>
+                                    <div class="cso-field-value">{contractPeriodFromDisplay}</div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Contract Period End Date</div>
+                                    <div class="cso-field-value">{contractPeriodEndDisplay}</div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-3 slds-p-around_x-small">
+                                    <div class="slds-text-title">Status</div>
+                                    <div class="cso-field-value">{statusDisplay}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bill To / Ship To -->
+                    <div class="cso-section slds-m-bottom_medium">
+                        <div class="cso-section-header">
+                            <lightning-icon icon-name="standard:address" size="small" class="slds-m-right_small"></lightning-icon>
+                            <span class="slds-text-heading_small">Bill To / Ship To</span>
+                        </div>
+                        <div class="cso-section-body">
+                            <div class="slds-grid slds-wrap slds-gutters">
+                                <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                    <div class="cso-subheader">BILL TO</div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">Name</span><span class="cso-addr-val">{billToNameDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">Street</span><span class="cso-addr-val">{billToStreetDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">City</span><span class="cso-addr-val">{billToCityDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">State</span><span class="cso-addr-val">{billToStateDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">Postal Code</span><span class="cso-addr-val">{billToPostalCodeDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">Country</span><span class="cso-addr-val">{billToCountryDisplay}</span></div>
+                                </div>
+                                <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                    <div class="cso-subheader">SHIP TO</div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">Name</span><span class="cso-addr-val">{shipToNameDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">Street</span><span class="cso-addr-val">{shipToStreetDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">City</span><span class="cso-addr-val">{shipToCityDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">State</span><span class="cso-addr-val">{shipToStateDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">Postal Code</span><span class="cso-addr-val">{shipToPostalCodeDisplay}</span></div>
+                                    <div class="cso-addr-row"><span class="slds-text-title">Country</span><span class="cso-addr-val">{shipToCountryDisplay}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Terms (read-only, copied from Quote) -->
+                    <div class="cso-section slds-m-bottom_medium">
+                        <div class="cso-section-header">
+                            <lightning-icon icon-name="standard:task2" size="small" class="slds-m-right_small"></lightning-icon>
+                            <span class="slds-text-heading_small">Payment Terms</span>
+                            <span class="cso-readonly-tag slds-m-left_small">Read only</span>
+                        </div>
+                        <div class="cso-section-body">
+                            <template if:true={hasPaymentTerms}>
+                                <pre class="cso-payment-terms">{quoteContext.paymentTerms}</pre>
+                            </template>
+                            <template if:false={hasPaymentTerms}>
+                                <p class="slds-text-color_weak">No Payment Terms on the source Quote.</p>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Remarks -->
+                    <div class="slds-m-bottom_medium">
+                        <lightning-textarea
+                            label="Remarks"
+                            value={remarks}
+                            onchange={handleRemarksChange}
+                            placeholder="Enter remarks">
+                        </lightning-textarea>
+                    </div>
+
+                    <!-- Order Items -->
+                    <div class="cso-items-header">
+                        <div class="slds-text-heading_small">Order Items</div>
+                        <lightning-button
+                            label="Add Product"
+                            variant="brand-outline"
+                            icon-name="utility:add"
+                            onclick={handleToggleAddProduct}>
+                        </lightning-button>
+                    </div>
+
+                    <!-- Inline Add Product panel -->
+                    <template if:true={isAddProductOpen}>
+                        <div class="cso-add-product-panel slds-m-bottom_medium">
+                            <div class="cso-add-product-title">
+                                <lightning-icon icon-name="utility:add" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                                Add Product
+                            </div>
+                            <div class="slds-grid slds-wrap slds-gutters_small cso-add-product-fields">
+                                <div class="slds-col slds-size_1-of-1">
+                                    <lightning-input
+                                        label="Search Product"
+                                        value={productSearchTerm}
+                                        placeholder="Type product name or code to search..."
+                                        onchange={handleProductSearch}
+                                        autocomplete="off"
+                                        class="slds-m-bottom_small">
+                                    </lightning-input>
+                                </div>
+                                <template if:true={showProductResults}>
+                                    <div class="slds-col slds-size_1-of-1">
+                                        <div class="cso-search-table-wrapper">
+                                            <table class="slds-table slds-table_bordered slds-table_cell-buffer cso-search-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Product Name</th>
+                                                        <th>Code</th>
+                                                        <th>Category</th>
+                                                        <th>Make / Model</th>
+                                                        <th>Unit Price</th>
+                                                        <th>Price Source</th>
+                                                        <th>Max Disc %</th>
+                                                        <th>HSN</th>
+                                                        <th>Tax %</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <template for:each={filteredProducts} for:item="prod">
+                                                        <tr key={prod.value}>
+                                                            <td class="cso-search-name">{prod.productName}</td>
+                                                            <td>{prod.productCode}</td>
+                                                            <td>{prod.category}</td>
+                                                            <td>{prod.makeModel}</td>
+                                                            <td>{prod.unitPriceDisplay}</td>
+                                                            <td>{prod.priceSource}</td>
+                                                            <td>{prod.maxDiscountDisplay}</td>
+                                                            <td>{prod.hsnCode}</td>
+                                                            <td>{prod.taxDisplay}</td>
+                                                            <td>
+                                                                <lightning-button-icon
+                                                                    icon-name="utility:add"
+                                                                    alternative-text="Add"
+                                                                    title="Add to order"
+                                                                    variant="brand"
+                                                                    size="small"
+                                                                    data-value={prod.value}
+                                                                    onclick={handleProductSelect}>
+                                                                </lightning-button-icon>
+                                                            </td>
+                                                        </tr>
+                                                    </template>
+                                                </tbody>
+                                            </table>
+                                            <template if:false={hasFilteredProducts}>
+                                                <p class="slds-text-align_center slds-p-around_small slds-text-color_weak">No products found</p>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="cso-add-product-actions">
+                                <button class="cancel-button" onclick={handleCloseAddProduct}>Close</button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template if:true={hasItems}>
+                        <div class="table-scroll-wrapper">
+                            <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_fixed-layout cso-items-table">
+                                <colgroup>
+                                    <col style="width: 3%;">
+                                    <col style="width: 17%;">
+                                    <col style="width: 5%;">
+                                    <col style="width: 6%;">
+                                    <col style="width: 8%;">
+                                    <col style="width: 8%;">
+                                    <col style="width: 7%;">
+                                    <col style="width: 7%;">
+                                    <col style="width: 5%;">
+                                    <col style="width: 10%;">
+                                    <col style="width: 9%;">
+                                    <col style="width: 5%;">
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Product</th>
+                                        <th>UOM</th>
+                                        <th>Qty</th>
+                                        <th>List Price</th>
+                                        <th>Sales Price</th>
+                                        <th>Disc. %</th>
+                                        <th>Max Disc %</th>
+                                        <th>Tax %</th>
+                                        <th>Price Status</th>
+                                        <th>Line Total</th>
+                                        <th class="slds-text-align_center">Del</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={displayItems} for:item="item" for:index="idx">
+                                        <tr key={item.rowKey}>
+                                            <td>{item.rowNum}</td>
+                                            <td class="product-cell">
+                                                <div class="cso-product-name">{item.productName}</div>
+                                                <template if:true={item.pricebookName}>
+                                                    <div class="cso-pricebook-badge">{item.pricebookName}</div>
+                                                </template>
+                                                <template if:true={item.productCode}>
+                                                    <div class="cso-product-code">{item.productCode}</div>
+                                                </template>
+                                            </td>
+                                            <td>{item.uomDisplay}</td>
+                                            <td>
+                                                <lightning-input
+                                                    type="number"
+                                                    variant="label-hidden"
+                                                    label="Qty"
+                                                    value={item.quantity}
+                                                    min="1"
+                                                    step="1"
+                                                    data-row-key={item.rowKey}
+                                                    onchange={handleQuantityChange}>
+                                                </lightning-input>
+                                            </td>
+                                            <td>{item.listPriceDisplay}</td>
+                                            <td>{item.unitPriceDisplay}</td>
+                                            <td>
+                                                <lightning-input
+                                                    type="number"
+                                                    variant="label-hidden"
+                                                    label="Discount"
+                                                    value={item.discount}
+                                                    min="0"
+                                                    max="100"
+                                                    step="0.01"
+                                                    data-row-key={item.rowKey}
+                                                    onchange={handleDiscountChange}>
+                                                </lightning-input>
+                                            </td>
+                                            <td>{item.maxDiscountDisplay}</td>
+                                            <td>{item.taxDisplay}</td>
+                                            <td>
+                                                <template if:true={item.priceStatus}>
+                                                    <span class={item.priceStatusBadgeClass}>{item.priceStatus}</span>
+                                                </template>
+                                            </td>
+                                            <td>{item.totalPriceDisplay}</td>
+                                            <td class="slds-text-align_center">
+                                                <lightning-button-icon
+                                                    icon-name="utility:delete"
+                                                    alternative-text="Delete row"
+                                                    title="Delete row"
+                                                    variant="bare"
+                                                    data-row-key={item.rowKey}
+                                                    onclick={handleDeleteRow}>
+                                                </lightning-button-icon>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+                    <template if:false={hasItems}>
+                        <div class="slds-text-align_center slds-p-around_medium">
+                            <lightning-icon icon-name="utility:info" size="medium"></lightning-icon>
+                            <p>No products on the order. Click "Add Product" to add one.</p>
+                        </div>
+                    </template>
+
+                    <!-- Internal Charges + Order Summary -->
+                    <div class="slds-grid slds-wrap slds-gutters slds-m-top_medium">
+                        <!-- Internal Charges -->
+                        <div class="slds-col slds-size_1-of-2">
+                            <div class="cso-section">
+                                <div class="cso-section-header">
+                                    <lightning-icon icon-name="standard:expense_report" size="small" class="slds-m-right_small"></lightning-icon>
+                                    <span class="slds-text-heading_small">Internal Charges</span>
+                                </div>
+                                <div class="cso-section-body">
+                                    <div class="slds-grid slds-wrap slds-gutters_small">
+                                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                            <lightning-input type="number" label="Packing Charges" value={packingCharges} formatter="currency" step="0.01" onchange={handleChargeChange} data-field="packingCharges"></lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                            <lightning-input type="number" label="Insurance Charges" value={insuranceCharges} formatter="currency" step="0.01" onchange={handleChargeChange} data-field="insuranceCharges"></lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                            <lightning-input type="number" label="Transport Cost" value={transportCharges} formatter="currency" step="0.01" onchange={handleChargeChange} data-field="transportCharges"></lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                            <lightning-input type="number" label="Warranty Cost" value={warrantyCost} formatter="currency" step="0.01" onchange={handleChargeChange} data-field="warrantyCost"></lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                            <lightning-input type="number" label="Installation Cost" value={installationCost} formatter="currency" step="0.01" onchange={handleChargeChange} data-field="installationCost"></lightning-input>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-2 slds-p-around_x-small">
+                                            <lightning-input type="number" label="Training Cost" value={trainingCost} formatter="currency" step="0.01" onchange={handleChargeChange} data-field="trainingCost"></lightning-input>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Summary -->
+                        <div class="slds-col slds-size_1-of-2">
+                            <div class="cso-section">
+                                <div class="cso-section-header">
+                                    <lightning-icon icon-name="standard:order" size="small" class="slds-m-right_small"></lightning-icon>
+                                    <span class="slds-text-heading_small">Order Summary</span>
+                                </div>
+                                <div class="cso-section-body">
+                                    <div class="cso-summary-row">
+                                        <span>Subtotal</span>
+                                        <span>{subtotalDisplay}</span>
+                                    </div>
+                                    <div class="cso-summary-row">
+                                        <span>Total Discount</span>
+                                        <span class="cso-discount-val">- {totalDiscountDisplay}</span>
+                                    </div>
+                                    <div class="cso-summary-row">
+                                        <span>Total Tax</span>
+                                        <span>{totalTaxDisplay}</span>
+                                    </div>
+                                    <div class="cso-summary-row">
+                                        <span>Internal Charges</span>
+                                        <span>{totalChargesDisplay}</span>
+                                    </div>
+                                    <div class="cso-summary-row cso-grand-total">
+                                        <span>Grand Total</span>
+                                        <span>{grandTotalDisplay}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Gradient Footer -->
+                <div class="gradient-footer">
+                    <button class="cancel-button" onclick={handleCancel} disabled={isSaving}>Cancel</button>
+                    <button class="confirm-button" onclick={handleConfirm} disabled={isConfirmDisabled}>
+                        <lightning-icon icon-name="utility:check" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                        {confirmButtonLabel}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- ================= ERROR ================= -->
+    <template if:true={errorMessage}>
+        <div class="slds-p-around_medium slds-text-color_error slds-text-align_center">
+            <lightning-icon icon-name="utility:error" size="small" variant="error" class="slds-m-right_small"></lightning-icon>
+            {errorMessage}
+        </div>
+    </template>
+
+    <!-- ================= LOADING / SAVING ================= -->
+    <template if:true={isLoading}>
+        <div class="slds-is-relative slds-p-around_medium" style="min-height:200px;">
+            <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+        </div>
+    </template>
+    <template if:true={isSaving}>
+        <lightning-spinner alternative-text="Saving..." size="medium"></lightning-spinner>
+    </template>
+</template>

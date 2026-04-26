@@ -1,0 +1,448 @@
+/* =========================================
+   Host — widen the Quick Action modal (also set via JS in .js for
+   browsers / LWS contexts where styling hooks alone don't reach the
+   parent .slds-modal__container).
+========================================= */
+:host {
+    display: block;
+    width: 100%;
+    --slds-c-modal-sizing-width: 95vw;
+    --slds-c-modal-sizing-max-width: 1600px;
+    --slds-c-modal-sizing-min-width: 320px;
+    --slds-c-modal-sizing-max-height: 92vh;
+}
+
+/* =========================================
+   Container — the top-level card inside the Quick Action modal
+========================================= */
+.cso-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    background-color: #ffffff;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* =========================================
+   Gradient Header
+========================================= */
+.gradient-header {
+    background: linear-gradient(45deg, #1589ee, #0070d2);
+    padding: 0.9rem 1.25rem;
+    border-radius: 4px 4px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cso-title {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1.15rem;
+    margin: 0;
+}
+
+/* =========================================
+   Body — scrolls when content is tall
+========================================= */
+.cso-body {
+    flex: 1 1 auto;
+    padding: 1rem 1.25rem;
+    max-height: 70vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: #ffffff;
+}
+
+/* =========================================
+   Customer Card
+========================================= */
+.customer-card {
+    border: 1px solid #dddbda;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
+    overflow: hidden;
+}
+
+.customer-card-header {
+    background: linear-gradient(to right, #f7f7f7, #ffffff);
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid #f2f2f2;
+    display: flex;
+    align-items: center;
+}
+
+.customer-card-body {
+    padding: 0.75rem;
+}
+
+.cso-field-value {
+    font-weight: 500;
+    color: #032d60;
+    margin-top: 0.15rem;
+}
+
+/* =========================================
+   Generic section (Quote Information, Bill To/Ship To)
+========================================= */
+.cso-section {
+    border: 1px solid #dddbda;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.cso-section-header {
+    background: linear-gradient(to right, #eef5fd, #ffffff);
+    border-bottom: 1px solid #e4eaf2;
+    padding: 0.6rem 0.9rem;
+    display: flex;
+    align-items: center;
+}
+
+.cso-section-body {
+    padding: 0.9rem;
+}
+
+/* Sub-header inside a section (e.g. BILL TO / SHIP TO) */
+.cso-subheader {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #0070d2;
+    letter-spacing: 0.04rem;
+    margin-bottom: 0.4rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid #e4eaf2;
+}
+
+.cso-addr-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.2rem 0;
+    border-bottom: 1px dashed #f1f1f1;
+    font-size: 0.85rem;
+}
+
+.cso-addr-row:last-child {
+    border-bottom: none;
+}
+
+.cso-addr-val {
+    color: #032d60;
+    font-weight: 500;
+    text-align: right;
+    word-break: break-word;
+    max-width: 65%;
+}
+
+/* =========================================
+   Items section header (heading + Add Product button)
+========================================= */
+.cso-items-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+/* =========================================
+   Items table
+========================================= */
+.table-scroll-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.cso-items-table {
+    width: 100%;
+    min-width: 900px;
+}
+
+.cso-items-table thead th {
+    background-color: #f7f7f7;
+    color: #444444;
+    font-weight: 600;
+    padding: 0.75rem;
+}
+
+.product-cell {
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    line-height: 1.4;
+}
+
+.cso-product-name {
+    font-weight: 600;
+    color: #032d60;
+    margin-bottom: 0.2rem;
+}
+
+.cso-pricebook-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #0070d2;
+    background-color: #e8f4ff;
+    border: 1px solid #bcd9f7;
+    border-radius: 10px;
+    padding: 0.1rem 0.5rem;
+    margin-top: 0.15rem;
+}
+
+.cso-product-code {
+    color: #7c8b9d;
+    font-size: 0.72rem;
+    margin-top: 0.15rem;
+}
+
+/* Price Status badges */
+.cso-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 0.1rem 0.55rem;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.cso-badge-neutral {
+    color: #535e71;
+    background-color: #f0f2f5;
+    border-color: #d6dbe3;
+}
+
+.cso-badge-ok {
+    color: #14703e;
+    background-color: #dff7e9;
+    border-color: #a8e1c0;
+}
+
+.cso-badge-warn {
+    color: #8a5700;
+    background-color: #fff2cf;
+    border-color: #f2d89e;
+}
+
+.cso-badge-error {
+    color: #8a1e1e;
+    background-color: #fde0e0;
+    border-color: #f2bcbc;
+}
+
+/* =========================================
+   Gradient Footer
+========================================= */
+.gradient-footer {
+    background: linear-gradient(45deg, #f2f2f2, #ffffff);
+    border-top: 1px solid #dddbda;
+    padding: 0.6rem 1.25rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    border-radius: 0 0 4px 4px;
+}
+
+.cancel-button,
+.confirm-button {
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    font-size: 0.875rem;
+}
+
+.cancel-button {
+    background-color: #f3f3f3;
+    color: #444444;
+    margin-right: 0.75rem;
+}
+
+.cancel-button:hover:not(:disabled) {
+    background-color: #e8e8e8;
+}
+
+.cancel-button:disabled {
+    color: #999999;
+    cursor: not-allowed;
+}
+
+.confirm-button {
+    background: linear-gradient(45deg, #0070d2, #1589ee);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.confirm-button:hover:not(:disabled) {
+    background: linear-gradient(45deg, #0057a3, #0070d2);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.confirm-button:disabled {
+    background: #c9c9c9;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* =========================================
+   Inline Add Product panel (appears below the Order Items heading)
+========================================= */
+.cso-add-product-panel {
+    background-color: #f3f7fb;
+    border: 1px solid #c7d9ea;
+    border-radius: 8px;
+    padding: 0.75rem 1rem 1rem 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.cso-add-product-title {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    color: #0070d2;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.cso-add-product-fields {
+    align-items: end;
+}
+
+.cso-add-product-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.75rem;
+}
+
+/* =========================================
+   Mobile (≤ 768px)
+========================================= */
+@media (max-width: 48em) {
+    :host {
+        --slds-c-modal-sizing-width: 100vw;
+        --slds-c-modal-sizing-max-width: 100vw;
+        --slds-c-modal-sizing-max-height: 100vh;
+    }
+
+    .cso-body {
+        padding: 0.75rem;
+        max-height: calc(100vh - 140px);
+    }
+
+    .gradient-header {
+        padding: 0.65rem 1rem;
+    }
+
+    .cso-title {
+        font-size: 1rem;
+    }
+
+    .gradient-footer {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .cso-items-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+}
+
+/* =========================================
+   Payment Terms (read-only block)
+========================================= */
+.cso-payment-terms {
+    white-space: pre-wrap;
+    font-family: inherit;
+    font-size: 0.9rem;
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    background-color: #f7f9fb;
+    border: 1px solid #e5e9ef;
+    border-radius: 4px;
+    color: #032d60;
+    line-height: 1.5;
+}
+
+.cso-readonly-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #747474;
+    background-color: #eeeeee;
+    border-radius: 10px;
+    padding: 0.1rem 0.5rem;
+}
+
+/* =========================================
+   Product Search dropdown
+========================================= */
+.cso-search-table-wrapper {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid #dddbda;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.cso-search-table thead th {
+    background-color: #f7f7f7;
+    color: #444;
+    font-weight: 600;
+    font-size: 0.78rem;
+    padding: 0.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.cso-search-table tbody td {
+    font-size: 0.82rem;
+    padding: 0.4rem 0.5rem;
+}
+
+.cso-search-name {
+    font-weight: 600;
+    color: #032d60;
+}
+
+/* =========================================
+   Order Summary
+========================================= */
+.cso-summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.45rem 0.75rem;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 0.9rem;
+}
+
+.cso-summary-row:last-child {
+    border-bottom: none;
+}
+
+.cso-discount-val {
+    color: #d9534f;
+}
+
+.cso-grand-total {
+    background-color: #eef5fd;
+    border-top: 2px solid #0070d2;
+    border-bottom: none;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #032d60;
+}
