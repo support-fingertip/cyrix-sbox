@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Installation_and_commissioning_required__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>When checked, installation and commissioning at the customer site is part of the quote scope.</description>
+    <externalId>false</externalId>
+    <label>Installation and Commissioning Required</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

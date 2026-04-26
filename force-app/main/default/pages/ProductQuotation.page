@@ -19,19 +19,21 @@
                 content: element(footer); 
                 } 
                 }
-                div.header { 
+                div.header {
                 position: running(header);
                 width: 100%;
+                padding: 10px 24px 6px 24px;
                 }
-                    div.footer { 
-                display: block; 
-    position: running(footer); 
+                    div.footer {
+                display: block;
+    position: running(footer);
     font-size: 11px;
     padding-bottom: 20px;
-   } 
+   }
                 div.content {
                 margin-left:7%;
-
+                margin-right:7%;
+                padding: 8px 4px 16px 4px;
                 }
                 
                 .overlaytext {
@@ -268,6 +270,7 @@
                         <div>Delivery will be scheduled within <strong>{!quote.Delivery__c}</strong> from receipt of confirmed Purchase Order along with advance payment.</div>
                     </div>
 
+                    <apex:outputPanel rendered="{!showInstallationSection}">
                     <div style="margin: 10px 0 10px 0;">
                         <div style="font-weight: bold; padding-bottom: 4px;"> Installation &amp; Approvals</div>
                         <div style="text-align:justify; line-height: 1.4;">Installation will be carried out at the approved site without additional charges, subject to site readiness confirmation from the customer.</div>
@@ -276,7 +279,9 @@
                             Statutory approvals such as PC-PNDT and AERB (where applicable) must be obtained by the customer prior to installation.
                         </div>
                     </div>
+                    </apex:outputPanel>
 
+                    <apex:outputPanel rendered="{!showWarrantySection}">
                     <div style="margin: 10px 0 10px 0;">
                         <div style="font-weight: bold; padding-bottom: 4px;"> Warranty</div>
                         <div style=" line-height: 1.4;">
@@ -288,6 +293,7 @@
                             calamities, pest-related issues, or third-party interference.
                         </div>
                     </div>
+                    </apex:outputPanel>
 
                     <div style="margin: 10px 0 10px 0;">
                         <div style="font-weight: bold; padding-bottom: 4px;">Site Responsibilities</div>
