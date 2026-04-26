@@ -79,13 +79,17 @@
 /* ===== Canvas + shell ===== */
 .qw-canvas {
     background: var(--bg-page);
-    padding: 32px 24px 48px;
+    padding: 16px;
     min-height: 100%;
 }
 
 .qw-shell {
-    max-width: 960px;
-    margin: 0 auto;
+    /* Full-width inside the host tab — the LWC tab page already centers
+       and chromes us, so the shell should fill the available width
+       instead of capping at 960px like the standalone mockup. */
+    width: 100%;
+    max-width: none;
+    margin: 0;
     background: var(--bg-surface);
     border-radius: var(--radius-2xl);
     box-shadow: var(--shadow-2xl);
@@ -842,7 +846,7 @@
 
 /* ===== Mobile ===== */
 @media (max-width: 768px) {
-    .qw-canvas { padding: 16px 12px 32px; }
+    .qw-canvas { padding: 8px; }
     .qw-shell { border-radius: var(--radius-xl); }
 
     .qw-header { padding: 20px 16px 14px; }
@@ -885,7 +889,7 @@
 }
 
 @media (max-width: 480px) {
-    .qw-canvas { padding: 12px 8px 24px; }
+    .qw-canvas { padding: 4px; }
     .qw-body { padding: 16px 12px; }
     .qw-header-title { font-size: 17px; }
 }
