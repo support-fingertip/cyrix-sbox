@@ -1,9 +1,18 @@
-public with sharing class WhatsAppQuoteSender {
+public without sharing class WhatsAppQuoteSender {
+    // WhatsApp quote sender — sync DML + async @future callout, with
+    // request/response logging to Log__c for delivery debugging.
 
     @AuraEnabled
     public static WhatsAppQuoteInfo getQuoteInfo(Id quoteId) {
-        Quote q = [
+        WhatsAppQuoteInfo info = new WhatsAppQuoteInfo();
+
+        if (quoteId == null) {
+            return info;
+        }
+
+        List<Quote> quotes = [
             SELECT Id, Name, QuoteNumber, Quote_Id__c,
+                   Phone, Email,
                    ContactId, Contact.Name, Contact.Phone, Contact.MobilePhone,
                    OpportunityId, Opportunity.Name,
                    Account.Name, Account.Phone,
@@ -13,13 +22,21 @@ public with sharing class WhatsAppQuoteSender {
             LIMIT 1
         ];
 
-        WhatsAppQuoteInfo info = new WhatsAppQuoteInfo();
+        if (quotes.isEmpty()) {
+            return info;
+        }
+
+        Quote q = quotes[0];
         info.quoteId = q.Id;
         info.quoteName = q.Name;
         info.contactName = q.ContactId != null ? q.Contact.Name : '';
         info.accountName = q.Account != null ? q.Account.Name : '';
 
-        if (q.ContactId != null && String.isNotBlank(q.Contact.MobilePhone)) {
+        // Phone fallback: standard Quote.Phone (auto-populated from Contact/Account)
+        // → Contact.MobilePhone → Contact.Phone → Account.Phone.
+        if (String.isNotBlank(q.Phone)) {
+            info.phone = q.Phone;
+        } else if (q.ContactId != null && String.isNotBlank(q.Contact.MobilePhone)) {
             info.phone = q.Contact.MobilePhone;
         } else if (q.ContactId != null && String.isNotBlank(q.Contact.Phone)) {
             info.phone = q.Contact.Phone;
@@ -34,6 +51,16 @@ public with sharing class WhatsAppQuoteSender {
         return info;
     }
 
+    /**
+     * Step 1 (sync): generate PDF, persist it as ContentVersion +
+     * ContentDistribution, capture the public download URL.
+     *
+     * Step 2 (async): hand the URL off to sendWhatsAppCalloutAsync,
+     * which performs the actual WhatsApp HTTP callout. Splitting the
+     * DML and the callout across two transactions is required
+     * because Salesforce blocks callouts that follow uncommitted
+     * DML in the same transaction ("uncommitted work pending").
+     */
     @AuraEnabled
     public static String sendQuoteViaWhatsApp(Id quoteId, String phone, String recipientName) {
         try {
@@ -47,20 +74,85 @@ public with sharing class WhatsAppQuoteSender {
                 pdfBlob = pdfPage.getContentAsPDF();
             }
 
-            Quote q = [SELECT Name, QuoteNumber FROM Quote WHERE Id = :quoteId LIMIT 1];
-            String fileName = q.Name + '_' + q.QuoteNumber + '.pdf';
+            List<Quote> quotes = [SELECT Name, QuoteNumber FROM Quote WHERE Id = :quoteId LIMIT 1];
+            if (quotes.isEmpty()) {
+                throw new AuraHandledException('Quote not found.');
+            }
+            String fileName = quotes[0].Name + '_' + quotes[0].QuoteNumber + '.pdf';
 
             String pdfUrl = savePDFAndGetPublicUrl(quoteId, fileName, pdfBlob);
 
-            String result = callWhatsAppAPI(phone, recipientName, pdfUrl);
+            // Hand the URL to the @future for the actual callout —
+            // runs in a fresh transaction once the current one commits.
+            sendWhatsAppCalloutAsync(quoteId, phone, recipientName, pdfUrl, fileName);
 
-            logWhatsAppActivity(quoteId, phone, recipientName, fileName);
-
-            return result;
+            return 'SUCCESS';
         } catch (AuraHandledException ae) {
             throw ae;
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
+        }
+    }
+
+    /**
+     * Async callout — runs after the calling transaction commits, so
+     * the DML done by savePDFAndGetPublicUrl is no longer "pending"
+     * and Salesforce permits the HTTP callout. The Activity log
+     * insert at the end is in this transaction too — fine because
+     * it happens after the callout completes.
+     */
+    @future(callout=true)
+    public static void sendWhatsAppCalloutAsync(Id quoteId, String phone, String recipientName,
+                                                 String pdfUrl, String fileName) {
+        String requestBodyForLog = '';
+        Integer statusCode = 0;
+        String responseBody = '';
+        String errorMessage = '';
+        try {
+            BitvoiceCall result = callWhatsAppAPIWithDetails(phone, recipientName, pdfUrl);
+            requestBodyForLog = result.requestBody;
+            statusCode = result.statusCode;
+            responseBody = result.responseBody;
+            logWhatsAppActivity(quoteId, phone, recipientName, fileName);
+        } catch (Exception ex) {
+            errorMessage = ex.getMessage();
+            System.debug('WhatsApp callout failed: ' + errorMessage);
+        } finally {
+            // Always write a Log__c so we can see what Bitvoice actually
+            // returned, even on 2xx responses (Bitvoice can return 200
+            // with an error body when the template/phone is wrong).
+            writeWhatsAppLog(quoteId, requestBodyForLog, responseBody, statusCode, errorMessage);
+        }
+    }
+
+    private class BitvoiceCall {
+        public String requestBody;
+        public Integer statusCode;
+        public String responseBody;
+    }
+
+    private static void writeWhatsAppLog(Id quoteId, String reqBody, String resBody,
+                                          Integer statusCode, String errorMessage) {
+        try {
+            Integer maxSize = 32000;
+            if (reqBody != null && reqBody.length() > maxSize) {
+                reqBody = reqBody.substring(0, maxSize);
+            }
+            String fullResponse = (errorMessage != null && errorMessage.length() > 0)
+                ? 'ERROR: ' + errorMessage + (resBody != null ? '\n\nResponseBody: ' + resBody : '')
+                : resBody;
+            if (fullResponse != null && fullResponse.length() > maxSize) {
+                fullResponse = fullResponse.substring(0, maxSize);
+            }
+
+            Log__c rec = new Log__c();
+            rec.Object__c      = 'WhatsApp Quote';
+            rec.Request__c     = reqBody;
+            rec.Response__c    = fullResponse;
+            rec.Status_Code__c = String.valueOf(statusCode);
+            insert rec;
+        } catch (Exception e) {
+            System.debug('WhatsApp log insert failed: ' + e.getMessage());
         }
     }
 
@@ -97,7 +189,15 @@ public with sharing class WhatsAppQuoteSender {
         return dist.ContentDownloadUrl;
     }
 
-    private static String callWhatsAppAPI(String phone, String recipientName, String pdfUrl) {
+    /**
+     * Custom exception used by callWhatsAppAPI for non-2xx responses.
+     * AuraHandledException can't be thrown from a @future method — only
+     * from VF / Aura / LWC contexts — so we use a plain subclass that
+     * works in both async and sync callers.
+     */
+    public class WhatsAppApiException extends Exception {}
+
+    private static BitvoiceCall callWhatsAppAPIWithDetails(String phone, String recipientName, String pdfUrl) {
         String apiUrl = System.Label.WhatsApp_API_URL;
         String apiKey = System.Label.WhatsApp_API_Key;
         String templateName = System.Label.WhatsApp_Template_Name;
@@ -133,17 +233,25 @@ public with sharing class WhatsAppQuoteSender {
         req.setEndpoint(apiUrl);
         req.setMethod('POST');
         req.setHeader('Content-Type', 'application/json');
-        req.setHeader('Authorization', 'Bearer ' + apiKey);
+        // Bitvoice expects an X-API-Key header, not Authorization Bearer.
+        req.setHeader('X-API-Key', apiKey);
         req.setBody(jsonBody);
         req.setTimeout(30000);
 
         Http http = new Http();
         HttpResponse res = http.send(req);
 
+        BitvoiceCall result = new BitvoiceCall();
+        result.requestBody  = jsonBody;
+        result.statusCode   = res.getStatusCode();
+        result.responseBody = res.getBody();
+
         if (res.getStatusCode() >= 200 && res.getStatusCode() < 300) {
-            return 'SUCCESS';
+            return result;
         } else {
-            throw new AuraHandledException('WhatsApp API error (' + res.getStatusCode() + '): ' + res.getBody());
+            throw new WhatsAppApiException(
+                'WhatsApp API error (' + res.getStatusCode() + '): ' + res.getBody()
+            );
         }
     }
 

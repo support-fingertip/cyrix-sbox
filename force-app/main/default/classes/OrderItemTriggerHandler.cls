@@ -16,8 +16,6 @@ public with sharing class OrderItemTriggerHandler {
     private static final String STATUS_APPROVAL_REQUIRED = 'Approval Required';
     private static final String STATUS_NOT_REQUIRED      = 'Not Required';
     private static final String STATUS_APPROVED          = 'Approved';
-    private static final String ORDER_STATUS_DRAFT       = 'Draft';
-
     /**
      * BEFORE insert/update. Mutates records in-place. Same tier-applied
      * pricebook rule used on Quote Line Items: final unit amount after
@@ -36,8 +34,8 @@ public with sharing class OrderItemTriggerHandler {
         if (productIds.isEmpty()) return;
 
         Map<Id, Product2> prodMap = new Map<Id, Product2>([
-            SELECT Id, Service_Item__c, Tax__c,
-                   Manager_Discount_Up_to__c
+            SELECT Id, Service_Item__c, Tax__c
+                   
             FROM Product2
             WHERE Id IN :productIds
         ]);
@@ -118,15 +116,7 @@ public with sharing class OrderItemTriggerHandler {
                 oi.Price_Status__c = STATUS_NOT_REQUIRED;
                 continue;
             }
-            Decimal d           = discount / 100;
-            Decimal managerLim  = p.Manager_Discount_Up_to__c != null
-                ? p.Manager_Discount_Up_to__c / 100 : 0;
-
-            if (managerLim > 0 && d > managerLim) {
-                oi.Price_Status__c = STATUS_APPROVAL_REQUIRED;
-            } else {
-                oi.Price_Status__c = STATUS_NOT_REQUIRED;
-            }
+          
         }
     }
 

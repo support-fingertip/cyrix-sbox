@@ -8,8 +8,7 @@ private class OrderItemTriggerHandlerTest {
     private static Product2 createProduct(Decimal managerLimit) {
         Product2 p = new Product2(
             Name = 'Test Prod',
-            IsActive = true,
-            Manager_Discount_Up_to__c = managerLimit
+            IsActive = true
         );
         insert p;
         return p;

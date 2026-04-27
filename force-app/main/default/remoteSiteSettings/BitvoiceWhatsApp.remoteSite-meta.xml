@@ -3,5 +3,5 @@
     <description>Bitvoice WhatsApp Business API for sending template messages</description>
     <disableProtocolSecurity>false</disableProtocolSecurity>
     <isActive>true</isActive>
-    <url>https://io6.n2080.cloud.bitvoice.in</url>
+    <url>https://webhook7.n2080.cloud.bitvoice.in</url>
 </RemoteSiteSetting>

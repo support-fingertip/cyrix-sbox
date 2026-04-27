@@ -85,6 +85,31 @@
         <default>false</default>
         <label>Vertex</label>
     </customValue>
+    <customValue>
+        <fullName>Air Liquide</fullName>
+        <default>false</default>
+        <label>Air Liquide</label>
+    </customValue>
+    <customValue>
+        <fullName>VMS</fullName>
+        <default>false</default>
+        <label>VMS</label>
+    </customValue>
+    <customValue>
+        <fullName>Allengers</fullName>
+        <default>false</default>
+        <label>Allengers</label>
+    </customValue>
+    <customValue>
+        <fullName>Drager</fullName>
+        <default>false</default>
+        <label>Drager</label>
+    </customValue>
+    <customValue>
+        <fullName>Esoate</fullName>
+        <default>false</default>
+        <label>Esoate</label>
+    </customValue>
     <masterLabel>Brand</masterLabel>
     <sorted>false</sorted>
 </GlobalValueSet>
