@@ -41,92 +41,94 @@ global class SAPGetData {
             return;
         }
 
-        if (value != 'productMaster') {
+        // Mirror the reference pattern: positive branch on productMaster,
+        // anything else lands in the else block as an Invalid Value error.
+        if (value == 'productMaster') {
+
+            List<Response> lstResponse = new List<Response>();
+
+            // 1. Parse incoming JSON into a list of plain maps so we can
+            //    inspect ProductCode before deserializing into Product2.
+            List<Map<String, Object>> incoming = new List<Map<String, Object>>();
+            Set<String> productCodes = new Set<String>();
+            try {
+                Map<String, Object> body = (Map<String, Object>) JSON.deserializeUntyped(data);
+                for (Object item : (List<Object>) body.get('data')) {
+                    Map<String, Object> m = (Map<String, Object>) item;
+                    incoming.add(m);
+                    Object code = m.get('ProductCode');
+                    if (code != null) {
+                        productCodes.add(String.valueOf(code));
+                    }
+                }
+            } catch (Exception parseEx) {
+                List<Response> err = new List<Response>{
+                    new Response('Failure', 'Invalid JSON body: ' + parseEx.getMessage(), false)
+                };
+                res.statusCode = 400;
+                res.addHeader('Content-Type', 'application/json');
+                res.responseBody = Blob.valueOf(JSON.serialize(err));
+                return;
+            }
+
+            // 2. Look up existing Product2 records by ProductCode so the
+            //    upsert acts as an update for known codes and an insert
+            //    for new ones (Product2 has no external-id field here).
+            Map<String, Id> existingByCode = new Map<String, Id>();
+            if (!productCodes.isEmpty()) {
+                for (Product2 ex : [
+                    SELECT Id, ProductCode
+                    FROM Product2
+                    WHERE ProductCode IN :productCodes
+                ]) {
+                    existingByCode.put(ex.ProductCode, ex.Id);
+                }
+            }
+
+            // 3. Build Product2 instances and upsert one at a time so a
+            //    single bad row doesn't block the rest of the batch.
+            for (Map<String, Object> m : incoming) {
+                String code = m.get('ProductCode') != null
+                    ? String.valueOf(m.get('ProductCode'))
+                    : null;
+                try {
+                    Map<String, Object> typedMap = new Map<String, Object>(m);
+                    typedMap.put('attributes', new Map<String, String>{
+                        'type' => 'Product2',
+                        'referenceId' => 'ref1'
+                    });
+                    Product2 p = (Product2) JSON.deserialize(
+                        JSON.serialize(typedMap),
+                        Sobject.class
+                    );
+
+                    if (String.isNotBlank(code) && existingByCode.containsKey(code)) {
+                        p.Id = existingByCode.get(code);
+                    }
+
+                    upsert p;
+                    lstResponse.add(new Response('Success', p.ProductCode));
+                } catch (Exception ex) {
+                    lstResponse.add(new Response('Failure', code, ex.getMessage()));
+                }
+            }
+
+            res.statusCode = 200;
+            res.addHeader('Content-Type', 'application/json');
+            res.responseBody = Blob.valueOf(JSON.serialize(lstResponse));
+
+            // 4. Audit log (same convention as other classes in this org).
+            if (Label.Enable_Logs == 'TRUE') {
+                writeLog(data, JSON.serialize(lstResponse), 'Product', String.valueOf(res.statusCode));
+            }
+
+        } else {
             List<Response> err = new List<Response>{
                 new Response('Failure', 'Invalid Parameter Value.', false)
             };
             res.statusCode = 403;
             res.addHeader('Content-Type', 'application/json');
             res.responseBody = Blob.valueOf(JSON.serialize(err));
-            return;
-        }
-
-        // ---- productMaster ----
-        List<Response> lstResponse = new List<Response>();
-
-        // 1. Parse incoming JSON into a list of plain maps so we can
-        //    inspect ProductCode before deserializing into Product2.
-        List<Map<String, Object>> incoming = new List<Map<String, Object>>();
-        Set<String> productCodes = new Set<String>();
-        try {
-            Map<String, Object> body = (Map<String, Object>) JSON.deserializeUntyped(data);
-            for (Object item : (List<Object>) body.get('data')) {
-                Map<String, Object> m = (Map<String, Object>) item;
-                incoming.add(m);
-                Object code = m.get('ProductCode');
-                if (code != null) {
-                    productCodes.add(String.valueOf(code));
-                }
-            }
-        } catch (Exception parseEx) {
-            List<Response> err = new List<Response>{
-                new Response('Failure', 'Invalid JSON body: ' + parseEx.getMessage(), false)
-            };
-            res.statusCode = 400;
-            res.addHeader('Content-Type', 'application/json');
-            res.responseBody = Blob.valueOf(JSON.serialize(err));
-            return;
-        }
-
-        // 2. Look up existing Product2 records by ProductCode so the
-        //    upsert acts as an update for known codes and an insert
-        //    for new ones (Product2 has no external-id field here).
-        Map<String, Id> existingByCode = new Map<String, Id>();
-        if (!productCodes.isEmpty()) {
-            for (Product2 ex : [
-                SELECT Id, ProductCode
-                FROM Product2
-                WHERE ProductCode IN :productCodes
-            ]) {
-                existingByCode.put(ex.ProductCode, ex.Id);
-            }
-        }
-
-        // 3. Build Product2 instances and upsert one at a time so a
-        //    single bad row doesn't block the rest of the batch.
-        for (Map<String, Object> m : incoming) {
-            String code = m.get('ProductCode') != null
-                ? String.valueOf(m.get('ProductCode'))
-                : null;
-            try {
-                Map<String, Object> typedMap = new Map<String, Object>(m);
-                typedMap.put('attributes', new Map<String, String>{
-                    'type' => 'Product2',
-                    'referenceId' => 'ref1'
-                });
-                Product2 p = (Product2) JSON.deserialize(
-                    JSON.serialize(typedMap),
-                    Sobject.class
-                );
-
-                if (String.isNotBlank(code) && existingByCode.containsKey(code)) {
-                    p.Id = existingByCode.get(code);
-                }
-
-                upsert p;
-                lstResponse.add(new Response('Success', p.ProductCode));
-            } catch (Exception ex) {
-                lstResponse.add(new Response('Failure', code, ex.getMessage()));
-            }
-        }
-
-        res.statusCode = 200;
-        res.addHeader('Content-Type', 'application/json');
-        res.responseBody = Blob.valueOf(JSON.serialize(lstResponse));
-
-        // 4. Audit log (same convention as other classes in this org).
-        if (Label.Enable_Logs == 'TRUE') {
-            writeLog(data, JSON.serialize(lstResponse), 'Product', String.valueOf(res.statusCode));
         }
     }
 
