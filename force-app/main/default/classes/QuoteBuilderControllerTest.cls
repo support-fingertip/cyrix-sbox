@@ -40,7 +40,7 @@ private class QuoteBuilderControllerTest {
         Opportunity opp = new Opportunity(
             Name = 'Test Hospital Deal',
             AccountId = acc.Id,
-            StageName = 'Qualified',
+            StageName = 'Proposal',
             CloseDate = Date.today().addDays(60),
             Pricebook2Id = stdPbId
         );
@@ -119,6 +119,7 @@ private class QuoteBuilderControllerTest {
         System.assertNotEquals(null, ctx);
         System.assertEquals('Test Hospital Deal', ctx.opportunityName);
         System.assertEquals('Test Hospital', ctx.accountName);
+        System.assertEquals('Proposal', ctx.stageName);
         System.assertNotEquals(null, ctx.pricebookId);
         // Verify billing address pre-population
         System.assertEquals('Test Hospital', ctx.billingName);
@@ -127,6 +128,24 @@ private class QuoteBuilderControllerTest {
         System.assertEquals('Kerala', ctx.billingState);
         System.assertEquals('682001', ctx.billingPostalCode);
         System.assertEquals('India', ctx.billingCountry);
+    }
+
+    @isTest
+    static void testGetOpportunityContextRejectsBlockedStage() {
+        Opportunity opp = [SELECT Id FROM Opportunity LIMIT 1];
+        opp.StageName = 'Qualification';
+        update opp;
+
+        Boolean blocked = false;
+        Test.startTest();
+        try {
+            QuoteBuilderController.getOpportunityContext(opp.Id);
+        } catch (AuraHandledException e) {
+            blocked = true;
+        }
+        Test.stopTest();
+
+        System.assert(blocked, 'getOpportunityContext should reject opportunities outside Negotiation/Proposal/Demo.');
     }
 
     @isTest

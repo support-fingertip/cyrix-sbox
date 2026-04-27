@@ -101,11 +101,16 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     get lineItemCount() { return this.lineItems.length; }
     get hasSearchResults() { return this.searchResults.length > 0; }
     get noSearchResults() { return this.showSearchResults && this.searchResults.length === 0; }
-    get isSearchDisabled() { return !this.searchTerm || this.searchTerm.length < 2; }
+    get isSearchDisabled() { return !this.searchTerm || this.searchTerm.trim().length < 2; }
+    get searchResultCountLabel() {
+        const n = this.searchResults.length;
+        return n === 1 ? '1 product found' : `${n} products found`;
+    }
     get isSaveDisabled() {
         if (this.isSaving || this.lineItems.length === 0) return true;
         if (this.paymentTerms.length > 0 && this.totalPercentage !== 100) return true;
         if (this.isContractDateInvalid) return true;
+        if (this.isContractFromDateMissing || this.isContractEndDateMissing) return true;
         return false;
     }
     get pageTitle() { return this.isEditMode ? 'Edit Quote' : 'Create Quote'; }
@@ -126,6 +131,14 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     get isContractDateInvalid() {
         if (!this.contractFromDate || !this.contractEndDate) return false;
         return new Date(this.contractEndDate) <= new Date(this.contractFromDate);
+    }
+    // AMC / CAMC sub-verticals must carry both contract period dates.
+    // We surface a per-field error and block the wizard until they're set.
+    get isContractFromDateMissing() {
+        return this.showContractDates && !this.contractFromDate;
+    }
+    get isContractEndDateMissing() {
+        return this.showContractDates && !this.contractEndDate;
     }
     // In edit mode, return undefined so an empty defaultValues object can't
     // interfere with LDS auto-loading the saved Quote address subfields.
@@ -187,8 +200,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // or null when it's safe to advance. Step 6 has no Continue (Submit
     // takes over) so we don't validate it here.
     validateCurrentStep() {
-        if (this.currentStep === 1 && this.isContractDateInvalid) {
-            return 'Contract End Date must be greater than From Date.';
+        if (this.currentStep === 1) {
+            if (this.isContractFromDateMissing || this.isContractEndDateMissing) {
+                return 'Contract Period From Date and End Date are required for AMC / CAMC sub-verticals.';
+            }
+            if (this.isContractDateInvalid) {
+                return 'Contract End Date must be greater than From Date.';
+            }
         }
         if (this.currentStep === 3 && this.lineItems.length === 0) {
             return 'Add at least one product before continuing.';
@@ -407,6 +425,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.defaultOpportunityId = data.opportunityId;
             this.businessVertical = data.vertical || null;
             this.subVertical = data.subVertical || null;
+            this.contractFromDate = data.contractFromDate || null;
+            this.contractEndDate = data.contractEndDate || null;
 
             // Populate address objects from saved quote
             this.billingAddress = {
@@ -565,8 +585,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 });
             }
         } catch (error) {
-            // Silent — the rep can still finish the form; verticals just
-            // won't auto-update for this opportunity.
+            // Surface stage-restriction (and any other server-side block)
+            // and clear the picker so the rep doesn't unknowingly continue
+            // with an Opportunity the server has rejected.
+            this.defaultOpportunityId = null;
+            this.businessVertical = null;
+            this.subVertical = null;
+            this.showError('Cannot use this Opportunity', this.reduceErrors(error));
         }
     }
 
@@ -640,6 +665,16 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.showError(
                 'Invalid Contract Period',
                 'Contract Period End Date must be greater than Contract Period From Date.'
+            );
+            return;
+        }
+
+        // AMC / CAMC sub-verticals require both contract dates — they
+        // anchor the maintenance window so saves without them aren't valid.
+        if (this.showContractDates && (!fromDate || !endDate)) {
+            this.showError(
+                'Contract dates required',
+                'Contract Period From Date and End Date are mandatory for AMC / CAMC sub-verticals.'
             );
             return;
         }
@@ -810,6 +845,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }
     }
 
+    handleClearSearch() {
+        this.searchTerm = '';
+        this.categoryFilter = '';
+        this.searchResults = [];
+        this.showSearchResults = false;
+    }
+
     async handleSearch() {
         if (this.isSearchDisabled) return;
 
@@ -824,14 +866,21 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 regionId: this.regionId || null
             });
 
-            this.searchResults = results.map(r => ({
-                ...r,
-                formattedPrice: this.formatCurrency(r.unitPrice),
-                formattedTax: r.taxPercent != null ? r.taxPercent + '%' : '0%',
-                priceBadgeClass: this.getPriceBadgeClass(r.sourcePricebookType),
-                priceBadgeLabel: this.getPriceBadgeLabel(r.sourcePricebookType),
-                hasPriceSource: !!r.sourcePricebookType
-            }));
+            const addedKeys = new Set(this.lineItems.map(li => li.pricebookEntryId));
+            this.searchResults = results.map(r => {
+                const alreadyAdded = addedKeys.has(r.pricebookEntryId);
+                return {
+                    ...r,
+                    formattedPrice: this.formatCurrency(r.unitPrice),
+                    formattedTax: r.taxPercent != null ? r.taxPercent + '%' : '0%',
+                    priceBadgeClass: this.getPriceBadgeClass(r.sourcePricebookType),
+                    priceBadgeLabel: this.getPriceBadgeLabel(r.sourcePricebookType),
+                    hasPriceSource: !!r.sourcePricebookType,
+                    productInitial: this.getProductInitial(r.productName),
+                    alreadyAdded: alreadyAdded,
+                    cardClass: alreadyAdded ? 'qw-product-card is-added' : 'qw-product-card'
+                };
+            });
         } catch (error) {
             this.showError('Search failed', this.reduceErrors(error));
             this.searchResults = [];
@@ -901,14 +950,32 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         };
 
         this.lineItems = [...this.lineItems, newItem];
+
+        // Mark this card as added in the visible search results so the
+        // user sees the "Added" pill without having to re-search.
+        this.searchResults = this.searchResults.map(r => {
+            if (r.pricebookEntryId !== pbeId) return r;
+            return { ...r, alreadyAdded: true, cardClass: 'qw-product-card is-added' };
+        });
+
         this.showSuccess('Product Added', product.productName + ' added to the quote.');
     }
 
     handleRemoveLineItem(event) {
         const rowId = event.currentTarget.dataset.rowId;
+        const removed = this.lineItems.find(item => item.rowId === rowId);
         this.lineItems = this.lineItems
             .filter(item => item.rowId !== rowId)
             .map((item, index) => ({ ...item, rowNumber: index + 1 }));
+
+        // If the removed product is still in the search results grid,
+        // flip the "Added" pill back to a fresh Add button.
+        if (removed) {
+            this.searchResults = this.searchResults.map(r => {
+                if (r.pricebookEntryId !== removed.pricebookEntryId) return r;
+                return { ...r, alreadyAdded: false, cardClass: 'qw-product-card' };
+            });
+        }
     }
 
     handleLineItemChange(event) {
