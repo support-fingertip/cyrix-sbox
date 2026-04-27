@@ -1,4 +1,6 @@
 public without sharing class WhatsAppQuoteSender {
+    // WhatsApp quote sender — sync DML + async @future callout, with
+    // request/response logging to Log__c for delivery debugging.
 
     @AuraEnabled
     public static WhatsAppQuoteInfo getQuoteInfo(Id quoteId) {
