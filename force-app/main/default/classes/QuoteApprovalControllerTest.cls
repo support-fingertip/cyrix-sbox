@@ -37,7 +37,6 @@ private class QuoteApprovalControllerTest {
             OpportunityId = opp.Id,
             Pricebook2Id = stdPricebookId,
             Quote_Date__c = Date.today(),
-            Valid_Till__c = Date.today().addDays(30),
             Price_Status__c = 'Draft'
         );
         insert qt;

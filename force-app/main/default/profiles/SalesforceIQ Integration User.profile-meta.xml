@@ -4314,7 +4314,7 @@
         <modifyAllRecords>false</modifyAllRecords>
         <object>Outstanding__c</object>
         <viewAllFields>false</viewAllFields>
-        <viewAllRecords>true</viewAllRecords>
+        <viewAllRecords>false</viewAllRecords>
     </objectPermissions>
     <objectPermissions>
         <allowCreate>false</allowCreate>
