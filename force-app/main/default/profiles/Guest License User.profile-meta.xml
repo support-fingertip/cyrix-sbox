@@ -2812,11 +2812,6 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
-        <field>PricebookEntry.CEO_Sales_Discount_Up_to__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
         <field>PricebookEntry.Effective_Customer_Price_INR__c</field>
         <readable>false</readable>
     </fieldPermissions>
@@ -2858,11 +2853,6 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Product2.Brand__c</field>
-        <readable>false</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Product2.CEO_Sales_Discount_Up_to__c</field>
         <readable>false</readable>
     </fieldPermissions>
     <fieldPermissions>
