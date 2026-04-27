@@ -190,6 +190,10 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         if (this.currentStep === 1 && this.isContractDateInvalid) {
             return 'Contract End Date must be greater than From Date.';
         }
+        if (this.currentStep === 2
+                && (!this.billingAddress || !this.billingAddress.state)) {
+            return 'Bill To state is required — it drives the auto-generated quote name.';
+        }
         if (this.currentStep === 3 && this.lineItems.length === 0) {
             return 'Add at least one product before continuing.';
         }
@@ -619,6 +623,16 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         const errors = this.validateLineItems();
         if (errors.length > 0) {
             this.showError('Validation Error', errors.join('\n'));
+            return;
+        }
+
+        // Billing state drives the auto-generated quote name, so block
+        // save when it isn't filled — the trigger that names the quote
+        // would addError on insert otherwise and the rep would see a
+        // less specific server-side message.
+        if (!this.billingAddress || !this.billingAddress.state) {
+            this.showError('Billing state required',
+                'Please fill the Bill To state before saving — it drives the quote name.');
             return;
         }
 

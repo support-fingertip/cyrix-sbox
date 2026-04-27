@@ -280,13 +280,24 @@ public with sharing class quoteTriggerHandler {
                   String key = q.Branch__c ;
             decimal nextNumber = maxNumberMap.containsKey(key) ? ((maxNumberMap.get(key).Last_Quote_Number__c !=null?maxNumberMap.get(key).Last_Quote_Number__c:0) + 1) : 1;
             maxNumberMap.get(key).Last_Quote_Number__c=nextNumber; // increment for next quote in same batch
-           string  shortCode =maxNumberMap.get(key).Short_Code__c ;
+            // Naming prefix is now the Bill To state code (e.g. "KL" /
+            // "MH"), not the branch short code from Quote_Number_Series.
+            // The series record is still used to drive the per-branch
+            // running number + financial year. Bill To state is enforced
+            // mandatory on the LWC; we addError here too so the trigger
+            // is the last line of defence on direct-API or list-view
+            // creation.
+            if (String.isBlank(q.BillingStateCode)) {
+                q.addError('Bill To state is required — it drives the quote name.');
+                continue;
+            }
+            String stateShortCode = q.BillingStateCode;
             // Store the sequential number and financial year on the quote (for future queries)
             string financialYear =  maxNumberMap.get(key).Name;
 
 
             // Build the name
-            String baseName = 'C-' + shortCode +'/'+q.Business_Vertical__c +'/QTN-' + String.valueOf(nextNumber.intValue()).leftPad(3, '0') + '/' + financialYear;
+            String baseName = 'C-' + stateShortCode +'/'+q.Business_Vertical__c +'/QTN-' + String.valueOf(nextNumber.intValue()).leftPad(3, '0') + '/' + financialYear;
             if (q.Version_Nmber__c != null && q.Version_Nmber__c >= 1) {
                 baseName += '-RV' + q.Version_Nmber__c;
             }
