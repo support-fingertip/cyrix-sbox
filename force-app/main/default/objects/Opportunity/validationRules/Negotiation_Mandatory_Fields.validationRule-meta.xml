@@ -12,7 +12,7 @@
         ISPICKVAL(StageName, 'Closed Won')
     ),
     OR(
-        ISPICKVAL(Buisness_Vertical__c, ''),
+        ISPICKVAL(Business_Vertical__c, ''),
         ISBLANK(No_of_Units__c)
     )
 )</errorConditionFormula>

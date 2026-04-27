@@ -45,7 +45,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     accountId;
     accountName = '';
     regionId;
-    // Mapped from Opportunity.Buisness_Vertical__c / .Sub_Vertical__c.
+    // Mapped from Opportunity.Business_Vertical__c / .Sub_Vertical__c.
     // Rendered as plain readonly text on the form so updates propagate
     // (lightning-input-field reads `value` only at mount and caches
     // via LDS, which silently swallows mid-form Opportunity changes).
@@ -187,8 +187,15 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // or null when it's safe to advance. Step 6 has no Continue (Submit
     // takes over) so we don't validate it here.
     validateCurrentStep() {
-        if (this.currentStep === 1 && this.isContractDateInvalid) {
-            return 'Contract End Date must be greater than From Date.';
+        if (this.currentStep === 1) {
+            if (this.showContractDates) {
+                if (!this.contractFromDate || !this.contractEndDate) {
+                    return 'Contract Period From Date and End Date are required for AMC / CAMC quotes.';
+                }
+            }
+            if (this.isContractDateInvalid) {
+                return 'Contract End Date must be greater than From Date.';
+            }
         }
         if (this.currentStep === 2
                 && (!this.billingAddress || !this.billingAddress.state)) {
@@ -633,6 +640,18 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         if (!this.billingAddress || !this.billingAddress.state) {
             this.showError('Billing state required',
                 'Please fill the Bill To state before saving — it drives the quote name.');
+            return;
+        }
+
+        // AMC / CAMC quotes must carry both contract period dates.
+        if (this.showContractDates && (!this.contractFromDate || !this.contractEndDate)) {
+            this.showError('Contract dates required',
+                'Contract Period From Date and End Date are required for AMC / CAMC quotes.');
+            return;
+        }
+        if (this.isContractDateInvalid) {
+            this.showError('Invalid contract dates',
+                'Contract End Date must be greater than From Date.');
             return;
         }
 
