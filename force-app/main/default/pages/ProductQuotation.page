@@ -603,7 +603,19 @@
                             </tr>
                             <tr>
                                 <td colspan="6" style="text-align: center; border: 1px solid #000; padding: 4px;">
-                                    <strong>Contract Period:&nbsp;<apex:outputPanel rendered="{!quote.Contract_Period_From_Date__c != null}" layout="none"><apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!quote.Contract_Period_From_Date__c}" /></apex:outputText></apex:outputPanel>&nbsp;to&nbsp;<apex:outputPanel rendered="{!quote.Contract_Period_End_Date__c != null}" layout="none"><apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!quote.Contract_Period_End_Date__c}" /></apex:outputText></apex:outputPanel></strong>
+                                    <strong>Contract Period: -
+                                        <apex:outputPanel rendered="{!quote.Contract_Period_From_Date__c != null}">
+                                            <apex:outputText value="{0,date,dd/MM/yyyy}">
+                                                <apex:param value="{!quote.Contract_Period_From_Date__c}" />
+                                            </apex:outputText>
+                                        </apex:outputPanel>
+                                        &nbsp;to&nbsp;
+                                        <apex:outputPanel rendered="{!quote.Contract_Period_End_Date__c != null}">
+                                            <apex:outputText value="{0,date,dd/MM/yyyy}">
+                                                <apex:param value="{!quote.Contract_Period_End_Date__c}" />
+                                            </apex:outputText>
+                                        </apex:outputPanel>
+                                    </strong>
                                 </td>
                             </tr>
                         </tbody>
@@ -820,7 +832,19 @@
                             </tr>
                             <tr>
                                 <td colspan="6" style="text-align: center; border: 1px solid #000; padding: 4px;">
-                                    <strong>Contract Period:&nbsp;<apex:outputPanel rendered="{!quote.Contract_Period_From_Date__c != null}" layout="none"><apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!quote.Contract_Period_From_Date__c}" /></apex:outputText></apex:outputPanel>&nbsp;to&nbsp;<apex:outputPanel rendered="{!quote.Contract_Period_End_Date__c != null}" layout="none"><apex:outputText value="{0,date,dd/MM/yyyy}"><apex:param value="{!quote.Contract_Period_End_Date__c}" /></apex:outputText></apex:outputPanel></strong>
+                                    <strong>Contract Period: -
+                                        <apex:outputPanel rendered="{!quote.Contract_Period_From_Date__c != null}">
+                                            <apex:outputText value="{0,date,dd/MM/yyyy}">
+                                                <apex:param value="{!quote.Contract_Period_From_Date__c}" />
+                                            </apex:outputText>
+                                        </apex:outputPanel>
+                                        &nbsp;to&nbsp;
+                                        <apex:outputPanel rendered="{!quote.Contract_Period_End_Date__c != null}">
+                                            <apex:outputText value="{0,date,dd/MM/yyyy}">
+                                                <apex:param value="{!quote.Contract_Period_End_Date__c}" />
+                                            </apex:outputText>
+                                        </apex:outputPanel>
+                                    </strong>
                                 </td>
                             </tr>
                         </tbody>

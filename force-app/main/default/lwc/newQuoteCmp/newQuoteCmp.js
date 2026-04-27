@@ -13,6 +13,11 @@ import savePaymentTerms from '@salesforce/apex/QuoteBuilderController.savePaymen
 let rowCounter = 0;
 let ptCounter = 0;
 
+const STEP_LABELS = [
+    'Quote info', 'Addresses', 'Products', 'Payment', 'Notes', 'Review'
+];
+const TOTAL_STEPS = STEP_LABELS.length;
+
 export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     @api recordId;
 
@@ -40,10 +45,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     accountId;
     accountName = '';
     regionId;
-    // Mapped from Opportunity.Buisness_Vertical__c so the Quote form shows
-    // the parent's vertical. The on-form field is disabled; this value is
-    // what the form binds to.
+    // Mapped from Opportunity.Buisness_Vertical__c / .Sub_Vertical__c.
+    // Rendered as plain readonly text on the form so updates propagate
+    // (lightning-input-field reads `value` only at mount and caches
+    // via LDS, which silently swallows mid-form Opportunity changes).
+    // handleFormSubmit pulls these into the field payload before save.
     businessVertical = null;
+    subVertical = null;
 
     // Default values for new quote (is_Active defaults to true so fresh quotes
     // are marked as the active one for the opportunity).
@@ -68,6 +76,10 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // Contract period dates (tracked locally for cross-field validation)
     contractFromDate = null;
     contractEndDate = null;
+
+    // Wizard state
+    currentStep = 1;
+    sameAsBilling = false;
 
     // ===== PICKLIST OPTIONS =====
 
@@ -125,8 +137,139 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // Prefill Business Vertical from the parent Opportunity on new quotes.
     // In edit mode fall through to the saved Quote value so we don't
     // overwrite the record with a blank.
-    get defaultBusinessVertical() {
-        return this.isEditMode ? undefined : (this.businessVertical || undefined);
+
+    // ===== WIZARD =====
+
+    get currentStepLabel() {
+        return STEP_LABELS[this.currentStep - 1] || '';
+    }
+    get progressPercent() {
+        return Math.round(((this.currentStep - 1) / (TOTAL_STEPS - 1)) * 100);
+    }
+    get progressFillStyle() {
+        return `width: ${this.progressPercent}%;`;
+    }
+    get isFirstStep() { return this.currentStep === 1; }
+    get isLastStep() { return this.currentStep === TOTAL_STEPS; }
+
+    get stepList() {
+        return STEP_LABELS.map((label, idx) => {
+            const num = idx + 1;
+            let cssClass = 'qw-step';
+            if (num === this.currentStep) cssClass += ' active';
+            else if (num < this.currentStep) cssClass += ' done';
+            return { num, label, cssClass };
+        });
+    }
+
+    get step1Class() { return this.stepClass(1); }
+    get step2Class() { return this.stepClass(2); }
+    get step3Class() { return this.stepClass(3); }
+    get step4Class() { return this.stepClass(4); }
+    get step5Class() { return this.stepClass(5); }
+    get step6Class() { return this.stepClass(6); }
+    stepClass(n) {
+        return n === this.currentStep ? 'qw-step-content active' : 'qw-step-content';
+    }
+
+    handleStepNext() {
+        if (this.currentStep >= TOTAL_STEPS) return;
+        const blocker = this.validateCurrentStep();
+        if (blocker) {
+            this.showError('Cannot continue', blocker);
+            return;
+        }
+        this.currentStep += 1;
+        this.scrollShellTop();
+    }
+
+    // Returns a blocker message if the current step isn't ready to leave,
+    // or null when it's safe to advance. Step 6 has no Continue (Submit
+    // takes over) so we don't validate it here.
+    validateCurrentStep() {
+        if (this.currentStep === 1 && this.isContractDateInvalid) {
+            return 'Contract End Date must be greater than From Date.';
+        }
+        if (this.currentStep === 3 && this.lineItems.length === 0) {
+            return 'Add at least one product before continuing.';
+        }
+        if (this.currentStep === 4 && this.paymentTerms.length > 0 && this.totalPercentage !== 100) {
+            return `Payment terms must total 100% (currently ${this.totalPercentage}%).`;
+        }
+        return null;
+    }
+    handleStepBack() {
+        if (this.currentStep > 1) {
+            this.currentStep -= 1;
+            this.scrollShellTop();
+        }
+    }
+    handleStepJump(event) {
+        const target = parseInt(event.currentTarget.dataset.step, 10);
+        if (!target || target === this.currentStep) return;
+        if (target < 1 || target > TOTAL_STEPS) return;
+        // Free navigation — clicking any step in the stepper or any
+        // Edit chip on the Review step jumps directly. The form's own
+        // submit-time validation still gates the final save, so we
+        // don't need to forward-lock the wizard.
+        this.currentStep = target;
+        this.scrollShellTop();
+    }
+    scrollShellTop() {
+        // Scroll the wizard shell into view so the user lands at the top
+        // of the new step on long mobile pages.
+        try {
+            const shell = this.template.querySelector('.qw-shell');
+            if (shell && shell.scrollIntoView) {
+                shell.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    handleSameAsBillingChange(event) {
+        this.sameAsBilling = !!event.target.checked;
+        if (this.sameAsBilling) {
+            this.shippingAddress = { ...this.billingAddress };
+        }
+    }
+
+    // ===== REVIEW STEP DISPLAY =====
+
+    get accountNameDisplay() { return this.accountName || '—'; }
+    get businessVerticalDisplay() { return this.businessVertical || '—'; }
+    get subVerticalDisplay() { return this.subVertical || '—'; }
+    // Contract dates are only meaningful for maintenance contracts —
+    // AMC and CAMC sub-verticals. Hide them on every other quote so
+    // the rep doesn't see fields they aren't expected to fill.
+    get showContractDates() {
+        const sv = (this.subVertical || '').trim();
+        return sv === 'AMC' || sv === 'CAMC';
+    }
+    // Number of Preventive Maintenance visits is an AMC-only commitment;
+    // CAMC and other sub-verticals don't need it on the form.
+    get showPreventiveMaintenanceCount() {
+        const sv = (this.subVertical || '').trim();
+        return sv === 'AMC';
+    }
+    get contractDateDisplay() {
+        if (!this.contractFromDate && !this.contractEndDate) return '—';
+        return `${this.contractFromDate || '—'} → ${this.contractEndDate || '—'}`;
+    }
+    get billingSummary() { return this.formatAddress(this.billingAddress); }
+    get shippingSummary() { return this.formatAddress(this.shippingAddress); }
+    formatAddress(a) {
+        if (!a) return '—';
+        const parts = [a.street, a.city, a.state, a.postalCode].filter(Boolean);
+        return parts.length ? parts.join(', ') : '—';
+    }
+
+    // ===== PAYMENT TOTAL STRIP =====
+
+    get paymentTotalClass() {
+        return this.totalPercentage === 100 ? 'qw-term-total ok' : 'qw-term-total err';
+    }
+    get paymentTotalText() {
+        return this.totalPercentage === 100 ? 'Ready to proceed' : 'Must equal 100%';
     }
 
     // ===== CALCULATIONS =====
@@ -192,8 +335,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.accountName = data.accountName || '';
             this.regionId = data.regionId;
             this.businessVertical = data.vertical || null;
+            this.subVertical = data.subVertical || null;
 
-            // === AUTO-POPULATE BILL TO ADDRESS FROM ACCOUNT ===
+            // === AUTO-POPULATE BILL TO + SHIP TO FROM ACCOUNT ===
+            // Bill To always comes from the account billing address.
+            // Ship To prefers the account's shipping address; if the
+            // account doesn't have one, fall back to billing so the
+            // ship-to card never starts blank.
             if (!this.isEditMode && this.accountId) {
                 this.billingAddress = {
                     name: data.billingName || '',
@@ -203,6 +351,18 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                     postalCode: data.billingPostalCode || '',
                     country: data.billingCountry || 'IN'
                 };
+                const hasShipping = data.shippingStreet || data.shippingCity
+                    || data.shippingState || data.shippingPostalCode;
+                this.shippingAddress = hasShipping
+                    ? {
+                        name: data.shippingName || data.billingName || '',
+                        street: data.shippingStreet || '',
+                        city: data.shippingCity || '',
+                        state: data.shippingState || '',
+                        postalCode: data.shippingPostalCode || '',
+                        country: data.shippingCountry || 'IN'
+                    }
+                    : { ...this.billingAddress };
             }
 
             // === AUTO-POPULATE PAYMENT TERMS FROM MASTER ===
@@ -218,6 +378,20 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                     };
                 });
             }
+
+            // === PREFILL LINE ITEMS FROM OPPORTUNITY PRODUCTS ===
+            // When the parent Opportunity has products attached, seed the
+            // new-quote grid with them so the rep doesn't re-enter each SKU.
+            // Only runs on fresh quotes and only when the grid is still empty
+            // — never clobber anything the user has already added.
+            if (!this.isEditMode
+                && this.lineItems.length === 0
+                && Array.isArray(data.opportunityLineItems)
+                && data.opportunityLineItems.length > 0) {
+                this.lineItems = data.opportunityLineItems.map(
+                    (item, index) => this.buildRowFromServerItem(item, index)
+                );
+            }
         } catch (error) {
             this.showError('Error loading opportunity', this.reduceErrors(error));
         }
@@ -231,6 +405,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.accountName = data.accountName || '';
             this.regionId = data.regionId;
             this.defaultOpportunityId = data.opportunityId;
+            this.businessVertical = data.vertical || null;
+            this.subVertical = data.subVertical || null;
 
             // Populate address objects from saved quote
             this.billingAddress = {
@@ -251,67 +427,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             };
 
             if (data.lineItems && data.lineItems.length > 0) {
-                this.lineItems = data.lineItems.map((item, index) => {
-                    rowCounter++;
-                    const base = (item.unitPrice || 0) * (item.quantity || 0);
-                    const discountAmt = base * ((item.discount || 0) / 100);
-                    const afterDiscount = base - discountAmt;
-                    const taxAmt = afterDiscount * ((item.taxPercent || 0) / 100);
-
-                    const disc = item.discount || 0;
-                    const isService = item.isServiceItem === true;
-                    // Edit-mode doesn't re-run the product search, so
-                    // tier PBE prices aren't available on the payload.
-                    // computePriceStatus will fall back to the listPrice
-                    // comparison for these lines; the live preview will
-                    // refresh the status on the first change.
-                    const tierPricesFromDb = [];
-                    // Legacy QLIs may still carry Quote-level values like 'Draft' or
-                    // 'Rejected' that aren't valid on the restricted line-item picklist.
-                    const VALID_LINE_STATUSES = ['Not Required', 'Approval Required', 'Approved'];
-                    // Service items (Service_Item picklist = Yes) never require
-                    // approval — ignore any stale server value that says otherwise.
-                    let priceStatus;
-                    if (isService) {
-                        priceStatus = 'Not Required';
-                    } else if (VALID_LINE_STATUSES.includes(item.priceStatus)) {
-                        priceStatus = item.priceStatus;
-                    } else {
-                        priceStatus = this.computePriceStatus(
-                            item.unitPrice, disc, item.listPrice, isService,
-                            item.taxPercent, tierPricesFromDb
-                        );
-                    }
-
-                    return {
-                        rowId: 'row-' + rowCounter,
-                        rowNumber: index + 1,
-                        productId: item.productId,
-                        pricebookEntryId: item.pricebookEntryId,
-                        productName: item.productName,
-                        productCode: item.productCode,
-                        uom: item.uom || 'Nos',
-                        quantity: item.quantity,
-                        listPrice: item.listPrice || item.unitPrice,
-                        unitPrice: item.unitPrice,
-                        discount: disc,
-                        taxPercent: item.taxPercent || 0,
-                        taxPercentDisplay: (item.taxPercent || 0) + '%',
-                        isServiceItem: isService,
-                        priceStatus: priceStatus,
-                        priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
-                        isApprovalRequired: priceStatus === 'Approval Required',
-                        lineTotal: afterDiscount + taxAmt,
-                        lineDescription: item.lineDescription || '',
-                        detailedDescription: item.detailedDescription || '',
-                        sourcePricebookId: item.sourcePricebookId || null,
-                        sourcePricebookName: item.sourcePricebookName || '',
-                        tierPrices: tierPricesFromDb,
-                        priceBadgeClass: this.getPriceBadgeClass(item.sourcePricebookName),
-                        priceBadgeLabel: this.getPriceBadgeLabel(item.sourcePricebookName),
-                        hasPriceSource: !!item.sourcePricebookName
-                    };
-                });
+                this.lineItems = data.lineItems.map((item, index) => this.buildRowFromServerItem(item, index));
             }
 
             if (data.paymentTerms && data.paymentTerms.length > 0) {
@@ -342,6 +458,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             postalCode: d.postalCode || '',
             country: d.country || 'IN'
         };
+        // When the user has opted in to "same as billing", keep shipping
+        // mirrored as the billing fields are edited.
+        if (this.sameAsBilling) {
+            this.shippingAddress = { ...this.billingAddress };
+        }
     }
 
     handleShippingAddressChange(event) {
@@ -364,6 +485,89 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
     handleContractEndDateChange(event) {
         this.contractEndDate = event.detail ? event.detail.value : event.target.value;
+    }
+
+    // Refetch verticals + default payment terms when the rep picks a
+    // different Opportunity on the form. Replaces the auto-loaded
+    // payment-terms list on new quotes; in edit mode we leave existing
+    // payment terms alone so a manual override isn't wiped.
+    async handleOpportunityChange(event) {
+        // lightning-record-picker dispatches change with recordId in
+        // event.detail.recordId. Fall through to the older shapes too
+        // (lightning-input-field / native) so this handler stays compatible
+        // if the on-form Opportunity control gets swapped back.
+        const d = event && event.detail ? event.detail : {};
+        const newOppId = d.recordId || d.value || (event.target && event.target.value) || null;
+        // Track the selection so handleFormSubmit can inject it as
+        // fields.OpportunityId — the picker isn't an input-field, so the
+        // form's submit payload doesn't pick it up automatically.
+        this.defaultOpportunityId = newOppId || null;
+        if (!newOppId) {
+            // Selection cleared — wipe verticals so they don't display a
+            // stale value. Payment terms are left as-is so the rep doesn't
+            // lose anything they may have customised.
+            this.businessVertical = null;
+            this.subVertical = null;
+            return;
+        }
+        try {
+            const data = await getOpportunityContext({ opportunityId: newOppId });
+            if (!data) return;
+            this.businessVertical = data.vertical || null;
+            this.subVertical = data.subVertical || null;
+            // Auto-fill billing + shipping address from the Opportunity's
+            // account when the rep hasn't typed anything yet, mirroring the
+            // launched-from-Opportunity flow. Ship To uses the account's
+            // shipping address and falls back to billing when shipping
+            // isn't on the account.
+            if (data.accountId) {
+                this.accountId = data.accountId;
+                this.accountName = data.accountName || '';
+                if (!this.billingAddress.street && !this.billingAddress.city) {
+                    this.billingAddress = {
+                        name: data.billingName || '',
+                        street: data.billingStreet || '',
+                        city: data.billingCity || '',
+                        state: data.billingState || '',
+                        postalCode: data.billingPostalCode || '',
+                        country: data.billingCountry || 'IN'
+                    };
+                }
+                if (!this.shippingAddress.street && !this.shippingAddress.city) {
+                    const hasShipping = data.shippingStreet || data.shippingCity
+                        || data.shippingState || data.shippingPostalCode;
+                    this.shippingAddress = hasShipping
+                        ? {
+                            name: data.shippingName || data.billingName || '',
+                            street: data.shippingStreet || '',
+                            city: data.shippingCity || '',
+                            state: data.shippingState || '',
+                            postalCode: data.shippingPostalCode || '',
+                            country: data.shippingCountry || 'IN'
+                        }
+                        : { ...this.billingAddress };
+                }
+                if (this.sameAsBilling) {
+                    this.shippingAddress = { ...this.billingAddress };
+                }
+            }
+            // Replace the auto-loaded payment terms with whatever the new
+            // Opportunity's vertical / sub-vertical pair maps to.
+            if (Array.isArray(data.defaultPaymentTerms) && data.defaultPaymentTerms.length > 0) {
+                this.paymentTerms = data.defaultPaymentTerms.map((t, idx) => {
+                    ptCounter++;
+                    return {
+                        ptId: 'pt-' + ptCounter,
+                        rowNumber: idx + 1,
+                        paymentTerm: t.paymentTerm || '',
+                        percentage: t.percentage || 0
+                    };
+                });
+            }
+        } catch (error) {
+            // Silent — the rep can still finish the form; verticals just
+            // won't auto-update for this opportunity.
+        }
     }
 
     // ===== PAYMENT TERM HANDLERS =====
@@ -447,6 +651,25 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
         // Inject Pricebook2Id
         fields.Pricebook2Id = this.pricebookId;
+
+        // Inject OpportunityId from the lightning-record-picker — that
+        // control isn't a lightning-input-field, so the form's submit
+        // payload doesn't include it automatically.
+        if (this.defaultOpportunityId) {
+            fields.OpportunityId = this.defaultOpportunityId;
+        }
+
+        // Inject verticals — these are rendered as readonly displays
+        // (not lightning-input-fields) so they aren't in event.detail.fields
+        // by default. Pull from tracked state which mirrors the parent
+        // Opportunity (and re-fetches when the rep changes Opportunity
+        // mid-form).
+        if (this.businessVertical) {
+            fields.Business_Vertical__c = this.businessVertical;
+        }
+        if (this.subVertical) {
+            fields.Sub_Vertical__c = this.subVertical;
+        }
 
         // Inject Billing Address
         fields.BillingName = this.billingAddress.name || '';
@@ -652,6 +875,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             productId: product.productId,
             pricebookEntryId: product.pricebookEntryId,
             productName: product.productName,
+            productInitial: this.getProductInitial(product.productName),
             productCode: product.productCode,
             uom: product.uom || 'Nos',
             quantity: 1,
@@ -663,6 +887,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             isServiceItem: isService,
             priceStatus: priceStatus,
             priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
+            qwStatusClass: this.getQwStatusClass(priceStatus),
             isApprovalRequired: priceStatus === 'Approval Required',
             lineTotal: (product.unitPrice || 0) * (1 + ((product.taxPercent || 0) / 100)),
             lineDescription: product.lineDescription || '',
@@ -701,17 +926,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 updated.quantity = parseFloat(value) || 0;
             } else if (field === 'unitPrice') {
                 const raw = parseFloat(value) || 0;
-                // For non-service lines Sales Price is locked to the
-                // Standard list price. If the rep types something else
-                // (either above or below the Standard) the input snaps
-                // back to list price without an error — Discount is the
-                // lever used to lower the effective price.
+                // For non-service lines, Sales Price can be raised above
+                // list price but never dropped below it — discount is the
+                // lever for going below the list. If the rep types a
+                // value below list, snap back to list silently.
                 if (!updated.isServiceItem) {
-                    if (raw !== updated.listPrice) {
-                        updated.unitPrice = updated.listPrice;
-                    } else {
-                        updated.unitPrice = raw;
-                    }
+                    const lp = updated.listPrice == null ? 0 : updated.listPrice;
+                    updated.unitPrice = raw < lp ? lp : raw;
                 } else {
                     updated.unitPrice = raw;
                 }
@@ -746,6 +967,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 );
                 updated.priceStatus = live;
                 updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(live);
+                updated.qwStatusClass = this.getQwStatusClass(live);
                 updated.isApprovalRequired = live === 'Approval Required';
             }
 
@@ -783,6 +1005,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 const updated = { ...it };
                 updated.priceStatus = preview.priceStatus || updated.priceStatus;
                 updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(updated.priceStatus);
+                updated.qwStatusClass = this.getQwStatusClass(updated.priceStatus);
                 updated.isApprovalRequired = updated.priceStatus === 'Approval Required';
                 updated.sourcePricebookId = preview.resolvedPricebookId || updated.sourcePricebookId;
                 updated.sourcePricebookName = resolvedPb;
@@ -879,6 +1102,69 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         return errors;
     }
 
+    // Shared builder for grid rows sourced from the server — used by
+    // edit-mode QLI loading and by the new-quote flow when prefilling
+    // from the parent Opportunity's products.
+    buildRowFromServerItem(item, index) {
+        rowCounter++;
+        const disc = item.discount || 0;
+        const isService = item.isServiceItem === true;
+        const base = (item.unitPrice || 0) * (item.quantity || 0);
+        const discountAmt = base * (disc / 100);
+        const afterDiscount = base - discountAmt;
+        const taxAmt = afterDiscount * ((item.taxPercent || 0) / 100);
+
+        // Server doesn't ship tier PBE prices on load — computePriceStatus
+        // falls back to the listPrice comparison; the live preview will
+        // refresh the status on the first edit.
+        const tierPricesFromDb = [];
+        const VALID_LINE_STATUSES = ['Not Required', 'Approval Required', 'Approved'];
+        // Service items (Service_Item picklist = Yes) never require
+        // approval — ignore any stale server value that says otherwise.
+        let priceStatus;
+        if (isService) {
+            priceStatus = 'Not Required';
+        } else if (VALID_LINE_STATUSES.includes(item.priceStatus)) {
+            priceStatus = item.priceStatus;
+        } else {
+            priceStatus = this.computePriceStatus(
+                item.unitPrice, disc, item.listPrice, isService,
+                item.taxPercent, tierPricesFromDb
+            );
+        }
+
+        return {
+            rowId: 'row-' + rowCounter,
+            rowNumber: index + 1,
+            productId: item.productId,
+            pricebookEntryId: item.pricebookEntryId,
+            productName: item.productName,
+            productInitial: this.getProductInitial(item.productName),
+            productCode: item.productCode,
+            uom: item.uom || 'Nos',
+            quantity: item.quantity,
+            listPrice: item.listPrice || item.unitPrice,
+            unitPrice: item.unitPrice,
+            discount: disc,
+            taxPercent: item.taxPercent || 0,
+            taxPercentDisplay: (item.taxPercent || 0) + '%',
+            isServiceItem: isService,
+            priceStatus: priceStatus,
+            priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
+            qwStatusClass: this.getQwStatusClass(priceStatus),
+            isApprovalRequired: priceStatus === 'Approval Required',
+            lineTotal: afterDiscount + taxAmt,
+            lineDescription: item.lineDescription || '',
+            detailedDescription: item.detailedDescription || '',
+            sourcePricebookId: item.sourcePricebookId || null,
+            sourcePricebookName: item.sourcePricebookName || '',
+            tierPrices: tierPricesFromDb,
+            priceBadgeClass: this.getPriceBadgeClass(item.sourcePricebookName),
+            priceBadgeLabel: this.getPriceBadgeLabel(item.sourcePricebookName),
+            hasPriceSource: !!item.sourcePricebookName
+        };
+    }
+
     // ===== PRICE STATUS =====
 
     // Client-side mirror of the server's Price_Status decision.
@@ -932,6 +1218,25 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             case 'Not Required':
             default: return base + ' slds-theme_shade';
         }
+    }
+
+    // Wizard-style status pill (qw-status-badge variants).
+    // Approved / Not Required render as the green default; Approval
+    // Required surfaces the amber pending pill so the rep notices.
+    getQwStatusClass(priceStatus) {
+        switch (priceStatus) {
+            case 'Approval Required': return 'qw-status-badge pending';
+            case 'Approved':
+            case 'Not Required':
+            default:                  return 'qw-status-badge';
+        }
+    }
+
+    // First-letter thumbnail label for the line-item card head.
+    getProductInitial(name) {
+        if (!name || typeof name !== 'string') return '?';
+        const ch = name.trim().charAt(0);
+        return ch ? ch.toUpperCase() : '?';
     }
 
     // ===== PRICING BADGE HELPERS =====

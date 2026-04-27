@@ -75,6 +75,7 @@ public with sharing class PricebookTierService {
 
         for (PricebookEntry pbe : [
             SELECT Id, Product2Id, UnitPrice, IsActive,
+                   Max_Discount_Percentage__c,
                    Pricebook2Id, Pricebook2.Name, Pricebook2.Price_Book_Type__c,
                    Pricebook2.IsActive
             FROM PricebookEntry
@@ -267,6 +268,154 @@ public with sharing class PricebookTierService {
         r.tierListPrice = lowestExisting.UnitPrice;
         r.underFloor = true;
         return r;
+    }
+
+    /**
+     * Discount-percentage based tier resolution.
+     *
+     * Walks PL4 -> PL3 -> PL2 -> PL1 (priority high-restriction first)
+     * and picks the first tier whose Max_Discount_Percentage__c covers
+     * the rep's discount. That tier becomes the source pricebook for
+     * the line.
+     *
+     * If the discount equals the tier's Max_Discount_Percentage__c the
+     * caller should treat the line as Approval Required — the rep has
+     * maxed out that tier. A discount strictly below the tier's max
+     * stays Not Required.
+     *
+     * Returns null tier (entry == null) when:
+     *   - discountPercent is null or <= 0 (no discount, Standard pricebook).
+     *   - discountPercent exceeds every tier's Max_Discount_Percentage__c
+     *     (over the broadest allowance — caller should require approval).
+     * In the second case underFloor is set so the caller can distinguish
+     * "no discount" from "discount over max".
+     */
+    public static TierResolution resolveTierByDiscount(ProductTierMap tiers, Decimal discountPercent) {
+        TierResolution r = new TierResolution();
+        r.underFloor = false;
+        if (tiers == null || tiers.byTier.isEmpty()) return r;
+        if (discountPercent == null || discountPercent <= 0) return r;
+
+        List<String> order = new List<String>{ TIER4, TIER3, TIER2, TIER1 };
+        for (String t : order) {
+            PricebookEntry e = tiers.tier(t);
+            if (e == null) continue;
+            Decimal maxDisc = e.Max_Discount_Percentage__c;
+            if (maxDisc == null) continue;
+            if (discountPercent <= maxDisc) {
+                r.entry = e;
+                r.tierName = t;
+                r.tierListPrice = e.UnitPrice;
+                return r;
+            }
+        }
+        // Discount exceeds every tier's max — flag underFloor so the
+        // caller can clamp / require approval. No tier entry returned.
+        r.underFloor = true;
+        return r;
+    }
+
+    /**
+     * Status from the discount-tier resolution. Approval Required when
+     * the rep is at or above the assigned tier's Max_Discount_Percentage__c
+     * (or when the discount overran every tier and underFloor was set);
+     * Not Required when the discount sits below the tier's threshold.
+     */
+    public static String priceStatusForDiscountTier(TierResolution r, Decimal discountPercent) {
+        if (r == null) return STATUS_NOT_REQUIRED;
+        if (r.underFloor == true) return STATUS_APPROVAL_REQUIRED;
+        if (r.entry == null) return STATUS_NOT_REQUIRED;
+        Decimal maxDisc = r.entry.Max_Discount_Percentage__c;
+        if (maxDisc == null) return STATUS_NOT_REQUIRED;
+        if (discountPercent == null) return STATUS_NOT_REQUIRED;
+        return discountPercent >= maxDisc ? STATUS_APPROVAL_REQUIRED : STATUS_NOT_REQUIRED;
+    }
+
+    /**
+     * Tier rank — how much discount allowance the tier carries.
+     *   PL4 = 1 (least allowance — ASM band)
+     *   PL3 = 2 (TSM band)
+     *   PL2 = 3 (VP band)
+     *   PL1 = 4 (most allowance — CFO/CEO band)
+     * Standard / unknown returns 0.
+     */
+    public static Integer tierRank(String tierName) {
+        if (tierName == TIER4) return 1;
+        if (tierName == TIER3) return 2;
+        if (tierName == TIER2) return 3;
+        if (tierName == TIER1) return 4;
+        return 0;
+    }
+
+    /**
+     * Map a profile name to the tier that profile is allowed to discount
+     * up to without approval, per the role hierarchy:
+     *   Sales Engineer  -> PL4   (ASM band)
+     *   ASM             -> PL3   (TSM band)
+     *   TSM             -> PL2   (VP band)
+     *   VP / VP Sales   -> PL2   (own band — VP sits at the tier boundary)
+     *   CFO / CEO       -> PL1   (full allowance)
+     * Other profiles return null — meaning they have no implicit
+     * allowance and any tier hit triggers Approval Required.
+     *
+     * Short codes ('asm', 'tsm', 'vp', 'ceo', 'cfo') match exactly so a
+     * profile name like "Receptionist" doesn't accidentally fall in via
+     * a substring; long-form labels ("Vice President", "Chief Financial
+     * Officer", etc.) match via contains().
+     */
+    public static String capTierFor(String profileName) {
+        if (profileName == null) return null;
+        String n = profileName.toLowerCase().trim();
+        if (n == 'sales engineer' || n == 'sales_engineer') return TIER4;
+        if (n == 'asm' || n.contains('area sales manager')) return TIER3;
+        if (n == 'tsm' || n.contains('territory sales manager')) return TIER2;
+        if (n == 'vp' || n.contains('vp sales') || n.contains('vp_sales')
+                || n.contains('vice president')) return TIER2;
+        if (n == 'ceo' || n == 'cfo'
+                || n.contains('chief financial') || n.contains('chief executive')) return TIER1;
+        return null;
+    }
+
+    /**
+     * Looks up the running user's profile name and returns their
+     * discount-cap tier. Cached per-transaction so the SOQL only fires
+     * once even when the LWC pings getProductPricingPreview repeatedly.
+     */
+    private static String cachedProfileName;
+    public static String runningUserProfileName() {
+        if (cachedProfileName != null) return cachedProfileName;
+        Id pid = UserInfo.getProfileId();
+        if (pid == null) {
+            cachedProfileName = '';
+            return cachedProfileName;
+        }
+        List<Profile> ps = [SELECT Name FROM Profile WHERE Id = :pid LIMIT 1];
+        cachedProfileName = ps.isEmpty() ? '' : (ps[0].Name == null ? '' : ps[0].Name);
+        return cachedProfileName;
+    }
+
+    /**
+     * Profile-aware status: a tier match below or at the running user's
+     * cap stays Not Required, a tier above the cap (or a discount that
+     * overran every tier) flips to Approval Required.
+     *
+     * Service items short-circuit elsewhere — this helper is only
+     * meaningful for non-service line items.
+     */
+    public static String priceStatusForProfile(TierResolution r, String profileName) {
+        if (r == null) return STATUS_NOT_REQUIRED;
+        if (r.underFloor == true) return STATUS_APPROVAL_REQUIRED;
+        if (r.entry == null) return STATUS_NOT_REQUIRED;
+        String capTier = capTierFor(profileName);
+        if (capTier == null) {
+            // Profile has no implicit discount allowance — every matched
+            // tier needs approval.
+            return STATUS_APPROVAL_REQUIRED;
+        }
+        Integer matched = tierRank(r.tierName);
+        Integer cap = tierRank(capTier);
+        if (matched == 0 || cap == 0) return STATUS_APPROVAL_REQUIRED;
+        return matched <= cap ? STATUS_NOT_REQUIRED : STATUS_APPROVAL_REQUIRED;
     }
 
     /**

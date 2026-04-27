@@ -2,17 +2,29 @@ public with sharing class QuoteBuilderController {
 
     @AuraEnabled(cacheable=true)
     public static OpportunityContext getOpportunityContext(Id opportunityId) {
-        Opportunity opp = [
-            SELECT Id, Name, AccountId, Account.Name,
-                   Account.BillingStreet, Account.BillingCity,
-                   Account.BillingStateCode, Account.BillingPostalCode,
-                   Account.BillingCountryCode,
-                   Pricebook2Id, CurrencyIsoCode, Buisness_Vertical__c,
-                   Region__c
-            FROM Opportunity
-            WHERE Id = :opportunityId
-            LIMIT 1
-        ];
+        // Sub_Vertical__c may not exist on Opportunity in every org — keep
+        // the SOQL dynamic so the controller still runs where it's missing.
+        Boolean oppHasSubVertical = Schema.SObjectType.Opportunity.fields.getMap()
+            .containsKey('sub_vertical__c');
+
+        String oppQuery =
+            'SELECT Id, Name, AccountId, Account.Name,' +
+            '       Account.BillingStreet, Account.BillingCity,' +
+            '       Account.BillingStateCode, Account.BillingPostalCode,' +
+            '       Account.BillingCountryCode,' +
+            '       Account.ShippingStreet, Account.ShippingCity,' +
+            '       Account.ShippingStateCode, Account.ShippingPostalCode,' +
+            '       Account.ShippingCountryCode,' +
+            '       Pricebook2Id, CurrencyIsoCode, Buisness_Vertical__c,' +
+            '       Region__c' +
+            (oppHasSubVertical ? ', Sub_Vertical__c' : '') +
+            ' FROM Opportunity WHERE Id = :opportunityId LIMIT 1';
+        List<Opportunity> oppList = Database.query(oppQuery);
+        if (oppList.isEmpty()) {
+            return new OpportunityContext();
+        }
+        Opportunity opp = oppList[0];
+        String subVertical = oppHasSubVertical ? (String) opp.get('Sub_Vertical__c') : null;
 
         OpportunityContext ctx = new OpportunityContext();
         ctx.opportunityId = opp.Id;
@@ -22,6 +34,7 @@ public with sharing class QuoteBuilderController {
         ctx.pricebookId = opp.Pricebook2Id;
         ctx.currencyCode = opp.CurrencyIsoCode;
         ctx.vertical = opp.Buisness_Vertical__c;
+        ctx.subVertical = subVertical;
         ctx.regionId = opp.Region__c;
 
         // Always provide the Standard Pricebook ID for auto-pricing
@@ -37,34 +50,162 @@ public with sharing class QuoteBuilderController {
             ctx.billingState = opp.Account.BillingStateCode;
             ctx.billingPostalCode = opp.Account.BillingPostalCode;
             ctx.billingCountry = opp.Account.BillingCountryCode;
+            // Account-level Shipping address — used by the new-quote
+            // wizard to prefill the Ship To card. Falls back to the
+            // billing address client-side when shipping isn't filled.
+            ctx.shippingName = opp.Account.Name;
+            ctx.shippingStreet = opp.Account.ShippingStreet;
+            ctx.shippingCity = opp.Account.ShippingCity;
+            ctx.shippingState = opp.Account.ShippingStateCode;
+            ctx.shippingPostalCode = opp.Account.ShippingPostalCode;
+            ctx.shippingCountry = opp.Account.ShippingCountryCode;
         }
 
-        ctx.defaultPaymentTerms = getDefaultPaymentTerms(opp.Buisness_Vertical__c);
+        ctx.defaultPaymentTerms = getDefaultPaymentTerms(opp.Buisness_Vertical__c, subVertical);
+        ctx.opportunityLineItems = getOpportunityLineItemsAsQuoteLines(opportunityId, ctx.standardPricebookId);
 
         return ctx;
     }
 
-    private static List<PaymentTermResult> getDefaultPaymentTerms(String vertical) {
-        List<PaymentTermResult> results = new List<PaymentTermResult>();
+    // Maps OpportunityLineItems to quote-line payloads so the new-quote
+    // builder can prefill its grid with the parent Opportunity's products.
+    // Resolves each product's Standard-pricebook PricebookEntry (quotes are
+    // anchored to Standard per loadOpportunityContext), falling back to the
+    // OLI's own PBE for service products that may not have a Standard
+    // entry — the save path tolerates a non-Standard PBE for services.
+    private static List<QuoteLineItemResult> getOpportunityLineItemsAsQuoteLines(Id opportunityId, Id standardPricebookId) {
+        List<QuoteLineItemResult> results = new List<QuoteLineItemResult>();
+        if (opportunityId == null) return results;
 
-        List<Payment_Terms_Master__c> matched = new List<Payment_Terms_Master__c>();
-        if (String.isNotBlank(vertical)) {
-            matched = [
-                SELECT Id, Payment_Term__c, Percentage__c, Type__c
-                FROM Payment_Terms_Master__c
-                WHERE Type__c = :vertical
-                ORDER BY CreatedDate ASC
-            ];
+        List<OpportunityLineItem> oppLines = [
+            SELECT Id, Product2Id, Quantity, UnitPrice, ListPrice, Description,
+                   PricebookEntryId,
+                   Product2.Name, Product2.ProductCode,
+                   Product2.QuantityUnitOfMeasure, Product2.Service_Item__c,
+                   Product2.Line_Description__c, Product2.Detailed_Description__c
+            FROM OpportunityLineItem
+            WHERE OpportunityId = :opportunityId
+            ORDER BY SortOrder ASC NULLS LAST, Id ASC
+        ];
+        if (oppLines.isEmpty()) return results;
+
+        Set<Id> productIds = new Set<Id>();
+        for (OpportunityLineItem oli : oppLines) {
+            if (oli.Product2Id != null) productIds.add(oli.Product2Id);
         }
 
-        // Fall back to records with blank Type when no vertical match
+        Map<Id, PricebookEntry> stdPbeByProduct = new Map<Id, PricebookEntry>();
+        if (standardPricebookId != null && !productIds.isEmpty()) {
+            for (PricebookEntry pbe : [
+                SELECT Id, Product2Id, UnitPrice, Tax__c, Max_Discount_Percentage__c,
+                       Pricebook2.Name
+                FROM PricebookEntry
+                WHERE Pricebook2Id = :standardPricebookId
+                  AND Product2Id IN :productIds
+                  AND IsActive = true
+            ]) {
+                stdPbeByProduct.put(pbe.Product2Id, pbe);
+            }
+        }
+
+        for (OpportunityLineItem oli : oppLines) {
+            if (oli.Product2Id == null) continue;
+            Boolean isService = (oli.Product2 != null && oli.Product2.Service_Item__c == 'Yes');
+            PricebookEntry stdPbe = stdPbeByProduct.get(oli.Product2Id);
+
+            // Non-service products require a Standard PricebookEntry to be
+            // quotable. Skip silently so the user can search-add a different
+            // SKU rather than seeing a broken row.
+            if (!isService && stdPbe == null) continue;
+
+            QuoteLineItemResult item = new QuoteLineItemResult();
+            item.productId = oli.Product2Id;
+            item.pricebookEntryId = stdPbe != null ? stdPbe.Id : oli.PricebookEntryId;
+            item.productName = oli.Product2 != null ? oli.Product2.Name : null;
+            item.productCode = oli.Product2 != null ? oli.Product2.ProductCode : null;
+            item.uom = (oli.Product2 != null && oli.Product2.QuantityUnitOfMeasure != null)
+                ? oli.Product2.QuantityUnitOfMeasure : 'Nos';
+            item.quantity = oli.Quantity;
+            item.unitPrice = oli.UnitPrice;
+            item.listPrice = stdPbe != null ? stdPbe.UnitPrice : oli.ListPrice;
+            // OpportunityLineItem.Discount isn't queried (it's read-only on
+            // some org configurations); derive from list-vs-unit instead.
+            if (item.listPrice != null && item.listPrice > 0 && oli.UnitPrice != null) {
+                Decimal delta = item.listPrice - oli.UnitPrice;
+                item.discount = delta > 0 ? (delta / item.listPrice) * 100 : 0;
+            } else {
+                item.discount = 0;
+            }
+            if (stdPbe != null) {
+                item.taxPercent = stdPbe.Tax__c != null ? stdPbe.Tax__c : 0;
+                item.maxDiscount = stdPbe.Max_Discount_Percentage__c;
+                item.sourcePricebookId = stdPbe.Id;
+                item.sourcePricebookName = stdPbe.Pricebook2 != null ? stdPbe.Pricebook2.Name : null;
+            } else {
+                item.taxPercent = 0;
+            }
+            item.isServiceItem = isService;
+            item.priceStatus = isService ? 'Not Required' : null;
+            item.lineDescription = (oli.Product2 != null) ? oli.Product2.Line_Description__c : null;
+            item.detailedDescription = (oli.Product2 != null) ? oli.Product2.Detailed_Description__c : null;
+            results.add(item);
+        }
+        return results;
+    }
+
+    private static List<PaymentTermResult> getDefaultPaymentTerms(String vertical, String subVertical) {
+        List<PaymentTermResult> results = new List<PaymentTermResult>();
+
+        // Sub_Vertical__c is optional on Payment_Terms_Master__c — fall
+        // back to vertical-only matching when the field isn't deployed.
+        Boolean ptmHasSubVertical = Schema.SObjectType.Payment_Terms_Master__c.fields.getMap()
+            .containsKey('sub_vertical__c');
+        String fields = 'Id, Payment_Term__c, Percentage__c, Type__c'
+            + (ptmHasSubVertical ? ', Sub_Vertical__c' : '');
+
+        List<Payment_Terms_Master__c> matched = new List<Payment_Terms_Master__c>();
+
+        // Tier 1: vertical AND sub-vertical — only when both are present
+        // and the field exists on the master object.
+        if (String.isNotBlank(vertical) && ptmHasSubVertical && String.isNotBlank(subVertical)) {
+            String q1 = 'SELECT ' + fields +
+                ' FROM Payment_Terms_Master__c' +
+                ' WHERE Type__c = :vertical AND Sub_Vertical__c = :subVertical' +
+                ' ORDER BY CreatedDate ASC';
+            matched = Database.query(q1);
+        }
+
+        // Tier 2: vertical AND blank sub-vertical — the per-vertical
+        // default record set used when the quote's sub-vertical doesn't
+        // have its own dedicated entry. Skipped when the master object
+        // doesn't have a Sub_Vertical__c field.
+        if (matched.isEmpty() && String.isNotBlank(vertical) && ptmHasSubVertical) {
+            String q2 = 'SELECT ' + fields +
+                ' FROM Payment_Terms_Master__c' +
+                ' WHERE Type__c = :vertical AND Sub_Vertical__c = null' +
+                ' ORDER BY CreatedDate ASC';
+            matched = Database.query(q2);
+        }
+
+        // Tier 3: any record with the matching vertical (regardless of
+        // sub-vertical). Safety net so the rep still gets a sensible
+        // default when the org has no blank-sub-vertical entries and
+        // the quote's sub-vertical doesn't line up with any master row.
+        if (matched.isEmpty() && String.isNotBlank(vertical)) {
+            String q3 = 'SELECT ' + fields +
+                ' FROM Payment_Terms_Master__c' +
+                ' WHERE Type__c = :vertical' +
+                ' ORDER BY CreatedDate ASC';
+            matched = Database.query(q3);
+        }
+
+        // Tier 4: records with blank Type (org-wide fallback).
         if (matched.isEmpty()) {
-            matched = [
-                SELECT Id, Payment_Term__c, Percentage__c, Type__c
-                FROM Payment_Terms_Master__c
-                WHERE Type__c = null
-                ORDER BY CreatedDate ASC
-            ];
+            String q4 = 'SELECT ' + fields +
+                ' FROM Payment_Terms_Master__c' +
+                ' WHERE Type__c = null' +
+                ' ORDER BY CreatedDate ASC';
+            matched = Database.query(q4);
         }
 
         for (Payment_Terms_Master__c pt : matched) {
@@ -223,13 +364,20 @@ public with sharing class QuoteBuilderController {
         // (Equipment / Spare / Accessories / Consumables). Older callers
         // sending the Product_Category label will fall through without
         // matching, but won't break the query.
+        // Search matches Name, ProductCode, the standard Description and
+        // both line/detailed description custom fields so reps can find
+        // products by any of those.
         String prodQuery = 'SELECT Id, Name, ProductCode, Product_Category__c, Product_Type__c, Make__c, Model__c, ' +
             'Description, HSN_Code__c, Standard_Price__c, QuantityUnitOfMeasure, ' +
             'Line_Description__c, Detailed_Description__c, ' +
             'Service_Item__c, Tax__c ' +
             'FROM Product2 ' +
             'WHERE IsActive = true ' +
-            'AND (Name LIKE :searchKey OR ProductCode LIKE :searchKey)';
+            'AND (Name LIKE :searchKey ' +
+            '     OR ProductCode LIKE :searchKey ' +
+            '     OR Description LIKE :searchKey ' +
+            '     OR Line_Description__c LIKE :searchKey ' +
+            '     OR Detailed_Description__c LIKE :searchKey)';
         if (String.isNotBlank(category)) {
             prodQuery += ' AND Product_Type__c = :category';
         }
@@ -430,20 +578,39 @@ public with sharing class QuoteBuilderController {
 
         out.standardPrice = standard;
 
-        if (tiers != null && !tiers.byTier.isEmpty()) {
+        // Discount-percentage based tier resolution: the rep entered a
+        // discount, walk PL4 -> PL1 and pick the first tier whose
+        // Max_Discount_Percentage__c covers it. Tag that tier as the
+        // line's source pricebook. Status is profile-aware — a Sales
+        // Engineer who lands on PL4 stays Not Required, but a Sales
+        // Engineer whose discount slips into PL3 needs approval.
+        if (d > 0 && tiers != null && !tiers.byTier.isEmpty()) {
             PricebookTierService.TierResolution applied =
-                PricebookTierService.resolveAppliedTier(tiers, finalAmount);
+                PricebookTierService.resolveTierByDiscount(tiers, d);
+            String runningProfile = PricebookTierService.runningUserProfileName();
             if (applied != null && applied.entry != null) {
                 out.resolvedTier = applied.tierName;
                 out.resolvedTierListPrice = applied.tierListPrice;
                 out.resolvedPricebookId = applied.entry.Pricebook2Id;
+                out.priceStatus = PricebookTierService.priceStatusForProfile(applied, runningProfile);
+                return out;
+            }
+            if (applied != null && applied.underFloor == true) {
+                // Discount exceeds every tier's Max_Discount_Percentage__c —
+                // the rep has gone past the broadest allowance, so flag
+                // for approval against the Standard pricebook.
+                List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
+                if (!stdPbs.isEmpty()) {
+                    out.resolvedTier = 'Standard';
+                    out.resolvedTierListPrice = standard;
+                    out.resolvedPricebookId = stdPbs[0].Id;
+                }
                 out.priceStatus = PricebookTierService.STATUS_APPROVAL_REQUIRED;
                 return out;
             }
         }
 
-        // Above the top discount tier (or no tier data) — tag the org's
-        // Standard pricebook (IsStandard = true) and mark Not Required.
+        // No discount (or no tier data) — Standard pricebook, no approval.
         List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
         if (!stdPbs.isEmpty()) {
             out.resolvedTier = 'Standard';
@@ -456,18 +623,24 @@ public with sharing class QuoteBuilderController {
 
     @AuraEnabled
     public static QuoteEditContext getQuoteForEdit(Id quoteId) {
-        Quote q = [
-            SELECT Id, Pricebook2Id, OpportunityId,
-                   Opportunity.AccountId, Opportunity.Account.Name,
-                   Opportunity.Region__c,
-                   BillingName, BillingStreet, BillingCity,
-                   BillingStateCode, BillingPostalCode, BillingCountryCode,
-                   ShippingName, ShippingStreet, ShippingCity,
-                   ShippingStateCode, ShippingPostalCode, ShippingCountryCode
-            FROM Quote
-            WHERE Id = :quoteId
-            LIMIT 1
-        ];
+        // Business_Vertical__c / Sub_Vertical__c live on the Quote in this
+        // org but may not be deployed everywhere; query them dynamically
+        // and ignore when missing so the controller still compiles.
+        Boolean qHasBV = Schema.SObjectType.Quote.fields.getMap().containsKey('business_vertical__c');
+        Boolean qHasSV = Schema.SObjectType.Quote.fields.getMap().containsKey('sub_vertical__c');
+        String quoteFields =
+            'Id, Pricebook2Id, OpportunityId,' +
+            ' Opportunity.AccountId, Opportunity.Account.Name,' +
+            ' Opportunity.Region__c,' +
+            ' BillingName, BillingStreet, BillingCity,' +
+            ' BillingStateCode, BillingPostalCode, BillingCountryCode,' +
+            ' ShippingName, ShippingStreet, ShippingCity,' +
+            ' ShippingStateCode, ShippingPostalCode, ShippingCountryCode' +
+            (qHasBV ? ', Business_Vertical__c' : '') +
+            (qHasSV ? ', Sub_Vertical__c' : '');
+        Quote q = (Quote) Database.query(
+            'SELECT ' + quoteFields + ' FROM Quote WHERE Id = :quoteId LIMIT 1'
+        );
 
         QuoteEditContext ctx = new QuoteEditContext();
         ctx.quoteId = q.Id;
@@ -477,6 +650,8 @@ public with sharing class QuoteBuilderController {
         ctx.accountName = (q.Opportunity != null && q.Opportunity.Account != null)
             ? q.Opportunity.Account.Name : '';
         ctx.regionId = q.Opportunity != null ? q.Opportunity.Region__c : null;
+        ctx.vertical = qHasBV ? (String) q.get('Business_Vertical__c') : null;
+        ctx.subVertical = qHasSV ? (String) q.get('Sub_Vertical__c') : null;
 
         // Address fields
         ctx.billingName = q.BillingName;
@@ -501,7 +676,7 @@ public with sharing class QuoteBuilderController {
         ctx.lineItems = new List<QuoteLineItemResult>();
         for (QuoteLineItem qli : [
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
-                   Product2.QuantityUnitOfMeasure,
+                   Product2.QuantityUnitOfMeasure, Product2.Service_Item__c,
                    PricebookEntryId, PricebookEntry.Tax__c,
                    PricebookEntry.Max_Discount_Percentage__c,
                    Quantity, ListPrice, UnitPrice, Discount,
@@ -531,6 +706,7 @@ public with sharing class QuoteBuilderController {
             item.detailedDescription = qli.Product_Detailed_Description__c;
             item.sourcePricebookId = qli.Source_Pricebook_Ref__c;
             item.sourcePricebookName = qli.Source_Pricebook_Ref__r != null ? qli.Source_Pricebook_Ref__r.Name : '';
+            item.isServiceItem = (qli.Product2 != null && qli.Product2.Service_Item__c == 'Yes');
             ctx.lineItems.add(item);
         }
 
@@ -790,6 +966,7 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Id standardPricebookId;
         @AuraEnabled public String currencyCode;
         @AuraEnabled public String vertical;
+        @AuraEnabled public String subVertical;
         @AuraEnabled public Id regionId;
         @AuraEnabled public String billingName;
         @AuraEnabled public String billingStreet;
@@ -797,7 +974,14 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public String billingState;
         @AuraEnabled public String billingPostalCode;
         @AuraEnabled public String billingCountry;
+        @AuraEnabled public String shippingName;
+        @AuraEnabled public String shippingStreet;
+        @AuraEnabled public String shippingCity;
+        @AuraEnabled public String shippingState;
+        @AuraEnabled public String shippingPostalCode;
+        @AuraEnabled public String shippingCountry;
         @AuraEnabled public List<PaymentTermResult> defaultPaymentTerms;
+        @AuraEnabled public List<QuoteLineItemResult> opportunityLineItems;
     }
 
     public class ShippingAddressResult {
@@ -860,6 +1044,8 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Id accountId;
         @AuraEnabled public String accountName;
         @AuraEnabled public Id regionId;
+        @AuraEnabled public String vertical;
+        @AuraEnabled public String subVertical;
         @AuraEnabled public Id standardPricebookId;
         @AuraEnabled public String billingName;
         @AuraEnabled public String billingStreet;
@@ -911,6 +1097,7 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public String detailedDescription;
         @AuraEnabled public Id sourcePricebookId;
         @AuraEnabled public String sourcePricebookName;
+        @AuraEnabled public Boolean isServiceItem;
     }
 
     // ===== Quote Session (per-Visit) =====

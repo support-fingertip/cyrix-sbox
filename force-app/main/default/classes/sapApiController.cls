@@ -1,19 +1,3 @@
-/**
- * Inbound REST endpoint that SAP polls to GET Salesforce data.
- * Mirrors the sapApiController pattern from the reference project,
- * but with the field set adapted to this org's Account / Order schema.
- *
- * URL:  /services/apexrest/sapapi/*
- * Auth: ?key=<value of Custom Label API_Key>
- * Selector: ?value=customer | order   (which entity to fetch)
- *
- * Optional filters:
- *   ?customerCode=<SAP_Code__c>   — fetch a specific Account by SAP code
- *   ?orderCode=<SAP_Code__c>      — fetch a specific Order by SAP code
- *
- * If no specific code is supplied, returns the first record that
- * still needs to be sent (Sync_To_SAP__c = false).
- */
 @RestResource(urlMapping='/sapapi/*')
 global class sapApiController {
 
@@ -22,10 +6,13 @@ global class sapApiController {
         RestRequest req = RestContext.request;
         RestResponse res = RestContext.response;
 
-        String key          = req.params.get('key');
-        String objectName   = req.params.get('value');
+        String key = req.params.get('key');
+        String objectName = req.params.get('value');
         String customerCode = req.params.get('customerCode');
-        String orderCode    = req.params.get('orderCode');
+        String orderCode = req.params.get('orderCode');
+
+        List<SObject> records = new List<SObject>();
+        String jsonString = '';
 
         if (Label.API_Key != key) {
             res.statusCode = 401;
@@ -33,101 +20,60 @@ global class sapApiController {
             return;
         }
 
-        List<SObject> records = new List<SObject>();
-
         if (objectName == 'customer' || String.isBlank(objectName)) {
             List<Account> aList;
-            if (String.isNotBlank(customerCode)) {
+           
                 aList = [
-                    SELECT Id, Name, Phone, Website,
-                           BillingStreet, BillingCity, BillingState, BillingStateCode,
-                           BillingPostalCode, BillingCountry, BillingCountryCode,
-                           ShippingStreet, ShippingCity, ShippingState, ShippingStateCode,
-                           ShippingPostalCode, ShippingCountry, ShippingCountryCode,
-                           GST_Number__c, PAN_Number__c,
-                           SAP_Code__c, Sync_To_SAP__c
+                    SELECT Id, Name, Status__c, Customer_Type__c, Customer_Category__c,
+                        Speciality__c, Business_Vertical__c, Region__c,
+                        Purchase_Value_Life_Time__c, Previous_History__c,
+                        Bank_Name__c, Branch_Name__c, Beneficiary_Name__c, Branch_Address__c,
+                        IFSC_CODE__c, GST_Number__c, PAN_Number__c,
+                        Email__c, Country_Code_Phone__c, Phone, Website,
+                        BillingCity, BillingCountryCode, BillingStateCode, BillingStreet, BillingPostalCode,
+                        SAP_Customer_Code__c, Customer_Code__c,
+                        (SELECT Id, Address_Code__c,
+                            Address__City__s, Address__Street__s, Address__StateCode__s,
+                            Address__PostalCode__s, Address__CountryCode__s
+                         FROM Shipping_Addresses__r)
                     FROM Account
-                    WHERE SAP_Code__c = :customerCode
+                   
                     LIMIT 1
                 ];
-            } else {
-                aList = [
-                    SELECT Id, Name, Phone, Website,
-                           BillingStreet, BillingCity, BillingState, BillingStateCode,
-                           BillingPostalCode, BillingCountry, BillingCountryCode,
-                           ShippingStreet, ShippingCity, ShippingState, ShippingStateCode,
-                           ShippingPostalCode, ShippingCountry, ShippingCountryCode,
-                           GST_Number__c, PAN_Number__c,
-                           SAP_Code__c, Sync_To_SAP__c
-                    FROM Account
-                    WHERE Sync_To_SAP__c = false
-                    LIMIT 1
-                ];
-            }
+          
             records.addAll((List<SObject>) aList);
         } else if (objectName == 'order') {
             List<Order> oList;
-            if (String.isNotBlank(orderCode)) {
+ 
                 oList = [
-                    SELECT Id, Name, OrderNumber, EffectiveDate, EndDate, Status, TotalAmount,
-                           CurrencyIsoCode, Description,
-                           BillingStreet, BillingCity, BillingState, BillingStateCode,
-                           BillingPostalCode, BillingCountry, BillingCountryCode,
-                           ShippingStreet, ShippingCity, ShippingState, ShippingStateCode,
-                           ShippingPostalCode, ShippingCountry, ShippingCountryCode,
-                           Business_Vertical__c,
-                           Contract_Period_From_Date__c, Contract_Period_End_Date__c,
-                           Delivery__c,
-                           SAP_Code__c, Sync_To_SAP__c,
-                           AccountId, Account.Name, Account.SAP_Code__c,
-                           (SELECT Id, OrderItemNumber, Product2.ProductCode,
-                                   Quantity, UnitPrice, TotalPrice
-                            FROM OrderItems),
-                           (SELECT Id, Name, Payment_Term__c, Percentage__c
-                            FROM Payment_Terms__r)
-                    FROM Order
-                    WHERE SAP_Code__c = :orderCode
+                    SELECT Id, Name, EffectiveDate, EndDate, OrderId__c, Status,
+                        BillingCity, BillingCountryCode, BillingStateCode, BillingStreet, BillingPostalCode,
+                        ShippingCity, ShippingCountryCode, ShippingStateCode, ShippingStreet, ShippingPostalCode,
+                        CurrencyIsoCode, Customer_Code__c, Business_Vertical__c, Sub_Vertical__c,
+                        Delivery__c, Contract_Period_From_Date__c, Contract_Period_End_Date__c,
+                        Description, Employee_Code__c, TotalAmount,
+                        (SELECT Id, OrderItemNumber, Order.OrderId__c, Product2.ProductCode,
+                            Quantity, UnitPrice, Tax__c, Tax_Amount__c, TotalPrice
+                         FROM OrderItems),
+                        (SELECT Id, OrderId__c, Name, Payment_Term__c, Percentage__c
+                         FROM Payment_Terms__r)
+                    FROM Order where id='801C400000VAlhFIAT'
+                   
                     LIMIT 1
                 ];
-            } else {
-                oList = [
-                    SELECT Id, Name, OrderNumber, EffectiveDate, EndDate, Status, TotalAmount,
-                           CurrencyIsoCode, Description,
-                           BillingStreet, BillingCity, BillingState, BillingStateCode,
-                           BillingPostalCode, BillingCountry, BillingCountryCode,
-                           ShippingStreet, ShippingCity, ShippingState, ShippingStateCode,
-                           ShippingPostalCode, ShippingCountry, ShippingCountryCode,
-                           Business_Vertical__c,
-                           Contract_Period_From_Date__c, Contract_Period_End_Date__c,
-                           Delivery__c,
-                           SAP_Code__c, Sync_To_SAP__c,
-                           AccountId, Account.Name, Account.SAP_Code__c,
-                           (SELECT Id, OrderItemNumber, Product2.ProductCode,
-                                   Quantity, UnitPrice, TotalPrice
-                            FROM OrderItems),
-                           (SELECT Id, Name, Payment_Term__c, Percentage__c
-                            FROM Payment_Terms__r)
-                    FROM Order
-                    WHERE Sync_To_SAP__c = false
-                    LIMIT 1
-                ];
-            }
+           
             records.addAll((List<SObject>) oList);
         }
 
-        Object cleaned = clean(JSON.deserializeUntyped(JSON.serialize(records)));
-        String jsonString = JSON.serialize(cleaned);
+        Object raw = JSON.deserializeUntyped(JSON.serialize(records));
+        Object cleaned = clean(raw);
+        jsonString = JSON.serialize(cleaned);
 
         res.addHeader('Content-Type', 'application/json');
         res.statusCode = 200;
         res.responseBody = Blob.valueOf(jsonString);
     }
 
-    /**
-     * Recursively strips Salesforce-internal metadata (attributes,
-     * totalSize, done) and unwraps the {records:[...]} envelope so SAP
-     * receives a clean payload of plain field/value JSON.
-     */
     private static Object clean(Object node) {
         if (node instanceof Map<String, Object>) {
             Map<String, Object> m = (Map<String, Object>) node;
@@ -159,7 +105,7 @@ global class sapApiController {
 
     public class response {
         public String SF_RecordId;
-        public String SAP_Code;
+        public String TallyUniqueId;
         public String Status;
         public String Message;
     }
