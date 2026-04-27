@@ -1,8 +1,14 @@
-public with sharing class WhatsAppQuoteSender {
+public without sharing class WhatsAppQuoteSender {
 
     @AuraEnabled
     public static WhatsAppQuoteInfo getQuoteInfo(Id quoteId) {
-        Quote q = [
+        WhatsAppQuoteInfo info = new WhatsAppQuoteInfo();
+
+        if (quoteId == null) {
+            return info;
+        }
+
+        List<Quote> quotes = [
             SELECT Id, Name, QuoteNumber, Quote_Id__c,
                    ContactId, Contact.Name, Contact.Phone, Contact.MobilePhone,
                    OpportunityId, Opportunity.Name,
@@ -13,7 +19,11 @@ public with sharing class WhatsAppQuoteSender {
             LIMIT 1
         ];
 
-        WhatsAppQuoteInfo info = new WhatsAppQuoteInfo();
+        if (quotes.isEmpty()) {
+            return info;
+        }
+
+        Quote q = quotes[0];
         info.quoteId = q.Id;
         info.quoteName = q.Name;
         info.contactName = q.ContactId != null ? q.Contact.Name : '';
