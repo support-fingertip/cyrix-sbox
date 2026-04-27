@@ -134,6 +134,10 @@
         <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
+                <field>HSN_Code_International__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
                 <field>Any_Other_Levies__c</field>
             </layoutItems>
         </layoutColumns>

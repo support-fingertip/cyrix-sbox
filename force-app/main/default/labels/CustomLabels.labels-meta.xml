@@ -68,21 +68,21 @@
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>WhatsApp API URL</shortDescription>
-        <value>https://io6.n2080.cloud.bitvoice.in/api/v1/send-template-message</value>
+        <value>https://webhook7.n2080.cloud.bitvoice.in/api/send-template</value>
     </labels>
     <labels>
         <fullName>WhatsApp_API_Key</fullName>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>WhatsApp API Key</shortDescription>
-        <value>REPLACE_WITH_YOUR_API_KEY</value>
+        <value>4cc3ae41858303588fcee2c4dadc2afa06993a2d8a8cf8602615df72612c9923</value>
     </labels>
     <labels>
         <fullName>WhatsApp_Template_Name</fullName>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>WhatsApp Template Name</shortDescription>
-        <value>lab_report</value>
+        <value>quotation_followup</value>
     </labels>
     <labels>
         <fullName>SAP_Endpoint</fullName>
