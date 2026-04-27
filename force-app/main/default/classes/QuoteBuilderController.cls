@@ -581,17 +581,18 @@ public with sharing class QuoteBuilderController {
         // Discount-percentage based tier resolution: the rep entered a
         // discount, walk PL4 -> PL1 and pick the first tier whose
         // Max_Discount_Percentage__c covers it. Tag that tier as the
-        // line's source pricebook. Status is Approval Required when the
-        // discount equals or exceeds the tier's max, Not Required when
-        // it sits below.
+        // line's source pricebook. Status is profile-aware — a Sales
+        // Engineer who lands on PL4 stays Not Required, but a Sales
+        // Engineer whose discount slips into PL3 needs approval.
         if (d > 0 && tiers != null && !tiers.byTier.isEmpty()) {
             PricebookTierService.TierResolution applied =
                 PricebookTierService.resolveTierByDiscount(tiers, d);
+            String runningProfile = PricebookTierService.runningUserProfileName();
             if (applied != null && applied.entry != null) {
                 out.resolvedTier = applied.tierName;
                 out.resolvedTierListPrice = applied.tierListPrice;
                 out.resolvedPricebookId = applied.entry.Pricebook2Id;
-                out.priceStatus = PricebookTierService.priceStatusForDiscountTier(applied, d);
+                out.priceStatus = PricebookTierService.priceStatusForProfile(applied, runningProfile);
                 return out;
             }
             if (applied != null && applied.underFloor == true) {

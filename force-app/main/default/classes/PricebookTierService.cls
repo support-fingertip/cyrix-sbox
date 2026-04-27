@@ -332,6 +332,87 @@ public with sharing class PricebookTierService {
     }
 
     /**
+     * Tier rank — how much discount allowance the tier carries.
+     *   PL4 = 1 (least allowance — ASM band)
+     *   PL3 = 2 (TSM band)
+     *   PL2 = 3 (VP band)
+     *   PL1 = 4 (most allowance — CFO/CEO band)
+     * Standard / unknown returns 0.
+     */
+    public static Integer tierRank(String tierName) {
+        if (tierName == TIER4) return 1;
+        if (tierName == TIER3) return 2;
+        if (tierName == TIER2) return 3;
+        if (tierName == TIER1) return 4;
+        return 0;
+    }
+
+    /**
+     * Map a profile name to the tier that profile is allowed to discount
+     * up to without approval, per the role hierarchy:
+     *   Sales Engineer  -> PL4   (ASM band)
+     *   ASM             -> PL3   (TSM band)
+     *   TSM             -> PL2   (VP band)
+     *   VP / VP Sales   -> PL2   (own band — VP sits at the tier boundary)
+     *   CFO / CEO       -> PL1   (full allowance)
+     * Other profiles return null — meaning they have no implicit
+     * allowance and any tier hit triggers Approval Required.
+     */
+    public static String capTierFor(String profileName) {
+        if (profileName == null) return null;
+        String n = profileName.toLowerCase().trim();
+        if (n.contains('sales engineer') || n == 'sales_engineer') return TIER4;
+        if (n == 'asm' || n.contains('area sales manager')) return TIER3;
+        if (n == 'tsm' || n.contains('territory sales manager')) return TIER2;
+        if (n.contains('vp')) return TIER2;
+        if (n.contains('cfo') || n.contains('ceo')
+                || n.contains('chief financial') || n.contains('chief executive')) return TIER1;
+        return null;
+    }
+
+    /**
+     * Looks up the running user's profile name and returns their
+     * discount-cap tier. Cached per-transaction so the SOQL only fires
+     * once even when the LWC pings getProductPricingPreview repeatedly.
+     */
+    private static String cachedProfileName;
+    public static String runningUserProfileName() {
+        if (cachedProfileName != null) return cachedProfileName;
+        Id pid = UserInfo.getProfileId();
+        if (pid == null) {
+            cachedProfileName = '';
+            return cachedProfileName;
+        }
+        List<Profile> ps = [SELECT Name FROM Profile WHERE Id = :pid LIMIT 1];
+        cachedProfileName = ps.isEmpty() ? '' : (ps[0].Name == null ? '' : ps[0].Name);
+        return cachedProfileName;
+    }
+
+    /**
+     * Profile-aware status: a tier match below or at the running user's
+     * cap stays Not Required, a tier above the cap (or a discount that
+     * overran every tier) flips to Approval Required.
+     *
+     * Service items short-circuit elsewhere — this helper is only
+     * meaningful for non-service line items.
+     */
+    public static String priceStatusForProfile(TierResolution r, String profileName) {
+        if (r == null) return STATUS_NOT_REQUIRED;
+        if (r.underFloor == true) return STATUS_APPROVAL_REQUIRED;
+        if (r.entry == null) return STATUS_NOT_REQUIRED;
+        String capTier = capTierFor(profileName);
+        if (capTier == null) {
+            // Profile has no implicit discount allowance — every matched
+            // tier needs approval.
+            return STATUS_APPROVAL_REQUIRED;
+        }
+        Integer matched = tierRank(r.tierName);
+        Integer cap = tierRank(capTier);
+        if (matched == 0 || cap == 0) return STATUS_APPROVAL_REQUIRED;
+        return matched <= cap ? STATUS_NOT_REQUIRED : STATUS_APPROVAL_REQUIRED;
+    }
+
+    /**
      * Service-line shortcut: service items have no tiered list price to
      * compare against, and the business rule is 'approval required except
      * when the Product's Service_Item field is No'. So every service line
