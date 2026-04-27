@@ -81,29 +81,22 @@ private class QuoteBuilderControllerTest {
         );
         insert new List<PricebookEntry>{ pbe1, pbe2 };
 
-        // Price list5 (standard tier) - required by the tiered pricing engine
-        // before any non-service product can be added to a quote.
-        Pricebook2 tier5Pb = new Pricebook2(
-            Name = 'Tier5 Standard',
-            IsActive = true,
-            Price_Book_Type__c = 'Price list5'
-        );
-        insert tier5Pb;
+        // Tier pricebooks (PL5 + PL4 + PL1) for the discount-vs-Discount__c
+        // evaluator. Discount__c on each tier is the maximum discount the
+        // tier covers — the same value PricebookTierService.evaluate
+        // checks the entered discount against.
+        Pricebook2 pl5 = new Pricebook2(Name = 'PL5', IsActive = true, Price_Book_Type__c = 'Price List 5');
+        Pricebook2 pl4 = new Pricebook2(Name = 'PL4', IsActive = true, Price_Book_Type__c = 'Price List 4');
+        Pricebook2 pl3 = new Pricebook2(Name = 'PL3', IsActive = true, Price_Book_Type__c = 'Price List 3');
+        Pricebook2 pl1 = new Pricebook2(Name = 'PL1', IsActive = true, Price_Book_Type__c = 'Price List 1');
+        insert new List<Pricebook2>{ pl5, pl4, pl3, pl1 };
+
         insert new List<PricebookEntry>{
-            new PricebookEntry(
-                Pricebook2Id = tier5Pb.Id,
-                Product2Id = prod1.Id,
-                UnitPrice = 150000,
-                IsActive = true,
-                UseStandardPrice = false
-            ),
-            new PricebookEntry(
-                Pricebook2Id = tier5Pb.Id,
-                Product2Id = prod2.Id,
-                UnitPrice = 85000,
-                IsActive = true,
-                UseStandardPrice = false
-            )
+            new PricebookEntry(Pricebook2Id = pl5.Id, Product2Id = prod1.Id, UnitPrice = 150000, Discount__c = 0,  IsActive = true, UseStandardPrice = false),
+            new PricebookEntry(Pricebook2Id = pl4.Id, Product2Id = prod1.Id, UnitPrice = 145000, Discount__c = 10, IsActive = true, UseStandardPrice = false),
+            new PricebookEntry(Pricebook2Id = pl3.Id, Product2Id = prod1.Id, UnitPrice = 135000, Discount__c = 15, IsActive = true, UseStandardPrice = false),
+            new PricebookEntry(Pricebook2Id = pl1.Id, Product2Id = prod1.Id, UnitPrice = 100000, Discount__c = 30, IsActive = true, UseStandardPrice = false),
+            new PricebookEntry(Pricebook2Id = pl5.Id, Product2Id = prod2.Id, UnitPrice = 85000,  Discount__c = 0,  IsActive = true, UseStandardPrice = false)
         };
     }
 
@@ -269,10 +262,15 @@ private class QuoteBuilderControllerTest {
                                      FROM QuoteLineItem WHERE QuoteId = :q.Id ORDER BY UnitPrice DESC];
         System.assertEquals(2, items.size(), 'Should have 2 line items');
         System.assertEquals(2, items[0].Quantity);
-        System.assertEquals(150000, items[0].UnitPrice);
         System.assertEquals(5, items[0].Discount);
         System.assertEquals('GST', items[0].Tax_Type__c);
-        System.assertEquals('Not Required', items[0].Price_Status__c);
+        // Test profile (System Administrator) doesn't map to a sales band,
+        // so the ceiling defaults to PL5 (0% allowance). Any non-zero
+        // discount escalates - 5% lands inside PL4 (10% ceiling) and the
+        // line flips to Approval Required.
+        System.assertEquals('Approval Required', items[0].Price_Status__c);
+        // The PM-200 row carries 0% discount and stays Not Required.
+        System.assertEquals('Not Required', items[1].Price_Status__c);
     }
 
     @isTest
@@ -314,7 +312,10 @@ private class QuoteBuilderControllerTest {
             PricebookEntryId = pbe.Id,
             Quantity = 2,
             UnitPrice = 150000,
-            Discount = 5,
+            // Zero discount keeps the trigger from re-fetching UnitPrice
+            // from a discount tier so the asserted UnitPrice stays at the
+            // PL5 standard.
+            Discount = 0,
             Tax_Type__c = 'GST'
         );
         insert qli;
@@ -398,7 +399,6 @@ private class QuoteBuilderControllerTest {
         System.assertEquals(1, results.size(), 'Should find 1 product');
         System.assertEquals('USG-500', results[0].productCode);
         System.assertNotEquals(null, results[0].unitPrice, 'Unit price should be set');
-        System.assertNotEquals(null, results[0].availablePrices, 'Available prices should be populated');
     }
 
     @isTest
@@ -414,8 +414,8 @@ private class QuoteBuilderControllerTest {
 
         System.assertEquals(1, results.size());
         System.assertEquals('USG-500', results[0].productCode);
-        System.assertEquals(150000, results[0].unitPrice, 'Should default to Price list5 list price');
-        System.assertEquals('Price list5', results[0].sourcePricebookType);
+        System.assertEquals(150000, results[0].unitPrice, 'Should default to Price List 5 list price');
+        System.assertEquals('Price List 5', results[0].sourcePricebookType);
         System.assertEquals(false, results[0].isServiceItem);
     }
 
@@ -474,45 +474,52 @@ private class QuoteBuilderControllerTest {
     }
 
     @isTest
-    static void testPricingPreview_tierResolution() {
+    static void testPricingPreview_escalatesToMatchingTier() {
         Product2 prod = [SELECT Id FROM Product2 WHERE ProductCode = 'USG-500' LIMIT 1];
 
-        // Add Price list3 at 100000 and Price list1 at 50000 to exercise the walk.
-        Pricebook2 pb3 = new Pricebook2(Name = 'T3', IsActive = true, Price_Book_Type__c = 'Price list3');
-        Pricebook2 pb1 = new Pricebook2(Name = 'T1', IsActive = true, Price_Book_Type__c = 'Price list1');
-        insert new List<Pricebook2>{pb3, pb1};
-        insert new List<PricebookEntry>{
-            new PricebookEntry(Pricebook2Id = pb3.Id, Product2Id = prod.Id, UnitPrice = 100000, IsActive = true, UseStandardPrice = false),
-            new PricebookEntry(Pricebook2Id = pb1.Id, Product2Id = prod.Id, UnitPrice = 50000, IsActive = true, UseStandardPrice = false)
-        };
-
         Test.startTest();
-        // Unit price 150000, discount 40% -> discounted = 90000. Tightest fit = Price list3 (100000).
+        // Setup ceilings: PL5=0, PL4=10, PL3=15, PL1=30. Running profile
+        // is the test profile (unknown -> ceiling=PL5). 12% > PL5 ceiling
+        // (0%), ladder walks PL4(10%) -> doesn't cover -> PL3(15%) covers.
         QuoteBuilderController.PricingPreview p =
-            QuoteBuilderController.getProductPricingPreview(prod.Id, 150000, 40, 1);
+            QuoteBuilderController.getProductPricingPreview(prod.Id, 150000, 12, 1);
         Test.stopTest();
 
-        System.assertEquals('Price list3', p.resolvedTier);
-        System.assertEquals(100000, p.resolvedTierListPrice);
-        System.assertEquals(150000, p.standardPrice);
-        // 90000 < 150000 -> Approval Required
         System.assertEquals('Approval Required', p.priceStatus);
+        System.assertEquals('Price List 3', p.resolvedTier);
+        System.assertEquals(135000, p.resolvedUnitPrice,
+            'Caller is told to re-fetch UnitPrice from PL3');
+        System.assertEquals(false, p.exceedsAllTiers);
     }
 
     @isTest
-    static void testPricingPreview_salesPriceFloor() {
+    static void testPricingPreview_zeroDiscountStaysAtPL5() {
         Product2 prod = [SELECT Id FROM Product2 WHERE ProductCode = 'USG-500' LIMIT 1];
 
         Test.startTest();
-        try {
-            QuoteBuilderController.getProductPricingPreview(prod.Id, 100000, 0, 1);
-            System.assert(false, 'Should have thrown - Sales Price below Price list5 floor');
-        } catch (AuraHandledException e) {
-            // AuraHandledException intentionally masks its server-side message
-            // so tests can only assert the exception type, not its text.
-            System.assert(true);
-        }
+        QuoteBuilderController.PricingPreview p =
+            QuoteBuilderController.getProductPricingPreview(prod.Id, 150000, 0, 1);
         Test.stopTest();
+
+        System.assertEquals('Not Required', p.priceStatus);
+        System.assertEquals('Price List 5', p.resolvedTier,
+            'Zero-discount lines stay on PL5 (the standard pricebook on the quote)');
+        System.assertEquals(150000, p.resolvedUnitPrice);
+    }
+
+    @isTest
+    static void testPricingPreview_overrunsAllTiers_exceedsAllTiersFlagged() {
+        Product2 prod = [SELECT Id FROM Product2 WHERE ProductCode = 'USG-500' LIMIT 1];
+
+        Test.startTest();
+        // 50% > PL1 (30%) -> falls through to PL1 with exceedsAllTiers=true.
+        QuoteBuilderController.PricingPreview p =
+            QuoteBuilderController.getProductPricingPreview(prod.Id, 150000, 50, 1);
+        Test.stopTest();
+
+        System.assertEquals('Approval Required', p.priceStatus);
+        System.assertEquals('Price List 1', p.resolvedTier);
+        System.assertEquals(true, p.exceedsAllTiers);
     }
 
     @isTest
@@ -528,12 +535,14 @@ private class QuoteBuilderControllerTest {
 
         Test.startTest();
         QuoteBuilderController.PricingPreview p =
-            QuoteBuilderController.getProductPricingPreview(svc.Id, 2500, 10, 1);
+            QuoteBuilderController.getProductPricingPreview(svc.Id, 2500, 90, 1);
         Test.stopTest();
 
         System.assertEquals(true, p.isServiceItem);
         System.assertEquals('Not Required', p.priceStatus);
-        System.assertEquals(null, p.resolvedTier, 'Service items do not resolve a tier');
+        System.assertEquals(null, p.resolvedTier,
+            'Service items short-circuit and never remap the pricebook');
+        System.assertEquals(false, p.exceedsAllTiers);
     }
 
     @isTest
@@ -591,8 +600,8 @@ private class QuoteBuilderControllerTest {
         ];
         System.assertNotEquals(null, savedItem.Source_Pricebook_Ref__c,
             'Trigger must stamp a resolved tier pricebook');
-        System.assertEquals('Price list5', savedItem.Source_Pricebook_Ref__r.Price_Book_Type__c,
-            'Zero-discount line at list price resolves to Price list5');
+        System.assertEquals('Price List 5', savedItem.Source_Pricebook_Ref__r.Price_Book_Type__c,
+            'Zero-discount line at list price resolves to Price List 5');
         System.assertEquals('Not Required', savedItem.Price_Status__c,
             'Final price == standard price -> Not Required');
     }

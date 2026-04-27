@@ -1,76 +1,115 @@
 /**
- * Pure helper (no DML) for tiered-pricebook selection and price-status
- * calculation on QuoteLineItems.
+ * Discount-tier evaluator for QuoteLineItem and OrderItem.
  *
- * Tier hierarchy (highest -> lowest list price):
- *   Price list5  ->  Price list4  ->  Price list3  ->  Price list2  ->  Price list1
+ * The org's tier system lives on Pricebook2 records whose
+ * Price_Book_Type__c picklist points at one of:
+ *   Price List 1  (CEO / CFO band, most permissive)
+ *   Price List 2  (VP band)
+ *   Price List 3  (TSM band)
+ *   Price List 4  (ASM band)
+ *   Price List 5  (default / standard price on the quote/order)
  *
- * Default tier for a new non-service line is Price list5. When a user applies
- * a discount, resolveTier walks downward and returns the tightest-fitting
- * existing tier whose list price is >= the discounted unit price. If every
- * tier's list price is below the discounted price (i.e. the discount pushes
- * the price below Price list1), the line stays on Price list1 and the caller
- * must flag it as Approval Required.
+ * Each PricebookEntry on a tier carries Discount__c — the maximum
+ * discount allowed at that tier for the product. Max_Discount_Percentage__c
+ * is deprecated and is no longer read.
  *
- * resolveAppliedTier (newer rule): compares the final per-unit amount
- * *after discount and tax* against PL4 -> PL1 and returns the highest tier
- * whose list price is still <= that amount. Used by QuoteLineItem /
- * OrderItem triggers and the LWC live preview.
+ * Algorithm (per spec, run per line item on add and on every discount edit):
  *
- * Service items (Product2.Service_Item__c = 'Yes') bypass all tier logic.
- * They carry a pricebook entry against a dummy pricebook whose UnitPrice is
- * 0; Sales Price and Tax are user-entered and Price_Status__c is always
- * Not Required.
+ *   1. Service item (Product2.Service_Item__c = 'Yes')
+ *        -> Price_Status__c = 'Not Required'
+ *        -> keep the existing pricebook on the line, don't touch UnitPrice
+ *
+ *   2. Non-service, entered discount within the running user's ceiling
+ *      tier's Discount__c
+ *        -> Price_Status__c = 'Not Required'
+ *        -> map Price List 5 to the line
+ *
+ *   3. Non-service, entered discount exceeds the ceiling
+ *        -> walk the escalation ladder above the ceiling (tightest band
+ *           first) and pick the first tier whose Discount__c covers the
+ *           entered discount
+ *        -> Price_Status__c = 'Approval Required'
+ *        -> map that tier's Pricebook to the line
+ *
+ *   4. Non-service, entered discount exceeds every tier in the ladder
+ *        -> map Price List 1 (top of the ladder)
+ *        -> Price_Status__c = 'Approval Required'
+ *        -> evaluation flags exceedsAllTiers = true so the UI can warn
+ *
+ * Profile -> ceiling map (per spec):
+ *   Sales Engineer       -> Price List 4
+ *   ASM                  -> Price List 3
+ *   TSM                  -> Price List 2
+ *   VP / Vice President  -> Price List 2
+ *   CFO / CEO            -> Price List 1
+ *   Anything else        -> Price List 5 (no implicit allowance)
+ *
+ * A missing PricebookEntry for a tier is skipped silently (the ladder
+ * walks past it) — never thrown.
  */
 public with sharing class PricebookTierService {
 
-    public static final String TIER5 = 'Price List 5';
-    public static final String TIER4 = 'Price List 4';
-    public static final String TIER3 = 'Price List 3';
-    public static final String TIER2 = 'Price List 2';
     public static final String TIER1 = 'Price List 1';
+    public static final String TIER2 = 'Price List 2';
+    public static final String TIER3 = 'Price List 3';
+    public static final String TIER4 = 'Price List 4';
+    public static final String TIER5 = 'Price List 5';
 
-    // Walked from highest to lowest list price.
     public static final List<String> TIER_ORDER_HIGH_TO_LOW = new List<String>{
         TIER5, TIER4, TIER3, TIER2, TIER1
     };
 
-    public static final String STATUS_NOT_REQUIRED = 'Not Required';
+    public static final String STATUS_NOT_REQUIRED      = 'Not Required';
     public static final String STATUS_APPROVAL_REQUIRED = 'Approval Required';
 
-    /**
-     * Resolved tier for one product line.
-     * entry is the PricebookEntry the caller should assign to the
-     * QuoteLineItem; tierName is that entry's Pricebook2.Price_Book_Type__c;
-     * underFloor is true when the discounted price is below every existing
-     * tier's list price (caller must mark Approval Required regardless of
-     * the standard-price check).
-     */
-    public class TierResolution {
-        @AuraEnabled public PricebookEntry entry;
-        @AuraEnabled public String tierName;
-        @AuraEnabled public Decimal tierListPrice;
-        @AuraEnabled public Boolean underFloor;
-    }
+    // PL5 is the lowest "rank"; PL1 is the highest. Ladder walks from
+    // ceiling+1 up to PL1.
+    private static final Map<String, Integer> RANK_BY_TIER = new Map<String, Integer>{
+        TIER5 => 0,
+        TIER4 => 1,
+        TIER3 => 2,
+        TIER2 => 3,
+        TIER1 => 4
+    };
 
     /**
-     * Per-product cache: tier name -> its PricebookEntry.
-     * Populated in one query per batch of product Ids.
+     * Per-product tier map: tier name -> active PricebookEntry on that
+     * tier's Pricebook2. Skips inactive tiers and inactive entries.
      */
-    public class ProductTierMap {
+    public class ProductTiers {
         public Map<String, PricebookEntry> byTier = new Map<String, PricebookEntry>();
         public PricebookEntry tier(String name) { return byTier.get(name); }
         public Boolean has(String name) { return byTier.containsKey(name); }
+        public Boolean isEmpty() { return byTier.isEmpty(); }
     }
 
     /**
-     * Load tier entries for a set of products in one SOQL round-trip.
-     * Only ACTIVE non-standard pricebooks with a Price_Book_Type__c in the
-     * tier enum are considered. The standard pricebook is ignored because
-     * tiers live on custom pricebooks.
+     * Outcome of evaluating one line item against the algorithm.
+     * mappedPricebookId / mappedPricebookEntryId / mappedUnitPrice are
+     * populated when the algorithm wants the caller to (re)assign the
+     * line's pricebook reference and re-fetch the unit price from the
+     * resolved entry. exceedsAllTiers is true when even Price List 1's
+     * Discount__c can't cover the entered discount.
      */
-    public static Map<Id, ProductTierMap> loadTiers(Set<Id> productIds) {
-        Map<Id, ProductTierMap> out = new Map<Id, ProductTierMap>();
+    public class Evaluation {
+        @AuraEnabled public String  status;
+        @AuraEnabled public Id      mappedPricebookId;
+        @AuraEnabled public Id      mappedPricebookEntryId;
+        @AuraEnabled public String  mappedTierName;
+        @AuraEnabled public Decimal mappedUnitPrice;
+        @AuraEnabled public Decimal mappedTierDiscount;
+        @AuraEnabled public String  ceilingTierName;
+        @AuraEnabled public Decimal ceilingTierDiscount;
+        @AuraEnabled public Boolean exceedsAllTiers;
+    }
+
+    /**
+     * Single SOQL: load active tier PricebookEntries for the requested
+     * products. Standard pricebook (IsStandard = true) is excluded — tiers
+     * are stored on custom Pricebook2 records keyed by Price_Book_Type__c.
+     */
+    public static Map<Id, ProductTiers> loadTiers(Set<Id> productIds) {
+        Map<Id, ProductTiers> out = new Map<Id, ProductTiers>();
         if (productIds == null || productIds.isEmpty()) return out;
 
         for (PricebookEntry pbe : [
@@ -85,286 +124,26 @@ public with sharing class PricebookTierService {
               AND Pricebook2.Price_Book_Type__c IN :TIER_ORDER_HIGH_TO_LOW
         ]) {
             String tier = pbe.Pricebook2.Price_Book_Type__c;
-            ProductTierMap pt = out.get(pbe.Product2Id);
+            ProductTiers pt = out.get(pbe.Product2Id);
             if (pt == null) {
-                pt = new ProductTierMap();
+                pt = new ProductTiers();
                 out.put(pbe.Product2Id, pt);
             }
-            // If two active pricebooks share the same tier for a product,
-            // last-write-wins is acceptable - the admin data model should
-            // prevent this. Tests assert a single entry per (product, tier).
             pt.byTier.put(tier, pbe);
         }
         return out;
     }
 
     /**
-     * Default tier entry used when a product is first added to a quote.
-     * Returns the Price list5 PricebookEntry if it exists; null otherwise.
-     * Caller must block the selection when this returns null for a
-     * non-service product.
+     * Map a profile name to the user's self-approval ceiling tier.
+     * Short codes match exactly (so 'Receptionist' doesn't bleed into
+     * a substring), long-form titles match via contains().
+     *
+     * Anything that doesn't map to a band returns TIER5 — i.e. no
+     * implicit discount allowance, every non-zero discount escalates.
      */
-    public static PricebookEntry defaultEntry(ProductTierMap tiers) {
-        if (tiers == null) return null;
-        return tiers.tier(TIER5);
-    }
-
-    /**
-     * Standard list price = Price list5 list price. Null when the product
-     * has no Price list5 entry.
-     */
-    public static Decimal standardPrice(ProductTierMap tiers) {
-        PricebookEntry e = tiers == null ? null : tiers.tier(TIER5);
-        return e == null ? null : e.UnitPrice;
-    }
-
-    /**
-     * Resolve the tier for a discounted unit price.
-     *
-     * Algorithm (matches spec Req 5):
-     *   1. Walk tiers from 5 down to 1.
-     *   2. Skip any tier the product does not have.
-     *   3. Accept the LAST tier whose list price is >= discountedUnitPrice.
-     *      "Last" means the tightest fit - the tier whose list price is
-     *      closest to (but not below) the discounted price.
-     *   4. If no tier fits (every existing tier's list price is below
-     *      discountedUnitPrice), return the lowest existing tier with
-     *      underFloor = true so the caller can flag Approval Required.
-     *   5. If only Price list5 exists, it is returned regardless of the
-     *      discount; the standard-price check handles the approval flag.
-     *
-     * discountedUnitPrice = UnitPrice * (1 - Discount/100).
-     */
-    public static TierResolution resolveTier(ProductTierMap tiers, Decimal discountedUnitPrice) {
-        TierResolution r = new TierResolution();
-        if (tiers == null || tiers.byTier.isEmpty()) {
-            return r;
-        }
-        if (discountedUnitPrice == null) discountedUnitPrice = 0;
-
-        PricebookEntry bestFit = null;
-        String bestFitTier = null;
-        PricebookEntry lowestExisting = null;
-        String lowestExistingTier = null;
-
-        for (String t : TIER_ORDER_HIGH_TO_LOW) {
-            if (!tiers.has(t)) continue;
-            PricebookEntry e = tiers.tier(t);
-            lowestExisting = e;
-            lowestExistingTier = t;
-            if (e.UnitPrice != null && e.UnitPrice >= discountedUnitPrice) {
-                bestFit = e;
-                bestFitTier = t;
-            }
-        }
-
-        if (bestFit != null) {
-            r.entry = bestFit;
-            r.tierName = bestFitTier;
-            r.tierListPrice = bestFit.UnitPrice;
-            r.underFloor = false;
-        } else {
-            r.entry = lowestExisting;
-            r.tierName = lowestExistingTier;
-            r.tierListPrice = lowestExisting == null ? null : lowestExisting.UnitPrice;
-            r.underFloor = true;
-        }
-        return r;
-    }
-
-    /**
-     * Price status for a non-service line.
-     *   final_unit_price = unitPrice * (1 - discount/100)
-     *   >= standardPrice -> Not Required
-     *   <  standardPrice -> Approval Required
-     *
-     * When standardPrice is null (product has no Price list5), the caller
-     * should not have allowed the line to be created; defensively returns
-     * Not Required here.
-     *
-     * underFloor from resolveTier forces Approval Required even if
-     * standardPrice is somehow not set - keeps the safety net tight.
-     */
-    public static String computePriceStatus(
-        Decimal unitPrice,
-        Decimal discount,
-        Decimal standardPrice,
-        Boolean underFloor
-    ) {
-        if (underFloor == true) return STATUS_APPROVAL_REQUIRED;
-        if (standardPrice == null) return STATUS_NOT_REQUIRED;
-        Decimal up = unitPrice == null ? 0 : unitPrice;
-        Decimal d = discount == null ? 0 : discount;
-        Decimal finalPrice = up * (1 - (d / 100));
-        return finalPrice < standardPrice ? STATUS_APPROVAL_REQUIRED : STATUS_NOT_REQUIRED;
-    }
-
-    /**
-     * Applied-pricebook selection (per spec): starting from Price list5 as
-     * the default (standard) price, a discounted line falls into one of
-     * the lower tiers depending on the final per-unit amount *after
-     * discount and tax*. Walk 4 -> 3 -> 2 -> 1 and pick the HIGHEST tier
-     * whose list price is still <= the final amount. That is the tier
-     * whose "range" contains the final amount.
-     *
-     *   final amount > Price list4 list price  -> no tier matches
-     *                                             (caller marks Not Required,
-     *                                              keeps the Standard / PL5
-     *                                              reference)
-     *   Price list3 <= final <= Price list4     -> tag PL4
-     *   Price list2 <= final <= Price list3     -> tag PL3
-     *   Price list1 <= final <= Price list2     -> tag PL2
-     *   final <= Price list1                    -> tag PL1
-     *
-     * When a tier in the sequence is absent the helper skips it; if every
-     * tier is absent the helper returns null and the caller should leave
-     * the line untagged.
-     */
-    public static TierResolution resolveAppliedTier(ProductTierMap tiers, Decimal finalAmount) {
-        TierResolution r = new TierResolution();
-        r.underFloor = false;
-        if (tiers == null || tiers.byTier.isEmpty()) return r;
-        if (finalAmount == null) finalAmount = 0;
-
-        List<String> order = new List<String>{ TIER4, TIER3, TIER2, TIER1 };
-
-        // Is the final amount above Price list4 (or above whichever the
-        // highest available of PL4..PL1 is)? If so, no tier matches.
-        PricebookEntry topExisting = null;
-        for (String t : order) {
-            PricebookEntry e = tiers.tier(t);
-            if (e != null) { topExisting = e; break; }
-        }
-        if (topExisting == null) return r;
-        Decimal topPrice = topExisting.UnitPrice == null ? 0 : topExisting.UnitPrice;
-        if (finalAmount > topPrice) {
-            // Above the top discount tier — caller keeps 'Not Required'.
-            return r;
-        }
-
-        // Walk high-to-low, pick the first tier (highest list price) whose
-        // list price is <= finalAmount. That's the tier the amount has
-        // "dropped into".
-        PricebookEntry lowestExisting = null;
-        String lowestExistingTier = null;
-        for (String t : order) {
-            PricebookEntry e = tiers.tier(t);
-            if (e == null) continue;
-            lowestExisting = e;
-            lowestExistingTier = t;
-            Decimal p = e.UnitPrice == null ? 0 : e.UnitPrice;
-            if (p <= finalAmount) {
-                r.entry = e;
-                r.tierName = t;
-                r.tierListPrice = p;
-                return r;
-            }
-        }
-
-        // finalAmount is below every tier we have — default to the lowest
-        // existing tier (typically Price list1).
-        r.entry = lowestExisting;
-        r.tierName = lowestExistingTier;
-        r.tierListPrice = lowestExisting.UnitPrice;
-        r.underFloor = true;
-        return r;
-    }
-
-    /**
-     * Discount-percentage based tier resolution.
-     *
-     * Walks PL4 -> PL3 -> PL2 -> PL1 (priority high-restriction first)
-     * and picks the first tier whose Discount__c covers
-     * the rep's discount. That tier becomes the source pricebook for
-     * the line.
-     *
-     * If the discount equals the tier's Discount__c the
-     * caller should treat the line as Approval Required — the rep has
-     * maxed out that tier. A discount strictly below the tier's max
-     * stays Not Required.
-     *
-     * Returns null tier (entry == null) when:
-     *   - discountPercent is null or <= 0 (no discount, Standard pricebook).
-     *   - discountPercent exceeds every tier's Discount__c
-     *     (over the broadest allowance — caller should require approval).
-     * In the second case underFloor is set so the caller can distinguish
-     * "no discount" from "discount over max".
-     */
-    public static TierResolution resolveTierByDiscount(ProductTierMap tiers, Decimal discountPercent) {
-        TierResolution r = new TierResolution();
-        r.underFloor = false;
-        if (tiers == null || tiers.byTier.isEmpty()) return r;
-        if (discountPercent == null || discountPercent <= 0) return r;
-
-        List<String> order = new List<String>{ TIER4, TIER3, TIER2, TIER1 };
-        for (String t : order) {
-            PricebookEntry e = tiers.tier(t);
-            if (e == null) continue;
-            Decimal maxDisc = e.Discount__c;
-            if (maxDisc == null) continue;
-            if (discountPercent <= maxDisc) {
-                r.entry = e;
-                r.tierName = t;
-                r.tierListPrice = e.UnitPrice;
-                return r;
-            }
-        }
-        // Discount exceeds every tier's max — flag underFloor so the
-        // caller can clamp / require approval. No tier entry returned.
-        r.underFloor = true;
-        return r;
-    }
-
-    /**
-     * Status from the discount-tier resolution. Approval Required when
-     * the rep is at or above the assigned tier's Discount__c
-     * (or when the discount overran every tier and underFloor was set);
-     * Not Required when the discount sits below the tier's threshold.
-     */
-    public static String priceStatusForDiscountTier(TierResolution r, Decimal discountPercent) {
-        if (r == null) return STATUS_NOT_REQUIRED;
-        if (r.underFloor == true) return STATUS_APPROVAL_REQUIRED;
-        if (r.entry == null) return STATUS_NOT_REQUIRED;
-        Decimal maxDisc = r.entry.Discount__c;
-        if (maxDisc == null) return STATUS_NOT_REQUIRED;
-        if (discountPercent == null) return STATUS_NOT_REQUIRED;
-        return discountPercent >= maxDisc ? STATUS_APPROVAL_REQUIRED : STATUS_NOT_REQUIRED;
-    }
-
-    /**
-     * Tier rank — how much discount allowance the tier carries.
-     *   PL4 = 1 (least allowance — ASM band)
-     *   PL3 = 2 (TSM band)
-     *   PL2 = 3 (VP band)
-     *   PL1 = 4 (most allowance — CFO/CEO band)
-     * Standard / unknown returns 0.
-     */
-    public static Integer tierRank(String tierName) {
-        if (tierName == TIER4) return 1;
-        if (tierName == TIER3) return 2;
-        if (tierName == TIER2) return 3;
-        if (tierName == TIER1) return 4;
-        return 0;
-    }
-
-    /**
-     * Map a profile name to the tier that profile is allowed to discount
-     * up to without approval, per the role hierarchy:
-     *   Sales Engineer  -> PL4   (ASM band)
-     *   ASM             -> PL3   (TSM band)
-     *   TSM             -> PL2   (VP band)
-     *   VP / VP Sales   -> PL2   (own band — VP sits at the tier boundary)
-     *   CFO / CEO       -> PL1   (full allowance)
-     * Other profiles return null — meaning they have no implicit
-     * allowance and any tier hit triggers Approval Required.
-     *
-     * Short codes ('asm', 'tsm', 'vp', 'ceo', 'cfo') match exactly so a
-     * profile name like "Receptionist" doesn't accidentally fall in via
-     * a substring; long-form labels ("Vice President", "Chief Financial
-     * Officer", etc.) match via contains().
-     */
-    public static String capTierFor(String profileName) {
-        if (profileName == null) return null;
+    public static String ceilingTierFor(String profileName) {
+        if (profileName == null) return TIER5;
         String n = profileName.toLowerCase().trim();
         if (n == 'sales engineer' || n == 'sales_engineer') return TIER4;
         if (n == 'asm' || n.contains('area sales manager')) return TIER3;
@@ -373,14 +152,26 @@ public with sharing class PricebookTierService {
                 || n.contains('vice president')) return TIER2;
         if (n == 'ceo' || n == 'cfo'
                 || n.contains('chief financial') || n.contains('chief executive')) return TIER1;
-        return null;
+        return TIER5;
     }
 
     /**
-     * Looks up the running user's profile name and returns their
-     * discount-cap tier. Cached per-transaction so the SOQL only fires
-     * once even when the LWC pings getProductPricingPreview repeatedly.
+     * Ordered escalation ladder above the ceiling, tightest-band first.
+     * A user at PL4 walks PL3 -> PL2 -> PL1; a CEO at PL1 has an empty
+     * ladder.
      */
+    public static List<String> escalationLadderAbove(String ceilingTier) {
+        Integer ceilingRank = RANK_BY_TIER.get(ceilingTier);
+        if (ceilingRank == null) ceilingRank = 0;
+        List<String> result = new List<String>();
+        for (String t : new List<String>{ TIER4, TIER3, TIER2, TIER1 }) {
+            Integer r = RANK_BY_TIER.get(t);
+            if (r != null && r > ceilingRank) result.add(t);
+        }
+        return result;
+    }
+
+    // Cached per-transaction so repeated LWC pings don't burn SOQL.
     private static String cachedProfileName;
     public static String runningUserProfileName() {
         if (cachedProfileName != null) return cachedProfileName;
@@ -395,36 +186,91 @@ public with sharing class PricebookTierService {
     }
 
     /**
-     * Profile-aware status: a tier match below or at the running user's
-     * cap stays Not Required, a tier above the cap (or a discount that
-     * overran every tier) flips to Approval Required.
+     * Run the algorithm for one line item.
      *
-     * Service items short-circuit elsewhere — this helper is only
-     * meaningful for non-service line items.
+     *   tiers           - the product's tier map from loadTiers()
+     *   enteredDiscount - the discount the user entered on the line (%)
+     *   isService       - Product2.Service_Item__c == 'Yes' shortcut
+     *   profileName     - running user profile (drives ceiling)
+     *
+     * The Evaluation result is shaped so the caller can simply copy
+     * mappedPricebookId / mappedPricebookEntryId / mappedUnitPrice onto
+     * the line and stamp status. When mappedPricebookId is null the
+     * caller should leave the line's pricebook reference alone (no tier
+     * data; nothing safe to map).
      */
-    public static String priceStatusForProfile(TierResolution r, String profileName) {
-        if (r == null) return STATUS_NOT_REQUIRED;
-        if (r.underFloor == true) return STATUS_APPROVAL_REQUIRED;
-        if (r.entry == null) return STATUS_NOT_REQUIRED;
-        String capTier = capTierFor(profileName);
-        if (capTier == null) {
-            // Profile has no implicit discount allowance — every matched
-            // tier needs approval.
-            return STATUS_APPROVAL_REQUIRED;
-        }
-        Integer matched = tierRank(r.tierName);
-        Integer cap = tierRank(capTier);
-        if (matched == 0 || cap == 0) return STATUS_APPROVAL_REQUIRED;
-        return matched <= cap ? STATUS_NOT_REQUIRED : STATUS_APPROVAL_REQUIRED;
-    }
+    public static Evaluation evaluate(
+        ProductTiers tiers,
+        Decimal enteredDiscount,
+        Boolean isService,
+        String profileName
+    ) {
+        Evaluation ev = new Evaluation();
+        ev.status = STATUS_NOT_REQUIRED;
+        ev.exceedsAllTiers = false;
 
-    /**
-     * Service-line shortcut: service items have no tiered list price to
-     * compare against, and the business rule is 'approval required except
-     * when the Product's Service_Item field is No'. So every service line
-     * lands on Approval Required and needs a human sign-off.
-     */
-    public static String priceStatusForService() {
-        return STATUS_APPROVAL_REQUIRED;
+        // Step 1 — service item shortcut. Don't touch the pricebook,
+        // status is always Not Required.
+        if (isService == true) return ev;
+
+        // No tier data at all. Nothing safe to evaluate against — leave
+        // the line as-is.
+        if (tiers == null || tiers.isEmpty()) return ev;
+
+        Decimal disc = enteredDiscount == null ? 0 : enteredDiscount;
+        String ceiling = ceilingTierFor(profileName);
+        ev.ceilingTierName = ceiling;
+
+        // Default mapping is Price List 5 (the standard).
+        PricebookEntry pl5 = tiers.tier(TIER5);
+        if (pl5 != null) {
+            ev.mappedPricebookId      = pl5.Pricebook2Id;
+            ev.mappedPricebookEntryId = pl5.Id;
+            ev.mappedTierName         = TIER5;
+            ev.mappedUnitPrice        = pl5.UnitPrice;
+        }
+
+        // Step 2 — within ceiling. A zero discount always passes this
+        // check (regardless of whether the ceiling tier exists).
+        PricebookEntry ceilingPbe = tiers.tier(ceiling);
+        Decimal ceilingDiscount = (ceilingPbe == null) ? null : ceilingPbe.Discount__c;
+        ev.ceilingTierDiscount = ceilingDiscount;
+
+        if (disc == 0) return ev;
+        if (ceilingDiscount != null && disc <= ceilingDiscount) return ev;
+
+        // Step 3 — escalation ladder. Walk tightest band first; pick
+        // the first tier whose Discount__c can cover the entered
+        // discount. Skip missing tiers gracefully.
+        for (String t : escalationLadderAbove(ceiling)) {
+            PricebookEntry tierPbe = tiers.tier(t);
+            if (tierPbe == null) continue;
+            Decimal tierDisc = tierPbe.Discount__c;
+            if (tierDisc == null) continue;
+            if (disc <= tierDisc) {
+                ev.status                 = STATUS_APPROVAL_REQUIRED;
+                ev.mappedPricebookId      = tierPbe.Pricebook2Id;
+                ev.mappedPricebookEntryId = tierPbe.Id;
+                ev.mappedTierName         = t;
+                ev.mappedUnitPrice        = tierPbe.UnitPrice;
+                ev.mappedTierDiscount     = tierDisc;
+                return ev;
+            }
+        }
+
+        // Step 4 — exceeds every tier in the ladder. Map Price List 1
+        // (top of ladder) and flag exceedsAllTiers so callers can warn
+        // the rep that the discount is past the broadest allowance.
+        PricebookEntry pl1 = tiers.tier(TIER1);
+        if (pl1 != null) {
+            ev.mappedPricebookId      = pl1.Pricebook2Id;
+            ev.mappedPricebookEntryId = pl1.Id;
+            ev.mappedTierName         = TIER1;
+            ev.mappedUnitPrice        = pl1.UnitPrice;
+            ev.mappedTierDiscount     = pl1.Discount__c;
+        }
+        ev.status = STATUS_APPROVAL_REQUIRED;
+        ev.exceedsAllTiers = true;
+        return ev;
     }
 }

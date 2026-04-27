@@ -363,9 +363,11 @@ public with sharing class QuoteBuilderController {
      * used by the new tier model - filtering by account or region is the
      * admin's responsibility via Pricebook2 activation.
      */
-    // Product search now filters on Product2.Product_Type__c (Equipment /
-    // Spare / Accessories / Consumables). Results use the tier model for
-    // display price + resolveAppliedTier for the save-time approval flip.
+    // Product search filters on Product2.Product_Type__c (Equipment /
+    // Spare / Accessories / Consumables). The displayed price comes
+    // from the product's Price List 5 entry; the save-time approval
+    // flip is owned by the QuoteLineItem trigger via the
+    // PricebookTierService.evaluate algorithm.
     @AuraEnabled
     public static List<ProductSearchResult> searchProductsWithBestPrice(
         String searchTerm, String category, Id accountId, Id regionId
@@ -429,7 +431,7 @@ public with sharing class QuoteBuilderController {
         for (Product2 p : products) {
             if (p.Service_Item__c != 'Yes') nonServiceIds.add(p.Id);
         }
-        Map<Id, PricebookTierService.ProductTierMap> tierMaps =
+        Map<Id, PricebookTierService.ProductTiers> tierMaps =
             PricebookTierService.loadTiers(nonServiceIds);
 
         for (Product2 prod : products) {
@@ -470,7 +472,7 @@ public with sharing class QuoteBuilderController {
             PricebookEntry stdEntry = stdEntryMap.get(prod.Id);
             if (stdEntry == null) continue; // cannot be added to a Standard-pricebook quote
 
-            PricebookTierService.ProductTierMap tiers = tierMaps.get(prod.Id);
+            PricebookTierService.ProductTiers tiers = tierMaps.get(prod.Id);
             PricebookEntry tier5 = tiers == null ? null : tiers.tier(PricebookTierService.TIER5);
 
             psr.pricebookEntryId = stdEntry.Id;
@@ -482,34 +484,11 @@ public with sharing class QuoteBuilderController {
                 psr.sourcePricebookType = PricebookTierService.TIER5;
             } else {
                 // No tier set up yet — fall back to the Standard PBE price so
-                // the product still surfaces in search. The trigger will reject
-                // the save if the org requires a tier entry, but at least the
-                // rep can see the product instead of it vanishing silently.
+                // the product still surfaces in search.
                 psr.unitPrice = stdEntry.UnitPrice;
                 psr.sourcePricebookId = stdEntry.Pricebook2Id;
                 psr.sourcePricebook = 'Standard';
                 psr.sourcePricebookType = 'Standard';
-            }
-
-            // Export the discount-tier PBE prices (PL4 -> PL1, skipping
-            // the Standard pricebook and Price list5) so the LWC can run
-            // the live Price_Status decision client-side against the
-            // actual tier ladder without round-tripping to Apex on every
-            // keystroke.
-            for (String t : new List<String>{
-                PricebookTierService.TIER4,
-                PricebookTierService.TIER3,
-                PricebookTierService.TIER2,
-                PricebookTierService.TIER1
-            }) {
-                PricebookEntry tierPbe = tiers == null ? null : tiers.tier(t);
-                if (tierPbe == null || tierPbe.UnitPrice == null) continue;
-                PriceOption po = new PriceOption();
-                po.pricebookType = t;
-                po.pricebookName = tierPbe.Pricebook2.Name;
-                po.price = tierPbe.UnitPrice;
-                po.isSelected = false;
-                psr.availablePrices.add(po);
             }
 
             results.add(psr);
@@ -518,15 +497,24 @@ public with sharing class QuoteBuilderController {
     }
 
     /**
-     * Live tier + Price_Status preview for the LWC. Called whenever the user
-     * edits UnitPrice, Discount, or Product on a line so the UI can echo
-     * what the trigger will stamp on save.
+     * Live tier + Price_Status preview for the LWC. Called whenever the
+     * user edits Discount or Product on a line so the UI can echo what
+     * the trigger will stamp on save.
      *
-     * For a service item, returns status=Not Required and resolvedTier=null.
-     * For a non-service item, returns the tightest-fitting tier for the
-     * discounted unit price and the Price_Status that will be written.
-     * Throws AuraHandledException when UnitPrice is below Price list5 - the
-     * same floor the trigger enforces.
+     * Service items short-circuit to status = 'Not Required' and leave
+     * the line's pricebook untouched (resolvedPricebookId stays null).
+     *
+     * Non-service items run the discount-vs-Discount__c algorithm in
+     * PricebookTierService.evaluate. Result tells the caller:
+     *   - which tier to map onto the line
+     *   - the unit price to re-fetch from that tier's PricebookEntry
+     *   - whether to flip Price_Status__c to Approval Required
+     *   - whether the discount overran every tier (exceedsAllTiers — the
+     *     UI surfaces a warning)
+     *
+     * unitPrice and quantity remain on the signature for backwards
+     * compatibility with existing LWC callers; they are no longer read by
+     * the algorithm.
      */
     @AuraEnabled(cacheable=false)
     public static PricingPreview getProductPricingPreview(Id productId, Decimal unitPrice, Decimal discount, Decimal quantity) {
@@ -544,93 +532,30 @@ public with sharing class QuoteBuilderController {
         out.isServiceItem = (p.Service_Item__c == 'Yes');
         out.taxPercent = p.Tax__c;
 
-        if (out.isServiceItem) {
-            out.priceStatus = PricebookTierService.priceStatusForService();
-            return out;
-        }
-
-        Map<Id, PricebookTierService.ProductTierMap> tierMaps =
+        Map<Id, PricebookTierService.ProductTiers> tierMaps =
             PricebookTierService.loadTiers(new Set<Id>{p.Id});
-        PricebookTierService.ProductTierMap tiers = tierMaps.get(p.Id);
-        PricebookEntry tier5 = tiers == null ? null : tiers.tier(PricebookTierService.TIER5);
 
-        // Determine the standard price: prefer Price list5, fall back to
-        // the Standard pricebook's PBE so products without a tier entry
-        // can still be previewed / saved.
-        Decimal standard;
-        if (tier5 != null && tier5.UnitPrice != null) {
-            standard = tier5.UnitPrice;
-        } else {
-            List<PricebookEntry> stdPbe = [
-                SELECT UnitPrice
-                FROM PricebookEntry
-                WHERE Product2Id = :p.Id
-                  AND IsActive = true
-                  AND Pricebook2.IsStandard = true
-                LIMIT 1
-            ];
-            standard = stdPbe.isEmpty() ? null : stdPbe[0].UnitPrice;
+        PricebookTierService.Evaluation ev = PricebookTierService.evaluate(
+            tierMaps.get(p.Id),
+            discount,
+            out.isServiceItem,
+            PricebookTierService.runningUserProfileName()
+        );
+
+        out.priceStatus              = ev.status;
+        out.resolvedTier             = ev.mappedTierName;
+        out.resolvedPricebookId      = ev.mappedPricebookId;
+        out.resolvedPricebookEntryId = ev.mappedPricebookEntryId;
+        out.resolvedUnitPrice        = ev.mappedUnitPrice;
+        out.exceedsAllTiers          = ev.exceedsAllTiers == true;
+        out.ceilingTierName          = ev.ceilingTierName;
+        out.ceilingTierDiscount      = ev.ceilingTierDiscount;
+        // standardPrice mirrors the PL5 unit price (the line's default
+        // basis) so the UI can keep totals consistent without an extra
+        // round-trip when the line stays within the ceiling.
+        if (out.resolvedTier == PricebookTierService.TIER5 && out.resolvedUnitPrice != null) {
+            out.standardPrice = out.resolvedUnitPrice;
         }
-
-        // Sales Price is locked to the Standard list price on
-        // non-service lines. If the LWC passes anything else (above or
-        // below), snap to Standard silently instead of erroring.
-        Decimal up = unitPrice == null ? standard : unitPrice;
-        if (standard != null && up != null && up != standard) {
-            up = standard;
-        }
-        Decimal d = discount == null ? 0 : discount;
-        Decimal taxPct = p.Tax__c != null ? p.Tax__c : 0;
-        Decimal upVal = up == null ? 0 : up;
-        Decimal discountedUnit = upVal * (1 - (d / 100));
-        // Per-unit final price after discount AND tax — compared against
-        // PL4..PL1 per-unit list prices. quantity is still accepted on
-        // the signature so the LWC can keep passing it, but it isn't
-        // folded into the tier-comparison amount.
-        Decimal finalAmount = discountedUnit * (1 + (taxPct / 100));
-
-        out.standardPrice = standard;
-
-        // Discount-percentage based tier resolution: the rep entered a
-        // discount, walk PL4 -> PL1 and pick the first tier whose
-        // Discount__c covers it. Tag that tier as the
-        // line's source pricebook. Status is profile-aware — a Sales
-        // Engineer who lands on PL4 stays Not Required, but a Sales
-        // Engineer whose discount slips into PL3 needs approval.
-        if (d > 0 && tiers != null && !tiers.byTier.isEmpty()) {
-            PricebookTierService.TierResolution applied =
-                PricebookTierService.resolveTierByDiscount(tiers, d);
-            String runningProfile = PricebookTierService.runningUserProfileName();
-            if (applied != null && applied.entry != null) {
-                out.resolvedTier = applied.tierName;
-                out.resolvedTierListPrice = applied.tierListPrice;
-                out.resolvedPricebookId = applied.entry.Pricebook2Id;
-                out.priceStatus = PricebookTierService.priceStatusForProfile(applied, runningProfile);
-                return out;
-            }
-            if (applied != null && applied.underFloor == true) {
-                // Discount exceeds every tier's Discount__c —
-                // the rep has gone past the broadest allowance, so flag
-                // for approval against the Standard pricebook.
-                List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
-                if (!stdPbs.isEmpty()) {
-                    out.resolvedTier = 'Standard';
-                    out.resolvedTierListPrice = standard;
-                    out.resolvedPricebookId = stdPbs[0].Id;
-                }
-                out.priceStatus = PricebookTierService.STATUS_APPROVAL_REQUIRED;
-                return out;
-            }
-        }
-
-        // No discount (or no tier data) — Standard pricebook, no approval.
-        List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
-        if (!stdPbs.isEmpty()) {
-            out.resolvedTier = 'Standard';
-            out.resolvedTierListPrice = standard;
-            out.resolvedPricebookId = stdPbs[0].Id;
-        }
-        out.priceStatus = PricebookTierService.STATUS_NOT_REQUIRED;
         return out;
     }
 
@@ -785,7 +710,6 @@ public with sharing class QuoteBuilderController {
             }
 
             Map<Id, Id> pbeByProduct = resolveQuotePricebookEntries(quoteId, lineItems);
-            Map<Id, Id> optedPbByProduct = resolveOptedPricebooks(lineItems);
 
             List<QuoteLineItem> qliList = new List<QuoteLineItem>();
             for (LineItemInput item : lineItems) {
@@ -800,16 +724,15 @@ public with sharing class QuoteBuilderController {
                 qli.Discount = item.discount;
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
-                qli.Source_Pricebook_Ref__c = item.sourcePricebookId;
-              //  qli.Opted_Price_Book__c = optedPbByProduct.get(item.productId);
                 // Tax__c carries the Product's tax rate from the LWC. The
-                // tiered-line trigger will re-stamp it from Product2.Tax__c
-                // for non-service rows; service rows keep the value the
-                // rep entered (trigger is a no-op on Tax for services).
+                // QuoteLineItem trigger re-stamps it from Product2.Tax__c on
+                // non-service rows; service rows keep the rep-entered value.
                 if (item.taxPercent != null) {
                     qli.Tax__c = item.taxPercent;
                 }
-                // Price_Status__c is stamped by the QuoteLineItem trigger.
+                // Price_Status__c and Source_Pricebook_Ref__c are stamped
+                // authoritatively by the QuoteLineItem trigger using the
+                // discount-vs-Discount__c algorithm.
                 qliList.add(qli);
             }
             insert qliList;
@@ -832,7 +755,6 @@ public with sharing class QuoteBuilderController {
             if (!oldItems.isEmpty()) delete oldItems;
 
             Map<Id, Id> pbeByProduct = resolveQuotePricebookEntries(quoteId, lineItems);
-            Map<Id, Id> optedPbByProduct = resolveOptedPricebooks(lineItems);
 
             List<QuoteLineItem> qliList = new List<QuoteLineItem>();
             for (LineItemInput item : lineItems) {
@@ -847,16 +769,11 @@ public with sharing class QuoteBuilderController {
                 qli.Discount = item.discount;
                 qli.Product_Line_Description__c = item.lineDescription;
                 qli.Product_Detailed_Description__c = item.detailedDescription;
-                qli.Source_Pricebook_Ref__c = item.sourcePricebookId;
-                qli.Opted_Price_Book__c = optedPbByProduct.get(item.productId);
-                // Tax__c carries the Product's tax rate from the LWC. The
-                // tiered-line trigger will re-stamp it from Product2.Tax__c
-                // for non-service rows; service rows keep the value the
-                // rep entered (trigger is a no-op on Tax for services).
                 if (item.taxPercent != null) {
                     qli.Tax__c = item.taxPercent;
                 }
-                // Price_Status__c is stamped by the QuoteLineItem trigger.
+                // Price_Status__c and Source_Pricebook_Ref__c are stamped by
+                // the QuoteLineItem trigger.
                 qliList.add(qli);
             }
             insert qliList;
@@ -865,57 +782,6 @@ public with sharing class QuoteBuilderController {
         } catch (Exception e) {
             throw new AuraHandledException('Line item update failed: ' + e.getMessage());
         }
-    }
-
-    /**
-     * For each incoming line, resolve the product's opted discount
-     * pricebook using the rule:
-     *
-     *   finalPrice = UnitPrice
-     *              - (Discount% * UnitPrice)
-     *              - (Tax% * UnitPrice)
-     *
-     *   Walk PL4 -> PL3 -> PL2 -> PL1 and return the HIGHEST tier
-     *   whose list price is <= finalPrice. If finalPrice is below
-     *   every configured tier, return PL1 (floor). If finalPrice is
-     *   above the top existing tier (no discount tier applies),
-     *   return null so the caller leaves Opted_Price_Book__c blank.
-     *
-     * Returns a productId -> Pricebook2 id map (only populated for
-     * lines whose product has tier pricebooks and whose final amount
-     * actually hits one).
-     */
-    private static Map<Id, Id> resolveOptedPricebooks(List<LineItemInput> lineItems) {
-        Map<Id, Id> out = new Map<Id, Id>();
-        if (lineItems == null || lineItems.isEmpty()) return out;
-
-        Set<Id> productIds = new Set<Id>();
-        for (LineItemInput li : lineItems) {
-            if (li.productId != null) productIds.add(li.productId);
-        }
-        if (productIds.isEmpty()) return out;
-
-        Map<Id, PricebookTierService.ProductTierMap> tierMaps =
-            PricebookTierService.loadTiers(productIds);
-
-        for (LineItemInput li : lineItems) {
-            if (li.productId == null) continue;
-            PricebookTierService.ProductTierMap tiers = tierMaps.get(li.productId);
-            if (tiers == null || tiers.byTier.isEmpty()) continue;
-
-            Decimal up  = li.unitPrice  == null ? 0 : li.unitPrice;
-            Decimal d   = li.discount   == null ? 0 : li.discount;
-            Decimal tax = li.taxPercent == null ? 0 : li.taxPercent;
-            Decimal taxprice = (up * tax) / 100;
-            Decimal finalPrice = up - ((d * up) / 100) - taxprice;
-
-            PricebookTierService.TierResolution applied =
-                PricebookTierService.resolveAppliedTier(tiers, finalPrice);
-            if (applied != null && applied.entry != null) {
-                out.put(li.productId, applied.entry.Pricebook2Id);
-            }
-        }
-        return out;
     }
 
     // Price_Status__c and Tax__c on QuoteLineItem and the Quote rollup are
@@ -1046,10 +912,23 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public Boolean isServiceItem;
         @AuraEnabled public Decimal taxPercent;
         @AuraEnabled public Decimal standardPrice;
-        @AuraEnabled public String resolvedTier;
-        @AuraEnabled public Decimal resolvedTierListPrice;
-        @AuraEnabled public Id resolvedPricebookId;
-        @AuraEnabled public String priceStatus;
+        // Tier the algorithm mapped to the line ('Price List 1'..'Price List 5')
+        @AuraEnabled public String  resolvedTier;
+        @AuraEnabled public Id      resolvedPricebookId;
+        @AuraEnabled public Id      resolvedPricebookEntryId;
+        // UnitPrice from the resolved tier's PricebookEntry — the LWC
+        // re-fetches this onto the line when a remap happens so totals
+        // reflect the new tier.
+        @AuraEnabled public Decimal resolvedUnitPrice;
+        @AuraEnabled public String  priceStatus;
+        // True when the discount overran every tier (PL1's Discount__c
+        // included). UI shows a warning that the discount exceeds even
+        // the broadest CEO/CFO allowance.
+        @AuraEnabled public Boolean exceedsAllTiers;
+        // Diagnostic context — surfaced as "Above your <CeilingTier>
+        // ceiling (<n>%)" in the toast that fires when status flips.
+        @AuraEnabled public String  ceilingTierName;
+        @AuraEnabled public Decimal ceilingTierDiscount;
     }
 
     public class PriceOption {

@@ -921,18 +921,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         if (!isService && (!product.pricebookEntryId || product.unitPrice == null)) {
             this.showError(
                 'Cannot add product',
-                product.productName + ' does not have a Price list5 entry. Ask an admin to create one before adding it to a quote.'
+                product.productName + ' does not have a Price List 5 entry. Ask an admin to create one before adding it to a quote.'
             );
             return;
         }
 
         rowCounter++;
-        // Extract the discount-tier PBE prices (PL4 -> PL1) from the
-        // search result so computePriceStatus can iterate them without
-        // a server round-trip.
-        const tierPrices = Array.isArray(product.availablePrices)
-            ? product.availablePrices.map(p => p.price).filter(v => v != null)
-            : [];
         const priceStatus = 'Not Required';
         const newItem = {
             rowId: 'row-' + rowCounter,
@@ -953,7 +947,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             priceStatus: priceStatus,
             priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
             qwStatusClass: this.getQwStatusClass(priceStatus),
-            isApprovalRequired: priceStatus === 'Approval Required',
+            isApprovalRequired: false,
             lineTotal: (product.unitPrice || 0) * (1 + ((product.taxPercent || 0) / 100)),
             lineDescription: product.lineDescription || '',
             detailedDescription: product.detailedDescription || '',
@@ -961,8 +955,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             sourcePricebookName: product.sourcePricebook || (isService ? 'Service' : ''),
             priceBadgeClass: this.getPriceBadgeClass(product.sourcePricebookType),
             priceBadgeLabel: this.getPriceBadgeLabel(product.sourcePricebookType),
-            hasPriceSource: !!product.sourcePricebookType,
-            tierPrices: tierPrices
+            hasPriceSource: !!product.sourcePricebookType
         };
 
         this.lineItems = [...this.lineItems, newItem];
@@ -973,6 +966,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             if (r.pricebookEntryId !== pbeId) return r;
             return { ...r, alreadyAdded: true, cardClass: 'qw-product-card is-added' };
         });
+
+        // Run the discount/ceiling evaluator immediately so a freshly
+        // added line carries an accurate priceStatus and (for non-service
+        // products) the resolved tier badge.
+        if (!isService) this.refreshPricingPreview(newItem.rowId);
 
         this.showSuccess('Product Added', product.productName + ' added to the quote.');
     }
@@ -1036,38 +1034,26 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             const taxAmt = afterDiscount * ((updated.taxPercent || 0) / 100);
             updated.lineTotal = afterDiscount + taxAmt;
 
-            // Recompute price status against the product's tier PBE
-            // prices (PL4..PL1). Preserves an already-Approved line so
-            // approvers' decisions aren't silently undone by a later edit.
-            if (updated.priceStatus !== 'Approved') {
-                const live = this.computePriceStatus(
-                    updated.unitPrice,
-                    updated.discount,
-                    updated.listPrice,
-                    updated.isServiceItem,
-                    updated.taxPercent,
-                    updated.tierPrices
-                );
-                updated.priceStatus = live;
-                updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(live);
-                updated.qwStatusClass = this.getQwStatusClass(live);
-                updated.isApprovalRequired = live === 'Approval Required';
-            }
-
             return updated;
         });
 
+        // The discount-vs-Discount__c evaluator is server-side: ping it on
+        // every discount/quantity/unit-price change so the UI badge,
+        // mapped tier, and (re-fetched) UnitPrice stay in sync with what
+        // the QuoteLineItem trigger will stamp on save.
         if (refreshTier) this.refreshPricingPreview(rowId);
     }
 
-    // Asks the server for the tightest-fitting tier based on the current
-    // unit price and discount. The server answer is authoritative for the
-    // tier badge + Price_Status — matches what the QLI trigger will stamp
-    // on save. Skipped for service lines and for already-Approved lines.
+    // Asks the server to run the discount-vs-Discount__c algorithm and
+    // returns the tier the line should map to, the UnitPrice to re-fetch
+    // from that tier's PricebookEntry, and the resulting Price_Status.
+    // Already-Approved lines are skipped so an approver's decision isn't
+    // silently undone by a later edit. Service items short-circuit on
+    // the server (status = Not Required, no remap).
     async refreshPricingPreview(rowId) {
         const item = this.lineItems.find(it => it.rowId === rowId);
-        if (!item || item.isServiceItem || item.priceStatus === 'Approved') return;
-        if (!item.productId || item.unitPrice == null) return;
+        if (!item || item.priceStatus === 'Approved') return;
+        if (!item.productId) return;
 
         try {
             const preview = await getProductPricingPreview({
@@ -1077,12 +1063,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 quantity: item.quantity || 1
             });
 
-            // Apex returns resolvedTier = 'Standard' when the per-unit
-            // final is above PL4 (no discount tier applies), else one
-            // of 'Price list4'..'Price list1'. Fall back to 'Standard'
-            // so the UI matches the save-time stamp on the org's
-            // Standard Pricebook.
-            const resolvedPb = preview.resolvedTier || 'Standard';
+            const previousStatus = item.priceStatus;
+            const resolvedPb = preview.resolvedTier || '';
             this.lineItems = this.lineItems.map(it => {
                 if (it.rowId !== rowId) return it;
                 const updated = { ...it };
@@ -1090,20 +1072,62 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(updated.priceStatus);
                 updated.qwStatusClass = this.getQwStatusClass(updated.priceStatus);
                 updated.isApprovalRequired = updated.priceStatus === 'Approval Required';
-                updated.sourcePricebookId = preview.resolvedPricebookId || updated.sourcePricebookId;
-                updated.sourcePricebookName = resolvedPb;
-                updated.priceBadgeClass = this.getPriceBadgeClass(resolvedPb);
-                updated.priceBadgeLabel = this.getPriceBadgeLabel(resolvedPb);
-                updated.hasPriceSource = !!resolvedPb;
+                if (preview.resolvedPricebookId) updated.sourcePricebookId = preview.resolvedPricebookId;
+                if (resolvedPb) {
+                    updated.sourcePricebookName = resolvedPb;
+                    updated.priceBadgeClass = this.getPriceBadgeClass(resolvedPb);
+                    updated.priceBadgeLabel = this.getPriceBadgeLabel(resolvedPb);
+                    updated.hasPriceSource = true;
+                }
+                if (preview.pricebookEntryId || preview.resolvedPricebookEntryId) {
+                    updated.pricebookEntryId = preview.resolvedPricebookEntryId || preview.pricebookEntryId;
+                }
+                // The trigger re-fetches UnitPrice from the mapped tier on
+                // save; mirror that in the UI so totals match what will
+                // be persisted. Skip for service items (server returns no
+                // mapped price for those).
+                if (!updated.isServiceItem && preview.resolvedUnitPrice != null) {
+                    updated.unitPrice = preview.resolvedUnitPrice;
+                    updated.listPrice = preview.standardPrice != null
+                        ? preview.standardPrice
+                        : updated.listPrice;
+                    const base = updated.unitPrice * (updated.quantity || 0);
+                    const afterDiscount = base * (1 - ((updated.discount || 0) / 100));
+                    const taxAmt = afterDiscount * ((updated.taxPercent || 0) / 100);
+                    updated.lineTotal = afterDiscount + taxAmt;
+                }
                 return updated;
             });
+
+            // UX feedback: when the status flips from Not Required to
+            // Approval Required (or the rep blew past the broadest
+            // ceiling) surface a toast naming the tier the discount
+            // landed on so they know which approval tier was hit.
+            if (preview.priceStatus === 'Approval Required'
+                && previousStatus !== 'Approval Required') {
+                if (preview.exceedsAllTiers) {
+                    this.showError(
+                        'Discount above CEO/CFO ceiling',
+                        `Discount exceeds the ${this.tierDisplayLabel(preview.resolvedTier)} ` +
+                        `maximum. Approval will be required.`
+                    );
+                } else if (preview.resolvedTier) {
+                    this.showSuccess(
+                        'Approval required',
+                        `Discount mapped to ${this.tierDisplayLabel(preview.resolvedTier)} — ` +
+                        `requires approval at that tier.`
+                    );
+                }
+            }
         } catch (error) {
-            // Server rejects UnitPrice < Price list5 by throwing — the
-            // client floor already caught that; any other rejection is
-            // non-fatal for the live UI (the save trigger remains the
-            // source of truth). Log quietly to the console.
             console.warn('Pricing preview unavailable:', error && error.body ? error.body.message : error);
         }
+    }
+
+    // Friendly label for the tier ('Price List 4' -> 'Tier 4').
+    tierDisplayLabel(tierName) {
+        const label = this.getPriceBadgeLabel(tierName);
+        return label || tierName || 'Standard';
     }
 
     // ===== CANCEL =====
@@ -1187,7 +1211,9 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
     // Shared builder for grid rows sourced from the server — used by
     // edit-mode QLI loading and by the new-quote flow when prefilling
-    // from the parent Opportunity's products.
+    // from the parent Opportunity's products. Price status is read from
+    // the server payload (or 'Not Required' for service items); the
+    // live preview re-evaluates on the first edit.
     buildRowFromServerItem(item, index) {
         rowCounter++;
         const disc = item.discount || 0;
@@ -1197,23 +1223,14 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         const afterDiscount = base - discountAmt;
         const taxAmt = afterDiscount * ((item.taxPercent || 0) / 100);
 
-        // Server doesn't ship tier PBE prices on load — computePriceStatus
-        // falls back to the listPrice comparison; the live preview will
-        // refresh the status on the first edit.
-        const tierPricesFromDb = [];
         const VALID_LINE_STATUSES = ['Not Required', 'Approval Required', 'Approved'];
-        // Service items (Service_Item picklist = Yes) never require
-        // approval — ignore any stale server value that says otherwise.
         let priceStatus;
         if (isService) {
             priceStatus = 'Not Required';
         } else if (VALID_LINE_STATUSES.includes(item.priceStatus)) {
             priceStatus = item.priceStatus;
         } else {
-            priceStatus = this.computePriceStatus(
-                item.unitPrice, disc, item.listPrice, isService,
-                item.taxPercent, tierPricesFromDb
-            );
+            priceStatus = 'Not Required';
         }
 
         return {
@@ -1241,57 +1258,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             detailedDescription: item.detailedDescription || '',
             sourcePricebookId: item.sourcePricebookId || null,
             sourcePricebookName: item.sourcePricebookName || '',
-            tierPrices: tierPricesFromDb,
             priceBadgeClass: this.getPriceBadgeClass(item.sourcePricebookName),
             priceBadgeLabel: this.getPriceBadgeLabel(item.sourcePricebookName),
             hasPriceSource: !!item.sourcePricebookName
         };
     }
 
-    // ===== PRICE STATUS =====
-
-    // Client-side mirror of the server's Price_Status decision.
-    //
-    // Non-service logic:
-    //   finalPrice = unitPrice
-    //              - (discount% of unitPrice)
-    //              - (tax% of unitPrice)
-    //   Walk the product's existing discount-tier pricebooks (Price list4
-    //   down to Price list1, excluding the Standard pricebook). If
-    //   finalPrice is <= any of those tier list prices, return
-    //   'Approval Required'. Otherwise compare to listPrice (the Standard
-    //   / Price list5 anchor) as the last-resort fallback for products
-    //   that don't have any tier pricebooks populated.
-    //
-    // Service lines (Product's Service_Item picklist = Yes) always return
-    // 'Not Required' — the tier/list-price approval gate doesn't apply.
-    computePriceStatus(unitPrice, discount, listPrice, isServiceItem, taxpercentage, tierPrices) {
-        if (isServiceItem) return 'Not Required';
-
-        const tax = taxpercentage == null ? 0 : taxpercentage;
-        const up  = unitPrice == null ? 0 : unitPrice;
-        const d   = discount == null ? 0 : discount;
-        const taxprice = (up * tax) / 100;
-        const finalPrice = up - ((d * up) / 100) - taxprice;
-
-        // Iterate the product's tier PBE prices (PL4 -> PL1, already
-        // excludes Standard). If any tier price is >= finalPrice, the
-        // discount has dropped the line into that tier's band and the
-        // status flips to Approval Required.
-        if (Array.isArray(tierPrices)) {
-            for (const tp of tierPrices) {
-               
-                if (tp != null && finalPrice <= tp) return 'Approval Required';
-            }
-            // No tier matched and tier data was actually supplied —
-            // final price is above every discount tier; no approval.
-            if (tierPrices.length > 0) return 'Not Required';
-        }
-
-        // Fallback for products with no tier PBEs configured.
-        if (listPrice == null) return 'Not Required';
-        return finalPrice <= listPrice ? 'Approval Required' : 'Not Required';
-    }
+    // ===== PRICE STATUS BADGES =====
 
     getPriceStatusBadgeClass(priceStatus) {
         const base = 'slds-badge';
@@ -1327,30 +1300,42 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     getPriceBadgeClass(pricebookType) {
         const base = 'price-source-badge';
         if (!pricebookType) return base + ' price-source-standard';
-        switch (pricebookType) {
-            case 'Standard':    return base + ' price-source-standard';
-            case 'Price list 5': return base + ' price-source-standard';
-            case 'Price list 4': return base + ' price-source-tier4';
-            case 'Price list 3': return base + ' price-source-tier3';
-            case 'Price list 2': return base + ' price-source-tier2';
-            case 'Price list 1': return base + ' price-source-tier1';
-            case 'Service':    return base + ' price-source-service';
-            default:           return base + ' price-source-standard';
+        switch (this.normaliseTier(pricebookType)) {
+            case 'Standard':     return base + ' price-source-standard';
+            case 'Price List 5': return base + ' price-source-standard';
+            case 'Price List 4': return base + ' price-source-tier4';
+            case 'Price List 3': return base + ' price-source-tier3';
+            case 'Price List 2': return base + ' price-source-tier2';
+            case 'Price List 1': return base + ' price-source-tier1';
+            case 'Service':      return base + ' price-source-service';
+            default:             return base + ' price-source-standard';
         }
     }
 
     getPriceBadgeLabel(pricebookType) {
         if (!pricebookType) return '';
-        switch (pricebookType) {
-            case 'Standard':    return 'Standard';
-            case 'Price list 5': return 'Tier 5';
-            case 'Price list 4': return 'Tier 4';
-            case 'Price list 3': return 'Tier 3';
-            case 'Price list 2': return 'Tier 2';
-            case 'Price list 1': return 'Tier 1';
-            case 'Service':    return 'Service';
-            default:           return pricebookType;
+        switch (this.normaliseTier(pricebookType)) {
+            case 'Standard':     return 'Standard';
+            case 'Price List 5': return 'Tier 5';
+            case 'Price List 4': return 'Tier 4';
+            case 'Price List 3': return 'Tier 3';
+            case 'Price List 2': return 'Tier 2';
+            case 'Price List 1': return 'Tier 1';
+            case 'Service':      return 'Service';
+            default:             return pricebookType;
         }
+    }
+
+    // Older quote / order saves stored the tier name in mixed casing
+    // ('Price list4', 'Price list 4', etc.). Normalise to the canonical
+    // 'Price List N' form so the badge maps stay clean.
+    normaliseTier(name) {
+        if (!name) return '';
+        const m = String(name).trim().match(/^price\s*list\s*([1-5])$/i);
+        if (m) return 'Price List ' + m[1];
+        if (/^standard$/i.test(name)) return 'Standard';
+        if (/^service$/i.test(name)) return 'Service';
+        return name;
     }
 
     // ===== UTILITY =====
