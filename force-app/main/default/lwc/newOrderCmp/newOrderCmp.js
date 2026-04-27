@@ -383,47 +383,9 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
 
 
         if (data.lineItems && data.lineItems.length > 0) {
-            this.lineItems = data.lineItems.map((item, index) => {
-                rowCounter++;
-                const base = (item.unitPrice || 0) * (item.quantity || 0);
-                const taxAmt = base * ((item.taxPercent || 0) / 100);
-                const disc = item.discount || 0;
-                const discountedBase = base - (base * (disc / 100));
-                const taxOnAfterDisc = discountedBase * ((item.taxPercent || 0) / 100);
-                const isService = item.isServiceItem === true;
-                const tierPricesFromDb = [];
-                const priceStatus = this.computePriceStatus(
-                    item.unitPrice, disc, item.listPrice, isService,
-                    item.taxPercent, tierPricesFromDb
-                );
-                return {
-                    rowId: 'row-' + rowCounter,
-                    rowNumber: index + 1,
-                    productId: item.productId,
-                    pricebookEntryId: item.pricebookEntryId,
-                    productName: item.productName,
-                    productInitial: this.getProductInitial(item.productName),
-                    productCode: item.productCode,
-                    uom: item.uom || 'Nos',
-                    quantity: item.quantity,
-                    listPrice: item.listPrice || item.unitPrice,
-                    unitPrice: item.unitPrice,
-                    discount: disc,
-                    taxPercent: item.taxPercent || 0,
-                    taxPercentDisplay: (item.taxPercent || 0) + '%',
-                    isServiceItem: isService,
-                    priceStatus: priceStatus,
-                    priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
-                    qwStatusClass: this.getQwStatusClass(priceStatus),
-                    tierPrices: tierPricesFromDb,
-                    sourcePricebookId: item.sourcePricebookId || null,
-                    sourcePricebookName: item.sourcePricebookName || '',
-                    priceBadgeClass: this.getPriceBadgeClass(item.sourcePricebookName),
-                    priceBadgeLabel: this.getPriceBadgeLabel(item.sourcePricebookName),
-                    hasPriceSource: !!item.sourcePricebookName,
-                    lineTotal: discountedBase + taxOnAfterDisc
-                };
-            });
+            this.lineItems = data.lineItems.map(
+                (item, index) => this.buildRowFromServerItem(item, index)
+            );
         }
 
         if (data.paymentTerms && data.paymentTerms.length > 0) {
@@ -467,48 +429,9 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
 
 
         if (data.lineItems && data.lineItems.length > 0) {
-            this.lineItems = data.lineItems.map((item, index) => {
-                rowCounter++;
-                const base = (item.unitPrice || 0) * (item.quantity || 0);
-                const taxAmt = base * ((item.taxPercent || 0) / 100);
-
-                const disc = item.discount || 0;
-                const discountedBase = base - (base * (disc / 100));
-                const taxOnAfterDisc = discountedBase * ((item.taxPercent || 0) / 100);
-                const isService = item.isServiceItem === true;
-                const tierPricesFromDb = [];
-                const priceStatus = this.computePriceStatus(
-                    item.unitPrice, disc, item.listPrice, isService,
-                    item.taxPercent, tierPricesFromDb
-                );
-                return {
-                    rowId: 'row-' + rowCounter,
-                    rowNumber: index + 1,
-                    productId: item.productId,
-                    pricebookEntryId: item.pricebookEntryId,
-                    productName: item.productName,
-                    productInitial: this.getProductInitial(item.productName),
-                    productCode: item.productCode,
-                    uom: item.uom || 'Nos',
-                    quantity: item.quantity,
-                    listPrice: item.listPrice || item.unitPrice,
-                    unitPrice: item.unitPrice,
-                    discount: disc,
-                    taxPercent: item.taxPercent || 0,
-                    taxPercentDisplay: (item.taxPercent || 0) + '%',
-                    isServiceItem: isService,
-                    priceStatus: priceStatus,
-                    priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
-                    qwStatusClass: this.getQwStatusClass(priceStatus),
-                    tierPrices: tierPricesFromDb,
-                    sourcePricebookId: item.sourcePricebookId || null,
-                    sourcePricebookName: item.sourcePricebookName || '',
-                    priceBadgeClass: this.getPriceBadgeClass(item.sourcePricebookName),
-                    priceBadgeLabel: this.getPriceBadgeLabel(item.sourcePricebookName),
-                    hasPriceSource: !!item.sourcePricebookName,
-                    lineTotal: discountedBase + taxOnAfterDisc
-                };
-            });
+            this.lineItems = data.lineItems.map(
+                (item, index) => this.buildRowFromServerItem(item, index)
+            );
         }
 
         if (data.paymentTerms && data.paymentTerms.length > 0) {
@@ -522,6 +445,52 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 };
             });
         }
+    }
+
+    // Shared row builder for grid items sourced from the server (edit-mode
+    // load and the source-Quote carry path). Status is read from the
+    // server payload (or 'Not Required' for service items); the live
+    // preview re-evaluates on the first edit.
+    buildRowFromServerItem(item, index) {
+        rowCounter++;
+        const disc = item.discount || 0;
+        const isService = item.isServiceItem === true;
+        const base = (item.unitPrice || 0) * (item.quantity || 0);
+        const discountedBase = base - (base * (disc / 100));
+        const taxOnAfterDisc = discountedBase * ((item.taxPercent || 0) / 100);
+
+        const VALID = ['Not Required', 'Approval Required', 'Approved'];
+        let priceStatus;
+        if (isService) priceStatus = 'Not Required';
+        else if (VALID.includes(item.priceStatus)) priceStatus = item.priceStatus;
+        else priceStatus = 'Not Required';
+
+        return {
+            rowId: 'row-' + rowCounter,
+            rowNumber: index + 1,
+            productId: item.productId,
+            pricebookEntryId: item.pricebookEntryId,
+            productName: item.productName,
+            productInitial: this.getProductInitial(item.productName),
+            productCode: item.productCode,
+            uom: item.uom || 'Nos',
+            quantity: item.quantity,
+            listPrice: item.listPrice || item.unitPrice,
+            unitPrice: item.unitPrice,
+            discount: disc,
+            taxPercent: item.taxPercent || 0,
+            taxPercentDisplay: (item.taxPercent || 0) + '%',
+            isServiceItem: isService,
+            priceStatus: priceStatus,
+            priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
+            qwStatusClass: this.getQwStatusClass(priceStatus),
+            sourcePricebookId: item.sourcePricebookId || null,
+            sourcePricebookName: item.sourcePricebookName || '',
+            priceBadgeClass: this.getPriceBadgeClass(item.sourcePricebookName),
+            priceBadgeLabel: this.getPriceBadgeLabel(item.sourcePricebookName),
+            hasPriceSource: !!item.sourcePricebookName,
+            lineTotal: discountedBase + taxOnAfterDisc
+        };
     }
 
     // ===== ADDRESS CHANGE HANDLERS =====
@@ -796,17 +765,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         rowCounter++;
         const base = (product.unitPrice || 0);
         const tax = base * ((product.taxPercent || 0) / 100);
-
-        // Pull discount-tier PBE prices (PL4..PL1, Standard excluded)
-        // out of the search result so the local Price_Status decision
-        // can iterate them without a server round-trip.
-        const tierPrices = Array.isArray(product.availablePrices)
-            ? product.availablePrices.map(p => p.price).filter(v => v != null)
-            : [];
-        const priceStatus = this.computePriceStatus(
-            product.unitPrice, 0, product.unitPrice, isService,
-            product.taxPercent, tierPrices
-        );
+        const priceStatus = 'Not Required';
 
         const newItem = {
             rowId: 'row-' + rowCounter,
@@ -826,7 +785,7 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
             isServiceItem: isService,
             priceStatus: priceStatus,
             priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
-            tierPrices: tierPrices,
+            qwStatusClass: this.getQwStatusClass(priceStatus),
             sourcePricebookId: product.sourcePricebookId || null,
             sourcePricebookName: product.sourcePricebook || (isService ? 'Service' : ''),
             priceBadgeClass: this.getPriceBadgeClass(product.sourcePricebookType),
@@ -836,6 +795,12 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         };
 
         this.lineItems = [...this.lineItems, newItem];
+
+        // Run the discount/ceiling evaluator on the freshly added line so
+        // the badge + tier reflect the current state without waiting for
+        // the rep's first discount edit.
+        if (!isService) this.refreshPricingPreview(newItem.rowId);
+
         this.showSuccess('Product Added', product.productName + ' added to the order.');
     }
 
@@ -884,37 +849,24 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
             const taxAmt = afterDisc * ((updated.taxPercent || 0) / 100);
             updated.lineTotal = afterDisc + taxAmt;
 
-            // Re-run the tier-based Price Status locally against the
-            // stored tierPrices. Preserves an already-Approved line so
-            // approvers' decisions aren't undone by a later edit.
-            if (updated.priceStatus !== 'Approved') {
-                const live = this.computePriceStatus(
-                    updated.unitPrice,
-                    updated.discount,
-                    updated.listPrice,
-                    updated.isServiceItem,
-                    updated.taxPercent,
-                    updated.tierPrices
-                );
-                updated.priceStatus = live;
-                updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(live);
-                updated.qwStatusClass = this.getQwStatusClass(live);
-            }
-
             return updated;
         });
 
+        // Server-side evaluator owns the price-status / mapped-tier
+        // decision. Ping it on every meaningful change so the UI badge
+        // stays consistent with the trigger's save-time stamp.
         if (refreshTier) this.refreshPricingPreview(rowId);
     }
 
-    // Ask the server for the tightest-fitting tier + Price_Status for the
-    // current unit price + discount. Lets the rep see Approval Required
-    // and the matching tier badge live — the OrderItem trigger will stamp
-    // the same values authoritatively on save.
+    // Ask the server to run the discount-vs-Discount__c algorithm and
+    // update the line with the resolved tier, the new UnitPrice (re-fetched
+    // from that tier's PricebookEntry), and the resulting Price_Status.
+    // Already-Approved lines are skipped so an approver's decision isn't
+    // silently undone by a later edit.
     async refreshPricingPreview(rowId) {
         const item = this.lineItems.find(it => it.rowId === rowId);
-        if (!item || item.isServiceItem || item.priceStatus === 'Approved') return;
-        if (!item.productId || item.unitPrice == null) return;
+        if (!item || item.priceStatus === 'Approved') return;
+        if (!item.productId) return;
 
         try {
             const preview = await getProductPricingPreview({
@@ -924,57 +876,61 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 quantity: item.quantity || 1
             });
 
-            const resolvedPb = preview.resolvedTier || 'Standard';
+            const previousStatus = item.priceStatus;
+            const resolvedPb = preview.resolvedTier || '';
             this.lineItems = this.lineItems.map(it => {
                 if (it.rowId !== rowId) return it;
                 const updated = { ...it };
                 updated.priceStatus = preview.priceStatus || updated.priceStatus;
                 updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(updated.priceStatus);
                 updated.qwStatusClass = this.getQwStatusClass(updated.priceStatus);
-                updated.sourcePricebookId = preview.resolvedPricebookId || updated.sourcePricebookId;
-                updated.sourcePricebookName = resolvedPb;
-                updated.priceBadgeClass = this.getPriceBadgeClass(resolvedPb);
-                updated.priceBadgeLabel = this.getPriceBadgeLabel(resolvedPb);
-                updated.hasPriceSource = !!resolvedPb;
+                if (preview.resolvedPricebookId) updated.sourcePricebookId = preview.resolvedPricebookId;
+                if (resolvedPb) {
+                    updated.sourcePricebookName = resolvedPb;
+                    updated.priceBadgeClass = this.getPriceBadgeClass(resolvedPb);
+                    updated.priceBadgeLabel = this.getPriceBadgeLabel(resolvedPb);
+                    updated.hasPriceSource = true;
+                }
+                if (preview.resolvedPricebookEntryId) {
+                    updated.pricebookEntryId = preview.resolvedPricebookEntryId;
+                }
+                if (!updated.isServiceItem && preview.resolvedUnitPrice != null) {
+                    updated.unitPrice = preview.resolvedUnitPrice;
+                    updated.listPrice = preview.standardPrice != null
+                        ? preview.standardPrice
+                        : updated.listPrice;
+                    const base = updated.unitPrice * (updated.quantity || 0);
+                    const afterDiscount = base * (1 - ((updated.discount || 0) / 100));
+                    const taxAmt = afterDiscount * ((updated.taxPercent || 0) / 100);
+                    updated.lineTotal = afterDiscount + taxAmt;
+                }
                 return updated;
             });
+
+            if (preview.priceStatus === 'Approval Required'
+                && previousStatus !== 'Approval Required') {
+                if (preview.exceedsAllTiers) {
+                    this.showError(
+                        'Discount above CEO/CFO ceiling',
+                        `Discount exceeds the ${this.tierDisplayLabel(preview.resolvedTier)} ` +
+                        `maximum. Approval will be required.`
+                    );
+                } else if (preview.resolvedTier) {
+                    this.showSuccess(
+                        'Approval required',
+                        `Discount mapped to ${this.tierDisplayLabel(preview.resolvedTier)} — ` +
+                        `requires approval at that tier.`
+                    );
+                }
+            }
         } catch (error) {
             console.warn('Pricing preview unavailable:', error && error.body ? error.body.message : error);
         }
     }
 
-    // Client-side mirror of the server's Price_Status decision.
-    //
-    // Non-service logic:
-    //   finalPrice = unitPrice
-    //              - (discount% of unitPrice)
-    //              - (tax% of unitPrice)
-    //   Walk the product's discount-tier PBEs (Price list4 -> Price
-    //   list1, Standard excluded). If finalPrice <= any tier price,
-    //   return 'Approval Required'. Otherwise 'Not Required'. Falls
-    //   back to comparing finalPrice <= listPrice for products that
-    //   don't have any tier pricebooks configured.
-    //
-    // Service lines (Product's Service_Item picklist = Yes) always return
-    // 'Not Required' — the tier/list-price approval gate doesn't apply.
-    computePriceStatus(unitPrice, discount, listPrice, isServiceItem, taxpercentage, tierPrices) {
-        if (isServiceItem) return 'Not Required';
-
-        const tax = taxpercentage == null ? 0 : taxpercentage;
-        const up  = unitPrice == null ? 0 : unitPrice;
-        const d   = discount == null ? 0 : discount;
-        const taxprice = (up * tax) / 100;
-        const finalPrice = up - ((d * up) / 100) - taxprice;
-
-        if (Array.isArray(tierPrices)) {
-            for (const tp of tierPrices) {
-                if (tp != null && finalPrice <= tp) return 'Approval Required';
-            }
-            if (tierPrices.length > 0) return 'Not Required';
-        }
-
-        if (listPrice == null) return 'Not Required';
-        return finalPrice <= listPrice ? 'Approval Required' : 'Not Required';
+    tierDisplayLabel(tierName) {
+        const label = this.getPriceBadgeLabel(tierName);
+        return label || tierName || 'Standard';
     }
 
     getPriceStatusBadgeClass(status) {
@@ -1011,30 +967,42 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     getPriceBadgeClass(pricebookType) {
         const base = 'price-source-badge';
         if (!pricebookType) return base + ' price-source-standard';
-        switch (pricebookType) {
-            case 'Standard':    return base + ' price-source-standard';
-            case 'Price list5': return base + ' price-source-standard';
-            case 'Price list4': return base + ' price-source-tier4';
-            case 'Price list3': return base + ' price-source-tier3';
-            case 'Price list2': return base + ' price-source-tier2';
-            case 'Price list1': return base + ' price-source-tier1';
-            case 'Service':     return base + ' price-source-service';
-            default:            return base + ' price-source-standard';
+        switch (this.normaliseTier(pricebookType)) {
+            case 'Standard':     return base + ' price-source-standard';
+            case 'Price List 5': return base + ' price-source-standard';
+            case 'Price List 4': return base + ' price-source-tier4';
+            case 'Price List 3': return base + ' price-source-tier3';
+            case 'Price List 2': return base + ' price-source-tier2';
+            case 'Price List 1': return base + ' price-source-tier1';
+            case 'Service':      return base + ' price-source-service';
+            default:             return base + ' price-source-standard';
         }
     }
 
     getPriceBadgeLabel(pricebookType) {
         if (!pricebookType) return '';
-        switch (pricebookType) {
-            case 'Standard':    return 'Standard';
-            case 'Price list5': return 'Tier 5';
-            case 'Price list4': return 'Tier 4';
-            case 'Price list3': return 'Tier 3';
-            case 'Price list2': return 'Tier 2';
-            case 'Price list1': return 'Tier 1';
-            case 'Service':     return 'Service';
-            default:            return pricebookType;
+        switch (this.normaliseTier(pricebookType)) {
+            case 'Standard':     return 'Standard';
+            case 'Price List 5': return 'Tier 5';
+            case 'Price List 4': return 'Tier 4';
+            case 'Price List 3': return 'Tier 3';
+            case 'Price List 2': return 'Tier 2';
+            case 'Price List 1': return 'Tier 1';
+            case 'Service':      return 'Service';
+            default:             return pricebookType;
         }
+    }
+
+    // Older saves stored the tier name with various casings ('Price list4',
+    // 'Price list 4', etc.). Normalise to the canonical 'Price List N'
+    // form so the badge maps stay clean.
+    normaliseTier(name) {
+        if (!name) return '';
+        const m = String(name).trim().match(/^price\s*list\s*([1-5])$/i);
+        if (m) return 'Price List ' + m[1];
+        if (/^standard$/i.test(name)) return 'Standard';
+        if (/^service$/i.test(name)) return 'Service';
+        return name;
     }
 
     // ===== CANCEL =====
