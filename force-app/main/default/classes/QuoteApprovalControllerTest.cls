@@ -9,9 +9,7 @@ private class QuoteApprovalControllerTest {
         Product2 prod = new Product2(
             Name = 'Test X-Ray Machine',
             IsActive = true,
-            Manager_Discount_Up_to__c = 8,
-            VP_Sales_Discount_Up_to__c = 12,
-            CEO_Sales_Discount_Up_to__c = 15
+            Manager_Discount_Up_to__c = 8
         );
         insert prod;
 

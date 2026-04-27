@@ -14,7 +14,6 @@ private class ProductTriggerHandlerTest {
             Name = 'Test Product',
             Item_Code__c = 'TEST-001',
             HSN_Code__c = '9018',
-            HSN_Code_International__c = '901819',
             Product_Status__c = 'Active'
         );
 
@@ -32,7 +31,6 @@ private class ProductTriggerHandlerTest {
             Name = 'Inactive Product',
             Item_Code__c = 'TEST-002',
             HSN_Code__c = '9018',
-            HSN_Code_International__c = '901819',
             Product_Status__c = 'Inactive'
         );
 
@@ -50,7 +48,6 @@ private class ProductTriggerHandlerTest {
             Name = 'Test Product Update',
             Item_Code__c = 'TEST-003',
             HSN_Code__c = '9018',
-            HSN_Code_International__c = '901819',
             Product_Status__c = 'Active'
         );
         insert p;

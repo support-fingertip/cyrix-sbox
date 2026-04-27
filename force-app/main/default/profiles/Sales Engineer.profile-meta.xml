@@ -2887,11 +2887,6 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Product2.CEO_Sales_Discount_Up_to__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
         <field>Product2.Color__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -2907,11 +2902,6 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
-        <field>Product2.Detailed_Description__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
         <field>Product2.ERP_Sync_Status__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -2923,11 +2913,6 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Product2.Expiry__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Product2.HSN_Code_International__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -3098,11 +3083,6 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Product2.Tax__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Product2.VP_Sales_Discount_Up_to__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

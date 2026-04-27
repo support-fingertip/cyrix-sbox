@@ -97,7 +97,7 @@ public with sharing class QuoteBuilderController {
                    PricebookEntryId,
                    Product2.Name, Product2.ProductCode,
                    Product2.QuantityUnitOfMeasure, Product2.Service_Item__c,
-                   Product2.Line_Description__c, Product2.Detailed_Description__c
+                   Product2.Line_Description__c
             FROM OpportunityLineItem
             WHERE OpportunityId = :opportunityId
             ORDER BY SortOrder ASC NULLS LAST, Id ASC
@@ -162,7 +162,7 @@ public with sharing class QuoteBuilderController {
             item.isServiceItem = isService;
             item.priceStatus = isService ? 'Not Required' : null;
             item.lineDescription = (oli.Product2 != null) ? oli.Product2.Line_Description__c : null;
-            item.detailedDescription = (oli.Product2 != null) ? oli.Product2.Detailed_Description__c : null;
+            item.detailedDescription = null;
             results.add(item);
         }
         return results;
@@ -302,7 +302,7 @@ public with sharing class QuoteBuilderController {
             'Product2.Product_Category__c, Product2.Make__c, Product2.Model__c, ' +
             'Product2.Description, Product2.HSN_Code__c, ' +
             'Product2.Standard_Price__c, Product2.QuantityUnitOfMeasure, ' +
-            'Product2.Line_Description__c, Product2.Detailed_Description__c, ' +
+            'Product2.Line_Description__c, ' +
             'UnitPrice, Tax__c, CurrencyIsoCode ' +
             'FROM PricebookEntry ' +
             'WHERE Pricebook2Id = :pbId ' +
@@ -332,7 +332,7 @@ public with sharing class QuoteBuilderController {
                 psr.standardPrice = pbe.Product2.Standard_Price__c;
                 psr.uom = pbe.Product2.QuantityUnitOfMeasure;
                 psr.lineDescription = pbe.Product2.Line_Description__c;
-                psr.detailedDescription = pbe.Product2.Detailed_Description__c;
+                psr.detailedDescription = null;
                 results.add(psr);
             }
         } catch (Exception e) {
@@ -380,12 +380,10 @@ public with sharing class QuoteBuilderController {
         // sending the Product_Category label will fall through without
         // matching, but won't break the query.
         // Search matches Name, ProductCode, the standard Description and
-        // Line_Description__c. Detailed_Description__c is a LongTextArea
-        // which SOQL can't filter — it's still selected for display, just
-        // excluded from the WHERE.
+        // Line_Description__c.
         String prodQuery = 'SELECT Id, Name, ProductCode, Product_Category__c, Product_Type__c, Make__c, Model__c, ' +
             'Description, HSN_Code__c, Standard_Price__c, QuantityUnitOfMeasure, ' +
-            'Line_Description__c, Detailed_Description__c, ' +
+            'Line_Description__c, ' +
             'Service_Item__c, Tax__c ' +
             'FROM Product2 ' +
             'WHERE IsActive = true ' +
@@ -447,7 +445,7 @@ public with sharing class QuoteBuilderController {
             psr.standardPrice = prod.Standard_Price__c;
             psr.uom = prod.QuantityUnitOfMeasure;
             psr.lineDescription = prod.Line_Description__c;
-            psr.detailedDescription = prod.Detailed_Description__c;
+            psr.detailedDescription = null;
             psr.isServiceItem = (prod.Service_Item__c == 'Yes');
             psr.taxPercent = prod.Tax__c;
             psr.availablePrices = new List<PriceOption>();

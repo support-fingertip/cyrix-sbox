@@ -15,7 +15,6 @@ private class ProductSyncServiceTest {
             Item_Code__c = 'IE-000004',
             ProductCode = 'IE-000004',
             HSN_Code__c = '9018',
-            HSN_Code_International__c = '901819',
             Product_Category__c = 'Equipment',
             Product_Status__c = 'Active',
             IsActive = true,
@@ -66,11 +65,10 @@ private class ProductSyncServiceTest {
         System.assertEquals(true, results[0].success, 'Should succeed');
         System.assertEquals('Created', results[0].message, 'Should be created');
 
-        Product2 inserted = [SELECT Id, Name, Item_Code__c, Brand__c, HSN_Code_International__c,
+        Product2 inserted = [SELECT Id, Name, Item_Code__c, Brand__c,
             Default_Warranty_Months__c, Is_Installation_Required__c, ERP_Sync_Status__c, IsActive
             FROM Product2 WHERE Item_Code__c = 'IC-000010'];
         System.assertEquals('Ciyan', inserted.Brand__c);
-        System.assertEquals('481100', inserted.HSN_Code_International__c);
         System.assertEquals('Synced', inserted.ERP_Sync_Status__c);
         System.assertEquals(true, inserted.IsActive);
     }
