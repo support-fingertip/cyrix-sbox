@@ -1,6 +1,6 @@
 /**
  * Outbound SAP send orchestrator. Mirrors the SAPsend_TriggerHandler
- * pattern from the reference project.
+ * pattern from the reference project. Used by the Send to SAP LWC.
  *
  * Entry point for the LWC quick action:
  *   SendToSAP_call(recordId) -> Integer status code
