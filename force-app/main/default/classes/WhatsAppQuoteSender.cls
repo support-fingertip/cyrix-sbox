@@ -143,6 +143,14 @@ public without sharing class WhatsAppQuoteSender {
         return dist.ContentDownloadUrl;
     }
 
+    /**
+     * Custom exception used by callWhatsAppAPI for non-2xx responses.
+     * AuraHandledException can't be thrown from a @future method — only
+     * from VF / Aura / LWC contexts — so we use a plain subclass that
+     * works in both async and sync callers.
+     */
+    public class WhatsAppApiException extends Exception {}
+
     private static String callWhatsAppAPI(String phone, String recipientName, String pdfUrl) {
         String apiUrl = System.Label.WhatsApp_API_URL;
         String apiKey = System.Label.WhatsApp_API_Key;
@@ -190,7 +198,9 @@ public without sharing class WhatsAppQuoteSender {
         if (res.getStatusCode() >= 200 && res.getStatusCode() < 300) {
             return 'SUCCESS';
         } else {
-            throw new AuraHandledException('WhatsApp API error (' + res.getStatusCode() + '): ' + res.getBody());
+            throw new WhatsAppApiException(
+                'WhatsApp API error (' + res.getStatusCode() + '): ' + res.getBody()
+            );
         }
     }
 
