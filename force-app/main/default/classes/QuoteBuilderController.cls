@@ -112,7 +112,7 @@ public with sharing class QuoteBuilderController {
         Map<Id, PricebookEntry> stdPbeByProduct = new Map<Id, PricebookEntry>();
         if (standardPricebookId != null && !productIds.isEmpty()) {
             for (PricebookEntry pbe : [
-                SELECT Id, Product2Id, UnitPrice, Tax__c, Max_Discount_Percentage__c,
+                SELECT Id, Product2Id, UnitPrice, Tax__c, Discount__c,
                        Pricebook2.Name
                 FROM PricebookEntry
                 WHERE Pricebook2Id = :standardPricebookId
@@ -153,7 +153,7 @@ public with sharing class QuoteBuilderController {
             }
             if (stdPbe != null) {
                 item.taxPercent = stdPbe.Tax__c != null ? stdPbe.Tax__c : 0;
-                item.maxDiscount = stdPbe.Max_Discount_Percentage__c;
+                item.maxDiscount = stdPbe.Discount__c;
                 item.sourcePricebookId = stdPbe.Id;
                 item.sourcePricebookName = stdPbe.Pricebook2 != null ? stdPbe.Pricebook2.Name : null;
             } else {
@@ -593,7 +593,7 @@ public with sharing class QuoteBuilderController {
 
         // Discount-percentage based tier resolution: the rep entered a
         // discount, walk PL4 -> PL1 and pick the first tier whose
-        // Max_Discount_Percentage__c covers it. Tag that tier as the
+        // Discount__c covers it. Tag that tier as the
         // line's source pricebook. Status is profile-aware — a Sales
         // Engineer who lands on PL4 stays Not Required, but a Sales
         // Engineer whose discount slips into PL3 needs approval.
@@ -609,7 +609,7 @@ public with sharing class QuoteBuilderController {
                 return out;
             }
             if (applied != null && applied.underFloor == true) {
-                // Discount exceeds every tier's Max_Discount_Percentage__c —
+                // Discount exceeds every tier's Discount__c —
                 // the rep has gone past the broadest allowance, so flag
                 // for approval against the Standard pricebook.
                 List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
@@ -699,7 +699,7 @@ public with sharing class QuoteBuilderController {
             SELECT Id, Product2Id, Product2.Name, Product2.ProductCode,
                    Product2.QuantityUnitOfMeasure, Product2.Service_Item__c,
                    PricebookEntryId, PricebookEntry.Tax__c,
-                   PricebookEntry.Max_Discount_Percentage__c,
+                   PricebookEntry.Discount__c,
                    Quantity, ListPrice, UnitPrice, Discount,
                    Product_Line_Description__c,
                    Product_Detailed_Description__c,
@@ -721,7 +721,7 @@ public with sharing class QuoteBuilderController {
             item.unitPrice = qli.UnitPrice;
             item.discount = qli.Discount != null ? qli.Discount : 0;
             item.taxPercent = qli.PricebookEntry.Tax__c != null ? qli.PricebookEntry.Tax__c : 0;
-            item.maxDiscount = qli.PricebookEntry.Max_Discount_Percentage__c;
+            item.maxDiscount = qli.PricebookEntry.Discount__c;
             item.priceStatus = qli.Price_Status__c;
             item.lineDescription = qli.Product_Line_Description__c;
             item.detailedDescription = qli.Product_Detailed_Description__c;

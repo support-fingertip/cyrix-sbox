@@ -75,7 +75,7 @@ public with sharing class PricebookTierService {
 
         for (PricebookEntry pbe : [
             SELECT Id, Product2Id, UnitPrice, IsActive,
-                   Max_Discount_Percentage__c,
+                   Discount__c,
                    Pricebook2Id, Pricebook2.Name, Pricebook2.Price_Book_Type__c,
                    Pricebook2.IsActive
             FROM PricebookEntry
@@ -274,18 +274,18 @@ public with sharing class PricebookTierService {
      * Discount-percentage based tier resolution.
      *
      * Walks PL4 -> PL3 -> PL2 -> PL1 (priority high-restriction first)
-     * and picks the first tier whose Max_Discount_Percentage__c covers
+     * and picks the first tier whose Discount__c covers
      * the rep's discount. That tier becomes the source pricebook for
      * the line.
      *
-     * If the discount equals the tier's Max_Discount_Percentage__c the
+     * If the discount equals the tier's Discount__c the
      * caller should treat the line as Approval Required — the rep has
      * maxed out that tier. A discount strictly below the tier's max
      * stays Not Required.
      *
      * Returns null tier (entry == null) when:
      *   - discountPercent is null or <= 0 (no discount, Standard pricebook).
-     *   - discountPercent exceeds every tier's Max_Discount_Percentage__c
+     *   - discountPercent exceeds every tier's Discount__c
      *     (over the broadest allowance — caller should require approval).
      * In the second case underFloor is set so the caller can distinguish
      * "no discount" from "discount over max".
@@ -300,7 +300,7 @@ public with sharing class PricebookTierService {
         for (String t : order) {
             PricebookEntry e = tiers.tier(t);
             if (e == null) continue;
-            Decimal maxDisc = e.Max_Discount_Percentage__c;
+            Decimal maxDisc = e.Discount__c;
             if (maxDisc == null) continue;
             if (discountPercent <= maxDisc) {
                 r.entry = e;
@@ -317,7 +317,7 @@ public with sharing class PricebookTierService {
 
     /**
      * Status from the discount-tier resolution. Approval Required when
-     * the rep is at or above the assigned tier's Max_Discount_Percentage__c
+     * the rep is at or above the assigned tier's Discount__c
      * (or when the discount overran every tier and underFloor was set);
      * Not Required when the discount sits below the tier's threshold.
      */
@@ -325,7 +325,7 @@ public with sharing class PricebookTierService {
         if (r == null) return STATUS_NOT_REQUIRED;
         if (r.underFloor == true) return STATUS_APPROVAL_REQUIRED;
         if (r.entry == null) return STATUS_NOT_REQUIRED;
-        Decimal maxDisc = r.entry.Max_Discount_Percentage__c;
+        Decimal maxDisc = r.entry.Discount__c;
         if (maxDisc == null) return STATUS_NOT_REQUIRED;
         if (discountPercent == null) return STATUS_NOT_REQUIRED;
         return discountPercent >= maxDisc ? STATUS_APPROVAL_REQUIRED : STATUS_NOT_REQUIRED;
