@@ -1,4 +1,6 @@
 public without sharing class WhatsAppQuoteSender {
+    // WhatsApp quote sender — sync DML + async @future callout, with
+    // request/response logging to Log__c for delivery debugging.
 
     @AuraEnabled
     public static WhatsAppQuoteInfo getQuoteInfo(Id quoteId) {
@@ -102,11 +104,55 @@ public without sharing class WhatsAppQuoteSender {
     @future(callout=true)
     public static void sendWhatsAppCalloutAsync(Id quoteId, String phone, String recipientName,
                                                  String pdfUrl, String fileName) {
+        String requestBodyForLog = '';
+        Integer statusCode = 0;
+        String responseBody = '';
+        String errorMessage = '';
         try {
-            callWhatsAppAPI(phone, recipientName, pdfUrl);
+            BitvoiceCall result = callWhatsAppAPIWithDetails(phone, recipientName, pdfUrl);
+            requestBodyForLog = result.requestBody;
+            statusCode = result.statusCode;
+            responseBody = result.responseBody;
             logWhatsAppActivity(quoteId, phone, recipientName, fileName);
         } catch (Exception ex) {
-            System.debug('WhatsApp callout failed: ' + ex.getMessage());
+            errorMessage = ex.getMessage();
+            System.debug('WhatsApp callout failed: ' + errorMessage);
+        } finally {
+            // Always write a Log__c so we can see what Bitvoice actually
+            // returned, even on 2xx responses (Bitvoice can return 200
+            // with an error body when the template/phone is wrong).
+            writeWhatsAppLog(quoteId, requestBodyForLog, responseBody, statusCode, errorMessage);
+        }
+    }
+
+    private class BitvoiceCall {
+        public String requestBody;
+        public Integer statusCode;
+        public String responseBody;
+    }
+
+    private static void writeWhatsAppLog(Id quoteId, String reqBody, String resBody,
+                                          Integer statusCode, String errorMessage) {
+        try {
+            Integer maxSize = 32000;
+            if (reqBody != null && reqBody.length() > maxSize) {
+                reqBody = reqBody.substring(0, maxSize);
+            }
+            String fullResponse = (errorMessage != null && errorMessage.length() > 0)
+                ? 'ERROR: ' + errorMessage + (resBody != null ? '\n\nResponseBody: ' + resBody : '')
+                : resBody;
+            if (fullResponse != null && fullResponse.length() > maxSize) {
+                fullResponse = fullResponse.substring(0, maxSize);
+            }
+
+            Log__c rec = new Log__c();
+            rec.Object__c      = 'WhatsApp Quote';
+            rec.Request__c     = reqBody;
+            rec.Response__c    = fullResponse;
+            rec.Status_Code__c = String.valueOf(statusCode);
+            insert rec;
+        } catch (Exception e) {
+            System.debug('WhatsApp log insert failed: ' + e.getMessage());
         }
     }
 
@@ -151,7 +197,7 @@ public without sharing class WhatsAppQuoteSender {
      */
     public class WhatsAppApiException extends Exception {}
 
-    private static String callWhatsAppAPI(String phone, String recipientName, String pdfUrl) {
+    private static BitvoiceCall callWhatsAppAPIWithDetails(String phone, String recipientName, String pdfUrl) {
         String apiUrl = System.Label.WhatsApp_API_URL;
         String apiKey = System.Label.WhatsApp_API_Key;
         String templateName = System.Label.WhatsApp_Template_Name;
@@ -195,8 +241,13 @@ public without sharing class WhatsAppQuoteSender {
         Http http = new Http();
         HttpResponse res = http.send(req);
 
+        BitvoiceCall result = new BitvoiceCall();
+        result.requestBody  = jsonBody;
+        result.statusCode   = res.getStatusCode();
+        result.responseBody = res.getBody();
+
         if (res.getStatusCode() >= 200 && res.getStatusCode() < 300) {
-            return 'SUCCESS';
+            return result;
         } else {
             throw new WhatsAppApiException(
                 'WhatsApp API error (' + res.getStatusCode() + '): ' + res.getBody()
