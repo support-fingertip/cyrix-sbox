@@ -15,7 +15,7 @@ public with sharing class QuoteBuilderController {
             '       Account.ShippingStreet, Account.ShippingCity,' +
             '       Account.ShippingStateCode, Account.ShippingPostalCode,' +
             '       Account.ShippingCountryCode,' +
-            '       Pricebook2Id, CurrencyIsoCode, Buisness_Vertical__c,' +
+            '       Pricebook2Id, CurrencyIsoCode, Business_Vertical__c,' +
             '       Region__c' +
             (oppHasSubVertical ? ', Sub_Vertical__c' : '') +
             ' FROM Opportunity WHERE Id = :opportunityId LIMIT 1';
@@ -33,7 +33,7 @@ public with sharing class QuoteBuilderController {
         ctx.accountName = opp.Account != null ? opp.Account.Name : '';
         ctx.pricebookId = opp.Pricebook2Id;
         ctx.currencyCode = opp.CurrencyIsoCode;
-        ctx.vertical = opp.Buisness_Vertical__c;
+        ctx.vertical = opp.Business_Vertical__c;
         ctx.subVertical = subVertical;
         ctx.regionId = opp.Region__c;
 
@@ -61,7 +61,7 @@ public with sharing class QuoteBuilderController {
             ctx.shippingCountry = opp.Account.ShippingCountryCode;
         }
 
-        ctx.defaultPaymentTerms = getDefaultPaymentTerms(opp.Buisness_Vertical__c, subVertical);
+        ctx.defaultPaymentTerms = getDefaultPaymentTerms(opp.Business_Vertical__c, subVertical);
         ctx.opportunityLineItems = getOpportunityLineItemsAsQuoteLines(opportunityId, ctx.standardPricebookId);
 
         return ctx;
@@ -364,9 +364,11 @@ public with sharing class QuoteBuilderController {
         // (Equipment / Spare / Accessories / Consumables). Older callers
         // sending the Product_Category label will fall through without
         // matching, but won't break the query.
-        // Search matches Name, ProductCode, the standard Description and
-        // both line/detailed description custom fields so reps can find
-        // products by any of those.
+        // Searchable fields: Name, ProductCode and the Text-typed
+        // Line_Description__c. Standard Description and the rich
+        // Detailed_Description__c are LongTextArea — Salesforce blocks
+        // those in WHERE clauses ("field cannot be filtered in a query
+        // call"), so they're queried for display but not for matching.
         String prodQuery = 'SELECT Id, Name, ProductCode, Product_Category__c, Product_Type__c, Make__c, Model__c, ' +
             'Description, HSN_Code__c, Standard_Price__c, QuantityUnitOfMeasure, ' +
             'Line_Description__c, Detailed_Description__c, ' +
@@ -375,9 +377,7 @@ public with sharing class QuoteBuilderController {
             'WHERE IsActive = true ' +
             'AND (Name LIKE :searchKey ' +
             '     OR ProductCode LIKE :searchKey ' +
-            '     OR Description LIKE :searchKey ' +
-            '     OR Line_Description__c LIKE :searchKey ' +
-            '     OR Detailed_Description__c LIKE :searchKey)';
+            '     OR Line_Description__c LIKE :searchKey)';
         if (String.isNotBlank(category)) {
             prodQuery += ' AND Product_Type__c = :category';
         }

@@ -94,7 +94,7 @@
         <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Buisness_Vertical__c</field>
+                <field>Business_Vertical__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>

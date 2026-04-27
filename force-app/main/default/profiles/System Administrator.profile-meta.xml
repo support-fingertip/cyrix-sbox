@@ -2066,7 +2066,7 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Opportunity.Buisness_Vertical__c</field>
+        <field>Opportunity.Business_Vertical__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
