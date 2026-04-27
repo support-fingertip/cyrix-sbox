@@ -18,17 +18,16 @@ private class QuoteBuilderControllerTest {
         );
         insert acc;
 
-        // Create Shipping_Address__c records for the Account
+        // Create Shipping_Address__c records for the Account.
+        // Name is an auto-number (sh-{0000}) so it isn't set explicitly.
         Shipping_Address__c shipAddr1 = new Shipping_Address__c(
             Account__c = acc.Id,
-            Name = 'Main Warehouse',
             Address__Street__s = '789 Industrial Area',
             Address__City__s = 'Kochi',
             Address__PostalCode__s = '682002'
         );
         Shipping_Address__c shipAddr2 = new Shipping_Address__c(
             Account__c = acc.Id,
-            Name = 'Branch Office',
             Address__Street__s = '100 Tech Park',
             Address__City__s = 'Trivandrum',
             Address__PostalCode__s = '695002'
@@ -40,7 +39,7 @@ private class QuoteBuilderControllerTest {
         Opportunity opp = new Opportunity(
             Name = 'Test Hospital Deal',
             AccountId = acc.Id,
-            StageName = 'Qualified',
+            StageName = 'Proposal',
             CloseDate = Date.today().addDays(60),
             Pricebook2Id = stdPbId
         );
@@ -119,6 +118,7 @@ private class QuoteBuilderControllerTest {
         System.assertNotEquals(null, ctx);
         System.assertEquals('Test Hospital Deal', ctx.opportunityName);
         System.assertEquals('Test Hospital', ctx.accountName);
+        System.assertEquals('Proposal', ctx.stageName);
         System.assertNotEquals(null, ctx.pricebookId);
         // Verify billing address pre-population
         System.assertEquals('Test Hospital', ctx.billingName);
@@ -127,6 +127,24 @@ private class QuoteBuilderControllerTest {
         System.assertEquals('Kerala', ctx.billingState);
         System.assertEquals('682001', ctx.billingPostalCode);
         System.assertEquals('India', ctx.billingCountry);
+    }
+
+    @isTest
+    static void testGetOpportunityContextRejectsBlockedStage() {
+        Opportunity opp = [SELECT Id FROM Opportunity LIMIT 1];
+        opp.StageName = 'Qualification';
+        update opp;
+
+        Boolean blocked = false;
+        Test.startTest();
+        try {
+            QuoteBuilderController.getOpportunityContext(opp.Id);
+        } catch (AuraHandledException e) {
+            blocked = true;
+        }
+        Test.stopTest();
+
+        System.assert(blocked, 'getOpportunityContext should reject opportunities outside Negotiation/Proposal/Demo.');
     }
 
     @isTest
@@ -471,7 +489,7 @@ private class QuoteBuilderControllerTest {
         Test.startTest();
         // Unit price 150000, discount 40% -> discounted = 90000. Tightest fit = Price list3 (100000).
         QuoteBuilderController.PricingPreview p =
-            QuoteBuilderController.getProductPricingPreview(prod.Id, 150000, 40);
+            QuoteBuilderController.getProductPricingPreview(prod.Id, 150000, 40, 1);
         Test.stopTest();
 
         System.assertEquals('Price list3', p.resolvedTier);
@@ -487,7 +505,7 @@ private class QuoteBuilderControllerTest {
 
         Test.startTest();
         try {
-            QuoteBuilderController.getProductPricingPreview(prod.Id, 100000, 0);
+            QuoteBuilderController.getProductPricingPreview(prod.Id, 100000, 0, 1);
             System.assert(false, 'Should have thrown - Sales Price below Price list5 floor');
         } catch (AuraHandledException e) {
             // AuraHandledException intentionally masks its server-side message
@@ -510,7 +528,7 @@ private class QuoteBuilderControllerTest {
 
         Test.startTest();
         QuoteBuilderController.PricingPreview p =
-            QuoteBuilderController.getProductPricingPreview(svc.Id, 2500, 10);
+            QuoteBuilderController.getProductPricingPreview(svc.Id, 2500, 10, 1);
         Test.stopTest();
 
         System.assertEquals(true, p.isServiceItem);

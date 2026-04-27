@@ -93,11 +93,18 @@
                             </div>
                             <div class="qw-field"><lightning-input-field field-name="Shipping_Mode__c"></lightning-input-field></div>
                             <div class="qw-field"><lightning-input-field field-name="Delivery__c"></lightning-input-field></div>
-                            <div class="qw-field"><lightning-input-field field-name="is_Active__c" value={defaultIsActive}></lightning-input-field></div>
                             <template if:true={showContractDates}>
-                                <div class="qw-field"><lightning-input-field field-name="Contract_Period_From_Date__c" onchange={handleContractFromDateChange}></lightning-input-field></div>
                                 <div class="qw-field">
-                                    <lightning-input-field field-name="Contract_Period_End_Date__c" onchange={handleContractEndDateChange}></lightning-input-field>
+                                    <lightning-input-field field-name="Contract_Period_From_Date__c" required onchange={handleContractFromDateChange}></lightning-input-field>
+                                    <template if:true={isContractFromDateMissing}>
+                                        <div class="qw-field-error">Contract Period From Date is required for AMC / CAMC.</div>
+                                    </template>
+                                </div>
+                                <div class="qw-field">
+                                    <lightning-input-field field-name="Contract_Period_End_Date__c" required onchange={handleContractEndDateChange}></lightning-input-field>
+                                    <template if:true={isContractEndDateMissing}>
+                                        <div class="qw-field-error">Contract Period End Date is required for AMC / CAMC.</div>
+                                    </template>
                                     <template if:true={isContractDateInvalid}>
                                         <div class="qw-field-error">End Date must be greater than From Date.</div>
                                     </template>
@@ -111,6 +118,7 @@
                                 <div class="qw-field"><lightning-input-field field-name="Status"></lightning-input-field></div>
                                 <div class="qw-field"><lightning-input-field field-name="Reason_for_Revision__c"></lightning-input-field></div>
                             </template>
+                            <div class="qw-field"><lightning-input-field field-name="is_Active__c" value={defaultIsActive}></lightning-input-field></div>
                         </div>
                     </div>
 
@@ -185,52 +193,77 @@
                                 onchange={handleSearchTermChange}
                                 onkeydown={handleSearchKeydown}
                                 placeholder="Search by name, code, or description…"
-                                type="text">
+                                type="search">
                             </lightning-input>
-                            <button type="button" class="qw-btn primary" onclick={handleSearch} disabled={isSearchDisabled}>Search</button>
+                            <button type="button" class="qw-btn primary qw-search-btn" onclick={handleSearch} disabled={isSearchDisabled}>
+                                <lightning-icon icon-name="utility:search" size="xx-small" variant="inverse"></lightning-icon>
+                                <span>Search</span>
+                            </button>
+                        </div>
+                        <div class="qw-search-hint">
+                            <lightning-icon icon-name="utility:info" size="xx-small"></lightning-icon>
+                            <span>Type at least 2 characters then press Enter or click Search. Filter by Product Type to narrow the catalog.</span>
                         </div>
 
                         <template if:true={showSearchResults}>
                             <template if:true={hasSearchResults}>
-                                <div class="qw-search-results">
-                                    <div class="qw-table-scroll">
-                                        <table class="qw-search-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Product</th>
-                                                    <th>Code</th>
-                                                    <th>Category</th>
-                                                    <th>Unit price</th>
-                                                    <th>Tier</th>
-                                                    <th>Tax %</th>
-                                                    <th class="add-cell"></th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <template for:each={searchResults} for:item="prod">
-                                                    <tr key={prod.pricebookEntryId}>
-                                                        <td>{prod.productName}</td>
-                                                        <td>{prod.productCode}</td>
-                                                        <td>{prod.category}</td>
-                                                        <td>{prod.formattedPrice}</td>
-                                                        <td>
-                                                            <template if:true={prod.hasPriceSource}>
-                                                                <span class={prod.priceBadgeClass}>{prod.priceBadgeLabel}</span>
-                                                            </template>
-                                                        </td>
-                                                        <td>{prod.formattedTax}</td>
-                                                        <td class="add-cell">
-                                                            <button type="button" class="qw-btn primary" data-id={prod.pricebookEntryId} onclick={handleAddProduct}>+ Add</button>
-                                                        </td>
-                                                    </tr>
+                                <div class="qw-search-meta">
+                                    <span class="qw-search-meta-count">{searchResultCountLabel}</span>
+                                    <button type="button" class="qw-link" onclick={handleClearSearch}>Clear</button>
+                                </div>
+                                <div class="qw-product-grid">
+                                    <template for:each={searchResults} for:item="prod">
+                                        <div key={prod.pricebookEntryId} class={prod.cardClass}>
+                                            <div class="qw-product-card-head">
+                                                <div class="qw-product-thumb">{prod.productInitial}</div>
+                                                <div class="qw-product-headline">
+                                                    <div class="qw-product-name" title={prod.productName}>{prod.productName}</div>
+                                                    <div class="qw-product-code">{prod.productCode}</div>
+                                                </div>
+                                                <template if:true={prod.hasPriceSource}>
+                                                    <span class={prod.priceBadgeClass}>{prod.priceBadgeLabel}</span>
                                                 </template>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                            </div>
+                                            <template if:true={prod.lineDescription}>
+                                                <div class="qw-product-desc" title={prod.lineDescription}>{prod.lineDescription}</div>
+                                            </template>
+                                            <div class="qw-product-meta">
+                                                <template if:true={prod.category}>
+                                                    <span class="qw-product-chip">{prod.category}</span>
+                                                </template>
+                                                <template if:true={prod.isServiceItem}>
+                                                    <span class="qw-product-chip qw-chip-service">Service</span>
+                                                </template>
+                                                <span class="qw-product-chip qw-chip-tax">Tax {prod.formattedTax}</span>
+                                            </div>
+                                            <div class="qw-product-foot">
+                                                <div class="qw-product-price">
+                                                    <span class="qw-price-label">Unit price</span>
+                                                    <span class="qw-price-value">{prod.formattedPrice}</span>
+                                                </div>
+                                                <template if:true={prod.alreadyAdded}>
+                                                    <button type="button" class="qw-btn qw-btn-added" disabled>
+                                                        <lightning-icon icon-name="utility:check" size="xx-small" variant="success"></lightning-icon>
+                                                        <span>Added</span>
+                                                    </button>
+                                                </template>
+                                                <template if:false={prod.alreadyAdded}>
+                                                    <button type="button" class="qw-btn primary" data-id={prod.pricebookEntryId} onclick={handleAddProduct}>
+                                                        <lightning-icon icon-name="utility:add" size="xx-small" variant="inverse"></lightning-icon>
+                                                        <span>Add</span>
+                                                    </button>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
                                 </div>
                             </template>
                             <template if:true={noSearchResults}>
-                                <div class="qw-search-empty">No products found matching your search.</div>
+                                <div class="qw-search-empty">
+                                    <lightning-icon icon-name="utility:search" size="small"></lightning-icon>
+                                    <div class="qw-search-empty-title">No products found</div>
+                                    <div class="qw-search-empty-sub">Try a different keyword or change the Product Type filter.</div>
+                                </div>
                             </template>
                         </template>
 

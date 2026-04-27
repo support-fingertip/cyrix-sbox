@@ -5,15 +5,10 @@
 @isTest
 private class OrderItemTriggerHandlerTest {
 
-    private static Product2 createProduct(
-        Decimal managerLimit, Decimal vpLimit, Decimal ceoLimit
-    ) {
+    private static Product2 createProduct(Decimal managerLimit) {
         Product2 p = new Product2(
             Name = 'Test Prod',
-            IsActive = true,
-            Manager_Discount_Up_to__c = managerLimit,
-            VP_Sales_Discount_Up_to__c = vpLimit,
-            CEO_Sales_Discount_Up_to__c = ceoLimit
+            IsActive = true
         );
         insert p;
         return p;
@@ -46,7 +41,7 @@ private class OrderItemTriggerHandlerTest {
 
     @isTest
     static void discountBelowManagerLimitIsNotRequired() {
-        Product2 p = createProduct(10, 20, 30);
+        Product2 p = createProduct(10);
         PricebookEntry pbe = createPbe(p.Id);
         Order o = createOrder();
 
@@ -72,8 +67,8 @@ private class OrderItemTriggerHandlerTest {
     }
 
     @isTest
-    static void discountAboveCeoLimitIsApprovalRequired() {
-        Product2 p = createProduct(10, 20, 30);
+    static void discountAboveManagerLimitIsApprovalRequired() {
+        Product2 p = createProduct(10);
         PricebookEntry pbe = createPbe(p.Id);
         Order o = createOrder();
 
@@ -91,7 +86,7 @@ private class OrderItemTriggerHandlerTest {
 
         OrderItem refreshed = [SELECT Price_Status__c FROM OrderItem WHERE Id = :oi.Id];
         System.assertEquals('Approval Required', refreshed.Price_Status__c,
-            'Discount 40% above CEO limit 30% should be Approval Required');
+            'Discount 40% above manager limit 10% should be Approval Required');
 
         Order refreshedOrder = [SELECT Price_Status__c FROM Order WHERE Id = :o.Id];
         System.assertEquals('Approval Required', refreshedOrder.Price_Status__c,
@@ -100,7 +95,7 @@ private class OrderItemTriggerHandlerTest {
 
     @isTest
     static void updateDiscountDownwardFlipsBackToNotRequired() {
-        Product2 p = createProduct(10, 20, 30);
+        Product2 p = createProduct(10);
         PricebookEntry pbe = createPbe(p.Id);
         Order o = createOrder();
 
@@ -133,7 +128,7 @@ private class OrderItemTriggerHandlerTest {
 
     @isTest
     static void mixedItemsRollUpToApprovalRequired() {
-        Product2 p = createProduct(10, 20, 30);
+        Product2 p = createProduct(10);
         PricebookEntry pbe = createPbe(p.Id);
         Order o = createOrder();
 
