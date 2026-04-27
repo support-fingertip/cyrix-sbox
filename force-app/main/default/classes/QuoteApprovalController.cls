@@ -183,8 +183,6 @@ public with sharing class QuoteApprovalController {
     public static void evaluateDiscountThresholds(Id quoteId) {
         List<QuoteLineItem> lineItems = [
             SELECT Id, Product2Id, Product2.Manager_Discount_Up_to__c,
-                   Product2.VP_Sales_Discount_Up_to__c,
-                   Product2.CEO_Sales_Discount_Up_to__c,
                    Discount, Price_Status__c
             FROM QuoteLineItem
             WHERE QuoteId = :quoteId
@@ -194,16 +192,8 @@ public with sharing class QuoteApprovalController {
             Decimal discount = qli.Discount != null ? qli.Discount / 100 : 0;
             Decimal managerLimit = qli.Product2.Manager_Discount_Up_to__c != null
                 ? qli.Product2.Manager_Discount_Up_to__c / 100 : 0;
-            Decimal vpLimit = qli.Product2.VP_Sales_Discount_Up_to__c != null
-                ? qli.Product2.VP_Sales_Discount_Up_to__c / 100 : 0;
-            Decimal ceoLimit = qli.Product2.CEO_Sales_Discount_Up_to__c != null
-                ? qli.Product2.CEO_Sales_Discount_Up_to__c / 100 : 0;
 
-            if (discount > ceoLimit && ceoLimit > 0) {
-                qli.Price_Status__c = 'Approval Required';
-            } else if (discount > vpLimit && vpLimit > 0) {
-                qli.Price_Status__c = 'Approval Required';
-            } else if (discount > managerLimit && managerLimit > 0) {
+            if (managerLimit > 0 && discount > managerLimit) {
                 qli.Price_Status__c = 'Approval Required';
             } else {
                 qli.Price_Status__c = 'Not Required';

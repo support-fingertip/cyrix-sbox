@@ -1,7 +1,7 @@
 /**
  * Mirrors Quote approval logic on Order:
  *   - evaluateDiscountThresholds: compares each OrderItem.Discount__c
- *     against the Product's Manager / VP / CEO discount limits and sets
+ *     against the Product's Manager discount limit and sets
  *     Price_Status__c = 'Approval Required' or 'Not Required'.
  *   - rollUpPriceStatusToOrder: if ANY OrderItem on an Order is flagged
  *     'Approval Required', the parent Order.Price_Status__c flips to
@@ -9,8 +9,7 @@
  *     Else 'Not Required'.
  *
  * Mirrors QuoteApprovalController.evaluateDiscountThresholds (the same
- * Manager_Discount_Up_to__c / VP_Sales_Discount_Up_to__c /
- * CEO_Sales_Discount_Up_to__c fields on Product2 are used).
+ * Manager_Discount_Up_to__c field on Product2 is used).
  */
 public with sharing class OrderItemTriggerHandler {
 
@@ -38,9 +37,7 @@ public with sharing class OrderItemTriggerHandler {
 
         Map<Id, Product2> prodMap = new Map<Id, Product2>([
             SELECT Id, Service_Item__c, Tax__c,
-                   Manager_Discount_Up_to__c,
-                   VP_Sales_Discount_Up_to__c,
-                   CEO_Sales_Discount_Up_to__c
+                   Manager_Discount_Up_to__c
             FROM Product2
             WHERE Id IN :productIds
         ]);
@@ -115,20 +112,17 @@ public with sharing class OrderItemTriggerHandler {
 
             // Discount-threshold fallback stays as a safety net for orgs
             // that haven't populated tier pricebooks — if the discount
-            // exceeds the Product's Manager/VP/CEO limits, still flip
-            // to Approval Required. Otherwise Not Required.
+            // exceeds the Product's Manager limit, still flip to
+            // Approval Required. Otherwise Not Required.
             if (discount == null || discount == 0) {
                 oi.Price_Status__c = STATUS_NOT_REQUIRED;
                 continue;
             }
             Decimal d           = discount / 100;
-            Decimal managerLim  = p.Manager_Discount_Up_to__c   != null ? p.Manager_Discount_Up_to__c   / 100 : 0;
-            Decimal vpLim       = p.VP_Sales_Discount_Up_to__c  != null ? p.VP_Sales_Discount_Up_to__c  / 100 : 0;
-            Decimal ceoLim      = p.CEO_Sales_Discount_Up_to__c != null ? p.CEO_Sales_Discount_Up_to__c / 100 : 0;
+            Decimal managerLim  = p.Manager_Discount_Up_to__c != null
+                ? p.Manager_Discount_Up_to__c / 100 : 0;
 
-            if ((ceoLim > 0 && d > ceoLim) ||
-                (vpLim > 0 && d > vpLim) ||
-                (managerLim > 0 && d > managerLim)) {
+            if (managerLim > 0 && d > managerLim) {
                 oi.Price_Status__c = STATUS_APPROVAL_REQUIRED;
             } else {
                 oi.Price_Status__c = STATUS_NOT_REQUIRED;

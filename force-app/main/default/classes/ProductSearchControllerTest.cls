@@ -17,7 +17,6 @@ private class ProductSearchControllerTest {
             Item_Code__c = 'IE-000004',
             ProductCode = 'IE-000004',
             HSN_Code__c = '9018',
-            HSN_Code_International__c = '901819',
             Product_Category__c = 'Equipment',
             Sub_Category__c = 'Diagnostic Imaging',
             Product_Vertical__c = 'Product Sales',
@@ -39,7 +38,6 @@ private class ProductSearchControllerTest {
             Item_Code__c = 'IC-000001',
             ProductCode = 'IC-000001',
             HSN_Code__c = '4811',
-            HSN_Code_International__c = '481100',
             Product_Category__c = 'Consumables',
             Sub_Category__c = 'Consumables',
             Product_Vertical__c = 'Ciyan',
@@ -111,7 +109,6 @@ private class ProductSearchControllerTest {
 
         System.assertEquals('Ultrasound Machine DC80', details.Name);
         System.assertEquals('9018', details.HSN_Code__c);
-        System.assertEquals('901819', details.HSN_Code_International__c);
         System.assertEquals(12, details.Default_Warranty_Months__c);
         System.assertEquals('Yes', details.Is_Installation_Required__c);
     }

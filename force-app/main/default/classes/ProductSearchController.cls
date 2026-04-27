@@ -36,9 +36,9 @@ public with sharing class ProductSearchController {
             'Product_Category__c, Sub_Category__c, Product_Type__c, Product_Vertical__c, ' +
             'Brand__c, Model__c, Equipment_Name__c, Line_Description__c, ' +
             'Standard_Price__c, Tax__c,  ' +
-            'HSN_Code__c, HSN_Code_International__c, ' +
+            'HSN_Code__c, ' +
             'Default_Warranty_Months__c, ' +
-            'Specification__c, Detailed_Description__c, Source__c, Product_Status__c, Make__c ' +
+            'Specification__c, Source__c, Product_Status__c, Make__c ' +
             'FROM Product2 WHERE IsActive = true';
 
         if (String.isNotBlank(searchKey) && searchKey.length() >= 2) {
@@ -69,12 +69,12 @@ public with sharing class ProductSearchController {
             SELECT Id, Name, ProductCode, Item_Code__c, SAP_Item_Code__c,
                    Product_Category__c, Sub_Category__c, Product_Type__c, Product_Vertical__c,
                    Brand__c, Make__c, Model__c, Equipment_Name__c, Line_Description__c,
-                   Standard_Price__c, Tax__c, 
-                   HSN_Code__c, HSN_Code_International__c, Source__c,
+                   Standard_Price__c, Tax__c,
+                   HSN_Code__c, Source__c,
                    Default_Warranty_Months__c,
                     Installation_Terms__c,
                    Specification__c, Description,
-                   Detailed_Description__c, Compatibility__c, Remarks__c,
+                   Compatibility__c, Remarks__c,
                    Product_Status__c, ERP_Sync_Status__c, Last_ERP_Sync_Date__c,
                    Product_Image_URL__c, Product_Image_URL_2__c, Product_Image_URL_3__c
             FROM Product2
