@@ -201,8 +201,14 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // takes over) so we don't validate it here.
     validateCurrentStep() {
         if (this.currentStep === 1) {
-            if (this.isContractFromDateMissing || this.isContractEndDateMissing) {
-                return 'Contract Period From Date and End Date are required for AMC / CAMC sub-verticals.';
+            if (this.isContractFromDateMissing && this.isContractEndDateMissing) {
+                return 'Contract Period From Date and End Date are required.';
+            }
+            if (this.isContractFromDateMissing) {
+                return 'Contract Period From Date is required.';
+            }
+            if (this.isContractEndDateMissing) {
+                return 'Contract Period End Date is required.';
             }
             if (this.isContractDateInvalid) {
                 return 'Contract End Date must be greater than From Date.';
@@ -672,9 +678,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         // AMC / CAMC sub-verticals require both contract dates — they
         // anchor the maintenance window so saves without them aren't valid.
         if (this.showContractDates && (!fromDate || !endDate)) {
+            const missing = [];
+            if (!fromDate) missing.push('Contract Period From Date');
+            if (!endDate) missing.push('Contract Period End Date');
             this.showError(
                 'Contract dates required',
-                'Contract Period From Date and End Date are mandatory for AMC / CAMC sub-verticals.'
+                `${missing.join(' and ')} ${missing.length === 1 ? 'is' : 'are'} required.`
             );
             return;
         }
@@ -818,9 +827,16 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     handleFormError(event) {
         this.isSaving = false;
         this.isLoading = false;
-        const message = event.detail?.message || 'An error occurred while saving the quote.';
+        const detail = event.detail || {};
+        // record-edit-form's onerror payload nests the field/page error
+        // bag under detail.output — reduceErrors knows how to walk it
+        // and yields friendlier multi-line messages than detail.message
+        // (which is just the top-line summary).
+        const message = this.reduceErrors({ body: detail })
+            || detail.message
+            || 'An error occurred while saving the quote.';
         this.showError('Save Failed', message);
-        console.error('Form error:', JSON.stringify(event.detail));
+        console.error('Form error:', JSON.stringify(detail));
     }
 
     // ===== SEARCH HANDLERS =====
@@ -1348,28 +1364,86 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }).format(value);
     }
 
+    // Normalises every error shape the platform throws (Apex AuraHandled,
+    // record-edit-form DML errors, plain Errors, plain strings) into a
+    // single, user-readable string. Strips Salesforce's "FIELD_CUSTOM_VALIDATION_EXCEPTION,"
+    // and trailing ": [Field__c]" prefixes/suffixes so the toast shows the
+    // human-meaningful sentence and nothing else.
     reduceErrors(error) {
-        if (typeof error === 'string') return error;
-        if (error?.body?.message) return error.body.message;
-        if (error?.body?.fieldErrors) {
-            const fieldMsgs = Object.values(error.body.fieldErrors).flat().map(e => e.message);
-            if (fieldMsgs.length) return fieldMsgs.join(', ');
+        if (!error) return 'An unexpected error occurred.';
+        if (typeof error === 'string') return this.cleanErrorMessage(error);
+
+        const messages = [];
+        const errors = Array.isArray(error) ? error : [error];
+
+        for (const e of errors) {
+            if (!e) continue;
+            if (typeof e === 'string') {
+                messages.push(this.cleanErrorMessage(e));
+                continue;
+            }
+            if (e.body) {
+                if (Array.isArray(e.body)) {
+                    e.body.forEach(b => b && b.message && messages.push(this.cleanErrorMessage(b.message)));
+                    continue;
+                }
+                if (typeof e.body === 'string') {
+                    messages.push(this.cleanErrorMessage(e.body));
+                    continue;
+                }
+                if (e.body.fieldErrors) {
+                    Object.values(e.body.fieldErrors).flat().forEach(fe => {
+                        if (fe && fe.message) messages.push(this.cleanErrorMessage(fe.message));
+                    });
+                }
+                if (e.body.pageErrors) {
+                    e.body.pageErrors.forEach(pe => {
+                        if (pe && pe.message) messages.push(this.cleanErrorMessage(pe.message));
+                    });
+                }
+                if (e.body.output && Array.isArray(e.body.output.errors)) {
+                    e.body.output.errors.forEach(oe => {
+                        if (oe && oe.message) messages.push(this.cleanErrorMessage(oe.message));
+                    });
+                }
+                if (e.body.message) messages.push(this.cleanErrorMessage(e.body.message));
+                continue;
+            }
+            if (e.message) messages.push(this.cleanErrorMessage(e.message));
         }
-        if (error?.body?.pageErrors) {
-            const pageMsgs = error.body.pageErrors.map(e => e.message);
-            if (pageMsgs.length) return pageMsgs.join(', ');
+
+        const unique = [...new Set(messages.filter(m => m && m.trim()))];
+        if (!unique.length) {
+            console.error('Unhandled error format:', JSON.stringify(error));
+            return 'An unexpected error occurred. Please try again or contact your administrator.';
         }
-        if (error?.message) return error.message;
-        if (Array.isArray(error?.body)) return error.body.map(e => e.message).join(', ');
-        console.error('Unhandled error format:', JSON.stringify(error));
-        return 'An unexpected error occurred.';
+        return unique.join('\n');
+    }
+
+    // Strips Salesforce's noise ("FIELD_CUSTOM_VALIDATION_EXCEPTION, ",
+    // ": [Field__c]") so the rep sees the human sentence the admin wrote.
+    cleanErrorMessage(raw) {
+        if (!raw) return '';
+        let msg = String(raw).trim();
+        msg = msg.replace(/^[A-Z_]+_EXCEPTION\s*[,:]\s*/i, '');
+        msg = msg.replace(/^System\.[A-Za-z]+Exception:\s*/i, '');
+        msg = msg.replace(/:\s*\[[^\]]+\]\s*$/, '');
+        return msg.trim();
     }
 
     showSuccess(title, message) {
-        this.dispatchEvent(new ShowToastEvent({ title, message, variant: 'success' }));
+        this.dispatchEvent(new ShowToastEvent({
+            title, message, variant: 'success', mode: 'dismissable'
+        }));
     }
 
+    // 'dismissable' auto-closes after the platform's default timeout (~3s)
+    // and still lets the user click ✕ to close it sooner. 'sticky' kept
+    // earlier toasts on screen until manually dismissed, which left
+    // stale errors hanging around.
     showError(title, message) {
-        this.dispatchEvent(new ShowToastEvent({ title, message, variant: 'error', mode: 'sticky' }));
+        this.dispatchEvent(new ShowToastEvent({
+            title, message, variant: 'error', mode: 'dismissable'
+        }));
     }
 }
