@@ -75,7 +75,7 @@
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>WhatsApp API Key</shortDescription>
-        <value>REPLACE_WITH_YOUR_API_KEY</value>
+        <value>Salesforce</value>
     </labels>
     <labels>
         <fullName>WhatsApp_API_URL</fullName>

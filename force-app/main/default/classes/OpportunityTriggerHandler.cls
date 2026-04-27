@@ -53,9 +53,9 @@ public class OpportunityTriggerHandler {
                 }
                 opp.Name='';
              opp.Name =accName;
-                if(opp.Buisness_Vertical__c!=null ){
-                   opp.Name+=' ' +opp.Buisness_Vertical__c;
-                }
+               if(opp.Business_Vertical__c!=null ){
+                 opp.Name+=' ' +opp.Business_Vertical__c;
+               }
                 if(prodName !=null){
                     opp.Name+=' ' +prodName;  
                 }

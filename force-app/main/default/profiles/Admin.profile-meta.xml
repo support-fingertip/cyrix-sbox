@@ -506,6 +506,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>SAPGetData</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>SAPToSFIntegrationController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -2318,7 +2322,7 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Opportunity.Buisness_Vertical__c</field>
+        <field>Opportunity.Business_Vertical__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

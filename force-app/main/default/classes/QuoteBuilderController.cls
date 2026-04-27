@@ -15,7 +15,7 @@ public with sharing class QuoteBuilderController {
             '       Account.ShippingStreet, Account.ShippingCity,' +
             '       Account.ShippingStateCode, Account.ShippingPostalCode,' +
             '       Account.ShippingCountryCode,' +
-            '       Pricebook2Id, CurrencyIsoCode, Buisness_Vertical__c,' +
+            '       Pricebook2Id, CurrencyIsoCode, Business_Vertical__c,' +
             '       Region__c' +
             (oppHasSubVertical ? ', Sub_Vertical__c' : '') +
             ' FROM Opportunity WHERE Id = :opportunityId LIMIT 1';
@@ -33,7 +33,7 @@ public with sharing class QuoteBuilderController {
         ctx.accountName = opp.Account != null ? opp.Account.Name : '';
         ctx.pricebookId = opp.Pricebook2Id;
         ctx.currencyCode = opp.CurrencyIsoCode;
-        ctx.vertical = opp.Buisness_Vertical__c;
+        ctx.vertical = opp.Business_Vertical__c;
         ctx.subVertical = subVertical;
         ctx.regionId = opp.Region__c;
 
@@ -61,7 +61,7 @@ public with sharing class QuoteBuilderController {
             ctx.shippingCountry = opp.Account.ShippingCountryCode;
         }
 
-        ctx.defaultPaymentTerms = getDefaultPaymentTerms(opp.Buisness_Vertical__c, subVertical);
+        ctx.defaultPaymentTerms = getDefaultPaymentTerms(opp.Business_Vertical__c, subVertical);
         ctx.opportunityLineItems = getOpportunityLineItemsAsQuoteLines(opportunityId, ctx.standardPricebookId);
 
         return ctx;
