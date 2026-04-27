@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>SAP_OrderItem_Id__c</fullName>
+    <description>SAP-side Order Item Id. Unique External Id used to resolve OrderItem from incoming SAP invoice line items (Invoice_Item__c.OrderItemId__c -&gt; this field).</description>
+    <externalId>true</externalId>
+    <label>SAP Order Item Id</label>
+    <length>80</length>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>true</unique>
+</CustomField>
