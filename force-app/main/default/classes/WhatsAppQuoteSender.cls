@@ -10,6 +10,7 @@ public without sharing class WhatsAppQuoteSender {
 
         List<Quote> quotes = [
             SELECT Id, Name, QuoteNumber, Quote_Id__c,
+                   Phone, Email,
                    ContactId, Contact.Name, Contact.Phone, Contact.MobilePhone,
                    OpportunityId, Opportunity.Name,
                    Account.Name, Account.Phone,
@@ -29,7 +30,11 @@ public without sharing class WhatsAppQuoteSender {
         info.contactName = q.ContactId != null ? q.Contact.Name : '';
         info.accountName = q.Account != null ? q.Account.Name : '';
 
-        if (q.ContactId != null && String.isNotBlank(q.Contact.MobilePhone)) {
+        // Phone fallback: standard Quote.Phone (auto-populated from Contact/Account)
+        // → Contact.MobilePhone → Contact.Phone → Account.Phone.
+        if (String.isNotBlank(q.Phone)) {
+            info.phone = q.Phone;
+        } else if (q.ContactId != null && String.isNotBlank(q.Contact.MobilePhone)) {
             info.phone = q.Contact.MobilePhone;
         } else if (q.ContactId != null && String.isNotBlank(q.Contact.Phone)) {
             info.phone = q.Contact.Phone;
@@ -44,6 +49,16 @@ public without sharing class WhatsAppQuoteSender {
         return info;
     }
 
+    /**
+     * Step 1 (sync): generate PDF, persist it as ContentVersion +
+     * ContentDistribution, capture the public download URL.
+     *
+     * Step 2 (async): hand the URL off to sendWhatsAppCalloutAsync,
+     * which performs the actual WhatsApp HTTP callout. Splitting the
+     * DML and the callout across two transactions is required
+     * because Salesforce blocks callouts that follow uncommitted
+     * DML in the same transaction ("uncommitted work pending").
+     */
     @AuraEnabled
     public static String sendQuoteViaWhatsApp(Id quoteId, String phone, String recipientName) {
         try {
@@ -57,20 +72,41 @@ public without sharing class WhatsAppQuoteSender {
                 pdfBlob = pdfPage.getContentAsPDF();
             }
 
-            Quote q = [SELECT Name, QuoteNumber FROM Quote WHERE Id = :quoteId LIMIT 1];
-            String fileName = q.Name + '_' + q.QuoteNumber + '.pdf';
+            List<Quote> quotes = [SELECT Name, QuoteNumber FROM Quote WHERE Id = :quoteId LIMIT 1];
+            if (quotes.isEmpty()) {
+                throw new AuraHandledException('Quote not found.');
+            }
+            String fileName = quotes[0].Name + '_' + quotes[0].QuoteNumber + '.pdf';
 
             String pdfUrl = savePDFAndGetPublicUrl(quoteId, fileName, pdfBlob);
 
-            String result = callWhatsAppAPI(phone, recipientName, pdfUrl);
+            // Hand the URL to the @future for the actual callout —
+            // runs in a fresh transaction once the current one commits.
+            sendWhatsAppCalloutAsync(quoteId, phone, recipientName, pdfUrl, fileName);
 
-            logWhatsAppActivity(quoteId, phone, recipientName, fileName);
-
-            return result;
+            return 'SUCCESS';
         } catch (AuraHandledException ae) {
             throw ae;
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
+        }
+    }
+
+    /**
+     * Async callout — runs after the calling transaction commits, so
+     * the DML done by savePDFAndGetPublicUrl is no longer "pending"
+     * and Salesforce permits the HTTP callout. The Activity log
+     * insert at the end is in this transaction too — fine because
+     * it happens after the callout completes.
+     */
+    @future(callout=true)
+    public static void sendWhatsAppCalloutAsync(Id quoteId, String phone, String recipientName,
+                                                 String pdfUrl, String fileName) {
+        try {
+            callWhatsAppAPI(phone, recipientName, pdfUrl);
+            logWhatsAppActivity(quoteId, phone, recipientName, fileName);
+        } catch (Exception ex) {
+            System.debug('WhatsApp callout failed: ' + ex.getMessage());
         }
     }
 
@@ -143,7 +179,8 @@ public without sharing class WhatsAppQuoteSender {
         req.setEndpoint(apiUrl);
         req.setMethod('POST');
         req.setHeader('Content-Type', 'application/json');
-        req.setHeader('Authorization', 'Bearer ' + apiKey);
+        // Bitvoice expects an X-API-Key header, not Authorization Bearer.
+        req.setHeader('X-API-Key', apiKey);
         req.setBody(jsonBody);
         req.setTimeout(30000);
 
