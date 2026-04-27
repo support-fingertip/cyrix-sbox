@@ -357,15 +357,21 @@ public with sharing class PricebookTierService {
      *   CFO / CEO       -> PL1   (full allowance)
      * Other profiles return null — meaning they have no implicit
      * allowance and any tier hit triggers Approval Required.
+     *
+     * Short codes ('asm', 'tsm', 'vp', 'ceo', 'cfo') match exactly so a
+     * profile name like "Receptionist" doesn't accidentally fall in via
+     * a substring; long-form labels ("Vice President", "Chief Financial
+     * Officer", etc.) match via contains().
      */
     public static String capTierFor(String profileName) {
         if (profileName == null) return null;
         String n = profileName.toLowerCase().trim();
-        if (n.contains('sales engineer') || n == 'sales_engineer') return TIER4;
+        if (n == 'sales engineer' || n == 'sales_engineer') return TIER4;
         if (n == 'asm' || n.contains('area sales manager')) return TIER3;
         if (n == 'tsm' || n.contains('territory sales manager')) return TIER2;
-        if (n.contains('vp')) return TIER2;
-        if (n.contains('cfo') || n.contains('ceo')
+        if (n == 'vp' || n.contains('vp sales') || n.contains('vp_sales')
+                || n.contains('vice president')) return TIER2;
+        if (n == 'ceo' || n == 'cfo'
                 || n.contains('chief financial') || n.contains('chief executive')) return TIER1;
         return null;
     }
