@@ -63,42 +63,26 @@ global class SAPGetData {
 
                 List<Response> lstResponse = new List<Response>();
 
-                // Pre-pass: deserialize every incoming row into Product2 and
-                // collect the ProductCodes so we can match against existing
-                // records before the upsert. Without this, upsert acts as
-                // insert-only (Product2 has no External Id by default) and
-                // re-sending the same ProductCode hits unique-constraint
-                // errors on fields like SAP_Item_Code__c.
+                // Build Product2 instances from the incoming JSON. SAP sends
+                // its product identifier in ProductCode; mirror that into
+                // SAP_Item_Code__c (a unique External Id field on Product2),
+                // then upsert using SAP_Item_Code__c as the match key. That
+                // gives true insert-or-update semantics natively — no
+                // pre-query needed, no duplicate-value errors on retries.
                 List<Product2> prdlist = new List<Product2>();
-                Set<String> productCodes = new Set<String>();
                 for (String s : finalJsonString) {
                     s = s.replaceFirst('\\{', '{"attributes" : {"type" : "Product2", "referenceId" : "ref1"},');
                     Product2 prd = (Product2) JSON.deserialize(s, Sobject.class);
+                    if (String.isNotBlank(prd.ProductCode)) {
+                        prd.SAP_Item_Code__c = prd.ProductCode;
+                    }
                     System.debug('prd ' + prd);
                     prdlist.add(prd);
-                    if (String.isNotBlank(prd.ProductCode)) {
-                        productCodes.add(prd.ProductCode);
-                    }
-                }
-
-                Map<String, Id> existingByCode = new Map<String, Id>();
-                if (!productCodes.isEmpty()) {
-                    for (Product2 ex : [
-                        SELECT Id, ProductCode
-                        FROM Product2
-                        WHERE ProductCode IN :productCodes
-                    ]) {
-                        existingByCode.put(ex.ProductCode, ex.Id);
-                    }
                 }
 
                 for (Product2 prd : prdlist) {
-                    if (String.isNotBlank(prd.ProductCode)
-                        && existingByCode.containsKey(prd.ProductCode)) {
-                        prd.Id = existingByCode.get(prd.ProductCode);
-                    }
                     try {
-                        upsert prd;
+                        upsert prd Product2.SAP_Item_Code__c;
                         lstResponse.add(new Response('Success', prd.ProductCode));
                     } catch (DmlException ex) {
                         lstResponse.add(new Response('Failure', prd.ProductCode, ex.getMessage()));
