@@ -2,21 +2,21 @@
  * Inbound REST endpoint that SAP POSTs to in order to push records
  * into Salesforce. Cyrix-specific port of SAPGetData from the
  * reference project — only the productMaster branch is implemented;
- * any other ?value= falls into the else branch and returns 403.
+ * the StockTransfer branch from the reference is intentionally
+ * omitted, so any other ?value= falls into the else block.
  *
  * Endpoint: /services/apexrest/send/*
- * Auth: ?key=<value of Custom Label API_Key>
+ * Auth:     ?key=<value of Custom Label API_Key>
  * Selector: ?value=productMaster
- * Body: { "data": [ {Product2 fields...}, ... ] }
+ * Body:     { "data": [ {Product2 fields...}, ... ] }
  *
  * Schema differences vs the reference:
- *   - Reference's Product__c -> standard Product2 in this org.
- *   - Match key: Product2.ProductCode (no custom external id field
- *     exists on Product2 here, so we resolve the existing record by
- *     querying ProductCode and stamping Id before upsert).
- *   - Log__c fields used: Request__c, Response__c, Object__c,
- *     Status_Code__c (Text in this org, so res.statusCode is cast
- *     to String).
+ *   - Reference Product__c              -> standard Product2 here.
+ *   - Reference prd.Product_Code__c     -> Product2.ProductCode here.
+ *   - Reference Log__c.Status_Code__c   -> same field, but Text in this
+ *                                          org, so res.statusCode is
+ *                                          cast to String on log write.
+ *   - Reference Log__c.RecordId__c      -> not present here; omitted.
  */
 @RestResource(urlMapping='/send/*')
 global class SAPGetData {
@@ -26,160 +26,114 @@ global class SAPGetData {
         RestRequest req = RestContext.request;
         RestResponse res = RestContext.response;
 
-        String key   = req.params.get('key');
-        String value = req.params.get('value');
-        String data  = req.requestBody != null ? req.requestBody.toString() : '';
+        String url = req.requestURI.substring(req.requestURI.lastIndexOf('/') + 1);
+        String key = RestContext.request.params.get('key');
+        String value = RestContext.request.params.get('value');
 
-        // Auth gate — same Custom Label as the GET endpoint.
-        if (Label.API_Key != key) {
-            List<Response> err = new List<Response>{
-                new Response('Failure', 'Invalid Key.', false)
-            };
-            res.statusCode = 401;
-            res.addHeader('Content-Type', 'application/json');
-            res.responseBody = Blob.valueOf(JSON.serialize(err));
-            return;
-        }
+        String data = req.requestBody.toString();
 
-        // Mirror the reference pattern: positive branch on productMaster,
-        // anything else lands in the else block as an Invalid Value error.
-        if (value == 'productMaster') {
+        System.debug('data:' + data);
 
-            List<Response> lstResponse = new List<Response>();
+        String postfix = req.requestURI.substring(req.requestURI.lastIndexOf('/') + 1);
+        if (Label.API_Key == key) {
 
-            // 1. Parse incoming JSON into a list of plain maps so we can
-            //    inspect ProductCode before deserializing into Product2.
-            List<Map<String, Object>> incoming = new List<Map<String, Object>>();
-            Set<String> productCodes = new Set<String>();
-            try {
-                Map<String, Object> body = (Map<String, Object>) JSON.deserializeUntyped(data);
-                for (Object item : (List<Object>) body.get('data')) {
-                    Map<String, Object> m = (Map<String, Object>) item;
-                    incoming.add(m);
-                    Object code = m.get('ProductCode');
-                    if (code != null) {
-                        productCodes.add(String.valueOf(code));
+            Map<String, Object> prodMap  = (Map<String, Object>) JSON.deserializeUntyped(data);
+            Map<String, Object> prodMap2 = (Map<String, Object>) JSON.deserializeUntyped(data);
+
+            for (String key2 : prodMap2.keySet()) {
+                if (prodMap2.get(key2) == null) {
+                    prodMap2.remove(key2);
+                }
+            }
+
+            List<String> finalJsonString = new List<String>();
+            List<Map<String, Object>> datalist = new List<Map<String, Object>>();
+
+            for (Object instance : (List<Object>) prodMap.get('data')) {
+                finalJsonString.add(JSON.serialize(instance));
+                datalist.add((Map<String, Object>) instance);
+            }
+
+            System.debug('finalJsonString:' + finalJsonString);
+
+            Map<String, Object> succMap = new Map<String, Object>();
+            Map<String, Object> errMap  = new Map<String, Object>();
+
+            if (value == 'productMaster') {
+
+                List<Response> lstResponse = new List<Response>();
+
+                List<Product2> prdlist = new List<Product2>();
+                List<String> prdIds = new List<String>();
+                for (String s : finalJsonString) {
+                    s = s.replaceFirst('\\{', '{"attributes" : {"type" : "Product2", "referenceId" : "ref1"},');
+                    Product2 prd = (Product2) JSON.deserialize(s, Sobject.class);
+                    System.debug('prd ' + prd);
+                    try {
+                        upsert prd;
+                        lstResponse.add(new Response('Success', prd.ProductCode));
+                    } catch (DmlException ex) {
+                        lstResponse.add(new Response('Failure', prd.ProductCode, ex.getMessage()));
                     }
                 }
-            } catch (Exception parseEx) {
-                List<Response> err = new List<Response>{
-                    new Response('Failure', 'Invalid JSON body: ' + parseEx.getMessage(), false)
-                };
-                res.statusCode = 400;
+                res.statusCode = 200;
                 res.addHeader('Content-Type', 'application/json');
-                res.responseBody = Blob.valueOf(JSON.serialize(err));
-                return;
-            }
+                res.responseBody = Blob.valueOf(JSON.serialize(lstResponse));
 
-            // 2. Look up existing Product2 records by ProductCode so the
-            //    upsert acts as an update for known codes and an insert
-            //    for new ones (Product2 has no external-id field here).
-            Map<String, Id> existingByCode = new Map<String, Id>();
-            if (!productCodes.isEmpty()) {
-                for (Product2 ex : [
-                    SELECT Id, ProductCode
-                    FROM Product2
-                    WHERE ProductCode IN :productCodes
-                ]) {
-                    existingByCode.put(ex.ProductCode, ex.Id);
-                }
-            }
-
-            // 3. Build Product2 instances and upsert one at a time so a
-            //    single bad row doesn't block the rest of the batch.
-            for (Map<String, Object> m : incoming) {
-                String code = m.get('ProductCode') != null
-                    ? String.valueOf(m.get('ProductCode'))
-                    : null;
-                try {
-                    Map<String, Object> typedMap = new Map<String, Object>(m);
-                    typedMap.put('attributes', new Map<String, String>{
-                        'type' => 'Product2',
-                        'referenceId' => 'ref1'
-                    });
-                    Product2 p = (Product2) JSON.deserialize(
-                        JSON.serialize(typedMap),
-                        Sobject.class
-                    );
-
-                    if (String.isNotBlank(code) && existingByCode.containsKey(code)) {
-                        p.Id = existingByCode.get(code);
+                if (Label.Enable_Logs == 'TRUE') {
+                    String reqsizeString = data;
+                    Integer maxSize = 32000;
+                    if (reqsizeString.length() > maxSize) {
+                        reqsizeString = reqsizeString.substring(0, maxSize);
                     }
-
-                    upsert p;
-                    lstResponse.add(new Response('Success', p.ProductCode));
-                } catch (Exception ex) {
-                    lstResponse.add(new Response('Failure', code, ex.getMessage()));
+                    String ressizeString = JSON.serialize(lstResponse);
+                    if (ressizeString.length() > maxSize) {
+                        ressizeString = ressizeString.substring(0, maxSize);
+                    }
+                    Log__c getLogs = new Log__c();
+                    getLogs.Request__c     = reqsizeString;
+                    getLogs.Response__c    = ressizeString;
+                    getLogs.Object__c      = 'Product';
+                    getLogs.Status_Code__c = String.valueOf(res.statusCode);
+                    insert getLogs;
                 }
+
             }
-
-            res.statusCode = 200;
-            res.addHeader('Content-Type', 'application/json');
-            res.responseBody = Blob.valueOf(JSON.serialize(lstResponse));
-
-            // 4. Audit log (same convention as other classes in this org).
-            if (Label.Enable_Logs == 'TRUE') {
-                writeLog(data, JSON.serialize(lstResponse), 'Product', String.valueOf(res.statusCode));
+            // StockTransfer branch from the reference intentionally omitted.
+            else {
+                List<Response> lstResponse = new List<Response>();
+                lstResponse.add(new Response('Failure', 'Invalid Parameter Value.', false));
+                res.statusCode = 403;
+                res.addHeader('Content-Type', 'application/json');
+                res.responseBody = Blob.valueOf(JSON.serialize(lstResponse));
             }
 
         } else {
-            List<Response> err = new List<Response>{
-                new Response('Failure', 'Invalid Parameter Value.', false)
-            };
-            res.statusCode = 403;
+            List<Response> lstResponse = new List<Response>();
+            lstResponse.add(new Response('Failure', 'Invalid Key.', false));
+            res.statusCode = 401;
             res.addHeader('Content-Type', 'application/json');
-            res.responseBody = Blob.valueOf(JSON.serialize(err));
+            res.responseBody = Blob.valueOf(JSON.serialize(lstResponse));
         }
     }
 
-    /**
-     * Append a Log__c row with the truncated request/response bodies.
-     * Failure to log is non-fatal — the API response stays as-is.
-     */
-    private static void writeLog(String requestBody, String responseBody,
-                                  String objectName, String statusCode) {
-        try {
-            Integer maxSize = 32000;
-            if (requestBody != null && requestBody.length() > maxSize) {
-                requestBody = requestBody.substring(0, maxSize);
-            }
-            if (responseBody != null && responseBody.length() > maxSize) {
-                responseBody = responseBody.substring(0, maxSize);
-            }
-
-            Log__c rec = new Log__c();
-            rec.Request__c     = requestBody;
-            rec.Response__c    = responseBody;
-            rec.Object__c      = objectName;
-            rec.Status_Code__c = statusCode;
-            insert rec;
-        } catch (Exception e) {
-            System.debug('SAPGetData logging failed: ' + e.getMessage());
-        }
-    }
-
-    /**
-     * Per-row response envelope returned to SAP. Three constructors
-     * cover: success-with-id, error-with-id, and parameter/auth errors
-     * that don't have a per-row id.
-     */
     public class Response {
         public String Status;
         public String Message;
         public String ID;
 
-        public Response(String status, String id) {
-            this.Status = status;
-            this.ID     = id;
+        public Response(String Status, String ID) {
+            this.Status = Status;
+            this.ID = ID;
         }
-        public Response(String status, String message, Boolean noIds) {
-            this.Status  = status;
-            this.Message = message;
+        public Response(String Status, String Message, Boolean noIds) {
+            this.Status = Status;
+            this.Message = Message;
         }
-        public Response(String status, String id, String message) {
-            this.Status  = status;
-            this.ID      = id;
-            this.Message = message;
+        public Response(String Status, String ID, String Message) {
+            this.Status = Status;
+            this.ID = ID;
+            this.Message = Message;
         }
     }
 }
