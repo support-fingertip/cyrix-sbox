@@ -1,5 +1,12 @@
 public with sharing class QuoteBuilderController {
 
+    // Opportunity stages a Quote can be created from. Anything else
+    // (Prospecting, Qualification, Closed Won/Lost, etc.) blocks the
+    // builder so reps don't quote stages where pricing isn't expected.
+    private static final Set<String> QUOTE_ALLOWED_STAGES = new Set<String>{
+        'Negotiation', 'Proposal', 'Demo'
+    };
+
     @AuraEnabled(cacheable=true)
     public static OpportunityContext getOpportunityContext(Id opportunityId) {
         // Sub_Vertical__c may not exist on Opportunity in every org — keep
@@ -8,7 +15,7 @@ public with sharing class QuoteBuilderController {
             .containsKey('sub_vertical__c');
 
         String oppQuery =
-            'SELECT Id, Name, AccountId, Account.Name,' +
+            'SELECT Id, Name, StageName, AccountId, Account.Name,' +
             '       Account.BillingStreet, Account.BillingCity,' +
             '       Account.BillingStateCode, Account.BillingPostalCode,' +
             '       Account.BillingCountryCode,' +
@@ -24,11 +31,19 @@ public with sharing class QuoteBuilderController {
             return new OpportunityContext();
         }
         Opportunity opp = oppList[0];
+        if (!QUOTE_ALLOWED_STAGES.contains(opp.StageName)) {
+            throw new AuraHandledException(
+                'Quote can only be created when the Opportunity stage is ' +
+                'Negotiation, Proposal, or Demo. Current stage: ' +
+                (opp.StageName == null ? '(none)' : opp.StageName) + '.'
+            );
+        }
         String subVertical = oppHasSubVertical ? (String) opp.get('Sub_Vertical__c') : null;
 
         OpportunityContext ctx = new OpportunityContext();
         ctx.opportunityId = opp.Id;
         ctx.opportunityName = opp.Name;
+        ctx.stageName = opp.StageName;
         ctx.accountId = opp.AccountId;
         ctx.accountName = opp.Account != null ? opp.Account.Name : '';
         ctx.pricebookId = opp.Pricebook2Id;
@@ -365,8 +380,9 @@ public with sharing class QuoteBuilderController {
         // sending the Product_Category label will fall through without
         // matching, but won't break the query.
         // Search matches Name, ProductCode, the standard Description and
-        // both line/detailed description custom fields so reps can find
-        // products by any of those.
+        // Line_Description__c. Detailed_Description__c is a LongTextArea
+        // which SOQL can't filter — it's still selected for display, just
+        // excluded from the WHERE.
         String prodQuery = 'SELECT Id, Name, ProductCode, Product_Category__c, Product_Type__c, Make__c, Model__c, ' +
             'Description, HSN_Code__c, Standard_Price__c, QuantityUnitOfMeasure, ' +
             'Line_Description__c, Detailed_Description__c, ' +
@@ -376,8 +392,7 @@ public with sharing class QuoteBuilderController {
             'AND (Name LIKE :searchKey ' +
             '     OR ProductCode LIKE :searchKey ' +
             '     OR Description LIKE :searchKey ' +
-            '     OR Line_Description__c LIKE :searchKey ' +
-            '     OR Detailed_Description__c LIKE :searchKey)';
+            '     OR Line_Description__c LIKE :searchKey)';
         if (String.isNotBlank(category)) {
             prodQuery += ' AND Product_Type__c = :category';
         }
@@ -628,6 +643,10 @@ public with sharing class QuoteBuilderController {
         // and ignore when missing so the controller still compiles.
         Boolean qHasBV = Schema.SObjectType.Quote.fields.getMap().containsKey('business_vertical__c');
         Boolean qHasSV = Schema.SObjectType.Quote.fields.getMap().containsKey('sub_vertical__c');
+        Boolean qHasContractFrom = Schema.SObjectType.Quote.fields.getMap()
+            .containsKey('contract_period_from_date__c');
+        Boolean qHasContractEnd = Schema.SObjectType.Quote.fields.getMap()
+            .containsKey('contract_period_end_date__c');
         String quoteFields =
             'Id, Pricebook2Id, OpportunityId,' +
             ' Opportunity.AccountId, Opportunity.Account.Name,' +
@@ -637,7 +656,9 @@ public with sharing class QuoteBuilderController {
             ' ShippingName, ShippingStreet, ShippingCity,' +
             ' ShippingStateCode, ShippingPostalCode, ShippingCountryCode' +
             (qHasBV ? ', Business_Vertical__c' : '') +
-            (qHasSV ? ', Sub_Vertical__c' : '');
+            (qHasSV ? ', Sub_Vertical__c' : '') +
+            (qHasContractFrom ? ', Contract_Period_From_Date__c' : '') +
+            (qHasContractEnd ? ', Contract_Period_End_Date__c' : '');
         Quote q = (Quote) Database.query(
             'SELECT ' + quoteFields + ' FROM Quote WHERE Id = :quoteId LIMIT 1'
         );
@@ -652,6 +673,8 @@ public with sharing class QuoteBuilderController {
         ctx.regionId = q.Opportunity != null ? q.Opportunity.Region__c : null;
         ctx.vertical = qHasBV ? (String) q.get('Business_Vertical__c') : null;
         ctx.subVertical = qHasSV ? (String) q.get('Sub_Vertical__c') : null;
+        ctx.contractFromDate = qHasContractFrom ? (Date) q.get('Contract_Period_From_Date__c') : null;
+        ctx.contractEndDate = qHasContractEnd ? (Date) q.get('Contract_Period_End_Date__c') : null;
 
         // Address fields
         ctx.billingName = q.BillingName;
@@ -960,6 +983,7 @@ public with sharing class QuoteBuilderController {
     public class OpportunityContext {
         @AuraEnabled public Id opportunityId;
         @AuraEnabled public String opportunityName;
+        @AuraEnabled public String stageName;
         @AuraEnabled public Id accountId;
         @AuraEnabled public String accountName;
         @AuraEnabled public Id pricebookId;
@@ -1059,6 +1083,8 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public String shippingState;
         @AuraEnabled public String shippingPostalCode;
         @AuraEnabled public String shippingCountry;
+        @AuraEnabled public Date contractFromDate;
+        @AuraEnabled public Date contractEndDate;
         @AuraEnabled public List<QuoteLineItemResult> lineItems;
         @AuraEnabled public List<PaymentTermResult> paymentTerms;
     }
