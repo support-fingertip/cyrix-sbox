@@ -4,7 +4,7 @@
  * reference project — only the productMaster branch is implemented;
  * any other ?value= falls into the else branch and returns 403.
  *
- * URL:  /services/apexrest/send/*
+ * Endpoint: /services/apexrest/send/*
  * Auth: ?key=<value of Custom Label API_Key>
  * Selector: ?value=productMaster
  * Body: { "data": [ {Product2 fields...}, ... ] }
