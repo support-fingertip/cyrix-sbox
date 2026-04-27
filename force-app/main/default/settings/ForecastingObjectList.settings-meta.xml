@@ -15,7 +15,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027If1</field>
-            <label>Buisness Vertical</label>
+            <label>Business Vertical</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.EXP_AMOUNT</field>
@@ -346,6 +346,10 @@
             <label>Customer Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC40000037Bhl</field>
+            <label>Sub Vertical</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
         </forecastingObjectListLabelMappings>
@@ -439,6 +443,7 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC40000037Bhl</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
             <field>TERR2_NAME</field>
@@ -467,7 +472,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027If1</field>
-            <label>Buisness Vertical</label>
+            <label>Business Vertical</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.EXP_AMOUNT</field>
@@ -798,6 +803,10 @@
             <label>Customer Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC40000037Bhl</field>
+            <label>Sub Vertical</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
         </forecastingObjectListLabelMappings>
@@ -891,6 +900,7 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC40000037Bhl</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
             <field>TERR2_NAME</field>
@@ -919,7 +929,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027If1</field>
-            <label>Buisness Vertical</label>
+            <label>Business Vertical</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.EXP_AMOUNT</field>
@@ -1250,6 +1260,10 @@
             <label>Customer Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC40000037Bhl</field>
+            <label>Sub Vertical</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
         </forecastingObjectListLabelMappings>
@@ -1343,6 +1357,7 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC40000037Bhl</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
             <field>TERR2_NAME</field>
@@ -1371,7 +1386,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027If1</field>
-            <label>Buisness Vertical</label>
+            <label>Business Vertical</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.EXP_AMOUNT</field>
@@ -1706,6 +1721,10 @@
             <label>Customer Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC40000037Bhl</field>
+            <label>Sub Vertical</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
         </forecastingObjectListLabelMappings>
@@ -1800,6 +1819,7 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC40000037Bhl</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
             <field>TERR2_NAME</field>
@@ -1828,7 +1848,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027If1</field>
-            <label>Buisness Vertical</label>
+            <label>Business Vertical</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.EXP_AMOUNT</field>
@@ -2159,6 +2179,10 @@
             <label>Customer Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC40000037Bhl</field>
+            <label>Sub Vertical</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
         </forecastingObjectListLabelMappings>
@@ -2252,6 +2276,7 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC40000037Bhl</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
             <field>TERR2_NAME</field>
@@ -2280,7 +2305,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027If1</field>
-            <label>Buisness Vertical</label>
+            <label>Business Vertical</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.EXP_AMOUNT</field>
@@ -2615,6 +2640,10 @@
             <label>Customer Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC40000037Bhl</field>
+            <label>Sub Vertical</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
         </forecastingObjectListLabelMappings>
@@ -2709,6 +2738,7 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC40000037Bhl</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
             <field>TERR2_NAME</field>
@@ -2737,7 +2767,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027If1</field>
-            <label>Buisness Vertical</label>
+            <label>Business Vertical</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.EXP_AMOUNT</field>
@@ -3068,6 +3098,10 @@
             <label>Customer Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC40000037Bhl</field>
+            <label>Sub Vertical</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
         </forecastingObjectListLabelMappings>
@@ -3161,6 +3195,7 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC40000037Bhl</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
             <field>TERR2_NAME</field>
@@ -3189,7 +3224,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027If1</field>
-            <label>Buisness Vertical</label>
+            <label>Business Vertical</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.EXP_AMOUNT</field>
@@ -3524,6 +3559,10 @@
             <label>Customer Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC40000037Bhl</field>
+            <label>Sub Vertical</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
         </forecastingObjectListLabelMappings>
@@ -3618,6 +3657,7 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC40000037Bhl</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
             <field>TERR2_NAME</field>
@@ -3646,7 +3686,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027If1</field>
-            <label>Buisness Vertical</label>
+            <label>Business Vertical</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.EXP_AMOUNT</field>
@@ -3977,6 +4017,10 @@
             <label>Customer Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC40000037Bhl</field>
+            <label>Sub Vertical</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
         </forecastingObjectListLabelMappings>
@@ -4070,6 +4114,7 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC40000037Bhl</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
             <field>TERR2_NAME</field>
@@ -4098,7 +4143,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027If1</field>
-            <label>Buisness Vertical</label>
+            <label>Business Vertical</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.EXP_AMOUNT</field>
@@ -4433,6 +4478,10 @@
             <label>Customer Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC40000037Bhl</field>
+            <label>Sub Vertical</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
         </forecastingObjectListLabelMappings>
@@ -4527,6 +4576,7 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC40000037Bhl</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
             <field>TERR2_NAME</field>
@@ -4555,7 +4605,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027If1</field>
-            <label>Buisness Vertical</label>
+            <label>Business Vertical</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.EXP_AMOUNT</field>
@@ -4886,6 +4936,10 @@
             <label>Customer Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC40000037Bhl</field>
+            <label>Sub Vertical</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
         </forecastingObjectListLabelMappings>
@@ -4979,6 +5033,7 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC40000037Bhl</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
             <field>TERR2_NAME</field>
@@ -5007,7 +5062,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027If1</field>
-            <label>Buisness Vertical</label>
+            <label>Business Vertical</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.EXP_AMOUNT</field>
@@ -5342,6 +5397,10 @@
             <label>Customer Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC40000037Bhl</field>
+            <label>Sub Vertical</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
         </forecastingObjectListLabelMappings>
@@ -5436,6 +5495,7 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC40000037Bhl</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
             <field>TERR2_NAME</field>
@@ -5464,7 +5524,7 @@
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>00NC40000027If1</field>
-            <label>Buisness Vertical</label>
+            <label>Business Vertical</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
             <field>OPPORTUNITY.EXP_AMOUNT</field>
@@ -5795,6 +5855,10 @@
             <label>Customer Name</label>
         </forecastingObjectListLabelMappings>
         <forecastingObjectListLabelMappings>
+            <field>00NC40000037Bhl</field>
+            <label>Sub Vertical</label>
+        </forecastingObjectListLabelMappings>
+        <forecastingObjectListLabelMappings>
             <field>00NC400000280WL</field>
             <label>Secondary Email</label>
         </forecastingObjectListLabelMappings>
@@ -5888,6 +5952,7 @@
             <field>00NC4000002USLt</field>
             <field>00NC400000280w9</field>
             <field>00NC400000280WL</field>
+            <field>00NC40000037Bhl</field>
             <field>00NC4000002t8lO</field>
             <field>00NC4000002tA5d</field>
             <field>TERR2_NAME</field>

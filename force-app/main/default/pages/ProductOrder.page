@@ -1,0 +1,4 @@
+<apex:page standardController="Order" extensions="OrderPDFController" showHeader="false" sidebar="false">
+    <!-- Stub page kept for metadata continuity. Not used by Send Order Email. -->
+    <p>Order: {!order.Name}</p>
+</apex:page>

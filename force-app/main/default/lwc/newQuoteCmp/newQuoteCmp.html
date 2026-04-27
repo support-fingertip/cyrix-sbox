@@ -95,9 +95,9 @@
                             <div class="qw-field"><lightning-input-field field-name="Delivery__c"></lightning-input-field></div>
                             <div class="qw-field"><lightning-input-field field-name="is_Active__c" value={defaultIsActive}></lightning-input-field></div>
                             <template if:true={showContractDates}>
-                                <div class="qw-field"><lightning-input-field field-name="Contract_Period_From_Date__c" onchange={handleContractFromDateChange} required></lightning-input-field></div>
+                                <div class="qw-field"><lightning-input-field field-name="Contract_Period_From_Date__c" onchange={handleContractFromDateChange}></lightning-input-field></div>
                                 <div class="qw-field">
-                                    <lightning-input-field field-name="Contract_Period_End_Date__c" onchange={handleContractEndDateChange} required></lightning-input-field>
+                                    <lightning-input-field field-name="Contract_Period_End_Date__c" onchange={handleContractEndDateChange}></lightning-input-field>
                                     <template if:true={isContractDateInvalid}>
                                         <div class="qw-field-error">End Date must be greater than From Date.</div>
                                     </template>
@@ -456,7 +456,6 @@
                     <!-- ========== FOOTER ========== -->
                     <div class="qw-footer">
                         <div class="qw-footer-actions">
-                            <button type="button" class="qw-btn ghost" onclick={handleCancel}>Cancel</button>
                             <button type="button" class="qw-btn" onclick={handleStepBack} disabled={isFirstStep}>Back</button>
                             <template if:true={isLastStep}>
                                 <button type="submit" class="qw-btn success" disabled={isSaveDisabled}>{saveButtonLabel}</button>

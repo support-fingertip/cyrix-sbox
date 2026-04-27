@@ -14,7 +14,7 @@ public with sharing class OrderBuilderController {
                    Account.BillingStreet, Account.BillingCity,
                    Account.BillingStateCode, Account.BillingPostalCode,
                    Account.BillingCountryCode,
-                   Pricebook2Id, CurrencyIsoCode, Business_Vertical__c,
+                   Pricebook2Id, CurrencyIsoCode,/* Business_Vertical__c,*/
                    Region__c
             FROM Opportunity
             WHERE Id = :opportunityId
@@ -28,7 +28,7 @@ public with sharing class OrderBuilderController {
         ctx.accountName = opp.Account != null ? opp.Account.Name : '';
         ctx.pricebookId = opp.Pricebook2Id;
         ctx.currencyCode = opp.CurrencyIsoCode;
-        ctx.vertical = opp.Business_Vertical__c;
+       ctx.vertical = opp.Business_Vertical__c;
         ctx.regionId = opp.Region__c;
 
         List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
@@ -83,7 +83,7 @@ public with sharing class OrderBuilderController {
         Quote q = [
             SELECT Id, Name, QuoteNumber, OpportunityId, Opportunity.Name,
                    Opportunity.AccountId, Opportunity.Account.Name,
-                   Opportunity.Business_Vertical__c, Opportunity.Region__c,
+                  Opportunity.Business_Vertical__c, Opportunity.Region__c,
                    Pricebook2Id, CurrencyIsoCode,
                    Business_Vertical__c, Sub_Vertical__c,
                    Shipping_Mode__c, Delivery__c,

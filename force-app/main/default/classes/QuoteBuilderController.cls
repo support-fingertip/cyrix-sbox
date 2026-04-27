@@ -364,11 +364,9 @@ public with sharing class QuoteBuilderController {
         // (Equipment / Spare / Accessories / Consumables). Older callers
         // sending the Product_Category label will fall through without
         // matching, but won't break the query.
-        // Searchable fields: Name, ProductCode and the Text-typed
-        // Line_Description__c. Standard Description and the rich
-        // Detailed_Description__c are LongTextArea — Salesforce blocks
-        // those in WHERE clauses ("field cannot be filtered in a query
-        // call"), so they're queried for display but not for matching.
+        // Search matches Name, ProductCode, the standard Description and
+        // both line/detailed description custom fields so reps can find
+        // products by any of those.
         String prodQuery = 'SELECT Id, Name, ProductCode, Product_Category__c, Product_Type__c, Make__c, Model__c, ' +
             'Description, HSN_Code__c, Standard_Price__c, QuantityUnitOfMeasure, ' +
             'Line_Description__c, Detailed_Description__c, ' +
@@ -377,7 +375,9 @@ public with sharing class QuoteBuilderController {
             'WHERE IsActive = true ' +
             'AND (Name LIKE :searchKey ' +
             '     OR ProductCode LIKE :searchKey ' +
-            '     OR Line_Description__c LIKE :searchKey)';
+            '     OR Description LIKE :searchKey ' +
+            '     OR Line_Description__c LIKE :searchKey ' +
+            '     OR Detailed_Description__c LIKE :searchKey)';
         if (String.isNotBlank(category)) {
             prodQuery += ' AND Product_Type__c = :category';
         }

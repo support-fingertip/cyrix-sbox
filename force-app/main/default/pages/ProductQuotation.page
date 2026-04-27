@@ -19,27 +19,25 @@
                 content: element(footer); 
                 } 
                 }
-                div.header {
+                div.header { 
                 position: running(header);
                 width: 100%;
-                padding: 10px 24px 6px 24px;
                 }
-                    div.footer {
-                display: block;
-    position: running(footer);
+                    div.footer { 
+                display: block; 
+    position: running(footer); 
     font-size: 11px;
     padding-bottom: 20px;
-   }
+   } 
                 div.content {
                 margin-left:7%;
-                margin-right:7%;
-                padding: 8px 4px 16px 4px;
+
                 }
                 
                 .overlaytext {
                 position: absolute;
                 top: 15%;
-                left: 10%;
+                left: 7%;
 
                 font-size: 14px;
                 font-weight: bold;
@@ -51,7 +49,34 @@
                 .page-break {
                     page-break-before: always;
                 }
-                
+
+                /* Project costing / quotation data table: collapse borders
+                   so adjacent cells share a single line (no double borders
+                   or gaps). */
+                .data-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+                .data-table th,
+                .data-table td {
+                    border: 1px solid #000;
+                    padding: 4px;
+                }
+
+                /* Terms and Conditions section headings must stay with
+                   their list/body and numbered lists must not split
+                   across pages. */
+                .tc-heading { page-break-after: avoid; }
+                .tc-list    { page-break-inside: avoid; }
+
+                /* Signature table (SECOND PARTY / FIRST PARTY) and the
+                   closing signatory block should never split. */
+                .signature-table,
+                .closing-block { page-break-inside: avoid; page-break-after: avoid; }
+
+                /* Annexure always starts on a fresh page. */
+                .annexure { page-break-before: always; }
+
             </style>
         </head>
         <body>
@@ -66,13 +91,15 @@
             <table class="header-inner overlaytext"  style="index:10;">
                 <tr>
                     <td style="width: 80%; text-align: left;">
-                        <span style="color: #000000;">{!quote.Name}</span>
+                        <span style="color: #C8102E;">{!quoteNamePart1}</span><span style="color: #000000;">/{!quoteNamePart2}/</span><span style="color: #C8102E;">{!quoteNamePart3}</span><span style="color: #000000;">/{!quoteNamePart4}</span>
                     </td>
-                    <td style="width: 20%; text-align: left;">
+                    <td style="width: 20%; text-align: left; padding-left: 40px;">
                         <span style="color: #000000;">DATE:</span>
-                        <apex:outputText value="{0,date,dd/MM/yyyy}">
-                            <apex:param value="{!quote.Quote_Date__c}" />
-                        </apex:outputText>
+                        <span style="color: #C8102E;">
+                            <apex:outputText value="{0,date,dd/MM/yyyy}">
+                                <apex:param value="{!quote.Quote_Date__c}" />
+                            </apex:outputText>
+                        </span>
                     </td>
                 </tr>
             </table>
@@ -100,7 +127,7 @@
                             </p>
                         </div>
                         <p style="text-align: center; font-weight: bold; margin: 10px 0;">
-                            SUBJECT: QUOTATION FOR <span class="capitalize">{!quote.Business_Vertical__c}</span>
+                            SUBJECT: QUOTATION FOR <span style="text-transform: uppercase;">{!quote.Business_Vertical__c}</span>
                         </p>
                 
                     </div>
@@ -111,7 +138,7 @@
                         <div>
                             We sincerely appreciate your continued trust in our products and services. As per your
                             requirement, we are pleased to submit our proposal for
-                            <strong>{!quote.Business_Vertical__c}</strong> for your kind consideration.
+                            <strong style="text-transform: uppercase;">{!quote.Business_Vertical__c}</strong> for your kind consideration.
                         </div>
                         
                         <apex:variable var="pIdx" value="{!1}" />
@@ -174,7 +201,7 @@
 
                     <!-- Quotation for Cyrix table -->
                     <div style="text-align: center; font-weight: bold; margin: 6px 0 8px 0; text-decoration: underline; padding-bottom: 20px;">
-                        QUOTATION FOR CYRIX <span class="capitalize">{!productName}<apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> &amp; {!quote.Business_Vertical__c}</apex:outputPanel></span>
+                        QUOTATION FOR CYRIX <span style="text-transform: uppercase;">{!productName}<apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> &amp; {!quote.Business_Vertical__c}</apex:outputPanel></span>
                     </div>
                     
                     <table class="data-table">
@@ -220,10 +247,10 @@
                                         <apex:outputText value="{0, number, ###,##0.00}"><apex:param value="{!item.TotalPrice}" /></apex:outputText>
                                     </td>
                                     <td style="border: 1px solid #000; padding: 4px; text-align: right;">
-                                        <apex:outputText value="{0, number, ###,##0.00}"><apex:param value="{!item.TotalPrice}" /></apex:outputText>
+                                        <apex:outputText value="{0, number, ###,##0.00}"><apex:param value="{!lineGstAmount[item.Id]}" /></apex:outputText>
                                     </td>
                                     <td style="border: 1px solid #000; padding: 4px; text-align: right;">
-                                        <apex:outputText value="{0, number, ###,##0.00}"><apex:param value="{!item.TotalPrice}" /></apex:outputText>
+                                        <apex:outputText value="{0, number, ###,##0.00}"><apex:param value="{!lineGrandTotal[item.Id]}" /></apex:outputText>
                                     </td>
                                 </tr>
                                 <apex:variable var="rowNum" value="{!rowNum + 1}" />
@@ -270,7 +297,6 @@
                         <div>Delivery will be scheduled within <strong>{!quote.Delivery__c}</strong> from receipt of confirmed Purchase Order along with advance payment.</div>
                     </div>
 
-                    <apex:outputPanel rendered="{!showInstallationSection}">
                     <div style="margin: 10px 0 10px 0;">
                         <div style="font-weight: bold; padding-bottom: 4px;"> Installation &amp; Approvals</div>
                         <div style="text-align:justify; line-height: 1.4;">Installation will be carried out at the approved site without additional charges, subject to site readiness confirmation from the customer.</div>
@@ -279,9 +305,7 @@
                             Statutory approvals such as PC-PNDT and AERB (where applicable) must be obtained by the customer prior to installation.
                         </div>
                     </div>
-                    </apex:outputPanel>
 
-                    <apex:outputPanel rendered="{!showWarrantySection}">
                     <div style="margin: 10px 0 10px 0;">
                         <div style="font-weight: bold; padding-bottom: 4px;"> Warranty</div>
                         <div style=" line-height: 1.4;">
@@ -293,7 +317,6 @@
                             calamities, pest-related issues, or third-party interference.
                         </div>
                     </div>
-                    </apex:outputPanel>
 
                     <div style="margin: 10px 0 10px 0;">
                         <div style="font-weight: bold; padding-bottom: 4px;">Site Responsibilities</div>
@@ -344,11 +367,11 @@
                         </div>
                     </div>
 
-                    <div style="margin: 15px 0 10px 0;font-weight: bold;">
+                    <div class="closing-block" style="margin: 15px 0 0 0; font-weight: bold;">
                         Thanking you and always assuring you of our best services.<br/>
                         <div style="font-weight: bold; margin-top: 6px;">For CYRIX HEALTHCARE PVT.LTD</div><br/>
                         <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 60px; max-width: 60px;" /><br/>
-                        <div style="font-size: 10px;">Authorized Signatory</div><br/> 
+                        <div style="font-size: 10px;">Authorized Signatory</div>
                     </div>
 
                 </apex:outputPanel>
@@ -362,10 +385,10 @@
 
                     <!-- Project Costing table -->
                     <div style="text-align: center; font-weight: bold; margin: 6px 0 8px 0; text-decoration: underline; padding-bottom: 20px;">
-                        PROJECT COSTING - <apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"><span class="capitalize"> {!quote.Business_Vertical__c}</span></apex:outputPanel>
+                        PROJECT COSTING<apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> - <span style="text-transform: uppercase;">{!quote.Business_Vertical__c}</span></apex:outputPanel>
                     </div>
                     
-                    <table class="data-table">
+                    <table class="data-table" style="width: 100%; border-collapse: collapse; border-spacing: 0;">
                         <thead>
                             <tr>
                                 <th style="width: 30px; border: 1px solid #000;text-align: center; padding: 4px;">SN</th>
@@ -394,17 +417,17 @@
                                     <td style="border: 1px solid #000; padding: 4px; font-weight: bold; text-decoration: underline;">
                                         <apex:outputText value="{!IF(calItem.Product2.Parameters__c != null, calItem.Product2.Parameters__c, 'AS PER THE EQUIPMENT TYPE')}" />
                                     </td>
-                                    <td style="text-align: center; border: 1px solid #000; padding: 4px;">
+                                    <td style="text-align: right; border: 1px solid #000; padding: 4px;">
                                         <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!calItem.ListPrice}" /></apex:outputText>
                                     </td>
                                     <td style="text-align: right; border: 1px solid #000; padding: 4px;">
                                         <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!calItem.TotalPrice}" /></apex:outputText>
                                     </td>
-                                    <td style="text-align: center; border: 1px solid #000; padding: 4px;">
-                                        <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!calItem.ListPrice}" /></apex:outputText>
+                                    <td style="text-align: right; border: 1px solid #000; padding: 4px;">
+                                        <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!lineGstAmount[calItem.Id]}" /></apex:outputText>
                                     </td>
                                     <td style="text-align: right; border: 1px solid #000; padding: 4px;">
-                                        <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!calItem.TotalPrice}" /></apex:outputText>
+                                        <apex:outputText value="{0, number, ###,##0}"><apex:param value="{!lineGrandTotal[calItem.Id]}" /></apex:outputText>
                                     </td>
                                 </tr>
                                 <apex:variable var="calIdx" value="{!calIdx + 1}" />
@@ -465,7 +488,7 @@
                     </div>
 
                     <!-- Calibration: Additional Terms (clauses 1-11 hardcoded + 12-14 dynamic) -->
-                    <div style="font-weight: bold; text-decoration: underline; margin: 10px 0 6px 0;">
+                    <div style="page-break-before: always; font-weight: bold; text-decoration: underline; margin: 10px 0 6px 0;">
                         ADDITIONAL TERMS TO BE ADDED:
                     </div>
                     <ol style="margin: 0; padding-left: 25px; line-height: 1.6;">
@@ -528,11 +551,11 @@
                         </apex:repeat>
                     </ol>
 
-                    <div style="margin: 15px 0 10px 0;font-weight: bold;">
+                    <div style="margin: 15px 0 0 0; font-weight: bold; page-break-inside: avoid; page-break-after: avoid;">
                         Thanking you and always assuring you of our best services.<br/>
                         <div style="font-weight: bold; margin-top: 6px;">For CYRIX HEALTHCARE PVT.LTD</div><br/>
                         <apex:image url="{!URLFOR($Resource.Stamp)}" style="max-height: 60px; max-width: 60px;" /><br/>
-                        <div style="font-size: 10px;">Authorized Signatory</div><br/> 
+                        <div style="font-size: 10px;">Authorized Signatory</div>
                     </div>
 
                 </apex:outputPanel>
@@ -546,7 +569,7 @@
 
                     <!-- AMC: Project Costing table -->
                     <div style="text-align: center; font-weight: bold; margin: 6px 0 8px 0; text-decoration: underline; padding-bottom: 20px;">
-                        PROJECT COSTING <apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> - <span class="capitalize">{!quote.Business_Vertical__c}</span></apex:outputPanel>
+                        PROJECT COSTING <apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> - <span style="text-transform: uppercase;">{!quote.Business_Vertical__c}</span></apex:outputPanel>
                     </div>
 
                     <table class="data-table">
@@ -586,7 +609,7 @@
                                                 <apex:param value="{!quote.Contract_Period_From_Date__c}" />
                                             </apex:outputText>
                                         </apex:outputPanel>
-                                        to
+                                        &nbsp;to&nbsp;
                                         <apex:outputPanel rendered="{!quote.Contract_Period_End_Date__c != null}">
                                             <apex:outputText value="{0,date,dd/MM/yyyy}">
                                                 <apex:param value="{!quote.Contract_Period_End_Date__c}" />
@@ -604,8 +627,8 @@
                         TERMS &amp; CONDITIONS
                     </div>
 
-                    <p style="font-weight: bold; margin: 8px 0 2px 0;">1. Scope of Services</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 8px 0 2px 0;">1. Scope of Services</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;"><strong>Breakdown Support:</strong> Attendance for major or complete system breakdown within <strong>48 hours</strong> of complaint registration.</li>
                         <li style="margin-bottom: 3px;"><strong>Preventive Maintenance:</strong> <strong>Two (2)</strong> Preventive Maintenance visits per year to ensure optimal performance and reliability.</li>
                         <li style="margin-bottom: 3px;"><strong>User Training:</strong> Basic operational training for end users during the contract period.</li>
@@ -613,9 +636,9 @@
                         <li style="margin-bottom: 3px;"><strong>Yearly Calibration:</strong> One annual calibration as per applicable standards.</li>
                     </ul>
 
-                    <p style="font-weight: bold; margin: 8px 0 2px 0;">2. Exclusions</p>
+                    <p class="tc-heading" style="font-weight: bold; margin: 8px 0 2px 0;">2. Exclusions</p>
                     <p>The AMC does not cover:</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;"><strong>Spare Parts &amp; Software:</strong> Supply of all spare parts, components, consumables, and software upgrades or updates is excluded from this quotation and shall be provided only upon issuance of a separate Purchase Order by the CLIENT.</li>
                         <li style="margin-bottom: 3px;">Physical/accidental damage, fire, flood, electrical surge, rodent damage, corrosion, tampering, or misuse.</li>
                         <li style="margin-bottom: 3px;">Failures due to improper earthing, voltage fluctuation, or faulty power supply.</li>
@@ -623,8 +646,8 @@
                         <li style="margin-bottom: 3px;">Any failure or service interruption due to the CLIENT&#8217;s non-compliance with statutory or regulatory requirements (such as AERB, PC-PNDT, etc.) will not be covered under this AMC.</li>
                     </ul>
 
-                    <p style="font-weight: bold; margin: 8px 0 2px 0;">3. Contract Period</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 8px 0 2px 0;">3. Contract Period</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">
                             The contract shall be valid from
                             <apex:outputPanel rendered="{!quote.Contract_Period_From_Date__c != null}">
@@ -639,8 +662,8 @@
                         <li style="margin-bottom: 3px;">Renewable annually with 5% escalation, up to <strong>five years</strong>, subject to mutual agreement.</li>
                     </ul>
 
-                    <p style="font-weight: bold; margin: 8px 0 2px 0;">4. Payment Terms</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 8px 0 2px 0;">4. Payment Terms</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <apex:outputPanel rendered="{!paymentTerms.size > 0}">
                             <apex:repeat value="{!paymentTerms}" var="ptAmc">
                                 <li style="margin-bottom: 3px;"><strong>{!ptAmc.Percentage__c}%</strong> {!ptAmc.Payment_Term__c}</li>
@@ -651,65 +674,65 @@
                         </apex:outputPanel>
                     </ul>
 
-                    <p style="font-weight: bold; margin: 8px 0 2px 0;">5. Service Conditions</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 8px 0 2px 0; page-break-before: always;">5. Service Conditions</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">Service hours: 9:00 AM &#8211; 5:00 PM (Monday&#8211;Saturday), excluding holidays.</li>
                         <li style="margin-bottom: 3px;">Emergency calls outside working hours are chargeable.</li>
                         <li style="margin-bottom: 3px;">Delays due to non-availability of spares, natural calamities, strikes, or circumstances beyond control shall not be the responsibility of the service provider.</li>
                         <li style="margin-bottom: 3px;">Equipment may be shifted to workshop for repair if required, at CLIENT&#8217;s risk.</li>
                     </ul>
 
-                    <p style="font-weight: bold; margin: 8px 0 2px 0;">6. Client Responsibilities</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 8px 0 2px 0;">6. Client Responsibilities</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">Provide proper electrical supply, earthing, UPS, and stabilizer.</li>
                         <li style="margin-bottom: 3px;">Ensure suitable environmental conditions as per manufacturer guidelines.</li>
                         <li style="margin-bottom: 3px;">Provide full access to equipment and nominate a single point of contact.</li>
                     </ul>
 
-                    <p style="font-weight: bold; margin: 8px 0 2px 0;">7. Limitations of Liability</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 8px 0 2px 0;">7. Limitations of Liability</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">Not liable for misuse, unauthorized repairs, natural disasters, power failures, or normal wear and tear.</li>
                         <li style="margin-bottom: 3px;">Equipment declared irrepairable (spare cost exceeding 60% of equipment value) will not be covered.</li>
                         <li style="margin-bottom: 3px;">No liability for indirect or consequential losses.</li>
                     </ul>
 
-                    <p style="font-weight: bold; margin: 8px 0 2px 0;">8. ACCEPTANCE OF QUOTATION</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 8px 0 2px 0;">8. ACCEPTANCE OF QUOTATION</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">The quotation shall be considered accepted upon issuance of a formal Purchase Order or written confirmation by the CLIENT. Acceptance of the quotation shall constitute agreement to all terms and conditions mentioned herein.</li>
                     </ul>
 
-                    <p style="font-weight: bold; margin: 8px 0 2px 0;">9. Termination</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 8px 0 2px 0;">9. Termination</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">Either party may terminate with 30 days&#8217; written notice for valid reasons.</li>
                         <li style="margin-bottom: 3px;">Termination for convenience requires 90 days&#8217; written notice.</li>
                     </ul>
 
-                    <p style="font-weight: bold; margin: 8px 0 2px 0;">10. Arbitration &amp; Jurisdiction</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 8px 0 2px 0;">10. Arbitration &amp; Jurisdiction</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">Disputes shall be resolved through arbitration under the Arbitration and Conciliation Act, 1996.</li>
                         <li style="margin-bottom: 3px;">Jurisdiction: Cochin, Kerala.</li>
                     </ul>
 
-                    <p style="font-weight: bold; margin: 8px 0 2px 0;">11. BANK DETAILS:</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 8px 0 2px 0;">11. BANK DETAILS:</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
                         <li>A/C Number: <apex:outputPanel rendered="{!general.Account_No__c != null}">{!general.Account_No__c}</apex:outputPanel></li>
                         <li>Bank Name: <apex:outputPanel rendered="{!general.Bank_Name__c != null}">{!general.Bank_Name__c}</apex:outputPanel></li>
                         <li>Branch Code: <apex:outputPanel rendered="{!general.Branch_Code__c != null}">{!general.Branch_Code__c}</apex:outputPanel></li>
                         <li>IFSC: <apex:outputPanel rendered="{!general.IFSC_Code__c != null}">{!general.IFSC_Code__c}</apex:outputPanel></li>
                     </ul>
 
-                    <p style="font-weight: bold; margin: 8px 0 2px 0;">12. Service Report Acknowledgement</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 8px 0 2px 0;">12. Service Report Acknowledgement</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
                         <li>The CLIENT shall sign and acknowledge the service report upon completion of each service visit as confirmation of the work performed.</li>
                     </ul>
 
-                    <p style="font-weight: bold; margin: 8px 0 2px 0;">13. Addition of Equipment</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 8px 0 2px 0;">13. Addition of Equipment</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
                         <li>Any new equipment installed by the CLIENT during the contract period that is <strong>not listed in Annexure-A</strong> shall not be covered under this agreement. Such equipment may be included in the contract only <strong>upon mutual agreement</strong>, subject to inspection and revision of contract charges through a written amendment or separate Purchase Order.</li>
                     </ul>
 
                     <!-- AMC: Second Party / First Party block -->
-                    <table style="width: 100%; margin-top: 5px;">
+                    <table class="signature-table" style="width: 100%; margin-top: 5px; page-break-before: always;">
                         <tr>
                             <td style="width: 50%; vertical-align: top;"><strong>SECOND PARTY</strong></td>
                             <td style="width: 50%; vertical-align: top; padding-left: 80px;"><strong>FIRST PARTY</strong></td>
@@ -729,10 +752,8 @@
                         </tr>
                     </table>
 
-                    <br/><br/>
-
                     <!-- AMC: Annexure A -->
-                    <div style="text-align: center; font-weight: bold; text-decoration: underline; margin: 15px 0 10px 0;">
+                    <div class="annexure" style="text-align: center; font-weight: bold; text-decoration: underline; margin: 15px 0 10px 0;">
                         ANNEXURE &#8211; A
                     </div>
                     <table style="width: 90%; margin: 0 auto; border-collapse: collapse;">
@@ -777,7 +798,7 @@
 
                     <!-- CAMC: Project Costing table (separate from AMC) -->
                     <div style="text-align: center; font-weight: bold; margin: 6px 0 8px 0; text-decoration: underline; padding-bottom: 20px;">
-                        PROJECT COSTING <apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> - <span class="capitalize">{!quote.Business_Vertical__c}</span></apex:outputPanel>
+                        PROJECT COSTING <apex:outputPanel rendered="{!quote.Business_Vertical__c != null}"> - <span style="text-transform: uppercase;">{!quote.Business_Vertical__c}</span></apex:outputPanel>
                     </div>
 
                     <table class="data-table">
@@ -817,7 +838,7 @@
                                                 <apex:param value="{!quote.Contract_Period_From_Date__c}" />
                                             </apex:outputText>
                                         </apex:outputPanel>
-                                        to
+                                        &nbsp;to&nbsp;
                                         <apex:outputPanel rendered="{!quote.Contract_Period_End_Date__c != null}">
                                             <apex:outputText value="{0,date,dd/MM/yyyy}">
                                                 <apex:param value="{!quote.Contract_Period_End_Date__c}" />
@@ -833,8 +854,8 @@
                     <!-- CAMC: Terms and Conditions (all 13 sections) -->
                     <div style="text-align: center; font-weight: bold; text-decoration: underline; margin: 5px 0 8px 0;">TERMS &amp; CONDITIONS</div>
             
-                    <p style="font-weight: bold; margin: 6px 0 2px 0;">1. Scope of Services</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 6px 0 2px 0;">1. Scope of Services</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">All internal electronic and mechanical spare parts, labour, and service charges included.</li>
                         <li style="margin-bottom: 3px;"><strong>Breakdown Support:</strong> Attendance for major or complete system breakdown within <strong>48 hours</strong> of complaint registration.</li>
                         <li style="margin-bottom: 3px;"><strong>Preventive Maintenance:</strong> <strong>Two (2)</strong> Preventive Maintenance visits per year to ensure optimal performance and reliability.</li>
@@ -843,9 +864,9 @@
                         <li style="margin-bottom: 3px;"><strong>Yearly Calibration:</strong> One annual calibration as per applicable standards.</li>
                     </ul>
             
-                    <p style="font-weight: bold; margin: 6px 0 2px 0;">2. Exclusions</p>
+                    <p class="tc-heading" style="font-weight: bold; margin: 6px 0 2px 0;">2. Exclusions</p>
                     <p>The CAMC does not cover:</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">Consumables and accessories such as probes, cables, batteries, cuffs, tubing, printer cartridges, sensors, and similar items are not included under CAMC.</li>
                         <li style="margin-bottom: 3px;">Software upgrades, updates, licenses, or application software are not covered under this CAMC unless specifically mentioned in the contract.</li>
                         <li style="margin-bottom: 3px;">Physical/accidental damage, fire, flood, electrical surge, rodent damage, corrosion, tampering, or misuse.</li>
@@ -854,15 +875,15 @@
                         <li style="margin-bottom: 3px;">Any failure or service interruption due to the CLIENT&#8217;s non-compliance with statutory or regulatory requirements (such as AERB, PC-PNDT, etc.) will not be covered under this CAMC.</li>
                     </ul>
             
-                    <p style="font-weight: bold; margin: 6px 0 2px 0;">3. Contract Period</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 6px 0 2px 0;">3. Contract Period</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">The contract shall be valid for a period of one year, or for such duration as may be mutually agreed upon by both parties.</li>
                         <li style="margin-bottom: 3px;">Cyrix Healthcare Pvt. Ltd. agrees to provide maintenance services for the equipment listed in <strong>Annexure-A</strong> installed at the CLIENT premises.</li>
                         <li style="margin-bottom: 3px;">Renewable annually with 5% escalation, up to <strong>five years</strong>, subject to mutual agreement.</li>
                     </ul>
             
-                    <p style="font-weight: bold; margin: 6px 0 2px 0;">4. Payment Terms</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 6px 0 2px 0;">4. Payment Terms</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <apex:outputPanel rendered="{!paymentTerms.size > 0}">
                             <apex:repeat value="{!paymentTerms}" var="pt"><li style="margin-bottom: 3px;"><strong>{!pt.Percentage__c}%</strong> {!pt.Payment_Term__c}</li></apex:repeat>
                         </apex:outputPanel>
@@ -871,65 +892,65 @@
                         </apex:outputPanel>
                     </ul>
             
-                    <p style="font-weight: bold; margin: 6px 0 2px 0;">5. Service Conditions</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 6px 0 2px 0; page-break-before: always;">5. Service Conditions</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">Service hours: 9:00 AM &#8211; 5:00 PM (Monday&#8211;Saturday), excluding holidays.</li>
                         <li style="margin-bottom: 3px;">Emergency calls outside working hours are chargeable.</li>
                         <li style="margin-bottom: 3px;">Delays due to non-availability of spares, natural calamities, strikes, or circumstances beyond control shall not be the responsibility of the service provider.</li>
                         <li style="margin-bottom: 3px;">Equipment may be shifted to workshop for repair if required, at CLIENT&#8217;s risk.</li>
                     </ul>
-            
-                    <p style="font-weight: bold; margin: 6px 0 2px 0;">6. Client Responsibilities</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+
+                    <p class="tc-heading" style="font-weight: bold; margin: 6px 0 2px 0;">6. Client Responsibilities</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">Provide proper electrical supply, earthing, UPS, and stabilizer.</li>
                         <li style="margin-bottom: 3px;">Ensure suitable environmental conditions as per manufacturer guidelines.</li>
                         <li style="margin-bottom: 3px;">Provide full access to equipment and nominate a single point of contact.</li>
                     </ul>
             
-                    <p style="font-weight: bold; margin: 6px 0 2px 0;">7. Limitations of Liability</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 6px 0 2px 0;">7. Limitations of Liability</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">Not liable for misuse, unauthorized repairs, natural disasters, power failures, or normal wear and tear.</li>
                         <li style="margin-bottom: 3px;">Equipment declared irrepairable (spare cost exceeding 60% of equipment value) will not be covered.</li>
                         <li style="margin-bottom: 3px;">No liability for indirect or consequential losses.</li>
                     </ul>
             
-                    <p style="font-weight: bold; margin: 6px 0 2px 0;">8. ACCEPTANCE OF QUOTATION</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 6px 0 2px 0;">8. ACCEPTANCE OF QUOTATION</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">The quotation shall be considered accepted upon issuance of a formal Purchase Order or written confirmation by the CLIENT. Acceptance of the quotation shall constitute agreement to all terms and conditions mentioned herein.</li>
                     </ul>
             
-                    <p style="font-weight: bold; margin: 6px 0 2px 0;">9. Termination</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 6px 0 2px 0;">9. Termination</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">Either party may terminate with 30 days&#8217; written notice for valid reasons.</li>
                         <li style="margin-bottom: 3px;">Termination for convenience requires 90 days&#8217; written notice.</li>
                     </ul>
             
-                    <p style="font-weight: bold; margin: 6px 0 2px 0;">10. Arbitration &amp; Jurisdiction</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 6px 0 2px 0;">10. Arbitration &amp; Jurisdiction</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.5;">
                         <li style="margin-bottom: 3px;">Disputes shall be resolved through arbitration under the Arbitration and Conciliation Act, 1996.</li>
                         <li style="margin-bottom: 3px;">Jurisdiction: Cochin, Kerala.</li>
                     </ul>
             
-                    <p style="font-weight: bold; margin: 6px 0 2px 0;">11. BANK DETAILS:</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 6px 0 2px 0;">11. BANK DETAILS:</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
                         <li>A/C Number: <apex:outputPanel rendered="{!general.Account_No__c != null}">{!general.Account_No__c}</apex:outputPanel></li>
                         <li>Bank Name: <apex:outputPanel rendered="{!general.Bank_Name__c != null}">{!general.Bank_Name__c}</apex:outputPanel></li>
                         <li>Branch Code: <apex:outputPanel rendered="{!general.Branch_Code__c != null}">{!general.Branch_Code__c}</apex:outputPanel></li>
                         <li>IFSC: <apex:outputPanel rendered="{!general.IFSC_Code__c != null}">{!general.IFSC_Code__c}</apex:outputPanel></li>
                     </ul>
             
-                    <p style="font-weight: bold; margin: 6px 0 2px 0;">12. Service Report Acknowledgement</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 6px 0 2px 0;">12. Service Report Acknowledgement</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
                         <li>The CLIENT shall sign and acknowledge the service report upon completion of each service visit as confirmation of the work performed.</li>
                     </ul>
             
-                    <p style="font-weight: bold; margin: 6px 0 2px 0;">13. Addition of Equipment</p>
-                    <ul style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
+                    <p class="tc-heading" style="font-weight: bold; margin: 6px 0 2px 0;">13. Addition of Equipment</p>
+                    <ul class="tc-list" style="margin: 0 0 3px 15px; padding-left: 12px; line-height: 1.4;">
                         <li>Any new equipment installed by the CLIENT during the contract period that is <strong>not listed in Annexure-A</strong> shall not be covered under this agreement. Such equipment may be included in the contract only <strong>upon mutual agreement</strong>, subject to inspection and revision of contract charges through a written amendment or separate Purchase Order.</li>
                     </ul>
 
                     <!-- CAMC: Second Party / First Party block -->
-                    <table style="width: 100%; margin-top: 5px;">
+                    <table class="signature-table" style="width: 100%; margin-top: 5px; page-break-before: always;">
                         <tr>
                             <td style="width: 50%; vertical-align: top;"><strong>SECOND PARTY</strong></td>
                             <td style="width: 50%; vertical-align: top; padding-left: 80px;"><strong>FIRST PARTY</strong></td>
@@ -948,11 +969,9 @@
                             </td>
                         </tr>
                     </table>
-            
-                    <br/><br/>
 
                     <!-- CAMC: Annexure A -->
-                    <div style="text-align: center; font-weight: bold; text-decoration: underline; margin: 15px 0 10px 0;">
+                    <div class="annexure" style="text-align: center; font-weight: bold; text-decoration: underline; margin: 15px 0 10px 0;">
                         ANNEXURE &#8211; A
                     </div>
                     <table style="width: 90%; margin: 0 auto; border-collapse: collapse;">

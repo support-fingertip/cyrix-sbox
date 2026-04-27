@@ -31,13 +31,18 @@ public with sharing class QuotationPDFController {
     public Decimal amcGstAmount { get; set; }
     public Decimal amcGrandTotal { get; set; }
 
-    // Conditional T&C sections — show "Installation & Approvals" and the
-    // "Warranty" clauses only when the line items actually include
-    // products whose names reference those scopes (e.g. installation
-    // services, warranty add-ons). Service / AMC quotes won't carry
-    // either, so the boilerplate would just confuse the customer.
-    public Boolean showInstallationSection { get; private set; }
-    public Boolean showWarrantySection { get; private set; }
+    // Per-line GST amount and line grand total, keyed by QuoteLineItem Id.
+    // Used by the Calibration and General tables so GST/TOTAL columns don't
+    // collapse into duplicates of ListPrice/TotalPrice.
+    public Map<Id, Decimal> lineGstAmount { get; set; }
+    public Map<Id, Decimal> lineGrandTotal { get; set; }
+
+    // Quote.Name pre-split on '/' so the PDF header can color each segment
+    // (C-{code} / {vertical} / QTN-{NNN} / {FY}) independently.
+    public String quoteNamePart1 { get; set; }
+    public String quoteNamePart2 { get; set; }
+    public String quoteNamePart3 { get; set; }
+    public String quoteNamePart4 { get; set; }
 
 
     public QuotationPDFController(ApexPages.StandardController stdController) {
@@ -84,7 +89,14 @@ BillingPostalCode,Business_Vertical__c,
         }
 
         quote = quotes[0];
-       
+
+        if (String.isNotBlank(quote.Name)) {
+            List<String> parts = quote.Name.split('/');
+            quoteNamePart1 = parts.size() > 0 ? parts[0] : '';
+            quoteNamePart2 = parts.size() > 1 ? parts[1] : '';
+            quoteNamePart3 = parts.size() > 2 ? parts[2] : '';
+            quoteNamePart4 = parts.size() > 3 ? parts[3] : '';
+        }
 
         grandTotalInWords = convertNumberToWords(quote.grandTotal);
 
@@ -104,22 +116,19 @@ BillingPostalCode,Business_Vertical__c,
             ORDER BY CreatedDate ASC
         ];
 
-        // Walk the line items once to derive the AMC totals AND the
-        // T&C section flags (installation / warranty are gated on whether
-        // a line-item product name references those scopes). Keeping
-        // both in one pass avoids a second loop.
+        // AMC single-row summary: sum of line totals, fixed 18% GST.
         amcTotalRate = 0;
-        showInstallationSection = false;
-        showWarrantySection = false;
+        lineGstAmount = new Map<Id, Decimal>();
+        lineGrandTotal = new Map<Id, Decimal>();
         for (QuoteLineItem qli : lineItems) {
-            if (qli.TotalPrice != null) {
-                amcTotalRate += qli.TotalPrice;
-            }
-            if (qli.Product2 != null && qli.Product2.Name != null) {
-                String n = qli.Product2.Name.toLowerCase();
-                if (n.contains('installation')) showInstallationSection = true;
-                if (n.contains('warranty'))     showWarrantySection = true;
-            }
+            Decimal rate = qli.TotalPrice != null ? qli.TotalPrice : 0;
+            amcTotalRate += rate;
+
+            Decimal taxPct = (qli.Product2 != null && qli.Product2.Tax__c != null)
+                ? qli.Product2.Tax__c : 0;
+            Decimal gst = (rate * taxPct / 100).setScale(2, RoundingMode.HALF_UP);
+            lineGstAmount.put(qli.Id, gst);
+            lineGrandTotal.put(qli.Id, (rate + gst).setScale(2, RoundingMode.HALF_UP));
         }
         amcGstAmount = (amcTotalRate * 0.18).setScale(2, RoundingMode.HALF_UP);
         amcGrandTotal = (amcTotalRate + amcGstAmount).setScale(2, RoundingMode.HALF_UP);

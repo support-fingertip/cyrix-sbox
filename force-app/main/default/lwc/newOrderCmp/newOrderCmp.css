@@ -76,22 +76,20 @@
     justify-content: center;
 }
 
-/* ===== Canvas + shell =====
-   Desktop: large centered popup card (max 1200px) on the page
-   background. Mobile (see @media block below) flips to full width. */
+/* ===== Canvas + shell ===== */
 .qw-canvas {
     background: var(--bg-page);
-    padding: 32px 24px;
+    padding: 16px;
     min-height: 100%;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
 }
 
 .qw-shell {
+    /* Full-width inside the host tab — the LWC tab page already centers
+       and chromes us, so the shell should fill the available width
+       instead of capping at 960px like the standalone mockup. */
     width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
+    max-width: none;
+    margin: 0;
     background: var(--bg-surface);
     border-radius: var(--radius-2xl);
     box-shadow: var(--shadow-2xl);
@@ -809,10 +807,7 @@
     align-items: flex-start;
 }
 
-/* ===== Footer =====
-   Cancel sits on the left, Back / Continue / Submit on the right —
-   the standard wizard footer layout. The Cancel pill uses .ghost so
-   it doesn't compete visually with Back. */
+/* ===== Footer ===== */
 .qw-footer {
     padding: 16px 32px;
     border-top: 1px solid var(--border);
@@ -821,10 +816,9 @@
 .qw-footer-actions {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 12px;
 }
-/* Push Cancel to the left edge by stretching the gap after it. */
-.qw-footer-actions .qw-btn.ghost { margin-right: auto; }
 
 .qw-btn {
     display: inline-flex;
@@ -860,12 +854,6 @@
     border-color: var(--success);
 }
 .qw-btn.success:hover { background: #056439; border-color: #056439; }
-.qw-btn.ghost {
-    background: transparent;
-    border-color: transparent;
-    color: var(--text-tertiary);
-}
-.qw-btn.ghost:hover { background: var(--bg-muted); color: var(--text-primary); }
 
 /* ===== Force lightning-input-field to live inside the qw aesthetic ===== */
 .qw-step-content lightning-input,
