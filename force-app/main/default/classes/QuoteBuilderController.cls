@@ -364,13 +364,20 @@ public with sharing class QuoteBuilderController {
         // (Equipment / Spare / Accessories / Consumables). Older callers
         // sending the Product_Category label will fall through without
         // matching, but won't break the query.
+        // Search matches Name, ProductCode, the standard Description and
+        // both line/detailed description custom fields so reps can find
+        // products by any of those.
         String prodQuery = 'SELECT Id, Name, ProductCode, Product_Category__c, Product_Type__c, Make__c, Model__c, ' +
             'Description, HSN_Code__c, Standard_Price__c, QuantityUnitOfMeasure, ' +
             'Line_Description__c, Detailed_Description__c, ' +
             'Service_Item__c, Tax__c ' +
             'FROM Product2 ' +
             'WHERE IsActive = true ' +
-            'AND (Name LIKE :searchKey OR ProductCode LIKE :searchKey)';
+            'AND (Name LIKE :searchKey ' +
+            '     OR ProductCode LIKE :searchKey ' +
+            '     OR Description LIKE :searchKey ' +
+            '     OR Line_Description__c LIKE :searchKey ' +
+            '     OR Detailed_Description__c LIKE :searchKey)';
         if (String.isNotBlank(category)) {
             prodQuery += ' AND Product_Type__c = :category';
         }
@@ -571,20 +578,39 @@ public with sharing class QuoteBuilderController {
 
         out.standardPrice = standard;
 
-        if (tiers != null && !tiers.byTier.isEmpty()) {
+        // Discount-percentage based tier resolution: the rep entered a
+        // discount, walk PL4 -> PL1 and pick the first tier whose
+        // Max_Discount_Percentage__c covers it. Tag that tier as the
+        // line's source pricebook. Status is profile-aware — a Sales
+        // Engineer who lands on PL4 stays Not Required, but a Sales
+        // Engineer whose discount slips into PL3 needs approval.
+        if (d > 0 && tiers != null && !tiers.byTier.isEmpty()) {
             PricebookTierService.TierResolution applied =
-                PricebookTierService.resolveAppliedTier(tiers, finalAmount);
+                PricebookTierService.resolveTierByDiscount(tiers, d);
+            String runningProfile = PricebookTierService.runningUserProfileName();
             if (applied != null && applied.entry != null) {
                 out.resolvedTier = applied.tierName;
                 out.resolvedTierListPrice = applied.tierListPrice;
                 out.resolvedPricebookId = applied.entry.Pricebook2Id;
+                out.priceStatus = PricebookTierService.priceStatusForProfile(applied, runningProfile);
+                return out;
+            }
+            if (applied != null && applied.underFloor == true) {
+                // Discount exceeds every tier's Max_Discount_Percentage__c —
+                // the rep has gone past the broadest allowance, so flag
+                // for approval against the Standard pricebook.
+                List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
+                if (!stdPbs.isEmpty()) {
+                    out.resolvedTier = 'Standard';
+                    out.resolvedTierListPrice = standard;
+                    out.resolvedPricebookId = stdPbs[0].Id;
+                }
                 out.priceStatus = PricebookTierService.STATUS_APPROVAL_REQUIRED;
                 return out;
             }
         }
 
-        // Above the top discount tier (or no tier data) — tag the org's
-        // Standard pricebook (IsStandard = true) and mark Not Required.
+        // No discount (or no tier data) — Standard pricebook, no approval.
         List<Pricebook2> stdPbs = [SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1];
         if (!stdPbs.isEmpty()) {
             out.resolvedTier = 'Standard';
