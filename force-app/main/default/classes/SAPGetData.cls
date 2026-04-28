@@ -19,6 +19,7 @@
 @RestResource(urlMapping='/send/*')
 global class SAPGetData {
 
+    // Inbound entry point for SAP -> Salesforce POSTs.
     @HttpPost
     global static void doPost() {
         RestRequest req = RestContext.request;
