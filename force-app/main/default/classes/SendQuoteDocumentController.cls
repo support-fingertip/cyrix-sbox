@@ -398,6 +398,9 @@ public without sharing class SendQuoteDocumentController {
         headerParam.put('type', 'document');
         Map<String, Object> docObj = new Map<String, Object>();
         docObj.put('link', pdfUrl);
+        // Branded filename shown by WhatsApp on the document tile —
+        // overrides whatever name Bitvoice would derive from the URL.
+        docObj.put('filename', 'Cyrix Healthcare Quotation.pdf');
         headerParam.put('document', docObj);
 
         Map<String, Object> headerComponent = new Map<String, Object>();
