@@ -127,26 +127,30 @@
     color: var(--sqd-text-muted);
 }
 
-/* lightning-input slot — keep the wrapper margin tight so the field
-   sits flush under the custom field label without the SLDS form
-   element default spacing. */
-.sqd-li {
-    --slds-c-input-spacing-block-end: 0;
-}
-.sqd-li.slds-form-element {
-    margin: 0;
-}
-.sqd-li--locked .slds-input,
-.sqd-li--locked .slds-input:read-only {
+/* Display-only field rendered as a styled div so the box outline is
+   always visible, even before defaults arrive. */
+.sqd-static {
+    width: 100%;
+    min-height: 32px;
+    padding: 6px 10px;
+    font-size: 12px;
+    border: 1px solid var(--sqd-border);
+    border-radius: var(--sqd-radius-md);
     background: var(--sqd-tint-soft);
     color: var(--sqd-text-muted);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sqd-li {
+    display: block;
 }
 .sqd-li--phone {
     flex: 1;
-}
-.sqd-li--phone .slds-input {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
 }
 
 .sqd-tabs {

@@ -12,7 +12,20 @@ const RICH_TEXT_FORMATS = [
 ];
 
 export default class SendQuoteDocument extends LightningElement {
-    @api recordId;
+    _recordId;
+
+    @api
+    get recordId() { return this._recordId; }
+    set recordId(value) {
+        this._recordId = value;
+        // The framework sometimes sets @api recordId AFTER
+        // connectedCallback fires (especially on the
+        // lightning__RecordAction launch path). Trigger loadInfo
+        // reactively whenever the id arrives so we don't sit on a
+        // blank form forever waiting for an invoke() that may also
+        // pre-empt the id.
+        if (value) this.loadInfo();
+    }
 
     channel = 'email';
     isLoading = true;
@@ -39,11 +52,18 @@ export default class SendQuoteDocument extends LightningElement {
 
     connectedCallback() {
         this.reset();
-        this.loadInfo();
+        // Don't call loadInfo here — the @api recordId setter
+        // already triggers it as soon as the framework wires the id.
+        // Calling it from connectedCallback as well would either
+        // duplicate the load or fire with a null id and waste a
+        // round-trip.
     }
 
     @api invoke() {
         this.reset();
+        // The LWC instance is reused across quick action opens, so
+        // refresh defaults on every invocation to pick up edits to
+        // the Quote / Opportunity since the last open.
         this.loadInfo();
     }
 

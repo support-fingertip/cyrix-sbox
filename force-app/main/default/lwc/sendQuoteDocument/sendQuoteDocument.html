@@ -32,11 +32,7 @@
                     <div class="sqd-grid2">
                         <div class="sqd-row">
                             <label class="sqd-field-label">From</label>
-                            <lightning-input class="sqd-li sqd-li--locked"
-                                             variant="label-hidden"
-                                             value={fromAddress}
-                                             readonly>
-                            </lightning-input>
+                            <div class="sqd-static">{fromAddress}</div>
                         </div>
                         <div class="sqd-row">
                             <label class="sqd-field-label">To</label>
@@ -96,11 +92,7 @@
                 <template if:true={isWhatsAppChannel}>
                     <div class="sqd-row">
                         <label class="sqd-field-label">Customer</label>
-                        <lightning-input class="sqd-li sqd-li--locked"
-                                         variant="label-hidden"
-                                         value={customerName}
-                                         read-only>
-                        </lightning-input>
+                        <div class="sqd-static">{customerName}</div>
                     </div>
                     <div class="sqd-row">
                         <label class="sqd-field-label">Mobile number</label>
@@ -126,11 +118,7 @@
                                 Template
                                 <span class="sqd-lock-badge">🔒 fixed</span>
                             </label>
-                            <lightning-input class="sqd-li sqd-li--locked"
-                                             variant="label-hidden"
-                                             value={whatsappTemplateName}
-                                             readonly>
-                            </lightning-input>
+                            <div class="sqd-static">{whatsappTemplateName}</div>
                         </div>
                     </template>
                 </template>
