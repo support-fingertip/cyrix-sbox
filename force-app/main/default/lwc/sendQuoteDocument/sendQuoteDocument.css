@@ -315,7 +315,7 @@
 .sqd-modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(74, 27, 27, 0.45);
+    background: rgba(0, 0, 0, 0.35);
     display: flex;
     align-items: center;
     justify-content: center;
