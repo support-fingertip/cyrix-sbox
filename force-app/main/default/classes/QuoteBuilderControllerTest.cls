@@ -262,6 +262,10 @@ private class QuoteBuilderControllerTest {
                                      FROM QuoteLineItem WHERE QuoteId = :q.Id ORDER BY UnitPrice DESC];
         System.assertEquals(2, items.size(), 'Should have 2 line items');
         System.assertEquals(2, items[0].Quantity);
+        // UnitPrice stays at the PL5 list price even when the discount
+        // escalates the line to a higher tier — the trigger only updates
+        // Source_Pricebook_Ref / Price_Status, never the Sales Price.
+        System.assertEquals(150000, items[0].UnitPrice);
         System.assertEquals(5, items[0].Discount);
         System.assertEquals('GST', items[0].Tax_Type__c);
         // Test profile (System Administrator) doesn't map to a sales band,
@@ -487,8 +491,9 @@ private class QuoteBuilderControllerTest {
 
         System.assertEquals('Approval Required', p.priceStatus);
         System.assertEquals('Price List 3', p.resolvedTier);
-        System.assertEquals(135000, p.resolvedUnitPrice,
-            'Caller is told to re-fetch UnitPrice from PL3');
+        // resolvedUnitPrice is exposed for diagnostics, but the trigger
+        // does not apply it - the line keeps its PL5-list Sales Price.
+        System.assertEquals(135000, p.resolvedUnitPrice);
         System.assertEquals(false, p.exceedsAllTiers);
     }
 

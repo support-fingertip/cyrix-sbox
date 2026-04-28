@@ -82,13 +82,13 @@ public with sharing class QuoteLineItemTriggerHandler {
             qli.Tax__c = p.Tax__c;
 
             // Map the resolved pricebook (PL5 by default, or the tier the
-            // discount escalated into). Re-fetch the UnitPrice from that
-            // tier's PricebookEntry so totals reflect the mapped tier.
+            // discount escalated into). UnitPrice is intentionally left
+            // alone — the rep enters the Sales Price at the PL5 list and
+            // discount is the lever for going below it; re-fetching from
+            // the escalated tier would silently rewrite the price the rep
+            // saw on screen.
             if (ev.mappedPricebookId != null) {
                 qli.Source_Pricebook_Ref__c = ev.mappedPricebookId;
-            }
-            if (ev.mappedUnitPrice != null) {
-                qli.UnitPrice = ev.mappedUnitPrice;
             }
 
             // Tax_Amount = (Qty * UnitPrice * (1 - Disc/100)) * (Tax%/100).
