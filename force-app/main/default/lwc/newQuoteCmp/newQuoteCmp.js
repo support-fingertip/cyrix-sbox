@@ -1063,7 +1063,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 quantity: item.quantity || 1
             });
 
-            const previousStatus = item.priceStatus;
             const resolvedPb = preview.resolvedTier || '';
             this.lineItems = this.lineItems.map(it => {
                 if (it.rowId !== rowId) return it;
@@ -1097,36 +1096,9 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 // Sales Price.
                 return updated;
             });
-
-            // UX feedback: when the status flips from Not Required to
-            // Approval Required (or the rep blew past the broadest
-            // ceiling) surface a toast naming the tier the discount
-            // landed on so they know which approval tier was hit.
-            if (preview.priceStatus === 'Approval Required'
-                && previousStatus !== 'Approval Required') {
-                if (preview.exceedsAllTiers) {
-                    this.showError(
-                        'Discount above CEO/CFO ceiling',
-                        `Discount exceeds the ${this.tierDisplayLabel(preview.resolvedTier)} ` +
-                        `maximum. Approval will be required.`
-                    );
-                } else if (preview.resolvedTier) {
-                    this.showSuccess(
-                        'Approval required',
-                        `Discount mapped to ${this.tierDisplayLabel(preview.resolvedTier)} — ` +
-                        `requires approval at that tier.`
-                    );
-                }
-            }
         } catch (error) {
             console.warn('Pricing preview unavailable:', error && error.body ? error.body.message : error);
         }
-    }
-
-    // Friendly label for the tier ('Price List 4' -> 'Tier 4').
-    tierDisplayLabel(tierName) {
-        const label = this.getPriceBadgeLabel(tierName);
-        return label || tierName || 'Standard';
     }
 
     // 12.50% style trim — strip ".00" from clean integers and pad single

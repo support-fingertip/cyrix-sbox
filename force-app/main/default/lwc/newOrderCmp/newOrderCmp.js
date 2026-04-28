@@ -876,7 +876,6 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 quantity: item.quantity || 1
             });
 
-            const previousStatus = item.priceStatus;
             const resolvedPb = preview.resolvedTier || '';
             this.lineItems = this.lineItems.map(it => {
                 if (it.rowId !== rowId) return it;
@@ -904,31 +903,9 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 // displayed Sales Price.
                 return updated;
             });
-
-            if (preview.priceStatus === 'Approval Required'
-                && previousStatus !== 'Approval Required') {
-                if (preview.exceedsAllTiers) {
-                    this.showError(
-                        'Discount above CEO/CFO ceiling',
-                        `Discount exceeds the ${this.tierDisplayLabel(preview.resolvedTier)} ` +
-                        `maximum. Approval will be required.`
-                    );
-                } else if (preview.resolvedTier) {
-                    this.showSuccess(
-                        'Approval required',
-                        `Discount mapped to ${this.tierDisplayLabel(preview.resolvedTier)} — ` +
-                        `requires approval at that tier.`
-                    );
-                }
-            }
         } catch (error) {
             console.warn('Pricing preview unavailable:', error && error.body ? error.body.message : error);
         }
-    }
-
-    tierDisplayLabel(tierName) {
-        const label = this.getPriceBadgeLabel(tierName);
-        return label || tierName || 'Standard';
     }
 
     formatMaxDiscount(value) {
