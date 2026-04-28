@@ -1,0 +1,251 @@
+<h2 class="sr-only">Salesforce send-document component on desktop and mobile, both showing the PDF preview overlay open.</h2>
+
+<style>
+.section-label { font-size: 12px; color: #6B4848; font-weight: 500; margin: 0 0 8px; }
+.sf-card { background: #FFFFFF; border: 1px solid #E5C5C5; border-radius: var(--border-radius-lg); overflow: hidden; }
+.sf-head { background: #FFFFFF; padding: 12px 14px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #F0D5D5; }
+.sf-icon { width: 22px; height: 22px; border-radius: 4px; background: #C8102E; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+.sf-title { font-size: 13px; font-weight: 500; color: #1A1A1A; }
+.sf-meta { margin-left: auto; font-size: 11px; color: #8A6B6B; }
+.sf-body { padding: 14px; background: #FFFFFF; }
+.field-label { font-size: 11px; color: #6B4848; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; font-weight: 500; }
+.lock-badge { font-size: 10px; color: #6B4848; background: #FCEBEB; border: 1px solid #F0D5D5; padding: 1px 6px; border-radius: 10px; font-weight: 500; }
+.f-input { width: 100%; height: 32px; padding: 4px 10px; font-size: 12px; border: 1px solid #E5C5C5; border-radius: var(--border-radius-md); background: #FFFFFF; color: #1A1A1A; box-sizing: border-box; font-family: inherit; }
+.f-input:focus { outline: none; border-color: #C8102E; box-shadow: 0 0 0 2px #FCEBEB; }
+.f-input.locked, .f-input:read-only { background: #FCF5F5; color: #6B4848; }
+.f-textarea { width: 100%; padding: 8px 10px; font-size: 12px; border: 1px solid #E5C5C5; border-radius: var(--border-radius-md); background: #FFFFFF; color: #1A1A1A; box-sizing: border-box; font-family: inherit; resize: vertical; line-height: 1.5; }
+.f-textarea:focus { outline: none; border-color: #C8102E; box-shadow: 0 0 0 2px #FCEBEB; }
+.row { margin-bottom: 10px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tabs { display: flex; }
+.tab-btn { flex: 1; padding: 8px 10px; font-size: 12px; border: 1px solid #E5C5C5; background: #FFFFFF; color: #6B4848; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 500; }
+.tab-btn.active { background: #C8102E; color: #FFFFFF; border-color: #C8102E; }
+.tab-btn:first-child { border-radius: var(--border-radius-md) 0 0 var(--border-radius-md); border-right: none; }
+.tab-btn.active:first-child { border-right: 1px solid #C8102E; }
+.tab-btn:last-child { border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; }
+.pdf-card { display: flex; align-items: center; gap: 10px; padding: 10px; background: #FCEBEB; border: 1px solid #F0D5D5; border-radius: var(--border-radius-md); }
+.pdf-thumb { width: 32px; height: 40px; background: #C8102E; border-radius: 3px; display: flex; align-items: center; justify-content: center; color: white; font-size: 9px; font-weight: 500; flex-shrink: 0; }
+.preview-btn { padding: 6px 12px; font-size: 11px; border: 1px solid #C8102E; border-radius: var(--border-radius-md); background: #FFFFFF; color: #C8102E; cursor: pointer; font-weight: 500; flex-shrink: 0; }
+.preview-btn:hover { background: #FCEBEB; }
+.action-row { display: flex; gap: 8px; justify-content: flex-end; padding-top: 12px; border-top: 1px solid #F0D5D5; margin-top: 12px; }
+.btn-primary { padding: 8px 16px; font-size: 12px; background: #C8102E; color: white; border: 1px solid #C8102E; border-radius: var(--border-radius-md); cursor: pointer; font-weight: 500; }
+.btn-primary:hover { background: #A30D26; }
+.btn-secondary { padding: 8px 16px; font-size: 12px; background: #FFFFFF; color: #6B4848; border: 1px solid #E5C5C5; border-radius: var(--border-radius-md); cursor: pointer; }
+.btn-secondary:hover { background: #FCF5F5; }
+.cc-select { width: 84px; height: 32px; padding: 4px 6px; font-size: 12px; border: 1px solid #E5C5C5; border-radius: var(--border-radius-md) 0 0 var(--border-radius-md); border-right: none; background: #FCF5F5; color: #1A1A1A; }
+.phone-in { flex: 1; height: 32px; padding: 4px 10px; font-size: 12px; border: 1px solid #E5C5C5; border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; background: #FFFFFF; color: #1A1A1A; box-sizing: border-box; }
+.phone-in:focus { outline: none; border-color: #C8102E; box-shadow: 0 0 0 2px #FCEBEB; }
+.viewport { position: relative; background: #FCF5F5; border-radius: var(--border-radius-lg); padding: 14px; }
+.device-tag { font-size: 10px; color: #8A6B6B; margin-bottom: 8px; text-align: center; }
+.phone-frame { background: #FFFFFF; border: 2px solid #E5C5C5; border-radius: 28px; padding: 8px; max-width: 280px; margin: 0 auto; }
+.phone-screen { background: #FFFFFF; border: 1px solid #F0D5D5; border-radius: 22px; overflow: hidden; }
+.phone-statusbar { background: #FFFFFF; padding: 6px 16px 4px; display: flex; justify-content: space-between; font-size: 9px; color: #6B4848; font-weight: 500; }
+.modal-overlay { position: absolute; inset: 0; background: rgba(74, 27, 27, 0.45); display: flex; align-items: center; justify-content: center; z-index: 10; padding: 16px; border-radius: var(--border-radius-lg); }
+.modal { background: white; border: 1px solid #E5C5C5; border-radius: var(--border-radius-lg); width: 100%; max-width: 400px; max-height: 95%; display: flex; flex-direction: column; overflow: hidden; }
+.modal-head { padding: 10px 14px; border-bottom: 1px solid #F0D5D5; display: flex; align-items: center; justify-content: space-between; background: #FFFFFF; }
+.modal-body { background: #FCF5F5; padding: 16px; flex: 1; min-height: 320px; display: flex; align-items: center; justify-content: center; }
+.pdf-page { background: white; border: 1px solid #E5C5C5; width: 100%; max-width: 260px; aspect-ratio: 1/1.414; padding: 18px; box-sizing: border-box; font-size: 8px; line-height: 1.5; color: #1A1A1A; }
+.close-x { width: 24px; height: 24px; border: 1px solid #E5C5C5; border-radius: 50%; background: white; color: #6B4848; cursor: pointer; font-size: 12px; line-height: 1; display: flex; align-items: center; justify-content: center; padding: 0; }
+.close-x:hover { background: #FCF5F5; color: #C8102E; border-color: #C8102E; }
+.back-btn { background: none; border: none; color: #C8102E; font-size: 14px; cursor: pointer; padding: 0; }
+.preview-caption { font-size: 11px; color: #C8102E; font-weight: 500; margin: 0 0 6px; display: flex; align-items: center; gap: 4px; }
+</style>
+
+<div style="padding: 1rem 0; display: flex; flex-direction: column; gap: 24px;">
+
+  <div>
+    <p class="section-label">Desktop · 680px — preview open</p>
+    <p class="preview-caption">▼ PDF preview overlay — close with the ✕ button</p>
+    <div class="viewport" style="min-height: 580px;">
+      <div class="sf-card">
+        <div class="sf-head">
+          <div class="sf-icon">↗</div>
+          <div class="sf-title">Send document</div>
+          <div class="sf-meta">Account · Acme Industries</div>
+        </div>
+        <div class="sf-body">
+
+          <div style="margin-bottom: 14px;">
+            <span class="field-label">Channel</span>
+            <div class="tabs">
+              <button class="tab-btn active">✉ Email</button>
+              <button class="tab-btn">● WhatsApp</button>
+            </div>
+          </div>
+
+          <div class="grid2">
+            <div class="row">
+              <label class="field-label">From</label>
+              <input class="f-input" value="sales@acme.com" readonly />
+            </div>
+            <div class="row">
+              <label class="field-label">To</label>
+              <input class="f-input" value="priya.r@northwind.com" />
+            </div>
+          </div>
+          <div class="grid2">
+            <div class="row">
+              <label class="field-label">Cc</label>
+              <input class="f-input" placeholder="cc@example.com" />
+            </div>
+            <div class="row">
+              <label class="field-label">Bcc</label>
+              <input class="f-input" placeholder="bcc@example.com" />
+            </div>
+          </div>
+          <div class="row">
+            <label class="field-label">Subject</label>
+            <input class="f-input" value="Q3 Report — Acme Industries" />
+          </div>
+          <div class="row">
+            <label class="field-label">Message</label>
+            <textarea class="f-textarea" rows="3">Hi Priya,
+
+Please find attached the Q3 report for your review.</textarea>
+          </div>
+
+          <div class="row">
+            <label class="field-label">Attachment</label>
+            <div class="pdf-card">
+              <div class="pdf-thumb">PDF</div>
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 12px; font-weight: 500; color: #1A1A1A;">Q3-Report-Acme.pdf</div>
+                <div style="font-size: 10px; color: #6B4848;">12 pages · 1.4 MB</div>
+              </div>
+              <button class="preview-btn">Preview</button>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button class="btn-secondary">Cancel</button>
+            <button class="btn-primary">Send via email</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-overlay">
+        <div class="modal">
+          <div class="modal-head">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 20px; height: 24px; background: #C8102E; border-radius: 2px; display: flex; align-items: center; justify-content: center; color: white; font-size: 7px; font-weight: 500;">PDF</div>
+              <div>
+                <div style="font-size: 12px; font-weight: 500; color: #1A1A1A;">Q3-Report-Acme.pdf</div>
+                <div style="font-size: 10px; color: #6B4848;">Page 1 of 12</div>
+              </div>
+            </div>
+            <button class="close-x" aria-label="Close preview">✕</button>
+          </div>
+          <div class="modal-body">
+            <div class="pdf-page">
+              <div style="font-size: 12px; font-weight: 500; margin-bottom: 8px; color: #C8102E;">Q3 2026 — Performance Report</div>
+              <div style="color: #6B4848; margin-bottom: 10px;">Acme Industries · Prepared for Northwind Pvt Ltd</div>
+              <div style="margin-bottom: 6px; font-weight: 500;">Executive summary</div>
+              <div style="color: #444; margin-bottom: 10px;">Revenue grew 18% quarter on quarter, driven by new accounts in the South region and stronger renewal rates among enterprise customers.</div>
+              <div style="margin-bottom: 4px; font-weight: 500;">Key highlights</div>
+              <div style="color: #444;">— New ARR up 22%<br>— Churn down to 3.1%<br>— Pipeline coverage at 3.4x</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="section-label">Mobile · 360px — preview open</p>
+    <p class="preview-caption">▼ Full-screen PDF preview inside the device</p>
+    <div class="viewport">
+      <div class="device-tag">Salesforce mobile app</div>
+      <div class="phone-frame">
+        <div class="phone-screen" style="position: relative; min-height: 520px;">
+          <div class="phone-statusbar">
+            <span>9:41</span>
+            <span>●●● ▮</span>
+          </div>
+
+          <div class="sf-card" style="border: none; border-radius: 0;">
+            <div class="sf-head" style="padding: 10px 12px;">
+              <button class="back-btn">←</button>
+              <div class="sf-title" style="font-size: 12px;">Send document</div>
+            </div>
+            <div class="sf-body" style="padding: 12px;">
+
+              <div style="margin-bottom: 12px;">
+                <span class="field-label">Channel</span>
+                <div class="tabs">
+                  <button class="tab-btn" style="font-size: 11px;">✉ Email</button>
+                  <button class="tab-btn active" style="font-size: 11px;">● WhatsApp</button>
+                </div>
+              </div>
+
+              <div class="row">
+                <label class="field-label">Customer</label>
+                <input class="f-input" value="Priya Raghavan" readonly />
+              </div>
+              <div class="row">
+                <label class="field-label">Mobile number</label>
+                <div style="display: flex;">
+                  <select class="cc-select" style="width: 70px;">
+                    <option>🇮🇳 +91</option>
+                  </select>
+                  <input class="phone-in" value="98765 43210" />
+                </div>
+              </div>
+              <div class="row">
+                <label class="field-label">
+                  Template
+                  <span class="lock-badge">🔒 fixed</span>
+                </label>
+                <input class="f-input locked" value="document_share_v2" readonly />
+              </div>
+
+              <div class="row">
+                <label class="field-label">Attachment</label>
+                <div class="pdf-card" style="padding: 8px;">
+                  <div class="pdf-thumb" style="width: 28px; height: 34px;">PDF</div>
+                  <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 11px; font-weight: 500; color: #1A1A1A;">Q3-Report-Acme.pdf</div>
+                    <div style="font-size: 10px; color: #6B4848;">12 pages · 1.4 MB</div>
+                  </div>
+                  <button class="preview-btn" style="padding: 5px 10px;">Preview</button>
+                </div>
+              </div>
+
+              <div class="action-row" style="flex-direction: column-reverse; gap: 6px;">
+                <button class="btn-secondary" style="width: 100%;">Cancel</button>
+                <button class="btn-primary" style="width: 100%;">Send via WhatsApp</button>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="modal-overlay" style="border-radius: 22px;">
+            <div class="modal" style="max-width: 230px;">
+              <div class="modal-head" style="padding: 8px 10px;">
+                <div style="display: flex; align-items: center; gap: 6px; min-width: 0;">
+                  <div style="width: 18px; height: 22px; background: #C8102E; border-radius: 2px; display: flex; align-items: center; justify-content: center; color: white; font-size: 7px; font-weight: 500; flex-shrink: 0;">PDF</div>
+                  <div style="min-width: 0;">
+                    <div style="font-size: 11px; font-weight: 500; color: #1A1A1A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Q3-Report-Acme.pdf</div>
+                    <div style="font-size: 9px; color: #6B4848;">Page 1 of 12</div>
+                  </div>
+                </div>
+                <button class="close-x" aria-label="Close preview" style="width: 22px; height: 22px;">✕</button>
+              </div>
+              <div class="modal-body" style="padding: 10px; min-height: 220px;">
+                <div class="pdf-page" style="max-width: 170px; padding: 12px; font-size: 7px;">
+                  <div style="font-size: 9px; font-weight: 500; margin-bottom: 6px; color: #C8102E;">Q3 2026 Report</div>
+                  <div style="color: #6B4848; margin-bottom: 6px;">Acme · Northwind</div>
+                  <div style="margin-bottom: 3px; font-weight: 500;">Executive summary</div>
+                  <div style="color: #444; margin-bottom: 6px;">Revenue grew 18% quarter on quarter, driven by new accounts and stronger renewals.</div>
+                  <div style="margin-bottom: 3px; font-weight: 500;">Key highlights</div>
+                  <div style="color: #444;">— ARR up 22%<br>— Churn 3.1%<br>— Coverage 3.4x</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
