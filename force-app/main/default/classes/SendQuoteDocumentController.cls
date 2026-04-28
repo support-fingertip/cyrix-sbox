@@ -14,10 +14,10 @@ public without sharing class SendQuoteDocumentController {
 
         List<Quote> quotes = [
             SELECT Id, Name, QuoteNumber, Quote_Id__c,
-                   Phone, Email,
-                   AccountId, Account.Name, Account.Phone,
-                   ContactId, Contact.Name, Contact.Email, Contact.Phone, Contact.MobilePhone,
+                   AccountId, Account.Name,
+                   ContactId, Contact.Name, Contact.Email,
                    OpportunityId, Opportunity.Name, Opportunity.Email__c,
+                   Opportunity.Country_Code_Phone__c, Opportunity.Phone__c,
                    OwnerId, Owner.Name, Owner.Email, Owner.Title
             FROM Quote
             WHERE Id = :quoteId
@@ -42,16 +42,13 @@ public without sharing class SendQuoteDocumentController {
         info.fromAddress = UserInfo.getUserEmail();
         info.fileName = buildFileName(q);
 
-        // Default To: Opportunity email -> Contact email -> Owner email
-        if (String.isNotBlank(info.opportunityEmail)) {
-            info.defaultToAddress = info.opportunityEmail;
-        } else if (String.isNotBlank(info.contactEmail)) {
-            info.defaultToAddress = info.contactEmail;
-        } else if (String.isNotBlank(info.ownerEmail)) {
-            info.defaultToAddress = info.ownerEmail;
-        } else {
-            info.defaultToAddress = '';
-        }
+        // To address is sourced strictly from the Opportunity's
+        // Email__c field — that's the customer-facing address the
+        // sales team curates. Falling back to Contact / Owner email
+        // here would silently mail the wrong person if the
+        // opportunity field was just left blank, so leave it empty
+        // and let the rep fill it in.
+        info.defaultToAddress = info.opportunityEmail;
 
         // Default subject: Quote ref + opportunity/account context.
         String quoteRef = String.isNotBlank(q.Quote_Id__c)
@@ -90,18 +87,16 @@ public without sharing class SendQuoteDocumentController {
             (String.isNotBlank(ownerTitle) ? '<br/>' + ownerTitle : '') +
             '</p>';
 
-        // Phone fallback chain for WhatsApp:
-        // Quote.Phone (auto-populated from Contact/Account on insert)
-        // -> Contact.MobilePhone -> Contact.Phone -> Account.Phone.
-        if (String.isNotBlank(q.Phone)) {
-            info.phone = q.Phone;
-        } else if (q.ContactId != null && String.isNotBlank(q.Contact.MobilePhone)) {
-            info.phone = q.Contact.MobilePhone;
-        } else if (q.ContactId != null && String.isNotBlank(q.Contact.Phone)) {
-            info.phone = q.Contact.Phone;
-        } else if (q.AccountId != null && String.isNotBlank(q.Account.Phone)) {
-            info.phone = q.Account.Phone;
+        // WhatsApp number is sourced from the Opportunity:
+        //   country code  <- Opportunity.Country_Code_Phone__c
+        //   local number  <- Opportunity.Phone__c
+        // The two are kept in separate wrapper fields so the LWC's
+        // country-code dropdown can pre-select without re-parsing.
+        if (q.OpportunityId != null) {
+            info.phoneCountryCode = normalizeCountryCode(q.Opportunity.Country_Code_Phone__c);
+            info.phone = q.Opportunity.Phone__c;
         } else {
+            info.phoneCountryCode = '';
             info.phone = '';
         }
 
@@ -221,6 +216,17 @@ public without sharing class SendQuoteDocumentController {
             // with an error body when the template/phone is wrong).
             writeWhatsAppLog(quoteId, requestBodyForLog, responseBody, statusCode, errorMessage);
         }
+    }
+
+    private static String normalizeCountryCode(String raw) {
+        if (String.isBlank(raw)) return '';
+        String trimmed = raw.trim();
+        // Custom Text(10) field — values arrive as "+91", "91", "91-",
+        // etc. Strip everything except digits and a single leading +.
+        Boolean leadingPlus = trimmed.startsWith('+');
+        String digits = trimmed.replaceAll('[^0-9]', '');
+        if (String.isBlank(digits)) return '';
+        return '+' + digits;
     }
 
     private static Blob renderQuotePdf(Id quoteId) {
@@ -465,6 +471,7 @@ public without sharing class SendQuoteDocumentController {
         @AuraEnabled public String defaultToAddress;
         @AuraEnabled public String defaultSubject;
         @AuraEnabled public String defaultBody;
+        @AuraEnabled public String phoneCountryCode;
         @AuraEnabled public String phone;
         @AuraEnabled public String recipientName;
         @AuraEnabled public String whatsappTemplateName;

@@ -61,9 +61,8 @@ export default class SendQuoteDocument extends LightningElement {
                 this.subject = info.defaultSubject || '';
                 this.body = info.defaultBody || '';
                 this.customerName = info.recipientName || '';
-                const split = this.splitPhone(info.phone || '');
-                this.countryCode = split.code || '+91';
-                this.phone = split.local;
+                this.countryCode = info.phoneCountryCode || '+91';
+                this.phone = info.phone || '';
                 this.whatsappTemplateName = info.whatsappTemplateName || '';
                 this.accountName = info.accountName || '';
                 this.fileName = info.fileName || '';
@@ -73,15 +72,6 @@ export default class SendQuoteDocument extends LightningElement {
                 this.isLoading = false;
                 this.showToast('Error', this.errorMessage(error, 'Failed to load quote'), 'error');
             });
-    }
-
-    splitPhone(raw) {
-        const trimmed = (raw || '').trim();
-        const match = trimmed.match(/^(\+\d{1,3})\s*(.*)$/);
-        if (match) {
-            return { code: match[1], local: match[2].trim() };
-        }
-        return { code: '', local: trimmed };
     }
 
     get isEmailChannel() { return this.channel === 'email'; }
@@ -120,7 +110,7 @@ export default class SendQuoteDocument extends LightningElement {
     }
 
     get countryCodeOptions() {
-        return [
+        const base = [
             { value: '+91', label: '🇮🇳 +91' },
             { value: '+1', label: '🇺🇸 +1' },
             { value: '+44', label: '🇬🇧 +44' },
@@ -128,6 +118,11 @@ export default class SendQuoteDocument extends LightningElement {
             { value: '+966', label: '🇸🇦 +966' },
             { value: '+65', label: '🇸🇬 +65' }
         ];
+        const cc = this.countryCode;
+        if (cc && !base.some(o => o.value === cc)) {
+            base.unshift({ value: cc, label: cc });
+        }
+        return base;
     }
 
     handleSelectEmail() { this.channel = 'email'; }
