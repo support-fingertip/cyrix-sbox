@@ -1,0 +1,417 @@
+<div style="display: flex; flex-direction: column; gap: 1.5rem; padding: 1rem 0;">
+
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+    <div style="display: flex; gap: 8px;">
+      <button id="view-desktop" style="padding: 6px 14px; font-size: 13px;">Desktop</button>
+      <button id="view-mobile" style="padding: 6px 14px; font-size: 13px;">Mobile</button>
+    </div>
+    <span style="font-size: 12px; color: var(--color-text-tertiary);">Tap any button to see its popup</span>
+  </div>
+
+  <div id="desktop-frame" style="background: transparent; padding: 8px 0; position: relative; min-height: 80px;">
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+      <button class="peach-btn desktop-btn" data-action="approval" style="background: transparent; border: 1px solid #F0997B; color: #993C1D; padding: 8px 14px; font-size: 13px; border-radius: var(--border-radius-md); cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c2.39 0 4.68.93 6.36 2.64"/></svg>
+        Submit for approval
+      </button>
+      <button class="peach-btn desktop-btn" data-action="pdf" style="background: transparent; border: 1px solid #F0997B; color: #993C1D; padding: 8px 14px; font-size: 13px; border-radius: var(--border-radius-md); cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        Send quote PDF
+      </button>
+      <button class="peach-btn desktop-btn" data-action="status" style="background: transparent; border: 1px solid #F0997B; color: #993C1D; padding: 8px 14px; font-size: 13px; border-radius: var(--border-radius-md); cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h13l3 3-3 3H4z"/><path d="M4 14h10l3 3-3 3H4z"/><path d="M4 4v17"/></svg>
+        Mark status
+      </button>
+      <button class="peach-btn desktop-btn" data-action="preview" style="background: transparent; border: 1px solid #F0997B; color: #993C1D; padding: 8px 14px; font-size: 13px; border-radius: var(--border-radius-md); cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Preview quote PDF
+      </button>
+    </div>
+    <div id="popup-host-desktop" style="display: none; position: absolute; inset: -8px; background: rgba(0,0,0,0.45); border-radius: var(--border-radius-lg); align-items: center; justify-content: center; padding: 16px;"></div>
+  </div>
+
+  <div id="mobile-frame" style="display: none;">
+    <div style="background: #FAECE7; border-radius: var(--border-radius-lg); padding: 16px; display: flex; justify-content: center;">
+      <div style="width: 320px; background: #FFFFFF; border-radius: 24px; border: 0.5px solid var(--color-border-secondary); overflow: hidden; position: relative; min-height: 260px;">
+        <div style="height: 28px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #5F5E5A; border-bottom: 0.5px solid var(--color-border-tertiary);">9:41</div>
+
+        <div style="padding: 16px 12px; background: transparent;">
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;">
+            <button class="peach-btn mobile-btn" data-action="approval">
+              <span class="icon-circle">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c2.39 0 4.68.93 6.36 2.64"/></svg>
+              </span>
+              <span class="btn-label">Submit for<br/>approval</span>
+            </button>
+            <button class="peach-btn mobile-btn" data-action="pdf">
+              <span class="icon-circle">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+              </span>
+              <span class="btn-label">Send quote<br/>PDF</span>
+            </button>
+            <button class="peach-btn mobile-btn" data-action="status">
+              <span class="icon-circle">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h13l3 3-3 3H4z"/><path d="M4 14h10l3 3-3 3H4z"/><path d="M4 4v17"/></svg>
+              </span>
+              <span class="btn-label">Mark<br/>status</span>
+            </button>
+            <button class="peach-btn mobile-btn" data-action="preview">
+              <span class="icon-circle">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </span>
+              <span class="btn-label">Preview<br/>quote PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="popup-host-mobile" style="display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.45); border-radius: 24px; align-items: flex-end; justify-content: center;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" style="display: none; position: relative; padding: 10px 14px; border-radius: var(--border-radius-md); font-size: 13px;"></div>
+</div>
+
+<style>
+.peach-btn:hover { background: #FAECE7 !important; border-color: #D85A30 !important; }
+.peach-btn:active { transform: scale(0.98); }
+.peach-btn:focus-visible { outline: 2px solid #D85A30; outline-offset: 2px; }
+.field-error { border-color: #E24B4A !important; box-shadow: 0 0 0 2px #FCEBEB; }
+.error-msg { font-size: 11px; color: #A32D2D; margin-top: 4px; min-height: 14px; }
+
+.mobile-btn {
+  background: transparent;
+  border: 1px solid #F0997B;
+  color: #993C1D;
+  padding: 14px 8px;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-height: 92px;
+  font-family: inherit;
+}
+.icon-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #FAECE7;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #993C1D;
+}
+.btn-label {
+  font-size: 11px;
+  line-height: 1.3;
+  text-align: center;
+  color: #993C1D;
+}
+</style>
+
+<script>
+(function() {
+  const desktopFrame = document.getElementById('desktop-frame');
+  const mobileFrame = document.getElementById('mobile-frame');
+  const btnDesktop = document.getElementById('view-desktop');
+  const btnMobile = document.getElementById('view-mobile');
+  const toast = document.getElementById('toast');
+  let toastTimer = null;
+
+  function showToast(msg, kind) {
+    if (toastTimer) clearTimeout(toastTimer);
+    const palette = {
+      success: { bg: '#E1F5EE', color: '#0F6E56', border: '#5DCAA5' },
+      error:   { bg: '#FCEBEB', color: '#A32D2D', border: '#F09595' },
+      info:    { bg: '#FAECE7', color: '#993C1D', border: '#F0997B' }
+    }[kind || 'info'];
+    toast.style.background = palette.bg;
+    toast.style.color = palette.color;
+    toast.style.border = '1px solid ' + palette.border;
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    toastTimer = setTimeout(() => { toast.style.display = 'none'; }, 3200);
+  }
+
+  function setView(view) {
+    if (view === 'mobile') {
+      desktopFrame.style.display = 'none';
+      mobileFrame.style.display = 'block';
+      btnMobile.style.background = '#FAECE7';
+      btnMobile.style.borderColor = '#F0997B';
+      btnMobile.style.color = '#993C1D';
+      btnDesktop.style.background = '';
+      btnDesktop.style.borderColor = '';
+      btnDesktop.style.color = '';
+    } else {
+      desktopFrame.style.display = 'block';
+      mobileFrame.style.display = 'none';
+      btnDesktop.style.background = '#FAECE7';
+      btnDesktop.style.borderColor = '#F0997B';
+      btnDesktop.style.color = '#993C1D';
+      btnMobile.style.background = '';
+      btnMobile.style.borderColor = '';
+      btnMobile.style.color = '';
+    }
+    closePopup();
+  }
+  btnDesktop.addEventListener('click', () => setView('desktop'));
+  btnMobile.addEventListener('click', () => setView('mobile'));
+  setView('desktop');
+
+  function closePopup() {
+    const dh = document.getElementById('popup-host-desktop');
+    const mh = document.getElementById('popup-host-mobile');
+    dh.style.display = 'none'; dh.innerHTML = '';
+    mh.style.display = 'none'; mh.innerHTML = '';
+  }
+
+  function popupShell(inner, isMobile) {
+    const width = isMobile ? '100%' : '320px';
+    const radius = isMobile ? '20px 20px 0 0' : 'var(--border-radius-lg)';
+    return '<div style="background: #FFFFFF; width: ' + width + '; max-width: 320px; border-radius: ' + radius + '; border: 0.5px solid var(--color-border-tertiary); padding: 16px; box-sizing: border-box;">' + inner + '</div>';
+  }
+
+  function popupHeader(title) {
+    return '<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">' +
+      '<div style="font-size: 15px; font-weight: 500; color: #2C2C2A;">' + title + '</div>' +
+      '<button class="close-btn" aria-label="Close" style="border: none; background: transparent; font-size: 18px; padding: 0 4px; color: #5F5E5A; cursor: pointer;">×</button>' +
+      '</div>';
+  }
+
+  function primaryBtn(label, id) {
+    return '<button id="' + id + '" style="font-size: 13px; padding: 8px 14px; background: #FFFFFF; color: #993C1D; border: 1px solid #F0997B; border-radius: var(--border-radius-md); cursor: pointer; font-weight: 500;">' + label + '</button>';
+  }
+  function ghostBtn(label) {
+    return '<button class="close-btn" style="font-size: 13px; padding: 8px 14px; background: #FFFFFF; color: #5F5E5A; border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); cursor: pointer;">' + label + '</button>';
+  }
+
+  function popupApproval(isMobile) {
+    return popupShell(
+      popupHeader('Submit for approval') +
+      '<label style="display: block; font-size: 12px; color: #5F5E5A; margin-bottom: 6px;">Comments <span style="color:#A32D2D;">*</span></label>' +
+      '<textarea id="approval-comments" rows="4" placeholder="Add a note for the approver..." style="width: 100%; resize: none; box-sizing: border-box; padding: 8px; border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); font-family: inherit; font-size: 13px;"></textarea>' +
+      '<div id="approval-error" class="error-msg"></div>' +
+      '<div style="display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end;">' +
+        ghostBtn('Cancel') +
+        primaryBtn('Submit', 'approval-submit') +
+      '</div>',
+      isMobile
+    );
+  }
+
+  function popupPdf(isMobile) {
+    return popupShell(
+      popupHeader('Send quote PDF') +
+      '<label style="display: block; font-size: 12px; color: #5F5E5A; margin-bottom: 6px;">To <span style="color:#A32D2D;">*</span></label>' +
+      '<input id="pdf-email" type="email" placeholder="customer@acme.com" value="purchasing@acme.com" style="width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); font-size: 13px;" />' +
+      '<div id="pdf-email-error" class="error-msg"></div>' +
+      '<label style="display: block; font-size: 12px; color: #5F5E5A; margin: 6px 0 6px;">Message</label>' +
+      '<textarea id="pdf-msg" rows="3" placeholder="Optional message..." style="width: 100%; resize: none; box-sizing: border-box; padding: 8px; border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); font-family: inherit; font-size: 13px;">Please find the attached quote for your review.</textarea>' +
+      '<div style="display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 8px 10px; background: #FAECE7; border-radius: var(--border-radius-md); font-size: 12px; color: #712B13; border: 1px solid #F5C4B3;">' +
+        '<span>Attachment: Quote_Q-2401.pdf</span>' +
+      '</div>' +
+      '<div style="display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end;">' +
+        ghostBtn('Cancel') +
+        primaryBtn('Send PDF', 'pdf-send') +
+      '</div>',
+      isMobile
+    );
+  }
+
+  function popupStatus(isMobile) {
+    const items = [
+      { label: 'Revision', desc: 'Send back with reason' },
+      { label: 'Customer accepted', desc: 'Customer approved' },
+      { label: 'Denied', desc: 'Customer rejected' },
+      { label: 'Closed', desc: 'No further action' }
+    ];
+    const list = items.map(i =>
+      '<button class="status-item" data-status="' + i.label + '" style="width: 100%; text-align: left; display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; margin: 0; background: #FFFFFF; border: 1px solid #F0997B; border-radius: var(--border-radius-md); cursor: pointer;">' +
+        '<div>' +
+          '<div style="font-size: 13px; font-weight: 500; color: #993C1D;">' + i.label + '</div>' +
+          '<div style="font-size: 11px; color: #5F5E5A;">' + i.desc + '</div>' +
+        '</div>' +
+        '<span style="font-size: 16px; color: #993C1D;">›</span>' +
+      '</button>'
+    ).join('<div style="height: 8px;"></div>');
+
+    return popupShell(
+      popupHeader('Mark status') +
+      '<div style="font-size: 12px; color: #5F5E5A; margin-bottom: 10px;">Choose a new status</div>' +
+      list,
+      isMobile
+    );
+  }
+
+  function popupRevision(isMobile) {
+    return popupShell(
+      popupHeader('Reason for revision') +
+      '<label style="display: block; font-size: 12px; color: #5F5E5A; margin-bottom: 6px;">Why is this being sent back? <span style="color:#A32D2D;">*</span></label>' +
+      '<textarea id="rev-reason" rows="4" placeholder="e.g. Pricing on item 3 needs review..." style="width: 100%; resize: none; box-sizing: border-box; padding: 8px; border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); font-family: inherit; font-size: 13px;"></textarea>' +
+      '<div id="rev-error" class="error-msg"></div>' +
+      '<div style="display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end;">' +
+        ghostBtn('Cancel') +
+        primaryBtn('Save reason', 'rev-save') +
+      '</div>',
+      isMobile
+    );
+  }
+
+  function popupConfirm(action, isMobile) {
+    const map = {
+      'Customer accepted': { msg: 'Mark this quote as accepted by the customer?', toast: 'Status updated to Customer accepted', kind: 'success' },
+      'Denied':            { msg: 'Mark this quote as denied?', toast: 'Status updated to Denied', kind: 'info' },
+      'Closed':            { msg: 'Close this quote? No further changes will be allowed.', toast: 'Quote closed', kind: 'info' }
+    }[action];
+    return popupShell(
+      popupHeader('Confirm — ' + action) +
+      '<div style="font-size: 13px; color: #2C2C2A; margin-bottom: 12px; line-height: 1.5;">' + map.msg + '</div>' +
+      '<div style="display: flex; gap: 8px; justify-content: flex-end;">' +
+        ghostBtn('Cancel') +
+        '<button id="confirm-yes" data-toast="' + map.toast + '" data-kind="' + map.kind + '" style="font-size: 13px; padding: 8px 14px; background: #FFFFFF; color: #993C1D; border: 1px solid #F0997B; border-radius: var(--border-radius-md); cursor: pointer; font-weight: 500;">Confirm</button>' +
+      '</div>',
+      isMobile
+    );
+  }
+
+  function popupPreview(isMobile) {
+    return popupShell(
+      popupHeader('Preview — Quote_Q-2401.pdf') +
+      '<div style="background: #FFFFFF; border-radius: var(--border-radius-md); padding: 14px; font-size: 11px; color: #5F5E5A; border: 1px solid #F5C4B3;">' +
+        '<div style="display: flex; justify-content: space-between; margin-bottom: 10px; align-items: flex-start;">' +
+          '<div>' +
+            '<div style="font-size: 13px; font-weight: 500; color: #993C1D;">QUOTE</div>' +
+            '<div>#Q-2401 · Apr 28, 2026</div>' +
+          '</div>' +
+          '<div style="text-align: right; font-size: 11px;">' +
+            '<div style="color: #2C2C2A; font-weight: 500;">Your Co.</div>' +
+            '<div>billing@yourco.com</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="height: 1px; background: #F5C4B3; margin: 6px 0;"></div>' +
+        '<div style="display: flex; justify-content: space-between; padding: 4px 0;"><span>Implementation services</span><span style="color: #2C2C2A;">$ 18,000</span></div>' +
+        '<div style="display: flex; justify-content: space-between; padding: 4px 0;"><span>License (annual)</span><span style="color: #2C2C2A;">$ 6,000</span></div>' +
+        '<div style="display: flex; justify-content: space-between; padding: 4px 0;"><span>Tax</span><span style="color: #2C2C2A;">$ 500</span></div>' +
+        '<div style="height: 1px; background: #F5C4B3; margin: 6px 0;"></div>' +
+        '<div style="display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px;"><span style="color: #2C2C2A; font-weight: 500;">Total</span><span style="color: #993C1D; font-weight: 500;">$ 24,500</span></div>' +
+      '</div>' +
+      '<div style="display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end;">' +
+        ghostBtn('Close') +
+        primaryBtn('Download', 'preview-download') +
+      '</div>',
+      isMobile
+    );
+  }
+
+  function setFieldError(input, errEl, msg) {
+    if (msg) {
+      input.classList.add('field-error');
+      errEl.textContent = msg;
+      input.focus();
+    } else {
+      input.classList.remove('field-error');
+      errEl.textContent = '';
+    }
+  }
+
+  function isEmail(v) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+  }
+
+  function openPopup(action) {
+    const isMobile = mobileFrame.style.display !== 'none';
+    const host = document.getElementById(isMobile ? 'popup-host-mobile' : 'popup-host-desktop');
+    let html = '';
+    if (action === 'approval') html = popupApproval(isMobile);
+    else if (action === 'pdf') html = popupPdf(isMobile);
+    else if (action === 'status') html = popupStatus(isMobile);
+    else if (action === 'revision') html = popupRevision(isMobile);
+    else if (action === 'preview') html = popupPreview(isMobile);
+    else if (action === 'confirm-Customer accepted' || action === 'confirm-Denied' || action === 'confirm-Closed') {
+      html = popupConfirm(action.replace('confirm-', ''), isMobile);
+    }
+
+    host.innerHTML = html;
+    host.style.display = 'flex';
+
+    host.querySelectorAll('.close-btn').forEach(b => b.addEventListener('click', closePopup));
+
+    host.querySelectorAll('.status-item').forEach(b => b.addEventListener('click', (e) => {
+      const status = e.currentTarget.getAttribute('data-status');
+      if (status === 'Revision') openPopup('revision');
+      else openPopup('confirm-' + status);
+    }));
+
+    const approvalSubmit = host.querySelector('#approval-submit');
+    if (approvalSubmit) {
+      approvalSubmit.addEventListener('click', () => {
+        const ta = host.querySelector('#approval-comments');
+        const err = host.querySelector('#approval-error');
+        const v = ta.value.trim();
+        if (!v) return setFieldError(ta, err, 'Please add a comment before submitting.');
+        if (v.length < 5) return setFieldError(ta, err, 'Comment is too short — add a bit more detail.');
+        setFieldError(ta, err, '');
+        closePopup();
+        showToast('Submitted for approval', 'success');
+      });
+    }
+
+    const pdfSend = host.querySelector('#pdf-send');
+    if (pdfSend) {
+      pdfSend.addEventListener('click', () => {
+        const email = host.querySelector('#pdf-email');
+        const err = host.querySelector('#pdf-email-error');
+        const v = email.value.trim();
+        if (!v) return setFieldError(email, err, 'Recipient email is required.');
+        if (!isEmail(v)) return setFieldError(email, err, 'That doesn\u2019t look like a valid email address.');
+        setFieldError(email, err, '');
+        closePopup();
+        showToast('Quote PDF sent to ' + v, 'success');
+      });
+    }
+
+    const revSave = host.querySelector('#rev-save');
+    if (revSave) {
+      revSave.addEventListener('click', () => {
+        const ta = host.querySelector('#rev-reason');
+        const err = host.querySelector('#rev-error');
+        const v = ta.value.trim();
+        if (!v) return setFieldError(ta, err, 'A reason is required to mark for revision.');
+        if (v.length < 10) return setFieldError(ta, err, 'Please provide at least 10 characters of detail.');
+        setFieldError(ta, err, '');
+        closePopup();
+        showToast('Status updated to Revision', 'info');
+      });
+    }
+
+    const confirmYes = host.querySelector('#confirm-yes');
+    if (confirmYes) {
+      confirmYes.addEventListener('click', () => {
+        const msg = confirmYes.getAttribute('data-toast');
+        const kind = confirmYes.getAttribute('data-kind');
+        closePopup();
+        showToast(msg, kind);
+      });
+    }
+
+    const previewDownload = host.querySelector('#preview-download');
+    if (previewDownload) {
+      previewDownload.addEventListener('click', () => {
+        closePopup();
+        showToast('Quote_Q-2401.pdf downloaded', 'success');
+      });
+    }
+
+    host.addEventListener('click', (e) => { if (e.target === host) closePopup(); }, { once: true });
+  }
+
+  document.querySelectorAll('.peach-btn').forEach(b => {
+    if (b.id === 'view-desktop' || b.id === 'view-mobile') return;
+    b.addEventListener('click', () => openPopup(b.getAttribute('data-action')));
+  });
+})();
+</script>
