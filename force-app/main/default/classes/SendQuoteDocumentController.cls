@@ -8,6 +8,12 @@ public without sharing class SendQuoteDocumentController {
     @AuraEnabled
     public static QuoteDocumentInfo getQuoteDocumentInfo(Id quoteId) {
         QuoteDocumentInfo info = new QuoteDocumentInfo();
+
+        // From always shows the running rep's email, even when the
+        // Quote isn't resolvable yet — the LWC binds it on first
+        // render and the rep should always see who they're sending as.
+        info.fromAddress = UserInfo.getUserEmail();
+
         if (quoteId == null) {
             return info;
         }
@@ -39,7 +45,6 @@ public without sharing class SendQuoteDocumentController {
         info.opportunityName = q.OpportunityId != null ? q.Opportunity.Name : '';
         info.opportunityEmail = q.OpportunityId != null ? q.Opportunity.Email__c : '';
         info.ownerEmail = q.OwnerId != null ? q.Owner.Email : '';
-        info.fromAddress = UserInfo.getUserEmail();
         info.fileName = buildFileName(q);
 
         // To address is sourced strictly from the Opportunity's

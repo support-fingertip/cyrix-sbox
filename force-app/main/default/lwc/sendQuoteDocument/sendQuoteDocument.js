@@ -18,6 +18,7 @@ export default class SendQuoteDocument extends LightningElement {
     isLoading = true;
     isSending = false;
     showPreview = false;
+    defaultsLoaded = false;
     cacheBuster = Date.now();
 
     fromAddress = '';
@@ -53,7 +54,21 @@ export default class SendQuoteDocument extends LightningElement {
     }
 
     loadInfo() {
+        if (!this.recordId) {
+            // connectedCallback can fire before the framework hands us
+            // the record id on some launch paths; the @api invoke()
+            // call that follows always carries it. Skip the wasted
+            // call rather than running SOQL with a null Id.
+            this.isLoading = false;
+            return;
+        }
         this.isLoading = true;
+        // Force lightning-input-rich-text to remount with the next
+        // body value — its `value` attribute is initial-only, so an
+        // in-place update from a stale empty body to the populated
+        // template wouldn't reach the editor.
+        this.defaultsLoaded = false;
+
         getQuoteDocumentInfo({ quoteId: this.recordId })
             .then(info => {
                 this.fromAddress = info.fromAddress || '';
@@ -67,9 +82,11 @@ export default class SendQuoteDocument extends LightningElement {
                 this.accountName = info.accountName || '';
                 this.fileName = info.fileName || '';
                 this.isLoading = false;
+                this.defaultsLoaded = true;
             })
             .catch(error => {
                 this.isLoading = false;
+                this.defaultsLoaded = true;
                 this.showToast('Error', this.errorMessage(error, 'Failed to load quote'), 'error');
             });
     }

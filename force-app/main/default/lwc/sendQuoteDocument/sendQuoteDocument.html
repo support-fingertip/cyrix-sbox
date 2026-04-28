@@ -32,48 +32,75 @@
                     <div class="sqd-grid2">
                         <div class="sqd-row">
                             <label class="sqd-field-label">From</label>
-                            <input class="sqd-input sqd-input--locked" value={fromAddress} readonly />
+                            <lightning-input class="sqd-li sqd-li--locked"
+                                             variant="label-hidden"
+                                             value={fromAddress}
+                                             readonly>
+                            </lightning-input>
                         </div>
                         <div class="sqd-row">
                             <label class="sqd-field-label">To</label>
-                            <input class="sqd-input" type="email" value={toAddress}
-                                   onchange={handleToChange} required />
+                            <lightning-input class="sqd-li"
+                                             variant="label-hidden"
+                                             value={toAddress}
+                                             onchange={handleToChange}
+                                             required>
+                            </lightning-input>
                         </div>
                     </div>
 
                     <div class="sqd-grid2">
                         <div class="sqd-row">
                             <label class="sqd-field-label">Cc</label>
-                            <input class="sqd-input" value={ccAddress}
-                                   placeholder="cc@example.com" onchange={handleCcChange} />
+                            <lightning-input class="sqd-li"
+                                             variant="label-hidden"
+                                             value={ccAddress}
+                                             placeholder="Separate multiple emails with comma"
+                                             onchange={handleCcChange}>
+                            </lightning-input>
                         </div>
                         <div class="sqd-row">
                             <label class="sqd-field-label">Bcc</label>
-                            <input class="sqd-input" value={bccAddress}
-                                   placeholder="bcc@example.com" onchange={handleBccChange} />
+                            <lightning-input class="sqd-li"
+                                             variant="label-hidden"
+                                             value={bccAddress}
+                                             placeholder="Separate multiple emails with comma"
+                                             onchange={handleBccChange}>
+                            </lightning-input>
                         </div>
                     </div>
 
                     <div class="sqd-row">
                         <label class="sqd-field-label">Subject</label>
-                        <input class="sqd-input" value={subject} onchange={handleSubjectChange} required />
+                        <lightning-input class="sqd-li"
+                                         variant="label-hidden"
+                                         value={subject}
+                                         onchange={handleSubjectChange}
+                                         required>
+                        </lightning-input>
                     </div>
 
                     <div class="sqd-row">
                         <label class="sqd-field-label">Message</label>
-                        <lightning-input-rich-text
-                            value={body}
-                            onchange={handleBodyChange}
-                            placeholder="Compose your message…"
-                            formats={richTextFormats}>
-                        </lightning-input-rich-text>
+                        <template if:true={defaultsLoaded}>
+                            <lightning-input-rich-text
+                                value={body}
+                                onchange={handleBodyChange}
+                                placeholder="Compose your message…"
+                                formats={richTextFormats}>
+                            </lightning-input-rich-text>
+                        </template>
                     </div>
                 </template>
 
                 <template if:true={isWhatsAppChannel}>
                     <div class="sqd-row">
                         <label class="sqd-field-label">Customer</label>
-                        <input class="sqd-input sqd-input--locked" value={customerName} readonly />
+                        <lightning-input class="sqd-li sqd-li--locked"
+                                         variant="label-hidden"
+                                         value={customerName}
+                                         read-only>
+                        </lightning-input>
                     </div>
                     <div class="sqd-row">
                         <label class="sqd-field-label">Mobile number</label>
@@ -83,8 +110,14 @@
                                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                                 </template>
                             </select>
-                            <input class="sqd-phone-in" type="tel" value={phone}
-                                   placeholder="98765 43210" onchange={handlePhoneChange} required />
+                            <lightning-input class="sqd-li sqd-li--phone"
+                                             variant="label-hidden"
+                                             type="tel"
+                                             value={phone}
+                                             placeholder="98765 43210"
+                                             onchange={handlePhoneChange}
+                                             required>
+                            </lightning-input>
                         </div>
                     </div>
                     <template if:true={whatsappTemplateName}>
@@ -93,7 +126,11 @@
                                 Template
                                 <span class="sqd-lock-badge">🔒 fixed</span>
                             </label>
-                            <input class="sqd-input sqd-input--locked" value={whatsappTemplateName} readonly />
+                            <lightning-input class="sqd-li sqd-li--locked"
+                                             variant="label-hidden"
+                                             value={whatsappTemplateName}
+                                             readonly>
+                            </lightning-input>
                         </div>
                     </template>
                 </template>
