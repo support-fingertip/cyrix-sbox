@@ -293,6 +293,11 @@
                                                 data-row-id={item.rowId} data-field="discount"
                                                 onchange={handleLineItemChange}>
                                             </lightning-input>
+                                            <template if:true={item.hasMaxDiscount}>
+                                                <div class="qw-field-hint" title="Discounts above this require approval at a higher tier.">
+                                                    Max without approval: {item.maxDiscountDisplay}
+                                                </div>
+                                            </template>
                                         </div>
                                         <div>
                                             <div class="qw-field-label">Tax %</div>

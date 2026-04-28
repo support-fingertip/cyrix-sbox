@@ -68,11 +68,12 @@ public with sharing class OrderItemTriggerHandler {
 
             oi.Tax__c = p.Tax__c;
 
+            // Source_Pricebook_Ref__c reflects the mapped tier; UnitPrice
+            // is intentionally left at the PL5 list price the rep saw on
+            // screen — escalation only affects the approval path, not the
+            // displayed Sales Price.
             if (ev.mappedPricebookId != null) {
                 oi.Source_Pricebook_Ref__c = ev.mappedPricebookId;
-            }
-            if (ev.mappedUnitPrice != null) {
-                oi.UnitPrice = ev.mappedUnitPrice;
             }
 
             // Tax_Amount = (Qty * UnitPrice * (1 - Disc/100)) * (Tax%/100).

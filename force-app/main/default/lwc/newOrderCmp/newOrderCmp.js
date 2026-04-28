@@ -894,16 +894,14 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 if (preview.resolvedPricebookEntryId) {
                     updated.pricebookEntryId = preview.resolvedPricebookEntryId;
                 }
-                if (!updated.isServiceItem && preview.resolvedUnitPrice != null) {
-                    updated.unitPrice = preview.resolvedUnitPrice;
-                    updated.listPrice = preview.standardPrice != null
-                        ? preview.standardPrice
-                        : updated.listPrice;
-                    const base = updated.unitPrice * (updated.quantity || 0);
-                    const afterDiscount = base * (1 - ((updated.discount || 0) / 100));
-                    const taxAmt = afterDiscount * ((updated.taxPercent || 0) / 100);
-                    updated.lineTotal = afterDiscount + taxAmt;
+                if (preview.ceilingTierDiscount != null) {
+                    updated.maxDiscount = preview.ceilingTierDiscount;
+                    updated.maxDiscountDisplay = this.formatMaxDiscount(preview.ceilingTierDiscount);
+                    updated.hasMaxDiscount = true;
                 }
+                // UnitPrice is intentionally NOT updated from the preview;
+                // escalation only changes the approval path, not the
+                // displayed Sales Price.
                 return updated;
             });
 
@@ -931,6 +929,13 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     tierDisplayLabel(tierName) {
         const label = this.getPriceBadgeLabel(tierName);
         return label || tierName || 'Standard';
+    }
+
+    formatMaxDiscount(value) {
+        if (value == null) return '';
+        const n = Number(value);
+        if (!isFinite(n)) return '';
+        return (n % 1 === 0 ? n.toFixed(0) : n.toFixed(2)) + '%';
     }
 
     getPriceStatusBadgeClass(status) {

@@ -185,8 +185,10 @@ private class PricebookTierServiceTest {
         );
         System.assertEquals('Approval Required', ev.status);
         System.assertEquals(PricebookTierService.TIER3, ev.mappedTierName);
-        System.assertEquals(800, ev.mappedUnitPrice,
-            'UnitPrice re-fetched from the resolved tier PBE');
+        // Service exposes the mapped tier's UnitPrice for callers that
+        // want it (e.g. UI display); the trigger intentionally does not
+        // apply it on save, so the line keeps its PL5-listed Sales Price.
+        System.assertEquals(800, ev.mappedUnitPrice);
         System.assertEquals(false, ev.exceedsAllTiers);
     }
 

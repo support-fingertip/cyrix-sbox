@@ -1082,20 +1082,19 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 if (preview.pricebookEntryId || preview.resolvedPricebookEntryId) {
                     updated.pricebookEntryId = preview.resolvedPricebookEntryId || preview.pricebookEntryId;
                 }
-                // The trigger re-fetches UnitPrice from the mapped tier on
-                // save; mirror that in the UI so totals match what will
-                // be persisted. Skip for service items (server returns no
-                // mapped price for those).
-                if (!updated.isServiceItem && preview.resolvedUnitPrice != null) {
-                    updated.unitPrice = preview.resolvedUnitPrice;
-                    updated.listPrice = preview.standardPrice != null
-                        ? preview.standardPrice
-                        : updated.listPrice;
-                    const base = updated.unitPrice * (updated.quantity || 0);
-                    const afterDiscount = base * (1 - ((updated.discount || 0) / 100));
-                    const taxAmt = afterDiscount * ((updated.taxPercent || 0) / 100);
-                    updated.lineTotal = afterDiscount + taxAmt;
+                // Surface the rep's self-approval ceiling on the line so
+                // the row can show "Max Discount: N%". Falls back to the
+                // previous value when the server preview doesn't carry
+                // one (e.g. unknown profile, missing tier data).
+                if (preview.ceilingTierDiscount != null) {
+                    updated.maxDiscount = preview.ceilingTierDiscount;
+                    updated.maxDiscountDisplay = this.formatMaxDiscount(preview.ceilingTierDiscount);
+                    updated.hasMaxDiscount = true;
                 }
+                // UnitPrice is intentionally NOT updated from the preview.
+                // The rep entered it at the PL5 list price; escalation
+                // only affects the approval path, not the displayed
+                // Sales Price.
                 return updated;
             });
 
@@ -1128,6 +1127,15 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     tierDisplayLabel(tierName) {
         const label = this.getPriceBadgeLabel(tierName);
         return label || tierName || 'Standard';
+    }
+
+    // 12.50% style trim — strip ".00" from clean integers and pad single
+    // decimals to two so the row chip stays consistent.
+    formatMaxDiscount(value) {
+        if (value == null) return '';
+        const n = Number(value);
+        if (!isFinite(n)) return '';
+        return (n % 1 === 0 ? n.toFixed(0) : n.toFixed(2)) + '%';
     }
 
     // ===== CANCEL =====
