@@ -183,7 +183,21 @@ export default class SendQuoteDocument extends LightningElement {
     stopPropagation(event) { event.stopPropagation(); }
 
     handleCancel() {
+        this.closeOrDismiss();
+    }
+
+    /**
+     * Close the panel from either context: as a standalone quick
+     * action (CloseActionScreenEvent collapses the action modal) or
+     * as an embedded LWC inside another component (the bubbling
+     * `close` custom event gives the parent a chance to dismiss its
+     * own overlay). Firing both is safe — CloseActionScreenEvent is a
+     * no-op outside the action context, and the custom event is
+     * ignored by the action framework.
+     */
+    closeOrDismiss() {
         this.dispatchEvent(new CloseActionScreenEvent());
+        this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }));
     }
 
     handleSend() {
@@ -217,7 +231,7 @@ export default class SendQuoteDocument extends LightningElement {
                 this.isSending = false;
                 if (result === 'SUCCESS') {
                     this.showToast('Success', 'Quote PDF sent successfully!', 'success');
-                    this.dispatchEvent(new CloseActionScreenEvent());
+                    this.closeOrDismiss();
                 } else {
                     this.showToast('Error', result, 'error');
                 }
@@ -249,7 +263,7 @@ export default class SendQuoteDocument extends LightningElement {
                 this.isSending = false;
                 if (result === 'SUCCESS') {
                     this.showToast('Success', 'Quote PDF sent via WhatsApp!', 'success');
-                    this.dispatchEvent(new CloseActionScreenEvent());
+                    this.closeOrDismiss();
                 } else {
                     this.showToast('Error', result, 'error');
                 }

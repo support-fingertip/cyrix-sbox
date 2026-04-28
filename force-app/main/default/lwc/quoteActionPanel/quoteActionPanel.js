@@ -1,6 +1,8 @@
-import { LightningElement, api } from 'lwc';
+import { LightningElement, api, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
+import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
+import PRICE_STATUS_FIELD from '@salesforce/schema/Quote.Price_Status__c';
 import submitForApproval from '@salesforce/apex/QuoteActionPanelController.submitForApproval';
 import getQuoteStatusOptions from '@salesforce/apex/QuoteActionPanelController.getQuoteStatusOptions';
 import updateStatus from '@salesforce/apex/QuoteActionPanelController.updateStatus';
@@ -12,16 +14,22 @@ const STATUS_DESCRIPTIONS = {
     'Customer accepted': 'Customer approved',
     'Accepted': 'Customer approved',
     'Denied': 'Customer rejected',
-    'Rejected': 'Customer rejected',
     'Closed': 'No further action',
-    'Draft': 'Still being prepared',
     'Needs Review': 'Awaiting internal review',
     'In Review': 'Approval in progress',
-    'Approved': 'Internally approved',
     'Presented': 'Sent to customer'
 };
 
-const PREVIEW_TIMEOUT_MS = 12000;
+// Statuses the rep should not change to from this panel — Draft is
+// the starting state, and Approved / Rejected are reserved for the
+// approval process to write.
+const STATUS_HIDDEN = new Set(['Draft', 'Approved', 'Rejected']);
+
+// Submit-for-approval is only meaningful while the quote is sitting
+// at "Approval Required" pricing. Hide the button entirely outside
+// of that state so reps don't try to push an already-approved or
+// already-rejected quote into the workflow again.
+const APPROVAL_REQUIRED_PRICE_STATUS = 'Approval Required';
 
 export default class QuoteActionPanel extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -42,11 +50,20 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
 
     confirmMessage = '';
 
-    previewLoading = false;
-    previewError = false;
-    previewErrorMessage = '';
-    previewCacheBuster = Date.now();
-    _previewTimeoutId = null;
+    // ---------- price-status wire ----------
+
+    @wire(getRecord, { recordId: '$recordId', fields: [PRICE_STATUS_FIELD] })
+    wiredQuote;
+
+    get priceStatus() {
+        return this.wiredQuote && this.wiredQuote.data
+            ? getFieldValue(this.wiredQuote.data, PRICE_STATUS_FIELD)
+            : null;
+    }
+
+    get showApprovalButton() {
+        return this.priceStatus === APPROVAL_REQUIRED_PRICE_STATUS;
+    }
 
     // ---------- popup-state getters ----------
 
@@ -55,7 +72,7 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
     get isStatus()   { return this.activePopup === 'status'; }
     get isRevision() { return this.activePopup === 'revision'; }
     get isConfirm()  { return this.activePopup === 'confirm'; }
-    get isPreview()  { return this.activePopup === 'preview'; }
+    get isSendPdf()  { return this.activePopup === 'sendpdf'; }
 
     get popupTitle() {
         switch (this.activePopup) {
@@ -63,7 +80,6 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
             case 'status':   return 'Mark status';
             case 'revision': return 'Reason for revision';
             case 'confirm':  return 'Confirm — ' + this.pendingStatusLabel;
-            case 'preview':  return 'Preview quote PDF';
             default:         return '';
         }
     }
@@ -79,14 +95,6 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
         return 'qap-textarea' + (this.revisionError ? ' qap-textarea--error' : '');
     }
 
-    get previewUrl() {
-        return '/apex/ProductQuotation?id=' + this.recordId + '&t=' + this.previewCacheBuster;
-    }
-
-    get previewIframeClass() {
-        return this.previewLoading ? 'qap-iframe--hidden' : '';
-    }
-
     // ---------- button dispatch ----------
 
     handleAction(event) {
@@ -94,11 +102,11 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
         if (action === 'approval') {
             this.openApproval();
         } else if (action === 'pdf') {
-            this.launchSendPdf();
+            this.openSendPdf();
         } else if (action === 'status') {
             this.openStatus();
         } else if (action === 'preview') {
-            this.openPreview();
+            this.launchPreview();
         }
     }
 
@@ -106,10 +114,6 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
     stopPropagation(event) { event.stopPropagation(); }
 
     closePopup() {
-        if (this._previewTimeoutId) {
-            clearTimeout(this._previewTimeoutId);
-            this._previewTimeoutId = null;
-        }
         this.activePopup = null;
         this.isBusy = false;
         this.approvalComments = '';
@@ -119,9 +123,6 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
         this.pendingStatusValue = '';
         this.pendingStatusLabel = '';
         this.confirmMessage = '';
-        this.previewLoading = false;
-        this.previewError = false;
-        this.previewErrorMessage = '';
     }
 
     // ---------- approval ----------
@@ -136,16 +137,9 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
     }
 
     handleApprovalSubmit() {
+        // Comments are optional — submit whatever the rep typed
+        // (including blank).
         const v = (this.approvalComments || '').trim();
-        if (!v) {
-            this.approvalError = 'Please add a comment before submitting.';
-            return;
-        }
-        if (v.length < 5) {
-            this.approvalError = 'Comment is too short — add a bit more detail.';
-            return;
-        }
-
         this.isBusy = true;
         submitForApproval({ quoteId: this.recordId, comments: v })
             .then(() => {
@@ -158,17 +152,32 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
             });
     }
 
-    // ---------- send pdf (delegated to existing quick action) ----------
+    // ---------- send pdf (embedded sendQuoteDocument) ----------
 
-    launchSendPdf() {
-        // Reuse the merged sendQuoteDocument quick action so we don't
-        // duplicate the email/WhatsApp form. NavigationMixin's
-        // standard__quickAction page reference type opens any quick
-        // action by API name.
+    openSendPdf() {
+        this.activePopup = 'sendpdf';
+    }
+
+    /**
+     * sendQuoteDocument dispatches a bubbling `close` custom event
+     * after Cancel / Send completes, so we just dismiss the panel
+     * on receipt.
+     */
+    handleEmbedClose() {
+        this.closePopup();
+    }
+
+    // ---------- preview (delegated to existing Quote_PDF VF quick action) ----------
+
+    launchPreview() {
+        // Quote.Quote_PDF is a VisualforcePage quick action that
+        // launches the ProductQuotation page in a Salesforce-managed
+        // modal. Reusing it gets us a battle-tested PDF preview
+        // without re-implementing the iframe + timeout dance here.
         this[NavigationMixin.Navigate]({
             type: 'standard__quickAction',
             attributes: {
-                apiName: 'Quote.Send_Quote_PDF'
+                apiName: 'Quote.Quote_PDF'
             }
         });
     }
@@ -181,10 +190,12 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
             this.statusLoading = true;
             getQuoteStatusOptions({ quoteId: this.recordId })
                 .then(options => {
-                    this.statusOptions = (options || []).map(o => ({
-                        ...o,
-                        desc: STATUS_DESCRIPTIONS[o.label] || ('Set status to ' + o.label)
-                    }));
+                    this.statusOptions = (options || [])
+                        .filter(o => !STATUS_HIDDEN.has(o.value) && !STATUS_HIDDEN.has(o.label))
+                        .map(o => ({
+                            ...o,
+                            desc: STATUS_DESCRIPTIONS[o.label] || ('Set status to ' + o.label)
+                        }));
                     this.statusLoading = false;
                 })
                 .catch(error => {
@@ -216,7 +227,7 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
         if (lower === 'closed') {
             return 'Close this quote? No further changes will be allowed.';
         }
-        if (lower === 'denied' || lower === 'rejected') {
+        if (lower === 'denied') {
             return 'Mark this quote as ' + label + '?';
         }
         if (lower === 'customer accepted' || lower === 'accepted') {
@@ -273,58 +284,6 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
                 this.showToast('Couldn’t update status',
                     this.errorMessage(error, 'Status update failed'), 'error');
             });
-    }
-
-    // ---------- preview ----------
-
-    openPreview() {
-        this.activePopup = 'preview';
-        this.previewError = false;
-        this.previewErrorMessage = '';
-        this.previewLoading = true;
-        this.previewCacheBuster = Date.now();
-
-        // 12s safety timeout — VF page generation can hang on large
-        // quotes or when the underlying data has issues; the rep
-        // should get an actionable message rather than an endless
-        // spinner.
-        if (this._previewTimeoutId) clearTimeout(this._previewTimeoutId);
-        this._previewTimeoutId = setTimeout(() => {
-            if (this.previewLoading) {
-                this.previewLoading = false;
-                this.previewError = true;
-                this.previewErrorMessage =
-                    'The preview is taking longer than expected. ' +
-                    'The Quote PDF may still be generating, or the ProductQuotation Visualforce ' +
-                    'page may be returning an error. Try again in a moment, or open the record ' +
-                    'and use the standard Quote PDF action.';
-            }
-        }, PREVIEW_TIMEOUT_MS);
-    }
-
-    handlePreviewLoaded() {
-        this.previewLoading = false;
-        if (this._previewTimeoutId) {
-            clearTimeout(this._previewTimeoutId);
-            this._previewTimeoutId = null;
-        }
-    }
-
-    handlePreviewError() {
-        this.previewLoading = false;
-        this.previewError = true;
-        this.previewErrorMessage =
-            'The Quote PDF preview failed to load. This usually means the ProductQuotation ' +
-            'Visualforce page errored — open the record’s standard PDF action for the full ' +
-            'platform error.';
-        if (this._previewTimeoutId) {
-            clearTimeout(this._previewTimeoutId);
-            this._previewTimeoutId = null;
-        }
-    }
-
-    handlePreviewRetry() {
-        this.openPreview();
     }
 
     // ---------- shared helpers ----------

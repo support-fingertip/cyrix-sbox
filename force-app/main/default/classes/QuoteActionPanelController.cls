@@ -12,14 +12,16 @@ public with sharing class QuoteActionPanelController {
         if (quoteId == null) {
             throw new AuraHandledException('Missing Quote id.');
         }
-        if (String.isBlank(comments)) {
-            throw new AuraHandledException('Comments are required when submitting for approval.');
-        }
 
         try {
             Approval.ProcessSubmitRequest req = new Approval.ProcessSubmitRequest();
             req.setObjectId(quoteId);
-            req.setComments(comments);
+            // Comments are optional — pass through whatever the rep
+            // typed (empty string is fine; the Approval framework
+            // accepts a blank comment).
+            if (String.isNotBlank(comments)) {
+                req.setComments(comments);
+            }
             req.setSubmitterId(UserInfo.getUserId());
             Approval.ProcessResult result = Approval.process(req);
             if (!result.isSuccess()) {
