@@ -410,6 +410,10 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>QuoteActionPanelController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>SendQuoteDocumentController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
