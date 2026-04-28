@@ -2,7 +2,7 @@
 <QuickAction xmlns="http://soap.sforce.com/2006/04/metadata">
     <actionSubtype>ScreenAction</actionSubtype>
     <label>Send Quote PDF Whatsapp</label>
-    <lightningWebComponent>sendQuoteWhatsApp</lightningWebComponent>
+    <lightningComponent>sendQuoteWhatsAppAura</lightningComponent>
     <optionsCreateFeedItem>false</optionsCreateFeedItem>
-    <type>LightningWebComponent</type>
+    <type>LightningComponent</type>
 </QuickAction>
