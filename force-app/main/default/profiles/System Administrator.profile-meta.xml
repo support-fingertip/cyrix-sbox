@@ -386,10 +386,6 @@
         <enabled>false</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>QuotePDFEmailController</apexClass>
-        <enabled>false</enabled>
-    </classAccesses>
-    <classAccesses>
         <apexClass>SAPToSFIntegrationController</apexClass>
         <enabled>false</enabled>
     </classAccesses>
@@ -412,6 +408,10 @@
     <classAccesses>
         <apexClass>SendEmailCustomNotificationTest</apexClass>
         <enabled>false</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>SendQuoteDocumentController</apexClass>
+        <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
         <apexClass>ShippingAddressHandler</apexClass>

@@ -1,0 +1,146 @@
+<template>
+    <div class="sqd-card">
+        <div class="sqd-head">
+            <div class="sqd-icon">↗</div>
+            <div class="sqd-title">Send document</div>
+            <template if:true={headerMeta}>
+                <div class="sqd-meta">{headerMeta}</div>
+            </template>
+        </div>
+
+        <div class="sqd-body">
+            <template if:true={isLoading}>
+                <div class="sqd-loading">
+                    <lightning-spinner alternative-text="Loading…" size="small"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:false={isLoading}>
+                <div class="sqd-row">
+                    <div class="sqd-field-label">Channel</div>
+                    <div class="sqd-tabs">
+                        <button class={emailTabClass} onclick={handleSelectEmail} type="button">
+                            <span class="sqd-tab-glyph">✉</span> Email
+                        </button>
+                        <button class={whatsAppTabClass} onclick={handleSelectWhatsApp} type="button">
+                            <span class="sqd-tab-glyph">●</span> WhatsApp
+                        </button>
+                    </div>
+                </div>
+
+                <template if:true={isEmailChannel}>
+                    <div class="sqd-grid2">
+                        <div class="sqd-row">
+                            <label class="sqd-field-label">From</label>
+                            <input class="sqd-input sqd-input--locked" value={fromAddress} readonly />
+                        </div>
+                        <div class="sqd-row">
+                            <label class="sqd-field-label">To</label>
+                            <input class="sqd-input" type="email" value={toAddress}
+                                   onchange={handleToChange} required />
+                        </div>
+                    </div>
+
+                    <div class="sqd-grid2">
+                        <div class="sqd-row">
+                            <label class="sqd-field-label">Cc</label>
+                            <input class="sqd-input" value={ccAddress}
+                                   placeholder="cc@example.com" onchange={handleCcChange} />
+                        </div>
+                        <div class="sqd-row">
+                            <label class="sqd-field-label">Bcc</label>
+                            <input class="sqd-input" value={bccAddress}
+                                   placeholder="bcc@example.com" onchange={handleBccChange} />
+                        </div>
+                    </div>
+
+                    <div class="sqd-row">
+                        <label class="sqd-field-label">Subject</label>
+                        <input class="sqd-input" value={subject} onchange={handleSubjectChange} required />
+                    </div>
+
+                    <div class="sqd-row">
+                        <label class="sqd-field-label">Message</label>
+                        <lightning-input-rich-text
+                            value={body}
+                            onchange={handleBodyChange}
+                            placeholder="Compose your message…"
+                            formats={richTextFormats}>
+                        </lightning-input-rich-text>
+                    </div>
+                </template>
+
+                <template if:true={isWhatsAppChannel}>
+                    <div class="sqd-row">
+                        <label class="sqd-field-label">Customer</label>
+                        <input class="sqd-input sqd-input--locked" value={customerName} readonly />
+                    </div>
+                    <div class="sqd-row">
+                        <label class="sqd-field-label">Mobile number</label>
+                        <div class="sqd-phone-group">
+                            <select class="sqd-cc-select" value={countryCode} onchange={handleCountryCodeChange}>
+                                <template for:each={countryCodeOptions} for:item="opt">
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                </template>
+                            </select>
+                            <input class="sqd-phone-in" type="tel" value={phone}
+                                   placeholder="98765 43210" onchange={handlePhoneChange} required />
+                        </div>
+                    </div>
+                    <template if:true={whatsappTemplateName}>
+                        <div class="sqd-row">
+                            <label class="sqd-field-label">
+                                Template
+                                <span class="sqd-lock-badge">🔒 fixed</span>
+                            </label>
+                            <input class="sqd-input sqd-input--locked" value={whatsappTemplateName} readonly />
+                        </div>
+                    </template>
+                </template>
+
+                <div class="sqd-row">
+                    <label class="sqd-field-label">Attachment</label>
+                    <div class="sqd-pdf-card">
+                        <div class="sqd-pdf-thumb">PDF</div>
+                        <div class="sqd-pdf-meta">
+                            <div class="sqd-pdf-name">{attachmentFileName}</div>
+                            <div class="sqd-pdf-sub">Quote PDF · live preview</div>
+                        </div>
+                        <button class="sqd-preview-btn" type="button" onclick={handleOpenPreview}>
+                            Preview
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sqd-action-row">
+                    <button class="sqd-btn-secondary" type="button" onclick={handleCancel}>
+                        Cancel
+                    </button>
+                    <button class="sqd-btn-primary" type="button" onclick={handleSend} disabled={isSendDisabled}>
+                        {sendButtonLabel}
+                    </button>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <template if:true={showPreview}>
+        <div class="sqd-modal-overlay" onclick={handleClosePreview}>
+            <div class="sqd-modal" onclick={stopPropagation}>
+                <div class="sqd-modal-head">
+                    <div class="sqd-modal-head-meta">
+                        <div class="sqd-modal-thumb">PDF</div>
+                        <div>
+                            <div class="sqd-modal-title">{attachmentFileName}</div>
+                            <div class="sqd-modal-sub">Live preview</div>
+                        </div>
+                    </div>
+                    <button class="sqd-close-x" type="button" onclick={handleClosePreview} aria-label="Close preview">✕</button>
+                </div>
+                <div class="sqd-modal-body">
+                    <iframe src={pdfPreviewUrl} title="Quote PDF preview"></iframe>
+                </div>
+            </div>
+        </div>
+    </template>
+</template>

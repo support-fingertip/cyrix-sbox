@@ -1,0 +1,248 @@
+import { LightningElement, api } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { CloseActionScreenEvent } from 'lightning/actions';
+import getQuoteDocumentInfo from '@salesforce/apex/SendQuoteDocumentController.getQuoteDocumentInfo';
+import sendQuoteEmail from '@salesforce/apex/SendQuoteDocumentController.sendQuoteEmail';
+import sendQuoteViaWhatsApp from '@salesforce/apex/SendQuoteDocumentController.sendQuoteViaWhatsApp';
+
+const RICH_TEXT_FORMATS = [
+    'font', 'size', 'bold', 'italic', 'underline', 'strike',
+    'list', 'indent', 'align', 'link', 'clean', 'color', 'background',
+    'header', 'direction'
+];
+
+export default class SendQuoteDocument extends LightningElement {
+    @api recordId;
+
+    channel = 'email';
+    isLoading = true;
+    isSending = false;
+    showPreview = false;
+    cacheBuster = Date.now();
+
+    fromAddress = '';
+    toAddress = '';
+    ccAddress = '';
+    bccAddress = '';
+    subject = '';
+    body = '';
+
+    customerName = '';
+    countryCode = '+91';
+    phone = '';
+    whatsappTemplateName = '';
+
+    accountName = '';
+    fileName = '';
+    richTextFormats = RICH_TEXT_FORMATS;
+
+    connectedCallback() {
+        this.reset();
+        this.loadInfo();
+    }
+
+    @api invoke() {
+        this.reset();
+        this.loadInfo();
+    }
+
+    reset() {
+        this.isSending = false;
+        this.showPreview = false;
+        this.cacheBuster = Date.now();
+    }
+
+    loadInfo() {
+        this.isLoading = true;
+        getQuoteDocumentInfo({ quoteId: this.recordId })
+            .then(info => {
+                this.fromAddress = info.fromAddress || '';
+                this.toAddress = info.defaultToAddress || '';
+                this.subject = info.defaultSubject || '';
+                this.body = info.defaultBody || '';
+                this.customerName = info.recipientName || '';
+                const split = this.splitPhone(info.phone || '');
+                this.countryCode = split.code || '+91';
+                this.phone = split.local;
+                this.whatsappTemplateName = info.whatsappTemplateName || '';
+                this.accountName = info.accountName || '';
+                this.fileName = info.fileName || '';
+                this.isLoading = false;
+            })
+            .catch(error => {
+                this.isLoading = false;
+                this.showToast('Error', this.errorMessage(error, 'Failed to load quote'), 'error');
+            });
+    }
+
+    splitPhone(raw) {
+        const trimmed = (raw || '').trim();
+        const match = trimmed.match(/^(\+\d{1,3})\s*(.*)$/);
+        if (match) {
+            return { code: match[1], local: match[2].trim() };
+        }
+        return { code: '', local: trimmed };
+    }
+
+    get isEmailChannel() { return this.channel === 'email'; }
+    get isWhatsAppChannel() { return this.channel === 'whatsapp'; }
+
+    get emailTabClass() {
+        return 'sqd-tab-btn' + (this.isEmailChannel ? ' sqd-tab-btn--active' : '');
+    }
+    get whatsAppTabClass() {
+        return 'sqd-tab-btn' + (this.isWhatsAppChannel ? ' sqd-tab-btn--active' : '');
+    }
+
+    get headerMeta() {
+        return this.accountName ? 'Account · ' + this.accountName : '';
+    }
+
+    get attachmentFileName() {
+        return this.fileName || 'Quote.pdf';
+    }
+
+    get pdfPreviewUrl() {
+        return '/apex/ProductQuotation?id=' + this.recordId + '&t=' + this.cacheBuster;
+    }
+
+    get sendButtonLabel() {
+        if (this.isSending) return 'Sending…';
+        return this.isEmailChannel ? 'Send via email' : 'Send via WhatsApp';
+    }
+
+    get isSendDisabled() {
+        if (this.isSending) return true;
+        if (this.isEmailChannel) {
+            return !this.toAddress || !this.subject;
+        }
+        return !this.phone || !this.customerName;
+    }
+
+    get countryCodeOptions() {
+        return [
+            { value: '+91', label: '🇮🇳 +91' },
+            { value: '+1', label: '🇺🇸 +1' },
+            { value: '+44', label: '🇬🇧 +44' },
+            { value: '+971', label: '🇦🇪 +971' },
+            { value: '+966', label: '🇸🇦 +966' },
+            { value: '+65', label: '🇸🇬 +65' }
+        ];
+    }
+
+    handleSelectEmail() { this.channel = 'email'; }
+    handleSelectWhatsApp() { this.channel = 'whatsapp'; }
+
+    handleToChange(event) { this.toAddress = event.target.value; }
+    handleCcChange(event) { this.ccAddress = event.target.value; }
+    handleBccChange(event) { this.bccAddress = event.target.value; }
+    handleSubjectChange(event) { this.subject = event.target.value; }
+    handleBodyChange(event) {
+        this.body = event.detail ? event.detail.value : event.target.value;
+    }
+    handlePhoneChange(event) { this.phone = event.target.value; }
+    handleCountryCodeChange(event) { this.countryCode = event.target.value; }
+
+    handleOpenPreview() {
+        this.cacheBuster = Date.now();
+        this.showPreview = true;
+    }
+    handleClosePreview() { this.showPreview = false; }
+    stopPropagation(event) { event.stopPropagation(); }
+
+    handleCancel() {
+        this.dispatchEvent(new CloseActionScreenEvent());
+    }
+
+    handleSend() {
+        if (this.isEmailChannel) {
+            this.sendEmail();
+        } else {
+            this.sendWhatsApp();
+        }
+    }
+
+    sendEmail() {
+        if (!this.toAddress) {
+            this.showToast('Error', 'Please enter a To email address', 'error');
+            return;
+        }
+        if (!this.subject) {
+            this.showToast('Error', 'Please enter a subject', 'error');
+            return;
+        }
+
+        this.isSending = true;
+        sendQuoteEmail({
+            quoteId: this.recordId,
+            toAddress: this.toAddress,
+            ccAddress: this.ccAddress,
+            bccAddress: this.bccAddress,
+            subject: this.subject,
+            body: this.body
+        })
+            .then(result => {
+                this.isSending = false;
+                if (result === 'SUCCESS') {
+                    this.showToast('Success', 'Quote PDF sent successfully!', 'success');
+                    this.dispatchEvent(new CloseActionScreenEvent());
+                } else {
+                    this.showToast('Error', result, 'error');
+                }
+            })
+            .catch(error => {
+                this.isSending = false;
+                this.showToast('Error', this.errorMessage(error, 'Failed to send email'), 'error');
+            });
+    }
+
+    sendWhatsApp() {
+        if (!this.phone) {
+            this.showToast('Error', 'Please enter a phone number', 'error');
+            return;
+        }
+        if (!this.customerName) {
+            this.showToast('Error', 'Please enter the recipient name', 'error');
+            return;
+        }
+
+        const fullPhone = this.composePhone();
+        this.isSending = true;
+        sendQuoteViaWhatsApp({
+            quoteId: this.recordId,
+            phone: fullPhone,
+            recipientName: this.customerName
+        })
+            .then(result => {
+                this.isSending = false;
+                if (result === 'SUCCESS') {
+                    this.showToast('Success', 'Quote PDF sent via WhatsApp!', 'success');
+                    this.dispatchEvent(new CloseActionScreenEvent());
+                } else {
+                    this.showToast('Error', result, 'error');
+                }
+            })
+            .catch(error => {
+                this.isSending = false;
+                this.showToast('Error', this.errorMessage(error, 'Failed to send'), 'error');
+            });
+    }
+
+    composePhone() {
+        const local = (this.phone || '').replace(/\s+/g, '');
+        if (!local) return '';
+        if (local.startsWith('+')) return local;
+        const code = (this.countryCode || '').replace(/\s+/g, '');
+        return code + local;
+    }
+
+    errorMessage(error, fallback) {
+        if (error && error.body && error.body.message) return fallback + ': ' + error.body.message;
+        if (error && error.message) return fallback + ': ' + error.message;
+        return fallback;
+    }
+
+    showToast(title, message, variant) {
+        this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
+    }
+}
