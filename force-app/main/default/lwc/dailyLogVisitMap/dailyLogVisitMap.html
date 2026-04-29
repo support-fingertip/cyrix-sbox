@@ -54,15 +54,32 @@
 
                 <!-- Map -->
                 <div class="map-container">
-                    <div class="custom-map" lwc:dom="manual"></div>
+                    <lightning-map
+                        map-markers={mapMarkers}
+                        zoom-level={zoomLevel}
+                        markers-title="Visit Route"
+                        list-view="hidden"
+                        center={mapCenter}>
+                    </lightning-map>
                 </div>
 
                 <!-- Visit Route List -->
                 <div class="slds-m-top_medium">
-                    <h2 class="slds-text-heading_small slds-p-left_small slds-m-bottom_small">
-                        <lightning-icon icon-name="utility:routing_offline" size="small"></lightning-icon>
-                        &nbsp;Visit Route ({visitCount} visits)
-                    </h2>
+                    <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-p-horizontal_small slds-m-bottom_small">
+                        <h2 class="slds-text-heading_small">
+                            <lightning-icon icon-name="utility:routing_offline" size="small"></lightning-icon>
+                            &nbsp;Visit Route ({visitCount} visits)
+                        </h2>
+                        <template if:true={hasRoutableStops}>
+                            <lightning-button
+                                label="View Route on Google Maps"
+                                icon-name="utility:link"
+                                icon-position="left"
+                                variant="brand"
+                                onclick={handleOpenRoute}>
+                            </lightning-button>
+                        </template>
+                    </div>
                     <div class="route-timeline">
                         <template for:each={visitList} for:item="visit">
                             <div key={visit.id} class="route-item slds-grid slds-p-around_small slds-border_bottom">
