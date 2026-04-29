@@ -59,34 +59,48 @@ public with sharing class quoteTriggerHandler {
     }
 
     /**
-     * Notifies the Quote Owner when the Quote is approved. Fires when EITHER
-     * Approval_Status__c (set by the standard Quote_Approval process's final
-     * approval field update) OR Price_Status__c (set by the custom
-     * QuoteApprovalController.approveLineItems flow) transitions to
-     * 'Approved'. Two paths are checked because the standard approval flow
-     * updates Approval_Status__c reliably, while Price_Status__c is sometimes
-     * left at 'Not Required' by other automation in the org — relying on
-     * Price_Status__c alone caused the owner to miss the notification on
-     * legitimate L3 approvals.
+     * Notifies the Quote Owner when the Quote moves through the approval
+     * lifecycle. Fires on every notify-worthy transition of either
+     * Approval_Status__c (set by the multi-level standard approval flows)
+     * or Price_Status__c (set by the custom approveLineItems action).
+     *
+     * Notify-worthy Approval_Status__c values:
+     *   Level 1 Approved   - L1 manager signed off
+     *   Level 2 Approved   - L2 manager signed off
+     *   Approved           - Final approval completed (L3 / Order Acceptance)
+     *   Rejected           - Any approver rejected the quote
+     *
+     * Notify-worthy Price_Status__c values:
+     *   Approved   - Custom approveLineItems final approval
+     *   Rejected   - Custom approveLineItems rejection
+     *
+     * Two paths are checked because the standard approval flow updates
+     * Approval_Status__c reliably, while the custom flow drives
+     * Price_Status__c — relying on either alone caused the owner to miss
+     * notifications on legitimate transitions.
      */
     public static void notifyOwnerOnApproval(List<Quote> newQuotes, Map<Id, Quote> oldMap) {
         if (newQuotes == null || newQuotes.isEmpty() || oldMap == null) return;
 
-        List<Quote> justApproved = new List<Quote>();
+        // Each entry pairs the quote with the new status value that
+        // triggered the notification, so we can build a title + body
+        // that reflects the actual stage (Level 1, Level 2, Approved,
+        // Rejected) instead of a generic "approved" message.
+        List<Quote> targets = new List<Quote>();
+        List<String> targetStatuses = new List<String>();
+
         for (Quote q : newQuotes) {
             Quote oldQ = oldMap.get(q.Id);
             if (oldQ == null) continue;
             if (q.OwnerId == null) continue;
 
-            Boolean approvalFlipped = (q.Approval_Status__c == 'Approved'
-                                       && oldQ.Approval_Status__c != 'Approved');
-            Boolean priceFlipped    = (q.Price_Status__c == 'Approved'
-                                       && oldQ.Price_Status__c != 'Approved');
-            if (!approvalFlipped && !priceFlipped) continue;
+            String triggerStatus = pickNotifyStatus(q, oldQ);
+            if (triggerStatus == null) continue;
 
-            justApproved.add(q);
+            targets.add(q);
+            targetStatuses.add(triggerStatus);
         }
-        if (justApproved.isEmpty()) return;
+        if (targets.isEmpty()) return;
 
         Id notifTypeId;
         try {
@@ -101,25 +115,78 @@ public with sharing class quoteTriggerHandler {
             return;
         }
 
-        // Whoever clicked Approve in the standard approval process (or the
-        // custom approveLineItems action) is the running user when the
-        // workflow field updates re-fire this trigger, so UserInfo.getName()
-        // identifies the actual final approver to surface in the bell.
+        // Whoever clicked Approve/Reject in the standard approval process
+        // (or the custom approveLineItems action) is the running user when
+        // the workflow field updates re-fire this trigger.
         String approverName = UserInfo.getName();
 
-        for (Quote q : justApproved) {
+        for (Integer i = 0; i < targets.size(); i++) {
+            Quote q = targets[i];
+            String status = targetStatuses[i];
             try {
                 CustomNotificationService.notificationSend(
-                    'Your Quote has been Approved',
+                    titleFor(status),
                     q.Id,
-                    'Your Quote ' + q.Name + ' has been approved by ' + approverName + '.',
+                    bodyFor(q, status, approverName),
                     new Set<String>{ String.valueOf(q.OwnerId) },
                     notifTypeId
                 );
             } catch (Exception e) {
-                System.debug('Quote approved notification error: ' + e.getMessage());
+                System.debug('Quote approval notification error: ' + e.getMessage());
             }
         }
+    }
+
+    // Status values worth notifying on for each driver field. Anything
+    // outside these sets (Pending, Submitted, etc.) intentionally stays
+    // silent so we don't spam the owner mid-flow.
+    private static final Set<String> APPROVAL_NOTIFY_STATUSES = new Set<String>{
+        'Level 1 Approved', 'Level 2 Approved', 'Approved', 'Rejected'
+    };
+    private static final Set<String> PRICE_NOTIFY_STATUSES = new Set<String>{
+        'Approved', 'Rejected'
+    };
+
+    private static String pickNotifyStatus(Quote q, Quote oldQ) {
+        // Approval_Status__c takes precedence — it carries the level
+        // detail (Level 1 / Level 2 / Approved / Rejected) that the
+        // owner needs to see in the bell.
+        String newAppr = q.Approval_Status__c;
+        String oldAppr = oldQ.Approval_Status__c;
+        if (newAppr != null
+            && APPROVAL_NOTIFY_STATUSES.contains(newAppr)
+            && newAppr != oldAppr) {
+            return newAppr;
+        }
+        String newPrice = q.Price_Status__c;
+        String oldPrice = oldQ.Price_Status__c;
+        if (newPrice != null
+            && PRICE_NOTIFY_STATUSES.contains(newPrice)
+            && newPrice != oldPrice) {
+            return newPrice;
+        }
+        return null;
+    }
+
+    private static String titleFor(String status) {
+        if (status == 'Rejected') return 'Your Quote has been Rejected';
+        return 'Your Quote has been Approved';
+    }
+
+    private static String bodyFor(Quote q, String status, String approverName) {
+        // Approval_Status__c values are written verbatim for the level
+        // detail; Price_Status__c only carries Approved / Rejected.
+        if (status == 'Level 1 Approved') {
+            return 'Your Quote ' + q.Name + ' has been approved at Level 1 by ' + approverName + '.';
+        }
+        if (status == 'Level 2 Approved') {
+            return 'Your Quote ' + q.Name + ' has been approved at Level 2 by ' + approverName + '.';
+        }
+        if (status == 'Rejected') {
+            return 'Your Quote ' + q.Name + ' has been rejected by ' + approverName + '.';
+        }
+        // 'Approved' (final or price-status driven)
+        return 'Your Quote ' + q.Name + ' has been approved by ' + approverName + '.';
     }
 
     /**
