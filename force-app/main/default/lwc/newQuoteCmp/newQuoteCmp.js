@@ -19,6 +19,44 @@ const STEP_LABELS = [
 ];
 const TOTAL_STEPS = STEP_LABELS.length;
 
+// Maps a Quote field API name to the wizard step that owns it. When the
+// rep clicks Save on the Review step and the platform / pre-flight reports
+// a problem with one of these fields, we jump back to the step that hosts
+// the input so the rep can see and fix the issue in place instead of
+// hunting for it.
+const STEP_FOR_FIELD = {
+    Quote_Date__c: 1,
+    Quote_Valid_Till_in_days__c: 1,
+    OpportunityId: 1,
+    Business_Vertical__c: 1,
+    Sub_Vertical__c: 1,
+    Shipping_Mode__c: 1,
+    Delivery__c: 1,
+    Contract_Period_From_Date__c: 1,
+    Contract_Period_End_Date__c: 1,
+    Number_of_Preventive_Maintenance__c: 1,
+    Installation_and_commissioning_required__c: 1,
+    Status: 1,
+    Reason_for_Revision__c: 1,
+    is_Active__c: 1,
+    BillingName: 2, BillingStreet: 2, BillingCity: 2,
+    BillingState: 2, BillingStateCode: 2,
+    BillingPostalCode: 2, BillingCountry: 2, BillingCountryCode: 2,
+    ShippingName: 2, ShippingStreet: 2, ShippingCity: 2,
+    ShippingState: 2, ShippingStateCode: 2,
+    ShippingPostalCode: 2, ShippingCountry: 2, ShippingCountryCode: 2,
+    Description: 5
+};
+
+// Friendly labels for the Quote fields that we explicitly pre-flight on
+// step 1 before submitting the form. Keeps the toast message readable.
+const STEP1_REQUIRED_LABELS = {
+    Quote_Date__c: 'Quote Date',
+    Quote_Valid_Till_in_days__c: 'Quote Valid Till (in days)',
+    OpportunityId: 'Opportunity',
+    Business_Vertical__c: 'Business Vertical'
+};
+
 export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // recordId is a getter/setter so that re-mounting the same component
     // instance with a different record (e.g. a quick action / modal opened
@@ -805,13 +843,31 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     handleFormSubmit(event) {
         event.preventDefault();
 
-        const errors = this.validateLineItems();
-        if (errors.length > 0) {
-            this.showError('Validation Error', errors.join('\n'));
+        const fields = event.detail.fields;
+
+        // Step 1 required fields are far from the Save button on the Review
+        // step, so a missing value (e.g. Quote Valid Till) used to surface
+        // only as a generic save-failed toast — the rep had to walk back to
+        // step 1 to find the offending input. Pre-flight here, jump to
+        // step 1, and name the missing fields in the toast.
+        const step1Missing = this.findMissingStep1Fields(fields);
+        if (step1Missing.length > 0) {
+            this.jumpToStep(1);
+            this.showError(
+                'Quote info incomplete',
+                step1Missing.map(label => `${label} is required.`).join('\n')
+            );
             return;
         }
 
-        const fields = event.detail.fields;
+        const errors = this.validateLineItems();
+        if (errors.length > 0) {
+            // Line-item problems live on step 3 — jump there too so the
+            // rep lands on the affected grid.
+            this.jumpToStep(3);
+            this.showError('Products step needs attention', errors.join('\n'));
+            return;
+        }
 
         // Payment terms (if any) must sum to exactly 100%.
         if (this.paymentTerms.length > 0 && this.totalPercentage !== 100) {
@@ -1008,8 +1064,69 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         const message = this.reduceErrors({ body: detail })
             || detail.message
             || 'An error occurred while saving the quote.';
+        // Server-side validation that flags a specific field (e.g. a
+        // missing required Quote field) is reported under
+        // detail.output.fieldErrors. Find the earliest wizard step that
+        // hosts any of those fields and jump there so the rep isn't left
+        // staring at the Review step trying to guess where the problem
+        // lives.
+        const targetStep = this.stepForErrorPayload(detail);
+        if (targetStep && targetStep !== this.currentStep) {
+            this.jumpToStep(targetStep);
+        }
         this.showError('Save Failed', message);
         console.error('Form error:', JSON.stringify(detail));
+    }
+
+    // Returns labels for known step-1 required fields that are blank in
+    // the submit payload. Pulls Opportunity / Business Vertical from the
+    // tracked component state because those aren't lightning-input-fields.
+    findMissingStep1Fields(fields) {
+        const missing = [];
+        const isBlank = v => v === undefined || v === null || v === '' ||
+            (typeof v === 'string' && v.trim() === '');
+        if (isBlank(fields.Quote_Date__c)) missing.push(STEP1_REQUIRED_LABELS.Quote_Date__c);
+        if (isBlank(fields.Quote_Valid_Till_in_days__c)) missing.push(STEP1_REQUIRED_LABELS.Quote_Valid_Till_in_days__c);
+        if (isBlank(this.defaultOpportunityId)) missing.push(STEP1_REQUIRED_LABELS.OpportunityId);
+        if (isBlank(this.businessVertical)) missing.push(STEP1_REQUIRED_LABELS.Business_Vertical__c);
+        return missing;
+    }
+
+    // Walks a record-edit-form onerror payload looking for a fieldErrors
+    // bag and returns the lowest wizard step that owns any of those
+    // fields. Falls back to null when nothing matches the field map.
+    stepForErrorPayload(detail) {
+        const candidates = [];
+        const collect = obj => {
+            if (!obj || typeof obj !== 'object') return;
+            const fieldErrors = obj.fieldErrors;
+            if (fieldErrors && typeof fieldErrors === 'object') {
+                Object.keys(fieldErrors).forEach(name => {
+                    if (STEP_FOR_FIELD[name] != null) {
+                        candidates.push(STEP_FOR_FIELD[name]);
+                    }
+                });
+            }
+            if (Array.isArray(obj.errors)) {
+                obj.errors.forEach(e => {
+                    if (e && e.field && STEP_FOR_FIELD[e.field] != null) {
+                        candidates.push(STEP_FOR_FIELD[e.field]);
+                    }
+                });
+            }
+        };
+        collect(detail);
+        collect(detail && detail.output);
+        if (!candidates.length) return null;
+        return Math.min(...candidates);
+    }
+
+    // Programmatic jump used by error recovery flows. Mirrors
+    // handleStepJump but skips the click-event plumbing.
+    jumpToStep(step) {
+        if (!step || step < 1 || step > TOTAL_STEPS) return;
+        this.currentStep = step;
+        this.scrollShellTop();
     }
 
     // ===== SEARCH HANDLERS =====
