@@ -80,6 +80,15 @@
     justify-content: center;
     z-index: 9000;
     padding: 16px;
+    /* Salesforce Mobile occasionally wraps the LWC inside a transformed
+       ancestor, which silently downgrades position: fixed to position:
+       absolute relative to that ancestor. The min-height + 100vw width
+       keep the overlay covering the visible area in that fallback path,
+       and the JS scrollIntoView call brings it into view. */
+    min-height: 100vh;
+    min-width: 100vw;
+    left: 0;
+    top: 0;
 }
 
 .qap-popup {

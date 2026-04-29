@@ -57,6 +57,14 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
     activePopup = null;
     isBusy = false;
 
+    // Tracks whether the popup just opened so renderedCallback can
+    // scroll it into the user's viewport. Salesforce Mobile sometimes
+    // wraps the LWC inside a transformed ancestor, which breaks
+    // position: fixed — the overlay then falls back to its document
+    // position (above the button on long record pages) and the rep
+    // has to scroll up to find it.
+    _popupScrollPending = false;
+
     approvalComments = '';
     approvalError = '';
 
@@ -207,12 +215,72 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
         this.pendingStatusValue = '';
         this.pendingStatusLabel = '';
         this.confirmMessage = '';
+        this.unlockBodyScroll();
+    }
+
+    // ---------- popup viewport plumbing ----------
+
+    /**
+     * Centers the overlay in the visible viewport on open. Called after
+     * each popup state change because Salesforce Mobile can break
+     * position: fixed (transformed ancestor in the shell) and leave the
+     * overlay rendered at its document position — which on a long Quote
+     * record page sits above the visible area, forcing the rep to scroll
+     * up to find the popup.
+     */
+    renderedCallback() {
+        if (!this._popupScrollPending) return;
+        const overlay = this.template.querySelector('.qap-overlay');
+        if (!overlay) return;
+        this._popupScrollPending = false;
+        // requestAnimationFrame defers the scroll to the next paint so
+        // the overlay's final dimensions are settled.
+        requestAnimationFrame(() => {
+            try {
+                overlay.scrollIntoView({ block: 'center', behavior: 'auto' });
+            } catch (e) {
+                overlay.scrollIntoView();
+            }
+        });
+    }
+
+    /**
+     * Marks the next render as needing a viewport scroll and stops the
+     * page underneath from scrolling while the popup is up. Centralises
+     * the open-time housekeeping so every open* helper picks it up.
+     */
+    onPopupOpened() {
+        this._popupScrollPending = true;
+        this.lockBodyScroll();
+    }
+
+    lockBodyScroll() {
+        if (typeof document === 'undefined') return;
+        if (document.body && !document.body.dataset.qapScrollLocked) {
+            document.body.dataset.qapScrollLocked = '1';
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    unlockBodyScroll() {
+        if (typeof document === 'undefined') return;
+        if (document.body && document.body.dataset.qapScrollLocked) {
+            document.body.style.overflow = '';
+            delete document.body.dataset.qapScrollLocked;
+        }
+    }
+
+    disconnectedCallback() {
+        // Defensive — if the panel is removed mid-popup the lock would
+        // otherwise persist across navigation.
+        this.unlockBodyScroll();
     }
 
     // ---------- approval ----------
 
     openApproval() {
         this.activePopup = 'approval';
+        this.onPopupOpened();
     }
 
     handleApprovalCommentsChange(event) {
@@ -240,6 +308,7 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
 
     openSendPdf() {
         this.activePopup = 'sendpdf';
+        this.onPopupOpened();
     }
 
     /**
@@ -282,6 +351,7 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
 
     openStatus() {
         this.activePopup = 'status';
+        this.onPopupOpened();
         if (this.statusOptions.length === 0) {
             this.statusLoading = true;
             getQuoteStatusOptions({ quoteId: this.recordId })
@@ -316,6 +386,9 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
             this.confirmMessage = this.buildConfirmMessage(picked.label);
             this.activePopup = 'confirm';
         }
+        // Status -> revision/confirm transitions are still considered a
+        // popup transition, so keep the overlay scrolled into view.
+        this.onPopupOpened();
     }
 
     buildConfirmMessage(label) {
