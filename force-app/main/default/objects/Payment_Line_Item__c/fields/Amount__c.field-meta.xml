@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Payment_Amount__c</fullName>
-    <description>Portion of the parent Payment applied to this invoice line.</description>
+    <fullName>Amount__c</fullName>
+    <description>Portion of the parent Payment applied to this invoice line. Maps to the SAP payload's "Amount__c".</description>
     <label>Payment Amount</label>
     <precision>16</precision>
     <required>false</required>

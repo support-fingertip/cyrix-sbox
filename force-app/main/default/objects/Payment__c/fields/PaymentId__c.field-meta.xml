@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Payment_Id__c</fullName>
-    <description>External payment identifier from the source system (e.g. SAP). Used as the integration key for upserts.</description>
+    <fullName>PaymentId__c</fullName>
+    <description>External payment identifier from the source system (e.g. SAP). Used as the upsert key by the /payment REST endpoint.</description>
     <externalId>true</externalId>
     <label>Payment Id</label>
     <length>80</length>
