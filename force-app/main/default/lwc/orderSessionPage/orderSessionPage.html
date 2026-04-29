@@ -1,0 +1,270 @@
+<template>
+    <div class="order-session">
+
+        <!-- Loading overlay -->
+        <template if:true={isLoading}>
+            <div class="loading-overlay">
+                <lightning-spinner alternative-text="Loading orders" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- Order builder view (reuses newOrderCmp) -->
+        <template if:true={showBuilder}>
+            <div class="builder-wrapper">
+                <div class="builder-toolbar">
+                    <lightning-button
+                        label="Back to Order List"
+                        icon-name="utility:back"
+                        variant="neutral"
+                        onclick={handleCloseBuilder}>
+                    </lightning-button>
+                </div>
+                <c-new-order-cmp record-id={builderRecordId}></c-new-order-cmp>
+            </div>
+        </template>
+
+        <!-- Order list view -->
+        <template if:false={showBuilder}>
+
+            <!-- Header -->
+            <div class="session-header">
+                <div class="header-left">
+                    <lightning-button-icon
+                        icon-name="utility:chevronleft"
+                        alternative-text="Back"
+                        variant="border-filled"
+                        class="back-btn"
+                        onclick={handleBack}>
+                    </lightning-button-icon>
+                    <div class="header-text">
+                        <h1 class="session-title">Order Session</h1>
+                        <p class="session-subtitle">{headerSubtitle}</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <span class="count-pill">
+                        <lightning-icon icon-name="standard:orders" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                        {activeOrderCount} Order(s)
+                    </span>
+                </div>
+            </div>
+
+            <!-- ============================================= -->
+            <!-- Section 1: Customer Accepted Quotes           -->
+            <!-- ============================================= -->
+            <div class="section-block">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <lightning-icon icon-name="standard:quotes" size="x-small" class="section-icon"></lightning-icon>
+                        Customer Accepted Quotes
+                    </h2>
+                    <span class="section-count">{acceptedQuoteCount}</span>
+                </div>
+
+                <template if:true={hasAcceptedQuotes}>
+                    <!-- Desktop table -->
+                    <div class="desktop-view">
+                        <div class="table-wrapper">
+                            <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_striped session-table">
+                                <thead>
+                                    <tr class="slds-line-height_reset">
+                                        <th scope="col" style="width:40px"><div class="slds-truncate">#</div></th>
+                                        <th scope="col"><div class="slds-truncate">Quote #</div></th>
+                                        <th scope="col"><div class="slds-truncate">Name</div></th>
+                                        <th scope="col"><div class="slds-truncate">Opportunity</div></th>
+                                        <th scope="col"><div class="slds-truncate">Grand Total</div></th>
+                                        <th scope="col"><div class="slds-truncate">Valid Till</div></th>
+                                        <th scope="col"><div class="slds-truncate">Created On</div></th>
+                                        <th scope="col" style="width:160px"><div class="slds-truncate slds-text-align_center">Action</div></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={acceptedQuotes} for:item="q">
+                                        <tr key={q.quoteId}>
+                                            <td class="row-number">{q.rowNumber}</td>
+                                            <td><div class="slds-truncate" title={q.quoteNumber}>{q.quoteNumber}</div></td>
+                                            <td><div class="slds-truncate" title={q.name}>{q.name}</div></td>
+                                            <td><div class="slds-truncate" title={q.opportunityName}>{q.opportunityName}</div></td>
+                                            <td class="amount-cell">{q.formattedAmount}</td>
+                                            <td>{q.formattedExpiry}</td>
+                                            <td>{q.formattedCreatedDate}</td>
+                                            <td class="slds-text-align_center">
+                                                <lightning-button
+                                                    label="Convert to Order"
+                                                    icon-name="utility:forward"
+                                                    variant="brand"
+                                                    data-quote-id={q.quoteId}
+                                                    onclick={handleConvertToOrder}
+                                                    class="convert-btn">
+                                                </lightning-button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Mobile cards -->
+                    <div class="mobile-view">
+                        <template for:each={acceptedQuotes} for:item="q">
+                            <div key={q.quoteId} class="record-card">
+                                <div class="record-card-top">
+                                    <div class="record-card-id">
+                                        <div class="record-number">{q.quoteNumber}</div>
+                                        <div class="record-name">{q.name}</div>
+                                    </div>
+                                    <span class="status-badge status-accepted">Accepted</span>
+                                </div>
+                                <div class="record-card-body">
+                                    <div class="card-row">
+                                        <span class="card-label">Opportunity</span>
+                                        <span class="card-value">{q.opportunityName}</span>
+                                    </div>
+                                    <div class="card-row">
+                                        <span class="card-label">Grand Total</span>
+                                        <span class="card-value amount-cell">{q.formattedAmount}</span>
+                                    </div>
+                                    <div class="card-row">
+                                        <span class="card-label">Valid Till</span>
+                                        <span class="card-value">{q.formattedExpiry}</span>
+                                    </div>
+                                    <div class="card-row">
+                                        <span class="card-label">Created</span>
+                                        <span class="card-value">{q.formattedCreatedDate}</span>
+                                    </div>
+                                </div>
+                                <div class="record-card-actions">
+                                    <lightning-button
+                                        label="Convert to Order"
+                                        icon-name="utility:forward"
+                                        variant="brand"
+                                        data-quote-id={q.quoteId}
+                                        onclick={handleConvertToOrder}>
+                                    </lightning-button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <template if:false={hasAcceptedQuotes}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="standard:quotes" size="medium" class="empty-icon"></lightning-icon>
+                        <p class="empty-text">No customer-accepted quotes available to convert.</p>
+                    </div>
+                </template>
+            </div>
+
+            <!-- ============================================= -->
+            <!-- Section 2: Activated Orders                    -->
+            <!-- ============================================= -->
+            <div class="section-block">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <lightning-icon icon-name="standard:orders" size="x-small" class="section-icon"></lightning-icon>
+                        Activated Orders
+                    </h2>
+                    <span class="section-count">{activeOrderCount}</span>
+                </div>
+
+                <template if:true={hasActiveOrders}>
+                    <!-- Desktop table -->
+                    <div class="desktop-view">
+                        <div class="table-wrapper">
+                            <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_striped session-table">
+                                <thead>
+                                    <tr class="slds-line-height_reset">
+                                        <th scope="col" style="width:40px"><div class="slds-truncate">#</div></th>
+                                        <th scope="col"><div class="slds-truncate">Order #</div></th>
+                                        <th scope="col"><div class="slds-truncate">Opportunity</div></th>
+                                        <th scope="col"><div class="slds-truncate">Source Quote</div></th>
+                                        <th scope="col"><div class="slds-truncate">Status</div></th>
+                                        <th scope="col"><div class="slds-truncate">Total Amount</div></th>
+                                        <th scope="col"><div class="slds-truncate">Effective Date</div></th>
+                                        <th scope="col"><div class="slds-truncate">Created On</div></th>
+                                        <th scope="col" style="width:90px"><div class="slds-truncate slds-text-align_center">Action</div></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={activeOrders} for:item="o">
+                                        <tr key={o.orderId}>
+                                            <td class="row-number">{o.rowNumber}</td>
+                                            <td><div class="slds-truncate" title={o.orderNumber}>{o.orderNumber}</div></td>
+                                            <td><div class="slds-truncate" title={o.opportunityName}>{o.opportunityName}</div></td>
+                                            <td><div class="slds-truncate" title={o.sourceQuoteNumber}>{o.sourceQuoteNumber}</div></td>
+                                            <td><span class="status-badge status-activated">{o.status}</span></td>
+                                            <td class="amount-cell">{o.formattedAmount}</td>
+                                            <td>{o.formattedEffective}</td>
+                                            <td>{o.formattedCreatedDate}</td>
+                                            <td class="slds-text-align_center">
+                                                <lightning-button-icon
+                                                    icon-name="utility:edit"
+                                                    alternative-text="Edit"
+                                                    variant="border-filled"
+                                                    data-order-id={o.orderId}
+                                                    onclick={handleEditOrder}
+                                                    class="edit-btn">
+                                                </lightning-button-icon>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Mobile cards -->
+                    <div class="mobile-view">
+                        <template for:each={activeOrders} for:item="o">
+                            <div key={o.orderId} class="record-card">
+                                <div class="record-card-top">
+                                    <div class="record-card-id">
+                                        <div class="record-number">{o.orderNumber}</div>
+                                        <div class="record-name">{o.opportunityName}</div>
+                                    </div>
+                                    <span class="status-badge status-activated">{o.status}</span>
+                                </div>
+                                <div class="record-card-body">
+                                    <div class="card-row">
+                                        <span class="card-label">Source Quote</span>
+                                        <span class="card-value">{o.sourceQuoteNumber}</span>
+                                    </div>
+                                    <div class="card-row">
+                                        <span class="card-label">Total</span>
+                                        <span class="card-value amount-cell">{o.formattedAmount}</span>
+                                    </div>
+                                    <div class="card-row">
+                                        <span class="card-label">Effective</span>
+                                        <span class="card-value">{o.formattedEffective}</span>
+                                    </div>
+                                    <div class="card-row">
+                                        <span class="card-label">Created</span>
+                                        <span class="card-value">{o.formattedCreatedDate}</span>
+                                    </div>
+                                </div>
+                                <div class="record-card-actions">
+                                    <lightning-button
+                                        label="Edit Order"
+                                        icon-name="utility:edit"
+                                        variant="brand-outline"
+                                        data-order-id={o.orderId}
+                                        onclick={handleEditOrder}>
+                                    </lightning-button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <template if:false={hasActiveOrders}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="standard:orders" size="medium" class="empty-icon"></lightning-icon>
+                        <p class="empty-text">No activated orders for this customer yet.</p>
+                    </div>
+                </template>
+            </div>
+
+        </template>
+    </div>
+</template>
