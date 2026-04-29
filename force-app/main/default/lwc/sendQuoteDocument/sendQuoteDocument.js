@@ -190,14 +190,18 @@ export default class SendQuoteDocument extends LightningElement {
      * Close the panel from either context: as a standalone quick
      * action (CloseActionScreenEvent collapses the action modal) or
      * as an embedded LWC inside another component (the bubbling
-     * `close` custom event gives the parent a chance to dismiss its
+     * `dismiss` custom event gives the parent a chance to close its
      * own overlay). Firing both is safe — CloseActionScreenEvent is a
      * no-op outside the action context, and the custom event is
      * ignored by the action framework.
+     *
+     * The event name `dismiss` (not `close`) is used to avoid any
+     * confusion with the native <dialog> element's `close` event,
+     * which some host frameworks special-case.
      */
     closeOrDismiss() {
         this.dispatchEvent(new CloseActionScreenEvent());
-        this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }));
+        this.dispatchEvent(new CustomEvent('dismiss', { bubbles: true, composed: true }));
     }
 
     handleSend() {

@@ -240,6 +240,56 @@ public with sharing class quoteTriggerHandler {
     }
 
     /**
+     * Quote.IsSyncing is a platform-derived flag — it's true while
+     * Opportunity.SyncedQuoteId points at the quote. So clearing
+     * IsSyncing in a before-trigger doesn't persist (the platform
+     * recalculates from SyncedQuoteId on commit).
+     *
+     * When pricing on the synced quote requires approval, push out
+     * an async update on the parent Opportunity to set
+     * SyncedQuoteId = null. Salesforce then flips IsSyncing to false
+     * on the quote on the next read, so the unapproved totals stop
+     * propagating into Opportunity.Amount / forecasts. The quote
+     * continues to live as is_Active__c = true; it just stops
+     * being the synced one until the approval lands.
+     */
+    public static void unsyncQuotesNeedingApproval(List<Quote> newQuotes, Map<Id, Quote> oldMap) {
+        if (newQuotes == null || newQuotes.isEmpty()) return;
+        Set<Id> oppIdsToUnsync = new Set<Id>();
+        for (Quote q : newQuotes) {
+            if (q.OpportunityId == null) continue;
+            if (q.IsSyncing != true) continue;
+            if (q.Price_Status__c != 'Approval Required') continue;
+            // Only act on a transition INTO approval-required, not on
+            // every unrelated update of an already-approval-required
+            // synced quote — saves a redundant Opportunity DML.
+            Quote oldQ = oldMap == null ? null : oldMap.get(q.Id);
+            Boolean justEntered = (oldQ == null) || oldQ.Price_Status__c != 'Approval Required';
+            if (justEntered) oppIdsToUnsync.add(q.OpportunityId);
+        }
+        if (oppIdsToUnsync.isEmpty()) return;
+
+        if (!System.isFuture() && !System.isBatch() && !System.isQueueable()) {
+            unsyncOpportunitiesFuture(new List<Id>(oppIdsToUnsync));
+        }
+    }
+
+    @future
+    public static void unsyncOpportunitiesFuture(List<Id> oppIds) {
+        if (oppIds == null || oppIds.isEmpty()) return;
+        List<Opportunity> opps = new List<Opportunity>();
+        for (Id oid : oppIds) {
+            opps.add(new Opportunity(Id = oid, SyncedQuoteId = null));
+        }
+        try {
+            update opps;
+        } catch (Exception e) {
+            System.debug(LoggingLevel.ERROR,
+                'unsyncOpportunitiesFuture failed: ' + e.getMessage());
+        }
+    }
+
+    /**
      * Generates the auto quote name for a list of Quote records.
      * Called from before insert and before update triggers.
      */
@@ -327,6 +377,12 @@ public with sharing class quoteTriggerHandler {
                 if (oldQ == null) continue;
                 Quote snap = oldQ.clone(false, true, false, false);
                 snap.is_Active__c = false;
+                // The snapshot is the historical record — the rep just
+                // revised away from it, so we mark it Cancelled to make
+                // the retired status obvious in lists / reports. The
+                // current revision lives on the original record (now
+                // bumped to Draft / -RV1).
+                snap.Status = 'Cancelled';
                 // Link the snapshot back to the quote record that now carries
                 // the new revision, so users can navigate from history to current.
                 snap.Revised_Quote__c = origId;

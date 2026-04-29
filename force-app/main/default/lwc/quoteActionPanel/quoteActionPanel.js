@@ -2,6 +2,7 @@ import { LightningElement, api, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
+import FORM_FACTOR from '@salesforce/client/formFactor';
 import PRICE_STATUS_FIELD from '@salesforce/schema/Quote.Price_Status__c';
 import submitForApproval from '@salesforce/apex/QuoteActionPanelController.submitForApproval';
 import getQuoteStatusOptions from '@salesforce/apex/QuoteActionPanelController.getQuoteStatusOptions';
@@ -13,11 +14,12 @@ const STATUS_DESCRIPTIONS = {
     'Revision': 'Send back with reason',
     'Customer accepted': 'Customer approved',
     'Accepted': 'Customer approved',
-    'Denied': 'Customer rejected',
+    'Customer Rejected': 'Customer rejected',
     'Closed': 'No further action',
     'Needs Review': 'Awaiting internal review',
     'In Review': 'Approval in progress',
-    'Presented': 'Sent to customer'
+    'Presented': 'Sent to customer',
+    'Cancelled': 'Replaced by a newer revision'
 };
 
 // Statuses the rep should not change to from this panel — Draft is
@@ -170,15 +172,21 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
     // ---------- preview (delegated to existing Quote_PDF VF quick action) ----------
 
     launchPreview() {
-        // Quote.Quote_PDF is a VisualforcePage quick action that
-        // launches the ProductQuotation page in a Salesforce-managed
-        // modal. Reusing it gets us a battle-tested PDF preview
-        // without re-implementing the iframe + timeout dance here.
+        // Two PDF quick actions exist on Quote:
+        //   - Quote.Quote_PDF  -> VisualforcePage ScreenAction. Renders
+        //     ProductQuotation inline in a Salesforce-managed modal.
+        //     Works on desktop, doesn't render reliably on the
+        //     Salesforce mobile app.
+        //   - Quote.QuotePDF   -> the QuotePdf Aura quick action that
+        //     opens the public-site /quotepdf URL in a new tab. That
+        //     path *does* work on the mobile app's browser handoff.
+        // Pick the right one based on the running form factor.
+        const apiName = FORM_FACTOR === 'Small'
+            ? 'Quote.QuotePDF'
+            : 'Quote.Quote_PDF';
         this[NavigationMixin.Navigate]({
             type: 'standard__quickAction',
-            attributes: {
-                apiName: 'Quote.Quote_PDF'
-            }
+            attributes: { apiName }
         });
     }
 
@@ -227,8 +235,8 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
         if (lower === 'closed') {
             return 'Close this quote? No further changes will be allowed.';
         }
-        if (lower === 'denied') {
-            return 'Mark this quote as ' + label + '?';
+        if (lower === 'customer rejected') {
+            return 'Mark this quote as rejected by the customer?';
         }
         if (lower === 'customer accepted' || lower === 'accepted') {
             return 'Mark this quote as accepted by the customer?';

@@ -49,9 +49,19 @@
                 <!-- Embedded sendQuoteDocument — its own header /
                      action row owns the popup chrome, so we render
                      it inside a transparent shell that just sizes
-                     the modal to a comfortable desktop width. -->
-                <div class="qap-embed" onclick={stopPropagation} role="dialog" aria-modal="true">
-                    <c-send-quote-document record-id={recordId} onclose={handleEmbedClose}></c-send-quote-document>
+                     the modal to a comfortable desktop width. The
+                     `dismiss` custom event the child fires on Cancel
+                     / successful Send bubbles up here, and we also
+                     listen on the wrapper as a backup in case the
+                     template binding misses it. -->
+                <div class="qap-embed"
+                     onclick={stopPropagation}
+                     ondismiss={handleEmbedClose}
+                     role="dialog"
+                     aria-modal="true">
+                    <c-send-quote-document record-id={recordId}
+                                           ondismiss={handleEmbedClose}>
+                    </c-send-quote-document>
                 </div>
             </template>
 
