@@ -578,18 +578,13 @@ openQuoteScreen(){
     };
     this.genericDispatchEvent(message);
 }
-
-// Same parent-bound dispatch as openQuoteScreen — visitManager
-// listens for `orderScreen` and mounts <c-order-session-page> with
-// the same Visit Id (recordID) so the order list runs against the
-// account this visit is on.
 openOrderScreen(){
-    const message = {
-        message: 'orderScreen',
-        recordID: this.recordId,
-        index: this.index,
-        screen: 3.6,
-        accId: this.accId
+    const  message = {
+        message: 'orderScreen' ,
+        recordID : this.recordId,
+        index : this.index,
+        screen : 3.7,
+        accId : this.accId
     };
     this.genericDispatchEvent(message);
 }

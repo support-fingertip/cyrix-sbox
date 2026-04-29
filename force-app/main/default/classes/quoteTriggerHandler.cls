@@ -24,7 +24,9 @@ public with sharing class quoteTriggerHandler {
      * Quote are preserved.
      */
     public static void populateApproversFromHierarchy(List<Quote> quotes) {
+        
         if (quotes == null || quotes.isEmpty()) return;
+       list< General_Settings__c> settingsList =[select Id, Order_Acceptance_Approver__c from General_Settings__c limit 1];  
 
         Set<Id> ownerIds = new Set<Id>();
         for (Quote q : quotes) {
@@ -34,8 +36,7 @@ public with sharing class quoteTriggerHandler {
 
         Map<Id, User> userMap = new Map<Id, User>([
             SELECT Id, ManagerId,
-                   Manager.ManagerId,
-                   Manager.Manager.ManagerId
+                   Manager.ManagerId
             FROM User
             WHERE Id IN :ownerIds
         ]);
@@ -51,10 +52,8 @@ public with sharing class quoteTriggerHandler {
                 && owner.Manager.ManagerId != null) {
                 q.L2_Approver__c = owner.Manager.ManagerId;
             }
-            if (q.L3_Approver__c == null && owner.Manager != null
-                && owner.Manager.Manager != null
-                && owner.Manager.Manager.ManagerId != null) {
-                q.L3_Approver__c = owner.Manager.Manager.ManagerId;
+            if (q.L3_Approver__c == null && !settingsList.isEmpty()) {
+                q.L3_Approver__c = settingsList[0].Order_Acceptance_Approver__c;
             }
         }
     }
@@ -240,56 +239,6 @@ public with sharing class quoteTriggerHandler {
     }
 
     /**
-     * Quote.IsSyncing is a platform-derived flag — it's true while
-     * Opportunity.SyncedQuoteId points at the quote. So clearing
-     * IsSyncing in a before-trigger doesn't persist (the platform
-     * recalculates from SyncedQuoteId on commit).
-     *
-     * When pricing on the synced quote requires approval, push out
-     * an async update on the parent Opportunity to set
-     * SyncedQuoteId = null. Salesforce then flips IsSyncing to false
-     * on the quote on the next read, so the unapproved totals stop
-     * propagating into Opportunity.Amount / forecasts. The quote
-     * continues to live as is_Active__c = true; it just stops
-     * being the synced one until the approval lands.
-     */
-    public static void unsyncQuotesNeedingApproval(List<Quote> newQuotes, Map<Id, Quote> oldMap) {
-        if (newQuotes == null || newQuotes.isEmpty()) return;
-        Set<Id> oppIdsToUnsync = new Set<Id>();
-        for (Quote q : newQuotes) {
-            if (q.OpportunityId == null) continue;
-            if (q.IsSyncing != true) continue;
-            if (q.Price_Status__c != 'Approval Required') continue;
-            // Only act on a transition INTO approval-required, not on
-            // every unrelated update of an already-approval-required
-            // synced quote — saves a redundant Opportunity DML.
-            Quote oldQ = oldMap == null ? null : oldMap.get(q.Id);
-            Boolean justEntered = (oldQ == null) || oldQ.Price_Status__c != 'Approval Required';
-            if (justEntered) oppIdsToUnsync.add(q.OpportunityId);
-        }
-        if (oppIdsToUnsync.isEmpty()) return;
-
-        if (!System.isFuture() && !System.isBatch() && !System.isQueueable()) {
-            unsyncOpportunitiesFuture(new List<Id>(oppIdsToUnsync));
-        }
-    }
-
-    @future
-    public static void unsyncOpportunitiesFuture(List<Id> oppIds) {
-        if (oppIds == null || oppIds.isEmpty()) return;
-        List<Opportunity> opps = new List<Opportunity>();
-        for (Id oid : oppIds) {
-            opps.add(new Opportunity(Id = oid, SyncedQuoteId = null));
-        }
-        try {
-            update opps;
-        } catch (Exception e) {
-            System.debug(LoggingLevel.ERROR,
-                'unsyncOpportunitiesFuture failed: ' + e.getMessage());
-        }
-    }
-
-    /**
      * Generates the auto quote name for a list of Quote records.
      * Called from before insert and before update triggers.
      */
@@ -336,7 +285,7 @@ public with sharing class quoteTriggerHandler {
 
 
             // Build the name
-            String baseName = 'C-' + shortCode +'/'+q.Business_Vertical__c +'/QTN-' + String.valueOf(nextNumber.intValue()).leftPad(3, '0') + '/' + financialYear;
+            String baseName = 'QTN-' + String.valueOf(nextNumber.intValue()).leftPad(4, '0') + '/CHC/' + financialYear+'-'+q.Business_Vertical__c ;
             if (q.Version_Nmber__c != null && q.Version_Nmber__c >= 1) {
                 baseName += '-RV' + q.Version_Nmber__c;
             }
@@ -377,12 +326,6 @@ public with sharing class quoteTriggerHandler {
                 if (oldQ == null) continue;
                 Quote snap = oldQ.clone(false, true, false, false);
                 snap.is_Active__c = false;
-                // The snapshot is the historical record — the rep just
-                // revised away from it, so we mark it Cancelled to make
-                // the retired status obvious in lists / reports. The
-                // current revision lives on the original record (now
-                // bumped to Draft / -RV1).
-                snap.Status = 'Cancelled';
                 // Link the snapshot back to the quote record that now carries
                 // the new revision, so users can navigate from history to current.
                 snap.Revised_Quote__c = origId;

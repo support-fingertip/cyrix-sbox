@@ -8,5 +8,5 @@
         <target>lightning__Tab</target>
     </targets>
     <masterLabel>Order Session</masterLabel>
-    <description>Order session page for a visit: lists existing orders for the customer and lets the rep create / edit orders using the New Order builder.</description>
+    <description>Order session page for a visit: shows Customer Accepted quotes (convert to order) and Activated orders (edit) for the visit's account.</description>
 </LightningComponentBundle>

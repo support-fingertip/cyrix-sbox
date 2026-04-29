@@ -29,7 +29,7 @@ public with sharing class OrderTriggerHandler {
      */
     public static void populateApproversFromHierarchy(List<Order> orders) {
         if (orders == null || orders.isEmpty()) return;
-
+  list< General_Settings__c> settingsList =[select Id, Order_Acceptance_Approver__c from General_Settings__c limit 1]; 
         Set<Id> ownerIds = new Set<Id>();
         for (Order o : orders) {
             if (o.OwnerId != null) ownerIds.add(o.OwnerId);
@@ -55,10 +55,8 @@ public with sharing class OrderTriggerHandler {
                 && owner.Manager.ManagerId != null) {
                 o.L2_Approver__c = owner.Manager.ManagerId;
             }
-            if (o.L3_Approver__c == null && owner.Manager != null
-                && owner.Manager.Manager != null
-                && owner.Manager.Manager.ManagerId != null) {
-                o.L3_Approver__c = owner.Manager.Manager.ManagerId;
+            if (o.L3_Approver__c == null &&  !settingsList.isEmpty()) {
+                o.L3_Approver__c = settingsList[0].Order_Acceptance_Approver__c;
             }
         }
     }

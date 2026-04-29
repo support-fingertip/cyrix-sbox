@@ -391,10 +391,6 @@ export default class visitManager extends LightningElement {
             this.outletPage = true;
         }
         else if (msg.message == 'orderScreen') {
-            // Order session is reached the same way Quote session is —
-            // visitOrderExecuteScreen fires this with the Visit Id so
-            // orderSessionPage can list / create / edit Orders for the
-            // visit's account, reusing newOrderCmp under the hood.
             this.header = 'Order Session';
             this.recordId = msg.recordID;
             this.index = msg.index;
@@ -418,10 +414,8 @@ this.executeScreenData.isInProgress = false;
     }
 
     handleOrderBackToVisit() {
-        // Triggered by c-order-session-page when user clicks the back
-        // icon — same screen-3.6 anchor as the quote back path so the
-        // execute screen is restored after navigating away.
-        this.screen = 3.6;
+        // Triggered by c-order-session-page when user clicks the back icon
+        this.screen = 3.7;
         this.goBackScreen();
     }
 
@@ -534,6 +528,13 @@ this.executeScreenData.isInProgress = false;
             this.isVisitHeader = true;
             this.outletPage = true;
             this.isQuoteScreen = false;
+        }
+        else if (sc == 3.7) {
+            this.header = this.VisitListName;
+            this.isExecuteScreen = true;
+            this.screen = 3;
+            this.isVisitHeader = true;
+            this.outletPage = true;
             this.isOrderScreen = false;
         }
         if (changeShadow) {

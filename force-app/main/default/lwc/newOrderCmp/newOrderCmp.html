@@ -26,7 +26,9 @@
                             </template>
                         </div>
                     </div>
-                    <button type="button" class="qw-close-btn" title="Cancel" onclick={handleCancel}>×</button>
+                    <template if:false={fromVisitPlan}>
+                        <button type="button" class="qw-close-btn" title="Cancel" onclick={handleCancel}>×</button>
+                    </template>
                 </div>
                 <div class="qw-progress-track">
                     <div class="qw-progress-fill" style={progressFillStyle}></div>
@@ -455,6 +457,9 @@
                     <!-- ========== FOOTER ========== -->
                     <div class="qw-footer">
                         <div class="qw-footer-actions">
+                            <template if:true={fromVisitPlan}>
+                                <button type="button" class="qw-btn" onclick={handleVisitPlanCancel}>Cancel</button>
+                            </template>
                             <button type="button" class="qw-btn" onclick={handleStepBack} disabled={isFirstStep}>Back</button>
                             <template if:true={isLastStep}>
                                 <button type="submit" class="qw-btn success" disabled={isSaveDisabled}>{saveButtonLabel}</button>

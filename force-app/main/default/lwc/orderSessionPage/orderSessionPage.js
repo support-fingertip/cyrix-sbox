@@ -3,25 +3,25 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getOrdersForVisit from '@salesforce/apex/OrderBuilderController.getOrdersForVisit';
 
 export default class OrderSessionPage extends LightningElement {
-    // Visit Id - either passed by parent (visitManager) or resolved from record page
     @api recordId;
     @api isDesktop = false;
 
-    @track orders = [];
-    @track opportunityOptions = [];
+    @track acceptedQuotes = [];
+    @track activeOrders = [];
 
     accountId;
     accountName = '';
     visitName = '';
 
-    selectedOpportunityId = '';
     isLoading = false;
 
-    // Builder view state — same shape as quoteSessionPage so the
-    // mounted child component sees a consistent contract.
+    // Builder view state
     showBuilder = false;
-    builderMode = 'create'; // 'create' | 'edit'
-    builderRecordId = null; // opportunityId for create OR orderId for edit
+    // 'convert' (recordId is a Quote -> newOrderCmp prefills from quote)
+    // 'edit'    (recordId is an existing Order -> newOrderCmp loads in edit mode)
+    builderMode = 'convert';
+    builderRecordId = null;
+    builderFromVisitPlan = true;
 
     connectedCallback() {
         this.loadOrders();
@@ -41,26 +41,25 @@ export default class OrderSessionPage extends LightningElement {
             this.accountId = session.accountId;
             this.accountName = session.accountName || '';
 
-            this.opportunityOptions = (session.opportunities || []).map(o => ({
-                label: o.stage ? `${o.opportunityName} (${o.stage})` : o.opportunityName,
-                value: o.opportunityId
+            this.acceptedQuotes = (session.acceptedQuotes || []).map((q, i) => ({
+                ...q,
+                rowNumber: i + 1,
+                formattedAmount: this.formatCurrency(q.grandTotal),
+                formattedExpiry: q.expirationDate ? this.formatDate(q.expirationDate) : '--',
+                formattedCreatedDate: this.formatDate(q.createdDate)
             }));
 
-            if (this.opportunityOptions.length && !this.selectedOpportunityId) {
-                this.selectedOpportunityId = this.opportunityOptions[0].value;
-            }
-
-            this.orders = (session.orders || []).map((o, index) => ({
+            this.activeOrders = (session.activeOrders || []).map((o, i) => ({
                 ...o,
-                rowNumber: index + 1,
+                rowNumber: i + 1,
                 formattedAmount: this.formatCurrency(o.totalAmount),
-                formattedCreatedDate: this.formatDate(o.createdDate),
                 formattedEffective: o.effectiveDate ? this.formatDate(o.effectiveDate) : '--',
-                statusClass: this.getStatusClass(o.status)
+                formattedCreatedDate: this.formatDate(o.createdDate)
             }));
         } catch (error) {
             this.showError('Unable to load orders', this.reduceErrors(error));
-            this.orders = [];
+            this.acceptedQuotes = [];
+            this.activeOrders = [];
         } finally {
             this.isLoading = false;
         }
@@ -68,20 +67,20 @@ export default class OrderSessionPage extends LightningElement {
 
     // ===== COMPUTED =====
 
-    get hasOrders() {
-        return this.orders && this.orders.length > 0;
+    get hasAcceptedQuotes() {
+        return this.acceptedQuotes && this.acceptedQuotes.length > 0;
     }
 
-    get orderCount() {
-        return this.orders ? this.orders.length : 0;
+    get hasActiveOrders() {
+        return this.activeOrders && this.activeOrders.length > 0;
     }
 
-    get hasOpportunities() {
-        return this.opportunityOptions && this.opportunityOptions.length > 0;
+    get acceptedQuoteCount() {
+        return this.acceptedQuotes ? this.acceptedQuotes.length : 0;
     }
 
-    get createDisabled() {
-        return !this.selectedOpportunityId;
+    get activeOrderCount() {
+        return this.activeOrders ? this.activeOrders.length : 0;
     }
 
     get headerSubtitle() {
@@ -93,20 +92,11 @@ export default class OrderSessionPage extends LightningElement {
 
     // ===== HANDLERS =====
 
-    handleOpportunityChange(event) {
-        this.selectedOpportunityId = event.detail.value;
-    }
-
-    handleCreateOrder() {
-        if (!this.selectedOpportunityId) {
-            this.showError(
-                'Opportunity required',
-                'Please select an opportunity before creating an order.'
-            );
-            return;
-        }
-        this.builderMode = 'create';
-        this.builderRecordId = this.selectedOpportunityId;
+    handleConvertToOrder(event) {
+        const quoteId = event.currentTarget.dataset.quoteId;
+        if (!quoteId) return;
+        this.builderMode = 'convert';
+        this.builderRecordId = quoteId;
         this.showBuilder = true;
     }
 
@@ -121,7 +111,6 @@ export default class OrderSessionPage extends LightningElement {
     handleCloseBuilder() {
         this.showBuilder = false;
         this.builderRecordId = null;
-        // Reload to pick up any newly created / updated order
         this.loadOrders();
     }
 
@@ -130,17 +119,6 @@ export default class OrderSessionPage extends LightningElement {
     }
 
     // ===== UTILITY =====
-
-    getStatusClass(status) {
-        const base = 'status-badge';
-        if (!status) return base + ' status-draft';
-        const normalized = status.toLowerCase();
-        if (normalized.includes('activ')) return base + ' status-active';
-        if (normalized.includes('complete') || normalized.includes('fulfill')) return base + ' status-completed';
-        if (normalized.includes('cancel')) return base + ' status-cancelled';
-        if (normalized.includes('hold') || normalized.includes('review')) return base + ' status-review';
-        return base + ' status-draft';
-    }
 
     formatCurrency(value) {
         if (value == null) return '--';

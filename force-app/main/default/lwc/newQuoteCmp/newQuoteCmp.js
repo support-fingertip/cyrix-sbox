@@ -20,6 +20,11 @@ const TOTAL_STEPS = STEP_LABELS.length;
 
 export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     @api recordId;
+    @api fromVisitPlan = false;
+
+    get canvasClass() {
+        return this.fromVisitPlan ? 'qw-canvas qw-canvas-inline' : 'qw-canvas';
+    }
 
     // Picks up recordId when launched from the "New Quote" Lightning Component Tab
     // (the record-home override navigates here with state.c__recordId set).
@@ -788,6 +793,15 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 'Quote, line items, and payment terms saved successfully.'
             );
 
+            if (this.fromVisitPlan) {
+                // Stay inside the Visit Plan quote session — let the parent
+                // switch back to the quote list and refresh.
+                this.dispatchEvent(new CustomEvent('saved', {
+                    detail: { quoteId: quoteId, isEditMode: this.isEditMode }
+                }));
+                return;
+            }
+
             // Close the quick action modal
             this.dispatchEvent(new CloseActionScreenEvent());
 
@@ -809,6 +823,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 'Quote header was saved but line items failed: ' + this.reduceErrors(error) +
                 '. Please add line items from the Quote record page.'
             );
+            if (this.fromVisitPlan) {
+                this.dispatchEvent(new CustomEvent('saved', {
+                    detail: { quoteId: quoteId, isEditMode: this.isEditMode, partial: true }
+                }));
+                return;
+            }
             // Stay on the form, do not close modal
             this[NavigationMixin.Navigate]({
                 type: 'standard__recordPage',
@@ -1111,6 +1131,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     }
 
     // ===== CANCEL =====
+
+    handleVisitPlanCancel() {
+        // Launched from the Visit Plan quote session. Notify the parent
+        // (quoteSessionPage) so it can switch back to the quote list.
+        this.dispatchEvent(new CustomEvent('cancel'));
+    }
 
     handleCancel() {
         this.dispatchEvent(new CloseActionScreenEvent());

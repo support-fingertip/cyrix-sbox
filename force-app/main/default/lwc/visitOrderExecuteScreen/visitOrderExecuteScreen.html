@@ -72,7 +72,7 @@
                                 </div>
                                 <div class="dropdown-head-right">
                                     <template lwc:if={isInProgress}>
-                                        <div class="" onclick={openProductScreen}>
+                                        <div class="" onclick={openOrderScreen}>
                                             <lightning-icon icon-name="utility:forward" size="xx-small"
                                                 alternative-text="" class="">
                                             </lightning-icon>
@@ -244,39 +244,7 @@
                             </div>
                         </div>
 
-                        <!-- Orders entry point -->
-                        <div class="dropdown">
-                            <div class="dropdown-head">
-                                <div class="dropdown-head-left">
-                                    <i class="material-icons dropdown-head-nav-icon">
-                                        <lightning-icon icon-name="utility:chevrondown" size="x-small"
-                                            alternative-text="" class="chevron-icon-quo"></lightning-icon>
-                                    </i>
-                                    <h4 class="dropdown-head-title visitHeading">
-                                        <lightning-icon icon-name="standard:orders" size="x-small"
-                                            class="slds-m-right_xx-small"></lightning-icon>
-                                        Orders
-                                    </h4>
-                                </div>
 
-                                <div class="dropdown-head-right">
-                                    <template lwc:if={isInProgress}>
-                                        <div class="" onclick={openOrderScreen}>
-                                            <lightning-icon icon-name="utility:forward" size="xx-small"
-                                                alternative-text="" class="">
-                                            </lightning-icon>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-
-                            <div class="dropdown-body-quo dropdown-body">
-                                <div class="no-data" onclick={openOrderScreen}
-                                     style="cursor:pointer;color:#0a5b8c;">
-                                    Manage orders for this account →
-                                </div>
-                            </div>
-                        </div>
 
 
                     </template>

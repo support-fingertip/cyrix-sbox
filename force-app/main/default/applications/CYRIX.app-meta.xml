@@ -38,6 +38,8 @@
     <tabs>Branch__c</tabs>
     <tabs>standard-Pricebook2</tabs>
     <tabs>Payment_Terms_Master__c</tabs>
+    <tabs>Invoice__c</tabs>
+    <tabs>Payment__c</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>CYRIX_UtilityBar</utilityBar>
 </CustomApplication>

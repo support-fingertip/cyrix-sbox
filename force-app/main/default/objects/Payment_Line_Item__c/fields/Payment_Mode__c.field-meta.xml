@@ -3,6 +3,7 @@
     <fullName>Payment_Mode__c</fullName>
     <label>Payment Mode</label>
     <required>false</required>
+    <trackHistory>false</trackHistory>
     <trackTrending>false</trackTrending>
     <type>Picklist</type>
     <valueSet>

@@ -32,12 +32,6 @@ trigger QuoteTrigger on Quote (before insert, before update, after insert, after
              if (oldQ != null && oldQ.IsSyncing == true && q.IsSyncing == false && q.is_Active__c == true) {
                  q.is_Active__c = false;
              }
-             // Pricing-still-needs-approval quotes get unsynced from
-             // the parent Opportunity in after-update via
-             // quoteTriggerHandler.unsyncQuotesNeedingApproval. Setting
-             // q.IsSyncing here would be a no-op — IsSyncing is a
-             // platform-derived flag tied to Opportunity.SyncedQuoteId
-             // and would just be recalculated on commit.
              if(q.Status =='Revision' &&q.Status  !=trigger.oldMap.get(q.Id).Status){
                  // Reason for Revision is mandatory when moving a quote into Revision.
                  if (String.isBlank(q.Reason_for_Revision__c)) {
@@ -68,14 +62,6 @@ trigger QuoteTrigger on Quote (before insert, before update, after insert, after
     // and sync this quote to the opportunity (sets Opportunity.SyncedQuoteId).
     if (trigger.isAfter && (trigger.isInsert || trigger.isUpdate)) {
         quoteTriggerHandler.syncActiveQuote(trigger.new, trigger.oldMap);
-    }
-
-    // Unsync the parent Opportunity from any quote whose pricing now
-    // needs approval — IsSyncing is a derived flag tied to
-    // Opportunity.SyncedQuoteId, so we clear that field async and
-    // Salesforce flips Quote.IsSyncing to false on the next read.
-    if (trigger.isAfter && trigger.isUpdate) {
-        quoteTriggerHandler.unsyncQuotesNeedingApproval(trigger.new, trigger.oldMap);
     }
 
     // Clone quote + children as a historical snapshot when Status flipped to 'Revision'.

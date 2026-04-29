@@ -2,6 +2,9 @@ import { LightningElement, api, wire, track } from 'lwc';
 import getVisitLocations from '@salesforce/apex/DailyLogVisitMapController.getVisitLocations';
 import getVisitLocationsByUserAndDate from '@salesforce/apex/DailyLogVisitMapController.getVisitLocationsByUserAndDate';
 
+// Visit Route Map — renders the rep's daily visits on lightning-map
+// (markers only) and exposes a Google Maps Directions URL that
+// connects the stops in chronological check-in order.
 export default class DailyLogVisitMap extends LightningElement {
     @api recordId;
 
@@ -82,7 +85,10 @@ export default class DailyLogVisitMap extends LightningElement {
                     icon: v.icon
                 }));
 
-                this.visitList = data;
+                this.visitList = data.map(v => ({
+                    ...v,
+                    showCompany: v.isLead && !!v.companyName
+                }));
 
                 // Set map center to first visit
                 this.mapCenter = {
@@ -107,6 +113,39 @@ export default class DailyLogVisitMap extends LightningElement {
             this.visitList = [];
             this.hasLocations = false;
             this.showNoData = false;
+        }
+    }
+
+    // Build a Google Maps Directions URL that strings the visits together
+    // in chronological order (origin = first visit, destination = last,
+    // any intermediate visits become waypoints). This effectively
+    // "connects" the location pins along the rep's actual check-in order.
+    get googleRouteUrl() {
+        if (!this.visitList || this.visitList.length === 0) return '';
+        const points = this.visitList.map(v => `${v.latitude},${v.longitude}`);
+        if (points.length === 1) {
+            return `https://www.google.com/maps/search/?api=1&query=${points[0]}`;
+        }
+        const origin = points[0];
+        const destination = points[points.length - 1];
+        const waypoints = points.slice(1, -1).join('|');
+        let url = `https://www.google.com/maps/dir/?api=1&travelmode=driving`
+            + `&origin=${encodeURIComponent(origin)}`
+            + `&destination=${encodeURIComponent(destination)}`;
+        if (waypoints) {
+            url += `&waypoints=${encodeURIComponent(waypoints)}`;
+        }
+        return url;
+    }
+
+    get hasRoutableStops() {
+        return this.visitList && this.visitList.length >= 2;
+    }
+
+    handleOpenRoute() {
+        const url = this.googleRouteUrl;
+        if (url) {
+            window.open(url, '_blank');
         }
     }
 }

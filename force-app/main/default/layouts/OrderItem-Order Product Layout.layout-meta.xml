@@ -38,6 +38,10 @@
                 <behavior>Readonly</behavior>
                 <field>Product_Code__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>SAP_Order_Item_Id__c</field>
+            </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>

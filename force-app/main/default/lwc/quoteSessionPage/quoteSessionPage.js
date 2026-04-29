@@ -21,6 +21,7 @@ export default class QuoteSessionPage extends LightningElement {
     showBuilder = false;
     builderMode = 'create'; // 'create' | 'edit'
     builderRecordId = null; // opportunityId for create OR quoteId for edit
+    builderFromVisitPlan = true;
 
     connectedCallback() {
         this.loadQuotes();
