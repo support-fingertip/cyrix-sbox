@@ -111,6 +111,18 @@ global class SAPGetData {
                     writeLog(data, JSON.serialize(lstResponse), 'Invoice', String.valueOf(res.statusCode));
                 }
             }
+            else if (value == 'payment') {
+
+                List<Response> lstResponse = handlePayment(datalist);
+
+                res.statusCode = 200;
+                res.addHeader('Content-Type', 'application/json');
+                res.responseBody = Blob.valueOf(JSON.serialize(lstResponse));
+
+                if (Label.Enable_Logs == 'TRUE') {
+                    writeLog(data, JSON.serialize(lstResponse), 'Payment', String.valueOf(res.statusCode));
+                }
+            }
             // Any other ?value= falls through to the parameter error.
             else {
                 List<Response> lstResponse = new List<Response>();
@@ -300,6 +312,121 @@ global class SAPGetData {
                 lstResponse.add(new Response('Success', invoiceSapId));
             } catch (Exception ex) {
                 lstResponse.add(new Response('Failure', invoiceSapId, ex.getMessage()));
+            }
+        }
+
+        return lstResponse;
+    }
+
+    /**
+     * Payment handler.
+     *
+     * Each map in incoming represents one parent payment; it may
+     * carry a nested array under "PaymentLineItems" of child line items.
+     *
+     * Lookup resolution (single SOQL per object across the whole batch):
+     *   Customer__c (Account)         <- payload Customer_Code__c       -> Account.SAP_Code__c
+     *   Invoice__c  (Invoice__c)      <- line Invoice_Id__c             -> Invoice__c.Invoice_Id__c
+     *
+     * Upsert keys:
+     *   Payment__c           by PaymentId__c
+     *   Payment_Line_Item__c by lineItemId__c
+     *
+     * SAP sync stamps (SAP_Sync_Status__c = true, Last_ERP_Sync_Date__c
+     * = now) are written to the parent payment on every successful
+     * upsert.
+     */
+    private static List<Response> handlePayment(List<Map<String, Object>> incoming) {
+        List<Response> lstResponse = new List<Response>();
+        DateTime nowStamp = DateTime.now();
+
+        // ---- Pre-pass: collect all the codes we'll need to resolve ----
+        Set<String> customerCodes = new Set<String>();
+        Set<String> invoiceIds    = new Set<String>();
+
+        for (Map<String, Object> pay : incoming) {
+            addIfNotBlank(customerCodes, pay.get('Customer_Code__c'));
+
+            Object items = pay.get('PaymentLineItems');
+            if (items instanceof List<Object>) {
+                for (Object item : (List<Object>) items) {
+                    if (item instanceof Map<String, Object>) {
+                        Map<String, Object> li = (Map<String, Object>) item;
+                        addIfNotBlank(invoiceIds, li.get('Invoice_Id__c'));
+                    }
+                }
+            }
+        }
+
+        // ---- Resolve every lookup with one SOQL each ----
+        Map<String, Id> accountByCode = new Map<String, Id>();
+        if (!customerCodes.isEmpty()) {
+            for (Account a : [SELECT Id, SAP_Code__c FROM Account WHERE SAP_Code__c IN :customerCodes]) {
+                accountByCode.put(a.SAP_Code__c, a.Id);
+            }
+        }
+
+        Map<String, Id> invoiceByCode = new Map<String, Id>();
+        if (!invoiceIds.isEmpty()) {
+            for (Invoice__c i : [SELECT Id, Invoice_Id__c FROM Invoice__c WHERE Invoice_Id__c IN :invoiceIds]) {
+                invoiceByCode.put(i.Invoice_Id__c, i.Id);
+            }
+        }
+
+        // ---- Upsert each payment + its line items ----
+        for (Map<String, Object> pay : incoming) {
+            String paymentId = stringOf(pay.get('PaymentId__c'));
+            try {
+                Map<String, Object> payMap = new Map<String, Object>(pay);
+                payMap.remove('PaymentLineItems');
+                payMap.put('attributes', new Map<String, String>{
+                    'type' => 'Payment__c',
+                    'referenceId' => 'ref1'
+                });
+                Payment__c parent = (Payment__c) JSON.deserialize(JSON.serialize(payMap), Sobject.class);
+
+                String custCode = stringOf(pay.get('Customer_Code__c'));
+                if (String.isNotBlank(custCode) && accountByCode.containsKey(custCode)) {
+                    parent.Customer__c = accountByCode.get(custCode);
+                }
+
+                parent.SAP_Sync_Status__c = true;
+                parent.Last_ERP_Sync_Date__c = nowStamp;
+
+                upsert parent Payment__c.PaymentId__c;
+
+                // ---- Children ----
+                Object items = pay.get('PaymentLineItems');
+                if (items instanceof List<Object>) {
+                    List<Payment_Line_Item__c> lineItems = new List<Payment_Line_Item__c>();
+                    for (Object item : (List<Object>) items) {
+                        if (!(item instanceof Map<String, Object>)) continue;
+                        Map<String, Object> li = (Map<String, Object>) item;
+
+                        Map<String, Object> liMap = new Map<String, Object>(li);
+                        liMap.put('attributes', new Map<String, String>{
+                            'type' => 'Payment_Line_Item__c',
+                            'referenceId' => 'ref1'
+                        });
+                        Payment_Line_Item__c child = (Payment_Line_Item__c) JSON.deserialize(JSON.serialize(liMap), Sobject.class);
+
+                        // Always link to the just-upserted parent.
+                        child.Payment__c = parent.Id;
+
+                        String invId = stringOf(li.get('Invoice_Id__c'));
+                        if (String.isNotBlank(invId) && invoiceByCode.containsKey(invId)) {
+                            child.Invoice__c = invoiceByCode.get(invId);
+                        }
+                        lineItems.add(child);
+                    }
+                    if (!lineItems.isEmpty()) {
+                        upsert lineItems Payment_Line_Item__c.lineItemId__c;
+                    }
+                }
+
+                lstResponse.add(new Response('Success', paymentId));
+            } catch (Exception ex) {
+                lstResponse.add(new Response('Failure', paymentId, ex.getMessage()));
             }
         }
 
