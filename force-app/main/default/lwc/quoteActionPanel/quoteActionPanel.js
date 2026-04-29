@@ -82,21 +82,24 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
             : null;
     }
 
-    // Reviewer-owned state — surfacing the panel buttons here would
-    // let the rep push the quote forward while it's mid-review. Hide
-    // the entire button row when the quote is parked at Needs Review.
-    get hideAllButtons() {
+    // While the quote is parked at Needs Review the reviewer owns the
+    // record. The rep should only be able to push an Approval Required
+    // quote forward — every other button hides until the status moves
+    // back out of review.
+    get lockedForReview() {
         const s = (this.quoteStatus || '').trim().toLowerCase();
         return NEEDS_REVIEW_STATUSES.has(s);
     }
 
-    get showButtons() {
-        return !this.hideAllButtons;
+    get showApprovalButton() {
+        return this.priceStatus === APPROVAL_REQUIRED_PRICE_STATUS;
     }
 
-    get showApprovalButton() {
-        return !this.hideAllButtons
-            && this.priceStatus === APPROVAL_REQUIRED_PRICE_STATUS;
+    // The non-approval actions (PDF, Mark status, Preview, Create
+    // order, Edit quote) live behind this flag so the Needs Review
+    // lock can hide them in one place.
+    get showSecondaryButtons() {
+        return !this.lockedForReview;
     }
 
     // ---------- popup-state getters ----------
@@ -141,7 +144,37 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
             this.openStatus();
         } else if (action === 'preview') {
             this.launchPreview();
+        } else if (action === 'createOrder') {
+            this.launchCreateOrder();
+        } else if (action === 'editQuote') {
+            this.launchEditQuote();
         }
+    }
+
+    // ---------- create order / edit quote (delegated to existing quick actions) ----------
+
+    launchCreateOrder() {
+        // Quote.Create_Sales_Order is the LWC-typed quick action that
+        // hosts newOrderCmp. Firing it via NavigationMixin keeps the
+        // standard chrome (modal, header, close X) the rep is used to.
+        this[NavigationMixin.Navigate]({
+            type: 'standard__quickAction',
+            attributes: {
+                apiName: 'Quote.Create_Sales_Order'
+            }
+        });
+    }
+
+    launchEditQuote() {
+        // Quote.Edit_Quote hosts newQuoteCmp in edit mode. Same rationale
+        // as the order action — let the platform open the quick action
+        // modal so we don't have to embed the quote builder ourselves.
+        this[NavigationMixin.Navigate]({
+            type: 'standard__quickAction',
+            attributes: {
+                apiName: 'Quote.Edit_Quote'
+            }
+        });
     }
 
     handleOverlayClick() { this.closePopup(); }

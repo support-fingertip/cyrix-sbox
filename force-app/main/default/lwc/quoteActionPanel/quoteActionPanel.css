@@ -161,16 +161,6 @@
 }
 .qap-embed-close:hover { color: var(--qap-orange); }
 
-.qap-needs-review {
-    background: var(--qap-orange-tint);
-    border: 1px solid var(--qap-orange-line);
-    border-radius: var(--qap-radius-md);
-    padding: 10px 12px;
-    font-size: 12px;
-    color: var(--qap-text);
-    line-height: 1.4;
-}
-
 .qap-popup-head {
     display: flex;
     align-items: center;

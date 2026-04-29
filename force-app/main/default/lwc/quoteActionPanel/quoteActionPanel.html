@@ -1,18 +1,18 @@
 <template>
     <div class="qap-card">
-        <template if:true={showButtons}>
-            <div class="qap-grid">
-                <template if:true={showApprovalButton}>
-                    <button class="qap-btn" type="button" data-action="approval" onclick={handleAction}>
-                        <span class="qap-icon" aria-hidden="true">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M9 12l2 2 4-4"/>
-                                <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c2.39 0 4.68.93 6.36 2.64"/>
-                            </svg>
-                        </span>
-                        <span class="qap-label">Submit for approval</span>
-                    </button>
-                </template>
+        <div class="qap-grid">
+            <template if:true={showApprovalButton}>
+                <button class="qap-btn" type="button" data-action="approval" onclick={handleAction}>
+                    <span class="qap-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 12l2 2 4-4"/>
+                            <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c2.39 0 4.68.93 6.36 2.64"/>
+                        </svg>
+                    </span>
+                    <span class="qap-label">Submit for approval</span>
+                </button>
+            </template>
+            <template if:true={showSecondaryButtons}>
                 <button class="qap-btn" type="button" data-action="pdf" onclick={handleAction}>
                     <span class="qap-icon" aria-hidden="true">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -41,13 +41,26 @@
                     </span>
                     <span class="qap-label">Preview quote PDF</span>
                 </button>
-            </div>
-        </template>
-        <template if:false={showButtons}>
-            <div class="qap-needs-review">
-                This quote is awaiting review. Actions are disabled until the reviewer signs off.
-            </div>
-        </template>
+                <button class="qap-btn" type="button" data-action="editQuote" onclick={handleAction}>
+                    <span class="qap-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9"/>
+                            <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4z"/>
+                        </svg>
+                    </span>
+                    <span class="qap-label">Edit quote</span>
+                </button>
+                <button class="qap-btn" type="button" data-action="createOrder" onclick={handleAction}>
+                    <span class="qap-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 11V6a3 3 0 0 1 6 0v5"/>
+                            <path d="M5 11h14l-1 9H6z"/>
+                        </svg>
+                    </span>
+                    <span class="qap-label">Create order</span>
+                </button>
+            </template>
+        </div>
     </div>
 
     <template if:true={isPopupOpen}>
