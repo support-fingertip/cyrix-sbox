@@ -657,6 +657,15 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 'Order, line items, and payment terms saved successfully.'
             );
 
+            if (this.fromVisitPlan) {
+                // Stay inside the Visit Plan order session — let the parent
+                // switch back to the order list and refresh.
+                this.dispatchEvent(new CustomEvent('saved', {
+                    detail: { orderId: orderId, isEditMode: this.isEditMode }
+                }));
+                return;
+            }
+
             this.dispatchEvent(new CloseActionScreenEvent());
 
             setTimeout(() => {
@@ -675,6 +684,12 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 'Line Items Save Failed',
                 'Order header was saved but line items failed: ' + this.reduceErrors(error)
             );
+            if (this.fromVisitPlan) {
+                this.dispatchEvent(new CustomEvent('saved', {
+                    detail: { orderId: orderId, isEditMode: this.isEditMode, partial: true }
+                }));
+                return;
+            }
             this[NavigationMixin.Navigate]({
                 type: 'standard__recordPage',
                 attributes: {
