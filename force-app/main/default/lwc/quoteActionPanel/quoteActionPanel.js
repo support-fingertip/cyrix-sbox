@@ -46,6 +46,11 @@ const APPROVAL_REQUIRED_PRICE_STATUS = 'Approval Required';
 // variant some sandboxes carry.
 const NEEDS_REVIEW_STATUSES = new Set(['needs review', 'need review']);
 
+// Order creation is only meaningful once the customer has signed off.
+// Match case-insensitively and tolerate the legacy 'Accepted' value
+// some sandboxes still carry.
+const CUSTOMER_ACCEPTED_STATUSES = new Set(['customer accepted', 'accepted']);
+
 export default class QuoteActionPanel extends NavigationMixin(LightningElement) {
     @api recordId;
 
@@ -95,11 +100,23 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
         return this.priceStatus === APPROVAL_REQUIRED_PRICE_STATUS;
     }
 
-    // The non-approval actions (PDF, Mark status, Preview, Create
-    // order, Edit quote) live behind this flag so the Needs Review
-    // lock can hide them in one place.
+    // The non-approval actions (PDF, Mark status, Preview, Edit
+    // quote) live behind this flag so the Needs Review lock can hide
+    // them in one place. Create order has its own visibility rule
+    // (showCreateOrderButton) layered on top.
     get showSecondaryButtons() {
         return !this.lockedForReview;
+    }
+
+    // Order creation only makes sense after the customer has accepted
+    // the quote — surfacing the button earlier lets a rep generate
+    // orders against draft / pending quotes and pollute downstream
+    // numbering. Hidden during Needs Review by piggy-backing on
+    // showSecondaryButtons.
+    get showCreateOrderButton() {
+        if (!this.showSecondaryButtons) return false;
+        const s = (this.quoteStatus || '').trim().toLowerCase();
+        return CUSTOMER_ACCEPTED_STATUSES.has(s);
     }
 
     // ---------- popup-state getters ----------
