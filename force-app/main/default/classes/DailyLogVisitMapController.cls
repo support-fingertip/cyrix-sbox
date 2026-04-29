@@ -29,6 +29,7 @@ public with sharing class DailyLogVisitMapController {
         List<Visit__c> visits = [
             SELECT Id, Name, Visit_ID__c,
                    AccountName__c, Lead_Name__c, Visit_for__c,
+                   Lead__c, Lead__r.Company,
                    Visit_Start__c, Visit_End__c, Visit_Purpose__c, Status__c,
                    Check_In_Location__Latitude__s, Check_In_Location__Longitude__s,
                    Check_Out_Location__Latitude__s, Check_Out_Location__Longitude__s
@@ -39,16 +40,24 @@ public with sharing class DailyLogVisitMapController {
 
         Integer idx = 1;
         for (Visit__c v : visits) {
-            String visitTarget = (v.Visit_for__c == 'Customer')
-                ? (v.AccountName__c != null ? v.AccountName__c : 'Customer')
-                : (v.Lead_Name__c != null ? v.Lead_Name__c : 'Lead');
+            Boolean isLead = (v.Visit_for__c != 'Customer');
+            String leadCompany = (v.Lead__r != null) ? v.Lead__r.Company : null;
+            String visitTarget = isLead
+                ? (v.Lead_Name__c != null ? v.Lead_Name__c : 'Lead')
+                : (v.AccountName__c != null ? v.AccountName__c : 'Customer');
+
+            // For Lead visits, append the Company name when available so
+            // the route timeline shows e.g. "Anoop — Acme Pvt Ltd".
+            String displayLabel = (isLead && String.isNotBlank(leadCompany))
+                ? visitTarget + ' — ' + leadCompany
+                : visitTarget;
 
             // Check-In location
             if (v.Check_In_Location__Latitude__s != null && v.Check_In_Location__Longitude__s != null) {
                 VisitMapWrapper w = new VisitMapWrapper();
                 w.id = v.Id + '_in';
                 w.visitNumber = idx;
-                w.title = idx + '. ' + visitTarget;
+                w.title = idx + '. ' + displayLabel;
                 w.description = 'Visit: ' + v.Name +
                     '\nPurpose: ' + (v.Visit_Purpose__c != null ? v.Visit_Purpose__c : 'N/A') +
                     '\nCheck-In: ' + (v.Visit_Start__c != null ? v.Visit_Start__c.format() : 'N/A') +
@@ -57,7 +66,9 @@ public with sharing class DailyLogVisitMapController {
                 w.latitude = v.Check_In_Location__Latitude__s;
                 w.longitude = v.Check_In_Location__Longitude__s;
                 w.icon = 'standard:location';
-                w.customerName = visitTarget;
+                w.customerName = displayLabel;
+                w.companyName = leadCompany;
+                w.isLead = isLead;
                 w.checkInTime = v.Visit_Start__c != null ? v.Visit_Start__c.format() : '';
                 w.checkOutTime = v.Visit_End__c != null ? v.Visit_End__c.format() : '';
                 w.purpose = v.Visit_Purpose__c;
@@ -80,6 +91,8 @@ public with sharing class DailyLogVisitMapController {
         @AuraEnabled public Decimal longitude;
         @AuraEnabled public String icon;
         @AuraEnabled public String customerName;
+        @AuraEnabled public String companyName;
+        @AuraEnabled public Boolean isLead;
         @AuraEnabled public String checkInTime;
         @AuraEnabled public String checkOutTime;
         @AuraEnabled public String purpose;
