@@ -2,6 +2,9 @@ import { LightningElement, api, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
+import FORM_FACTOR from '@salesforce/client/formFactor';
+import USER_ID from '@salesforce/user/Id';
+import QUOTE_PDF_PUBLIC_URL from '@salesforce/label/c.Quote_PDF_Public_URL';
 import PRICE_STATUS_FIELD from '@salesforce/schema/Quote.Price_Status__c';
 import submitForApproval from '@salesforce/apex/QuoteActionPanelController.submitForApproval';
 import getQuoteStatusOptions from '@salesforce/apex/QuoteActionPanelController.getQuoteStatusOptions';
@@ -159,21 +162,45 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
     }
 
     /**
-     * sendQuoteDocument dispatches a bubbling `close` custom event
-     * after Cancel / Send completes, so we just dismiss the panel
-     * on receipt.
+     * sendQuoteDocument dispatches a bubbling, composed `dismiss`
+     * custom event after Cancel / Send completes, so we just dismiss
+     * the panel on receipt. The wrapper div also listens for the
+     * same event so a stopPropagation upstream still reaches us.
      */
     handleEmbedClose() {
         this.closePopup();
     }
 
-    // ---------- preview (delegated to existing Quote_PDF VF quick action) ----------
+    // ---------- preview ----------
 
     launchPreview() {
-        // Quote.Quote_PDF is a VisualforcePage quick action that
-        // launches the ProductQuotation page in a Salesforce-managed
-        // modal. Reusing it gets us a battle-tested PDF preview
-        // without re-implementing the iframe + timeout dance here.
+        // Salesforce Mobile can't host the desktop Visualforce quick
+        // action reliably (the modal renders blank on iOS, the user
+        // can't tap to download the PDF, etc.). On mobile, redirect
+        // to the public-site /quotepdf URL in a new tab — the route
+        // resolves the Quote by Id + userId and returns a properly
+        // rendered PDF the device's browser can open.
+        if (FORM_FACTOR === 'Small') {
+            const base = (QUOTE_PDF_PUBLIC_URL || '').trim();
+            if (!base) {
+                this.showToast(
+                    'Preview unavailable',
+                    'Quote_PDF_Public_URL custom label is not configured.',
+                    'error'
+                );
+                return;
+            }
+            const sep = base.indexOf('?') >= 0 ? '&' : '?';
+            const url = base + sep + 'Id=' + encodeURIComponent(this.recordId) +
+                '&userId=' + encodeURIComponent(USER_ID || '');
+            window.open(url, '_blank');
+            return;
+        }
+
+        // Desktop: Quote.Quote_PDF is a VisualforcePage quick action
+        // that launches the ProductQuotation page in a Salesforce-managed
+        // modal. Reusing it gets us a battle-tested PDF preview without
+        // re-implementing the iframe + timeout dance here.
         this[NavigationMixin.Navigate]({
             type: 'standard__quickAction',
             attributes: {

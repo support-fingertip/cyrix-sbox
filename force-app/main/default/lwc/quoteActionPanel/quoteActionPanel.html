@@ -50,8 +50,8 @@
                      action row owns the popup chrome, so we render
                      it inside a transparent shell that just sizes
                      the modal to a comfortable desktop width. -->
-                <div class="qap-embed" onclick={stopPropagation} role="dialog" aria-modal="true">
-                    <c-send-quote-document record-id={recordId} onclose={handleEmbedClose}></c-send-quote-document>
+                <div class="qap-embed" onclick={stopPropagation} role="dialog" aria-modal="true" ondismiss={handleEmbedClose}>
+                    <c-send-quote-document record-id={recordId} ondismiss={handleEmbedClose}></c-send-quote-document>
                 </div>
             </template>
 

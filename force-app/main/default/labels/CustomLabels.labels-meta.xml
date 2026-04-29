@@ -91,4 +91,11 @@
         <shortDescription>SAP Endpoint URL — POST target for the Send to SAP outbound callout.</shortDescription>
         <value>https://example.sap.endpoint/api/sync</value>
     </labels>
+    <labels>
+        <fullName>Quote_PDF_Public_URL</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Public-site Quote PDF URL — base path the mobile Preview Quote PDF action redirects to. Per-org override; the LWC appends ?Id and &amp;userId.</shortDescription>
+        <value>https://cyrix-healthcare--sbox1.sandbox.my.salesforce-sites.com/quotepdf</value>
+    </labels>
 </CustomLabels>
