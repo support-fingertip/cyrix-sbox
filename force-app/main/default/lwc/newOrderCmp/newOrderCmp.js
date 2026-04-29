@@ -22,6 +22,7 @@ const TOTAL_STEPS = STEP_LABELS.length;
 
 export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     @api recordId;
+    @api fromVisitPlan = false;
 
     @wire(CurrentPageReference)
     wiredPageRef(pageRef) {
@@ -988,6 +989,12 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     }
 
     // ===== CANCEL =====
+
+    handleVisitPlanCancel() {
+        // Launched from the Visit Plan order session. Notify the parent
+        // (orderSessionPage) so it can switch back to the order list.
+        this.dispatchEvent(new CustomEvent('cancel'));
+    }
 
     handleCancel() {
         this.dispatchEvent(new CloseActionScreenEvent());
