@@ -2,6 +2,9 @@ import { LightningElement, api, wire, track } from 'lwc';
 import getVisitLocations from '@salesforce/apex/DailyLogVisitMapController.getVisitLocations';
 import getVisitLocationsByUserAndDate from '@salesforce/apex/DailyLogVisitMapController.getVisitLocationsByUserAndDate';
 
+// Visit Route Map — renders the rep's daily visits on lightning-map
+// (markers only) and exposes a Google Maps Directions URL that
+// connects the stops in chronological check-in order.
 export default class DailyLogVisitMap extends LightningElement {
     @api recordId;
 
