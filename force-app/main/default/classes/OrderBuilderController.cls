@@ -507,4 +507,109 @@ public with sharing class OrderBuilderController {
         @AuraEnabled public Id sourcePricebookId;
         @AuraEnabled public String sourcePricebookName;
     }
+
+    // ===== Order Session (per-Visit) =====
+
+    /**
+     * Mirrors QuoteBuilderController.getQuotesForVisit. Hands the
+     * orderSessionPage LWC the data it needs to render the visit's
+     * order list + the opportunity picker the rep selects from when
+     * launching a brand-new order. Visit__c -> Account is the same
+     * key used by the quote session, so the two screens stay
+     * consistent.
+     */
+    @AuraEnabled(cacheable=false)
+    public static VisitOrderSession getOrdersForVisit(Id visitId) {
+        VisitOrderSession session = new VisitOrderSession();
+        session.orders = new List<OrderSummary>();
+        session.opportunities = new List<OrderOpportunityOption>();
+
+        if (visitId == null) return session;
+
+        List<Visit__c> visits = [
+            SELECT Id, Name, Account__c, Account__r.Name
+            FROM Visit__c
+            WHERE Id = :visitId
+            LIMIT 1
+        ];
+        if (visits.isEmpty()) return session;
+        Visit__c v = visits[0];
+
+        session.visitId = v.Id;
+        session.visitName = v.Name;
+        session.accountId = v.Account__c;
+        session.accountName = v.Account__r != null ? v.Account__r.Name : '';
+
+        if (v.Account__c == null) return session;
+
+        for (Opportunity opp : [
+            SELECT Id, Name, StageName
+            FROM Opportunity
+            WHERE AccountId = :v.Account__c
+            ORDER BY CreatedDate DESC
+        ]) {
+            OrderOpportunityOption opt = new OrderOpportunityOption();
+            opt.opportunityId = opp.Id;
+            opt.opportunityName = opp.Name;
+            opt.stage = opp.StageName;
+            session.opportunities.add(opt);
+        }
+
+        for (Order o : [
+            SELECT Id, OrderNumber, Name, Status, EffectiveDate, EndDate,
+                   TotalAmount, CreatedDate,
+                   OpportunityId, Opportunity.Name,
+                   QuoteId, Quote.QuoteNumber
+            FROM Order
+            WHERE AccountId = :v.Account__c
+            ORDER BY CreatedDate DESC
+        ]) {
+            OrderSummary os = new OrderSummary();
+            os.orderId = o.Id;
+            os.orderNumber = o.OrderNumber;
+            os.name = o.Name;
+            os.status = o.Status;
+            os.effectiveDate = o.EffectiveDate;
+            os.endDate = o.EndDate;
+            os.totalAmount = o.TotalAmount;
+            os.createdDate = o.CreatedDate;
+            os.opportunityId = o.OpportunityId;
+            os.opportunityName = o.Opportunity != null ? o.Opportunity.Name : '';
+            os.quoteId = o.QuoteId;
+            os.quoteNumber = o.Quote != null ? o.Quote.QuoteNumber : '';
+            session.orders.add(os);
+        }
+
+        return session;
+    }
+
+    public class VisitOrderSession {
+        @AuraEnabled public Id visitId;
+        @AuraEnabled public String visitName;
+        @AuraEnabled public Id accountId;
+        @AuraEnabled public String accountName;
+        @AuraEnabled public List<OrderSummary> orders;
+        @AuraEnabled public List<OrderOpportunityOption> opportunities;
+    }
+
+    public class OrderSummary {
+        @AuraEnabled public Id orderId;
+        @AuraEnabled public String orderNumber;
+        @AuraEnabled public String name;
+        @AuraEnabled public String status;
+        @AuraEnabled public Date effectiveDate;
+        @AuraEnabled public Date endDate;
+        @AuraEnabled public Decimal totalAmount;
+        @AuraEnabled public Datetime createdDate;
+        @AuraEnabled public Id opportunityId;
+        @AuraEnabled public String opportunityName;
+        @AuraEnabled public Id quoteId;
+        @AuraEnabled public String quoteNumber;
+    }
+
+    public class OrderOpportunityOption {
+        @AuraEnabled public Id opportunityId;
+        @AuraEnabled public String opportunityName;
+        @AuraEnabled public String stage;
+    }
 }

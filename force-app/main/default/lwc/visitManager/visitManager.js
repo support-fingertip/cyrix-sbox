@@ -64,6 +64,7 @@ export default class visitManager extends LightningElement {
     isDesktop = false;
     isCometitionScreen = false;
     isQuoteScreen = false;
+    isOrderScreen = false;
     currentLogId;
     visitData;
     pickListData;
@@ -321,6 +322,7 @@ export default class visitManager extends LightningElement {
         this.outletPage = false;
         this.isCameraScreen = false;
         this.isQuoteScreen = false;
+        this.isOrderScreen = false;
     }
     handleProductScreen(event) {
         this.isShowBackButton = true;
@@ -387,6 +389,18 @@ export default class visitManager extends LightningElement {
             this.screen = msg.screen;
             this.isQuoteScreen = true;
             this.outletPage = true;
+        }
+        else if (msg.message == 'orderScreen') {
+            // Order session is reached the same way Quote session is —
+            // visitOrderExecuteScreen fires this with the Visit Id so
+            // orderSessionPage can list / create / edit Orders for the
+            // visit's account, reusing newOrderCmp under the hood.
+            this.header = 'Order Session';
+            this.recordId = msg.recordID;
+            this.index = msg.index;
+            this.screen = msg.screen;
+            this.isOrderScreen = true;
+            this.outletPage = true;
         }else if (msg.message == 'checkin') {
 this.executeScreenData.isInProgress = false;
          } else if (msg.message == 'order' || msg.message == 'outstanding' || msg.message == 'sales' || msg.message == 'visit') {
@@ -399,6 +413,14 @@ this.executeScreenData.isInProgress = false;
 
     handleQuoteBackToVisit() {
         // Triggered by c-quote-session-page when user clicks the back icon
+        this.screen = 3.6;
+        this.goBackScreen();
+    }
+
+    handleOrderBackToVisit() {
+        // Triggered by c-order-session-page when user clicks the back
+        // icon — same screen-3.6 anchor as the quote back path so the
+        // execute screen is restored after navigating away.
         this.screen = 3.6;
         this.goBackScreen();
     }
@@ -512,6 +534,7 @@ this.executeScreenData.isInProgress = false;
             this.isVisitHeader = true;
             this.outletPage = true;
             this.isQuoteScreen = false;
+            this.isOrderScreen = false;
         }
         if (changeShadow) {
             const allMenuItems = this.template.querySelectorAll('.menu-items');

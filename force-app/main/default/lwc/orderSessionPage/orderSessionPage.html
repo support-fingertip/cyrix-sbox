@@ -1,0 +1,189 @@
+<template>
+    <div class="order-session">
+
+        <!-- Loading overlay -->
+        <template if:true={isLoading}>
+            <div class="loading-overlay">
+                <lightning-spinner alternative-text="Loading orders" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- Order builder view (reuses newOrderCmp) -->
+        <template if:true={showBuilder}>
+            <div class="builder-wrapper">
+                <div class="builder-toolbar">
+                    <lightning-button
+                        label="Back to Order List"
+                        icon-name="utility:back"
+                        variant="neutral"
+                        onclick={handleCloseBuilder}>
+                    </lightning-button>
+                </div>
+                <c-new-order-cmp record-id={builderRecordId}></c-new-order-cmp>
+            </div>
+        </template>
+
+        <!-- Order list view -->
+        <template if:false={showBuilder}>
+
+            <!-- Header -->
+            <div class="session-header">
+                <div class="header-left">
+                    <lightning-button-icon
+                        icon-name="utility:chevronleft"
+                        alternative-text="Back"
+                        variant="border-filled"
+                        class="back-btn"
+                        onclick={handleBack}>
+                    </lightning-button-icon>
+                    <div class="header-text">
+                        <h1 class="session-title">Order Session</h1>
+                        <p class="session-subtitle">{headerSubtitle}</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <span class="order-count-pill">
+                        <lightning-icon icon-name="standard:orders" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                        {orderCount} Order(s)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Create controls -->
+            <div class="create-bar">
+                <template if:true={hasOpportunities}>
+                    <div class="create-bar-inner">
+                        <lightning-combobox
+                            class="opp-picker"
+                            label="Opportunity"
+                            value={selectedOpportunityId}
+                            placeholder="Select opportunity"
+                            options={opportunityOptions}
+                            onchange={handleOpportunityChange}
+                            variant="label-hidden">
+                        </lightning-combobox>
+                        <lightning-button
+                            label="Create Order"
+                            variant="brand"
+                            icon-name="utility:add"
+                            disabled={createDisabled}
+                            onclick={handleCreateOrder}
+                            class="create-btn">
+                        </lightning-button>
+                    </div>
+                </template>
+                <template if:false={hasOpportunities}>
+                    <div class="no-opp-msg">
+                        <lightning-icon icon-name="utility:info_alt" size="x-small" class="slds-m-right_xx-small"></lightning-icon>
+                        No opportunities exist for this customer yet. Create an opportunity before adding an order.
+                    </div>
+                </template>
+            </div>
+
+            <!-- Order list -->
+            <template if:true={hasOrders}>
+                <!-- Desktop table -->
+                <div class="desktop-view">
+                    <div class="table-wrapper">
+                        <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_striped order-table">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th scope="col" style="width:40px"><div class="slds-truncate">#</div></th>
+                                    <th scope="col"><div class="slds-truncate">Order #</div></th>
+                                    <th scope="col"><div class="slds-truncate">Opportunity</div></th>
+                                    <th scope="col"><div class="slds-truncate">Quote #</div></th>
+                                    <th scope="col"><div class="slds-truncate">Status</div></th>
+                                    <th scope="col"><div class="slds-truncate">Total Amount</div></th>
+                                    <th scope="col"><div class="slds-truncate">Effective Date</div></th>
+                                    <th scope="col"><div class="slds-truncate">Created On</div></th>
+                                    <th scope="col" style="width:90px"><div class="slds-truncate slds-text-align_center">Action</div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={orders} for:item="o">
+                                    <tr key={o.orderId}>
+                                        <td class="row-number">{o.rowNumber}</td>
+                                        <td><div class="slds-truncate" title={o.orderNumber}>{o.orderNumber}</div></td>
+                                        <td><div class="slds-truncate" title={o.opportunityName}>{o.opportunityName}</div></td>
+                                        <td><div class="slds-truncate" title={o.quoteNumber}>{o.quoteNumber}</div></td>
+                                        <td><span class={o.statusClass}>{o.status}</span></td>
+                                        <td class="amount-cell">{o.formattedAmount}</td>
+                                        <td>{o.formattedEffective}</td>
+                                        <td>{o.formattedCreatedDate}</td>
+                                        <td class="slds-text-align_center">
+                                            <lightning-button-icon
+                                                icon-name="utility:edit"
+                                                alternative-text="Edit"
+                                                variant="border-filled"
+                                                data-order-id={o.orderId}
+                                                onclick={handleEditOrder}
+                                                class="edit-btn">
+                                            </lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Mobile / small-screen card list -->
+                <div class="mobile-view">
+                    <template for:each={orders} for:item="o">
+                        <div key={o.orderId} class="order-card">
+                            <div class="order-card-top">
+                                <div class="order-card-id">
+                                    <div class="order-number">{o.orderNumber}</div>
+                                    <div class="order-name">{o.opportunityName}</div>
+                                </div>
+                                <span class={o.statusClass}>{o.status}</span>
+                            </div>
+                            <div class="order-card-body">
+                                <div class="card-row">
+                                    <span class="card-label">Quote #</span>
+                                    <span class="card-value">{o.quoteNumber}</span>
+                                </div>
+                                <div class="card-row">
+                                    <span class="card-label">Total</span>
+                                    <span class="card-value amount-cell">{o.formattedAmount}</span>
+                                </div>
+                                <div class="card-row">
+                                    <span class="card-label">Effective</span>
+                                    <span class="card-value">{o.formattedEffective}</span>
+                                </div>
+                                <div class="card-row">
+                                    <span class="card-label">Created</span>
+                                    <span class="card-value">{o.formattedCreatedDate}</span>
+                                </div>
+                            </div>
+                            <div class="order-card-actions">
+                                <lightning-button
+                                    label="Edit Order"
+                                    icon-name="utility:edit"
+                                    variant="brand-outline"
+                                    data-order-id={o.orderId}
+                                    onclick={handleEditOrder}>
+                                </lightning-button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            <!-- Empty state -->
+            <template if:false={hasOrders}>
+                <div class="empty-state">
+                    <lightning-icon icon-name="standard:orders" size="large" class="empty-icon"></lightning-icon>
+                    <h3 class="empty-title">No orders yet</h3>
+                    <p class="empty-text">
+                        No orders have been created for this customer.
+                        <template if:true={hasOpportunities}>
+                            Use the <b>Create Order</b> button above to add one.
+                        </template>
+                    </p>
+                </div>
+            </template>
+
+        </template>
+    </div>
+</template>
