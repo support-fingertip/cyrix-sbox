@@ -193,16 +193,13 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
             return;
         }
 
-        // Desktop: Quote.Quote_PDF is a VisualforcePage quick action
-        // that launches the ProductQuotation page in a Salesforce-managed
-        // modal. Reusing it gets us a battle-tested PDF preview without
-        // re-implementing the iframe + timeout dance here.
-        this[NavigationMixin.Navigate]({
-            type: 'standard__quickAction',
-            attributes: {
-                apiName: 'Quote.Quote_PDF'
-            }
-        });
+        // Desktop: navigate directly to the ProductQuotation VF page in
+        // a new tab. The previous standard__quickAction → Quote.Quote_PDF
+        // path silently failed in modern Lightning when a
+        // VisualforcePage-typed quick action was the target — opening
+        // the page URL itself is the reliable redirect.
+        const vfUrl = '/apex/ProductQuotation?id=' + encodeURIComponent(this.recordId);
+        window.open(vfUrl, '_blank');
     }
 
     // ---------- status / revision / confirm ----------
