@@ -35,22 +35,44 @@ jobs:
           
           git fetch --all --prune
           
+          # --diff-filter=ACMRT excludes Deleted files; deletions still
+          # appear in `git diff --name-only` but we can't deploy a path
+          # that no longer exists on disk. Destructive deletions need
+          # to be handled separately via a destructiveChanges package.
           if git cat-file -e "$PREV"^{commit}; then
             echo "Previous commit exists. Using git diff."
-            CHANGED_FILES=$(git diff --name-only "$PREV" "$CURR" | grep '^force-app/' || true)
+            CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT "$PREV" "$CURR" | grep '^force-app/' || true)
           else
             echo "Previous commit not found. Falling back to last commit."
-            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | grep '^force-app/' || true)
+            CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT HEAD~1 HEAD | grep '^force-app/' || true)
           fi
-      
+
           echo "Changed files:"
           echo "$CHANGED_FILES"
-          
+
           if [ -z "$CHANGED_FILES" ]; then
             echo "No Salesforce metadata changes found. Skipping deploy."
           else
-            sf project deploy start \
-              --source-dir $CHANGED_FILES \
-              --target-org deployment-org \
-              --wait 30
+            # Build --source-dir arguments and skip any path that's no
+            # longer on disk (defensive — --diff-filter should already
+            # have removed deletions, but renames into different roots
+            # can still leave dangling entries).
+            SOURCE_ARGS=""
+            while IFS= read -r file; do
+              [ -z "$file" ] && continue
+              if [ -f "$file" ]; then
+                SOURCE_ARGS="$SOURCE_ARGS --source-dir \"$file\""
+              else
+                echo "Skipping missing file: $file"
+              fi
+            done <<< "$CHANGED_FILES"
+
+            if [ -n "$SOURCE_ARGS" ]; then
+              eval sf project deploy start \
+                $SOURCE_ARGS \
+                --target-org deployment-org \
+                --wait 30
+            else
+              echo "No valid files to deploy."
+            fi
           fi
