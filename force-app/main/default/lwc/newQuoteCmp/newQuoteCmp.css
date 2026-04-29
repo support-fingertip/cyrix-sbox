@@ -99,6 +99,29 @@
     animation: qwBackdropFade 0.2s ease;
 }
 
+/* Inline mode (when launched from the Visit Plan quote session). The
+   wizard sits inside the host page rather than overlaying it. */
+.qw-canvas.qw-canvas-inline {
+    position: relative;
+    inset: auto;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    padding: 0;
+    z-index: auto;
+    overflow-y: visible;
+    animation: none;
+}
+
+.qw-canvas.qw-canvas-inline .qw-shell {
+    max-width: 100%;
+    max-height: none;
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    animation: none;
+}
+
 @keyframes qwBackdropFade {
     from { opacity: 0; }
     to { opacity: 1; }
