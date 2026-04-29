@@ -6,19 +6,24 @@ global class sapApiController {
         RestRequest req = RestContext.request;
         RestResponse res = RestContext.response;
 
-        String key = req.params.get('key');
         String objectName = req.params.get('value');
         String customerCode = req.params.get('customerCode');
         String orderCode = req.params.get('orderCode');
 
+        // Authentication is owned by the Connected App OAuth flow now —
+        // Salesforce rejects unauthenticated requests before doGet ever
+        // runs, so we land here only when the caller already presented a
+        // valid Authorization: Bearer <token> header against
+        // <my-domain>.my.salesforce.com/services/apexrest/sapapi/.
+        //
+        // The previous Label.API_Key query-param check was a public-site
+        // safeguard (the Force.com Site let anonymous traffic through, so
+        // we needed an in-app secret). With callers cut over to OAuth and
+        // the public site retired, the API key adds no defence and just
+        // breaks the new bearer-only call shape, so it's gone.
+
         List<SObject> records = new List<SObject>();
         String jsonString = '';
-
-        if (Label.API_Key != key) {
-            res.statusCode = 401;
-            res.responseBody = Blob.valueOf('{"message":"Unauthorized"}');
-            return;
-        }
 
         if (objectName == 'customer' || String.isBlank(objectName)) {
             List<Account> aList;
