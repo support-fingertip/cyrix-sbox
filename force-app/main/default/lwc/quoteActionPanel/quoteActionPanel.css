@@ -108,10 +108,67 @@
 }
 
 @media (max-width: 600px) {
+    /* Mobile takes the full screen — small viewports can't afford
+       the gutter the desktop overlay uses. The popup and the embed
+       shell both edge-to-edge, the corners flatten, and the inside
+       scrolls if the content is tall. */
+    .qap-overlay {
+        padding: 0;
+        align-items: stretch;
+        justify-content: stretch;
+    }
     .qap-popup, .qap-embed {
         max-width: 100%;
-        max-height: 96vh;
+        width: 100%;
+        max-height: 100vh;
+        height: 100vh;
+        border-radius: 0;
+        border-left: 0;
+        border-right: 0;
     }
+    .qap-popup {
+        padding: 16px;
+    }
+}
+
+/* Header-level close button on the embedded sendQuoteDocument shell.
+   The child LWC does not draw an X, so the parent overlays one in the
+   top-right so the rep can always bail out — especially on mobile
+   where the form fills the screen. */
+.qap-embed {
+    position: relative;
+}
+
+.qap-embed-close {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    z-index: 2;
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--qap-text-muted);
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+.qap-embed-close:hover { color: var(--qap-orange); }
+
+.qap-needs-review {
+    background: var(--qap-orange-tint);
+    border: 1px solid var(--qap-orange-line);
+    border-radius: var(--qap-radius-md);
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--qap-text);
+    line-height: 1.4;
 }
 
 .qap-popup-head {

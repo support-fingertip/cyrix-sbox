@@ -5,6 +5,7 @@ import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
 import FORM_FACTOR from '@salesforce/client/formFactor';
 import USER_ID from '@salesforce/user/Id';
 import PRICE_STATUS_FIELD from '@salesforce/schema/Quote.Price_Status__c';
+import STATUS_FIELD from '@salesforce/schema/Quote.Status';
 import submitForApproval from '@salesforce/apex/QuoteActionPanelController.submitForApproval';
 import getQuoteStatusOptions from '@salesforce/apex/QuoteActionPanelController.getQuoteStatusOptions';
 import updateStatus from '@salesforce/apex/QuoteActionPanelController.updateStatus';
@@ -39,6 +40,12 @@ const STATUS_HIDDEN = new Set(['Draft', 'Approved', 'Rejected']);
 // already-rejected quote into the workflow again.
 const APPROVAL_REQUIRED_PRICE_STATUS = 'Approval Required';
 
+// While a quote is sitting at "Needs Review" the rep shouldn't be
+// able to take any panel action — the reviewer owns the next move.
+// Match case-insensitively and tolerate the singular "Need Review"
+// variant some sandboxes carry.
+const NEEDS_REVIEW_STATUSES = new Set(['needs review', 'need review']);
+
 export default class QuoteActionPanel extends NavigationMixin(LightningElement) {
     @api recordId;
 
@@ -60,7 +67,7 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
 
     // ---------- price-status wire ----------
 
-    @wire(getRecord, { recordId: '$recordId', fields: [PRICE_STATUS_FIELD] })
+    @wire(getRecord, { recordId: '$recordId', fields: [PRICE_STATUS_FIELD, STATUS_FIELD] })
     wiredQuote;
 
     get priceStatus() {
@@ -69,8 +76,27 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
             : null;
     }
 
+    get quoteStatus() {
+        return this.wiredQuote && this.wiredQuote.data
+            ? getFieldValue(this.wiredQuote.data, STATUS_FIELD)
+            : null;
+    }
+
+    // Reviewer-owned state — surfacing the panel buttons here would
+    // let the rep push the quote forward while it's mid-review. Hide
+    // the entire button row when the quote is parked at Needs Review.
+    get hideAllButtons() {
+        const s = (this.quoteStatus || '').trim().toLowerCase();
+        return NEEDS_REVIEW_STATUSES.has(s);
+    }
+
+    get showButtons() {
+        return !this.hideAllButtons;
+    }
+
     get showApprovalButton() {
-        return this.priceStatus === APPROVAL_REQUIRED_PRICE_STATUS;
+        return !this.hideAllButtons
+            && this.priceStatus === APPROVAL_REQUIRED_PRICE_STATUS;
     }
 
     // ---------- popup-state getters ----------

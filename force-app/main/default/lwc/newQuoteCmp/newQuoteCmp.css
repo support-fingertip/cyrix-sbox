@@ -1103,7 +1103,28 @@
     .qw-review-grid { grid-template-columns: 1fr; }
 
     .qw-product-search { grid-template-columns: 1fr; }
-    .qw-product-grid { grid-template-columns: 1fr; }
+    /* Cards default to 420 px min-width for desktop two-up; on mobile
+       force a single column whose cell is the viewport width. min-width
+       on the children keeps a long product name / code from forcing the
+       grid wider than the screen and making the page scroll sideways. */
+    .qw-product-grid {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+        padding: 0;
+    }
+    .qw-product-card {
+        min-width: 0;
+        padding: 14px;
+    }
+    .qw-product-name,
+    .qw-product-code,
+    .qw-product-desc {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+    .qw-product-headline { min-width: 0; flex: 1 1 auto; }
+    .qw-product-foot { flex-wrap: wrap; gap: 8px; }
 
     .qw-line-fields { grid-template-columns: 1fr 1fr; }
     .qw-line-total { text-align: left; }
