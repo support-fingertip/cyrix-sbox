@@ -22,6 +22,7 @@ const TOTAL_STEPS = STEP_LABELS.length;
 
 export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     @api recordId;
+    @api fromVisitPlan = false;
 
     @wire(CurrentPageReference)
     wiredPageRef(pageRef) {
@@ -656,6 +657,15 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 'Order, line items, and payment terms saved successfully.'
             );
 
+            if (this.fromVisitPlan) {
+                // Stay inside the Visit Plan order session — let the parent
+                // switch back to the order list and refresh.
+                this.dispatchEvent(new CustomEvent('saved', {
+                    detail: { orderId: orderId, isEditMode: this.isEditMode }
+                }));
+                return;
+            }
+
             this.dispatchEvent(new CloseActionScreenEvent());
 
             setTimeout(() => {
@@ -674,6 +684,12 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 'Line Items Save Failed',
                 'Order header was saved but line items failed: ' + this.reduceErrors(error)
             );
+            if (this.fromVisitPlan) {
+                this.dispatchEvent(new CustomEvent('saved', {
+                    detail: { orderId: orderId, isEditMode: this.isEditMode, partial: true }
+                }));
+                return;
+            }
             this[NavigationMixin.Navigate]({
                 type: 'standard__recordPage',
                 attributes: {
@@ -876,7 +892,6 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 quantity: item.quantity || 1
             });
 
-            const previousStatus = item.priceStatus;
             const resolvedPb = preview.resolvedTier || '';
             this.lineItems = this.lineItems.map(it => {
                 if (it.rowId !== rowId) return it;
@@ -904,31 +919,9 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
                 // displayed Sales Price.
                 return updated;
             });
-
-            if (preview.priceStatus === 'Approval Required'
-                && previousStatus !== 'Approval Required') {
-                if (preview.exceedsAllTiers) {
-                    this.showError(
-                        'Discount above CEO/CFO ceiling',
-                        `Discount exceeds the ${this.tierDisplayLabel(preview.resolvedTier)} ` +
-                        `maximum. Approval will be required.`
-                    );
-                } else if (preview.resolvedTier) {
-                    this.showSuccess(
-                        'Approval required',
-                        `Discount mapped to ${this.tierDisplayLabel(preview.resolvedTier)} — ` +
-                        `requires approval at that tier.`
-                    );
-                }
-            }
         } catch (error) {
             console.warn('Pricing preview unavailable:', error && error.body ? error.body.message : error);
         }
-    }
-
-    tierDisplayLabel(tierName) {
-        const label = this.getPriceBadgeLabel(tierName);
-        return label || tierName || 'Standard';
     }
 
     formatMaxDiscount(value) {
@@ -1011,6 +1004,12 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
     }
 
     // ===== CANCEL =====
+
+    handleVisitPlanCancel() {
+        // Launched from the Visit Plan order session. Notify the parent
+        // (orderSessionPage) so it can switch back to the order list.
+        this.dispatchEvent(new CustomEvent('cancel'));
+    }
 
     handleCancel() {
         this.dispatchEvent(new CloseActionScreenEvent());

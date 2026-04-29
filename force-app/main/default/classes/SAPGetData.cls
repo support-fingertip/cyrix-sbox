@@ -1,26 +1,25 @@
 /**
  * Inbound REST endpoint that SAP POSTs to in order to push records
- * into Salesforce. Cyrix-specific port of SAPGetData from the
- * reference project — only the productMaster branch is implemented;
- * the StockTransfer branch from the reference is intentionally
- * omitted, so any other ?value= falls into the else block.
+ * into Salesforce. Handles two ?value= selectors:
+ *
+ *   productMaster  -> upsert Product2 by SAP_Item_Code__c
+ *   invoice        -> upsert Invoice__c by Invoice_Id__c, plus its
+ *                     Invoice_Item__c children by lineItemId__c,
+ *                     resolving Customer / Order / Owner / Product /
+ *                     OrderItem lookups from incoming codes.
  *
  * Endpoint: /services/apexrest/send/*
  * Auth:     ?key=<value of Custom Label API_Key>
- * Selector: ?value=productMaster
- * Body:     { "data": [ {Product2 fields...}, ... ] }
+ * Body:     { "data": [ {fields...}, ... ] }
  *
- * Schema differences vs the reference:
- *   - Reference Product__c              -> standard Product2 here.
- *   - Reference prd.Product_Code__c     -> Product2.ProductCode here.
- *   - Reference Log__c.Status_Code__c   -> same field, but Text in this
- *                                          org, so res.statusCode is
- *                                          cast to String on log write.
- *   - Reference Log__c.RecordId__c      -> not present here; omitted.
+ * On every successful upsert we also stamp SAP_Sync_Status__c = true
+ * and Last_ERP_Sync_Date__c = now() so the record clearly shows it
+ * was last touched by the SAP integration.
  */
 @RestResource(urlMapping='/send/*')
 global class SAPGetData {
 
+    // Inbound entry point for SAP -> Salesforce POSTs.
     @HttpPost
     global static void doPost() {
         RestRequest req = RestContext.request;
@@ -70,12 +69,15 @@ global class SAPGetData {
                 // gives true insert-or-update semantics natively — no
                 // pre-query needed, no duplicate-value errors on retries.
                 List<Product2> prdlist = new List<Product2>();
+                DateTime nowStamp = DateTime.now();
                 for (String s : finalJsonString) {
                     s = s.replaceFirst('\\{', '{"attributes" : {"type" : "Product2", "referenceId" : "ref1"},');
                     Product2 prd = (Product2) JSON.deserialize(s, Sobject.class);
                     if (String.isNotBlank(prd.ProductCode)) {
                         prd.SAP_Item_Code__c = prd.ProductCode;
                     }
+                    prd.SAP_Sync_Status__c = true;
+                    prd.Last_ERP_Sync_Date__c = nowStamp;
                     System.debug('prd ' + prd);
                     prdlist.add(prd);
                 }
@@ -93,25 +95,23 @@ global class SAPGetData {
                 res.responseBody = Blob.valueOf(JSON.serialize(lstResponse));
 
                 if (Label.Enable_Logs == 'TRUE') {
-                    String reqsizeString = data;
-                    Integer maxSize = 32000;
-                    if (reqsizeString.length() > maxSize) {
-                        reqsizeString = reqsizeString.substring(0, maxSize);
-                    }
-                    String ressizeString = JSON.serialize(lstResponse);
-                    if (ressizeString.length() > maxSize) {
-                        ressizeString = ressizeString.substring(0, maxSize);
-                    }
-                    Log__c getLogs = new Log__c();
-                    getLogs.Request__c     = reqsizeString;
-                    getLogs.Response__c    = ressizeString;
-                    getLogs.Object__c      = 'Product';
-                    getLogs.Status_Code__c = String.valueOf(res.statusCode);
-                    insert getLogs;
+                    writeLog(data, JSON.serialize(lstResponse), 'Product', String.valueOf(res.statusCode));
                 }
 
             }
-            // StockTransfer branch from the reference intentionally omitted.
+            else if (value == 'invoice') {
+
+                List<Response> lstResponse = handleInvoice(datalist);
+
+                res.statusCode = 200;
+                res.addHeader('Content-Type', 'application/json');
+                res.responseBody = Blob.valueOf(JSON.serialize(lstResponse));
+
+                if (Label.Enable_Logs == 'TRUE') {
+                    writeLog(data, JSON.serialize(lstResponse), 'Invoice', String.valueOf(res.statusCode));
+                }
+            }
+            // Any other ?value= falls through to the parameter error.
             else {
                 List<Response> lstResponse = new List<Response>();
                 lstResponse.add(new Response('Failure', 'Invalid Parameter Value.', false));
@@ -126,6 +126,234 @@ global class SAPGetData {
             res.statusCode = 401;
             res.addHeader('Content-Type', 'application/json');
             res.responseBody = Blob.valueOf(JSON.serialize(lstResponse));
+        }
+    }
+
+    /**
+     * Invoice handler.
+     *
+     * SAP's payload uses some keys that don't exactly match the
+     * Salesforce field API names (e.g. SAP sends "InvoiceId__c"
+     * while the SF field is "Invoice_Id__c"). To keep the code
+     * tolerant of those differences, every field is mapped
+     * explicitly here instead of relying on JSON.deserialize.
+     *
+     * SAP key                            -> SF field
+     * ---                                ---
+     * InvoiceId__c (parent)              -> Invoice__c.Invoice_Id__c
+     * InvoiceItems (array)               -> nested loop
+     * InvoiceId__c (line item)           -> Invoice_Item__c.Invoice_Id__c
+     * Total_Amount_Excl_Tax__c (line)    -> Invoice_Item__c.Total_Amount_with_out_GST__c
+     *
+     * Lookup resolution (one SOQL per object across the batch):
+     *   Customer__c       <- payload Customer_Code__c     -> Account.SAP_Code__c
+     *   Order__c          <- payload OrderId__c           -> Order.SAP_Code__c
+     *   OwnerId           <- payload Employee_Code__c     -> User.Employee_Code__c
+     *   Product__c        <- line ProductCode__c          -> Product2.ProductCode
+     *   Order_Product__c  <- line OrderItemId__c          -> OrderItem.SAP_Order_Item_Id__c
+     *
+     * Upsert keys (External Id):
+     *   Invoice__c       Invoice_Id__c
+     *   Invoice_Item__c  lineItemId__c
+     */
+    private static List<Response> handleInvoice(List<Map<String, Object>> incoming) {
+        List<Response> lstResponse = new List<Response>();
+        DateTime nowStamp = DateTime.now();
+
+        // ---- Pre-pass: collect codes for lookup resolution ----
+        Set<String> customerCodes = new Set<String>();
+        Set<String> orderCodes    = new Set<String>();
+        Set<String> employeeCodes = new Set<String>();
+        Set<String> productCodes  = new Set<String>();
+        Set<String> orderItemIds  = new Set<String>();
+
+        for (Map<String, Object> inv : incoming) {
+            addIfNotBlank(customerCodes, inv.get('Customer_Code__c'));
+            addIfNotBlank(orderCodes,    inv.get('OrderId__c'));
+            addIfNotBlank(employeeCodes, inv.get('Employee_Code__c'));
+
+            Object items = inv.get('InvoiceItems');
+            if (items instanceof List<Object>) {
+                for (Object item : (List<Object>) items) {
+                    if (item instanceof Map<String, Object>) {
+                        Map<String, Object> li = (Map<String, Object>) item;
+                        addIfNotBlank(productCodes, li.get('ProductCode__c'));
+                        addIfNotBlank(orderItemIds, li.get('OrderItemId__c'));
+                        addIfNotBlank(orderCodes,   li.get('OrderId__c'));
+                    }
+                }
+            }
+        }
+
+        // ---- Resolve lookups (one SOQL per object) ----
+        Map<String, Id> accountByCode = new Map<String, Id>();
+        if (!customerCodes.isEmpty()) {
+            for (Account a : [SELECT Id, SAP_Code__c FROM Account WHERE SAP_Code__c IN :customerCodes]) {
+                accountByCode.put(a.SAP_Code__c, a.Id);
+            }
+        }
+
+        Map<String, Id> orderByCode = new Map<String, Id>();
+        if (!orderCodes.isEmpty()) {
+            for (Order o : [SELECT Id, SAP_Code__c FROM Order WHERE SAP_Code__c IN :orderCodes]) {
+                orderByCode.put(o.SAP_Code__c, o.Id);
+            }
+        }
+
+        Map<String, Id> userByEmpCode = new Map<String, Id>();
+        if (!employeeCodes.isEmpty()) {
+            for (User u : [SELECT Id, Employee_Code__c FROM User WHERE Employee_Code__c IN :employeeCodes]) {
+                userByEmpCode.put(u.Employee_Code__c, u.Id);
+            }
+        }
+
+        Map<String, Id> productByCode = new Map<String, Id>();
+        if (!productCodes.isEmpty()) {
+            for (Product2 p : [SELECT Id, ProductCode FROM Product2 WHERE ProductCode IN :productCodes]) {
+                productByCode.put(p.ProductCode, p.Id);
+            }
+        }
+
+        Map<String, Id> orderItemBySapId = new Map<String, Id>();
+        if (!orderItemIds.isEmpty()) {
+            for (OrderItem oi : [SELECT Id, SAP_Order_Item_Id__c FROM OrderItem WHERE SAP_Order_Item_Id__c IN :orderItemIds]) {
+                orderItemBySapId.put(oi.SAP_Order_Item_Id__c, oi.Id);
+            }
+        }
+
+        // ---- Upsert each invoice + its line items ----
+        for (Map<String, Object> inv : incoming) {
+            String invoiceSapId = stringOf(inv.get('InvoiceId__c'));
+            try {
+                Invoice__c parent = new Invoice__c();
+                parent.Name                    = stringOf(inv.get('Name'));
+                parent.Invoice_Id__c           = invoiceSapId;
+                parent.Invoice_Date__c         = parseDate(inv.get('Invoice_Date__c'));
+                parent.Customer_Code__c        = stringOf(inv.get('Customer_Code__c'));
+                parent.OrderId__c              = stringOf(inv.get('OrderId__c'));
+                parent.Total_Amount_Excl_Tax__c = parseDecimal(inv.get('Total_Amount_Excl_Tax__c'));
+                parent.Remarks__c              = stringOf(inv.get('Remarks__c'));
+                parent.Status__c               = stringOf(inv.get('Status__c'));
+                parent.Grand_Total__c          = parseDecimal(inv.get('Grand_Total__c'));
+                parent.Employee_Code__c        = stringOf(inv.get('Employee_Code__c'));
+
+                String custCode = stringOf(inv.get('Customer_Code__c'));
+                if (String.isNotBlank(custCode) && accountByCode.containsKey(custCode)) {
+                    parent.Customer__c = accountByCode.get(custCode);
+                }
+                String ordCode = stringOf(inv.get('OrderId__c'));
+                if (String.isNotBlank(ordCode) && orderByCode.containsKey(ordCode)) {
+                    parent.Order__c = orderByCode.get(ordCode);
+                }
+                String empCode = stringOf(inv.get('Employee_Code__c'));
+                if (String.isNotBlank(empCode) && userByEmpCode.containsKey(empCode)) {
+                    parent.OwnerId = userByEmpCode.get(empCode);
+                }
+
+                parent.SAP_Sync_Status__c   = true;
+                parent.Last_ERP_Sync_Date__c = nowStamp;
+
+                upsert parent Invoice__c.Invoice_Id__c;
+
+                // ---- Children ----
+                Object items = inv.get('InvoiceItems');
+                if (items instanceof List<Object>) {
+                    List<Invoice_Item__c> lineItems = new List<Invoice_Item__c>();
+                    for (Object item : (List<Object>) items) {
+                        if (!(item instanceof Map<String, Object>)) continue;
+                        Map<String, Object> li = (Map<String, Object>) item;
+
+                        Invoice_Item__c child = new Invoice_Item__c();
+                        child.lineItemId__c       = stringOf(li.get('lineItemId__c'));
+                        child.Invoice_Id__c       = stringOf(li.get('InvoiceId__c'));
+                        child.Invoice__c          = parent.Id;
+                        child.OrderItemId__c      = stringOf(li.get('OrderItemId__c'));
+                        child.ProductCode__c      = stringOf(li.get('ProductCode__c'));
+                        child.Quantity__c         = parseDecimal(li.get('Quantity__c'));
+                        child.Order_Item_Quantity__c = parseDecimal(li.get('Order_Item_Quantity__c'));
+                        child.Unit_Price__c       = parseDecimal(li.get('Unit_Price__c'));
+                        child.Tax__c              = parseDecimal(li.get('Tax__c'));
+                        child.Tax_Amount__c       = parseDecimal(li.get('Tax_Amount__c'));
+                        child.Total_Amount__c     = parseDecimal(li.get('Total_Amount__c'));
+                        child.Total_Amount_with_out_GST__c =
+                            parseDecimal(li.get('Total_Amount_Excl_Tax__c'));
+
+                        String pcode = stringOf(li.get('ProductCode__c'));
+                        if (String.isNotBlank(pcode) && productByCode.containsKey(pcode)) {
+                            child.Product__c = productByCode.get(pcode);
+                        }
+                        String oiId = stringOf(li.get('OrderItemId__c'));
+                        if (String.isNotBlank(oiId) && orderItemBySapId.containsKey(oiId)) {
+                            child.Order_Product__c = orderItemBySapId.get(oiId);
+                        }
+                        String liOrdCode = stringOf(li.get('OrderId__c'));
+                        if (String.isNotBlank(liOrdCode) && orderByCode.containsKey(liOrdCode)) {
+                            child.Order__c = orderByCode.get(liOrdCode);
+                        }
+                        lineItems.add(child);
+                    }
+                    if (!lineItems.isEmpty()) {
+                        upsert lineItems Invoice_Item__c.lineItemId__c;
+                    }
+                }
+
+                lstResponse.add(new Response('Success', invoiceSapId));
+            } catch (Exception ex) {
+                lstResponse.add(new Response('Failure', invoiceSapId, ex.getMessage()));
+            }
+        }
+
+        return lstResponse;
+    }
+
+    private static void addIfNotBlank(Set<String> target, Object val) {
+        if (val == null) return;
+        String s = String.valueOf(val);
+        if (String.isNotBlank(s)) target.add(s);
+    }
+
+    private static String stringOf(Object val) {
+        return val == null ? null : String.valueOf(val);
+    }
+
+    private static Date parseDate(Object val) {
+        if (val == null) return null;
+        try {
+            return Date.valueOf(String.valueOf(val));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static Decimal parseDecimal(Object val) {
+        if (val == null) return null;
+        if (val instanceof Decimal) return (Decimal) val;
+        if (val instanceof Integer) return Decimal.valueOf((Integer) val);
+        if (val instanceof Double)  return Decimal.valueOf((Double) val);
+        try {
+            return Decimal.valueOf(String.valueOf(val));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static void writeLog(String reqBody, String resBody, String objectName, String statusCode) {
+        try {
+            Integer maxSize = 32000;
+            if (reqBody != null && reqBody.length() > maxSize) {
+                reqBody = reqBody.substring(0, maxSize);
+            }
+            if (resBody != null && resBody.length() > maxSize) {
+                resBody = resBody.substring(0, maxSize);
+            }
+            Log__c rec = new Log__c();
+            rec.Request__c     = reqBody;
+            rec.Response__c    = resBody;
+            rec.Object__c      = objectName;
+            rec.Status_Code__c = statusCode;
+            insert rec;
+        } catch (Exception e) {
+            System.debug('SAPGetData logging failed: ' + e.getMessage());
         }
     }
 

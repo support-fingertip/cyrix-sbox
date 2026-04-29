@@ -64,6 +64,7 @@ export default class visitManager extends LightningElement {
     isDesktop = false;
     isCometitionScreen = false;
     isQuoteScreen = false;
+    isOrderScreen = false;
     currentLogId;
     visitData;
     pickListData;
@@ -321,6 +322,7 @@ export default class visitManager extends LightningElement {
         this.outletPage = false;
         this.isCameraScreen = false;
         this.isQuoteScreen = false;
+        this.isOrderScreen = false;
     }
     handleProductScreen(event) {
         this.isShowBackButton = true;
@@ -387,6 +389,14 @@ export default class visitManager extends LightningElement {
             this.screen = msg.screen;
             this.isQuoteScreen = true;
             this.outletPage = true;
+        }
+        else if (msg.message == 'orderScreen') {
+            this.header = 'Order Session';
+            this.recordId = msg.recordID;
+            this.index = msg.index;
+            this.screen = msg.screen;
+            this.isOrderScreen = true;
+            this.outletPage = true;
         }else if (msg.message == 'checkin') {
 this.executeScreenData.isInProgress = false;
          } else if (msg.message == 'order' || msg.message == 'outstanding' || msg.message == 'sales' || msg.message == 'visit') {
@@ -400,6 +410,12 @@ this.executeScreenData.isInProgress = false;
     handleQuoteBackToVisit() {
         // Triggered by c-quote-session-page when user clicks the back icon
         this.screen = 3.6;
+        this.goBackScreen();
+    }
+
+    handleOrderBackToVisit() {
+        // Triggered by c-order-session-page when user clicks the back icon
+        this.screen = 3.7;
         this.goBackScreen();
     }
 
@@ -512,6 +528,14 @@ this.executeScreenData.isInProgress = false;
             this.isVisitHeader = true;
             this.outletPage = true;
             this.isQuoteScreen = false;
+        }
+        else if (sc == 3.7) {
+            this.header = this.VisitListName;
+            this.isExecuteScreen = true;
+            this.screen = 3;
+            this.isVisitHeader = true;
+            this.outletPage = true;
+            this.isOrderScreen = false;
         }
         if (changeShadow) {
             const allMenuItems = this.template.querySelectorAll('.menu-items');

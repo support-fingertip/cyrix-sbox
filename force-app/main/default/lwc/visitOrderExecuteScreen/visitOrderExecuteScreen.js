@@ -578,6 +578,16 @@ openQuoteScreen(){
     };
     this.genericDispatchEvent(message);
 }
+openOrderScreen(){
+    const  message = {
+        message: 'orderScreen' ,
+        recordID : this.recordId,
+        index : this.index,
+        screen : 3.7,
+        accId : this.accId
+    };
+    this.genericDispatchEvent(message);
+}
 // Toggle dropdowns
 
 toggleImageDropdown(){

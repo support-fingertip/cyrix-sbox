@@ -20,6 +20,11 @@ const TOTAL_STEPS = STEP_LABELS.length;
 
 export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     @api recordId;
+    @api fromVisitPlan = false;
+
+    get canvasClass() {
+        return this.fromVisitPlan ? 'qw-canvas qw-canvas-inline' : 'qw-canvas';
+    }
 
     // Picks up recordId when launched from the "New Quote" Lightning Component Tab
     // (the record-home override navigates here with state.c__recordId set).
@@ -788,6 +793,15 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 'Quote, line items, and payment terms saved successfully.'
             );
 
+            if (this.fromVisitPlan) {
+                // Stay inside the Visit Plan quote session — let the parent
+                // switch back to the quote list and refresh.
+                this.dispatchEvent(new CustomEvent('saved', {
+                    detail: { quoteId: quoteId, isEditMode: this.isEditMode }
+                }));
+                return;
+            }
+
             // Close the quick action modal
             this.dispatchEvent(new CloseActionScreenEvent());
 
@@ -809,6 +823,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 'Quote header was saved but line items failed: ' + this.reduceErrors(error) +
                 '. Please add line items from the Quote record page.'
             );
+            if (this.fromVisitPlan) {
+                this.dispatchEvent(new CustomEvent('saved', {
+                    detail: { quoteId: quoteId, isEditMode: this.isEditMode, partial: true }
+                }));
+                return;
+            }
             // Stay on the form, do not close modal
             this[NavigationMixin.Navigate]({
                 type: 'standard__recordPage',
@@ -1063,7 +1083,6 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 quantity: item.quantity || 1
             });
 
-            const previousStatus = item.priceStatus;
             const resolvedPb = preview.resolvedTier || '';
             this.lineItems = this.lineItems.map(it => {
                 if (it.rowId !== rowId) return it;
@@ -1097,36 +1116,9 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 // Sales Price.
                 return updated;
             });
-
-            // UX feedback: when the status flips from Not Required to
-            // Approval Required (or the rep blew past the broadest
-            // ceiling) surface a toast naming the tier the discount
-            // landed on so they know which approval tier was hit.
-            if (preview.priceStatus === 'Approval Required'
-                && previousStatus !== 'Approval Required') {
-                if (preview.exceedsAllTiers) {
-                    this.showError(
-                        'Discount above CEO/CFO ceiling',
-                        `Discount exceeds the ${this.tierDisplayLabel(preview.resolvedTier)} ` +
-                        `maximum. Approval will be required.`
-                    );
-                } else if (preview.resolvedTier) {
-                    this.showSuccess(
-                        'Approval required',
-                        `Discount mapped to ${this.tierDisplayLabel(preview.resolvedTier)} — ` +
-                        `requires approval at that tier.`
-                    );
-                }
-            }
         } catch (error) {
             console.warn('Pricing preview unavailable:', error && error.body ? error.body.message : error);
         }
-    }
-
-    // Friendly label for the tier ('Price List 4' -> 'Tier 4').
-    tierDisplayLabel(tierName) {
-        const label = this.getPriceBadgeLabel(tierName);
-        return label || tierName || 'Standard';
     }
 
     // 12.50% style trim — strip ".00" from clean integers and pad single
@@ -1139,6 +1131,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     }
 
     // ===== CANCEL =====
+
+    handleVisitPlanCancel() {
+        // Launched from the Visit Plan quote session. Notify the parent
+        // (quoteSessionPage) so it can switch back to the quote list.
+        this.dispatchEvent(new CustomEvent('cancel'));
+    }
 
     handleCancel() {
         this.dispatchEvent(new CloseActionScreenEvent());
