@@ -21,6 +21,7 @@ export default class OrderSessionPage extends LightningElement {
     // 'edit'    (recordId is an existing Order -> newOrderCmp loads in edit mode)
     builderMode = 'convert';
     builderRecordId = null;
+    builderFromVisitPlan = true;
 
     connectedCallback() {
         this.loadOrders();
