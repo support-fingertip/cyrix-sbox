@@ -60,30 +60,34 @@
                     </aura:iteration>
                 </aura:if>
             </div>
-            <div class="slds-box slds-theme_default">
+            <div class="slds-box slds-theme_default gfu-file-list">
                 <aura:if isTrue="{!AND(v.contentDocIds.length > 0,!v.togglePreview)}">
-                    <table class="slds-table slds-table_bordered slds-table_cell-buffer slds-table_edit slds-table_fixed-layout slds-table_resizable-cols">
-                        <thead>
-                            <tr class="slds-line-height_reset">
-                                <th width="10%">Preview</th>
-                                <th width="30%">File Name</th>
-                                <th width="10%">Download</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <aura:iteration items="{!v.contentDocIds}" var="file">
-                                <tr>
-                                    <td>
-                                        <img src="{!file.previewUrl}" alt="{!file.title}" style="width:50px; height:50px;"/>
-                                    </td>
-                                    <td>{!file.title}</td>
-                                    <td>
-                                        <a href="{!file.downloadUrl}" target="_blank" class="slds-button slds-button_icon">Download</a>
-                                    </td>
+                    <div class="slds-scrollable_x">
+                        <table class="slds-table slds-table_bordered slds-table_cell-buffer gfu-file-table">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th class="gfu-col-preview">Preview</th>
+                                    <th class="gfu-col-name">File Name</th>
+                                    <th class="gfu-col-download">Download</th>
                                 </tr>
-                            </aura:iteration>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <aura:iteration items="{!v.contentDocIds}" var="file">
+                                    <tr>
+                                        <td class="gfu-col-preview">
+                                            <img src="{!file.previewUrl}" alt="{!file.title}" class="gfu-thumb"/>
+                                        </td>
+                                        <td class="gfu-col-name">
+                                            <span class="gfu-file-name" title="{!file.title}">{!file.title}</span>
+                                        </td>
+                                        <td class="gfu-col-download">
+                                            <a href="{!file.downloadUrl}" target="_blank" class="slds-button slds-button_neutral gfu-download-btn">Download</a>
+                                        </td>
+                                    </tr>
+                                </aura:iteration>
+                            </tbody>
+                        </table>
+                    </div>
                 </aura:if>
             </div>
         </article>
