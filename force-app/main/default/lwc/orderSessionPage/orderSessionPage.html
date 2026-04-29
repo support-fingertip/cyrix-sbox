@@ -20,7 +20,8 @@
                     </lightning-button>
                 </div>
                 <c-new-order-cmp record-id={builderRecordId} from-visit-plan
-                    oncancel={handleCloseBuilder}></c-new-order-cmp>
+                    oncancel={handleCloseBuilder}
+                    onsaved={handleCloseBuilder}></c-new-order-cmp>
             </div>
         </template>
 
