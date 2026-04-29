@@ -11,6 +11,13 @@
                         </valueListItems>
                         <valueListItems>
                             <value>Submit</value>
+                            <visibilityRule>
+                                <criteria>
+                                    <leftValue>{!Record.Price_Status__c}</leftValue>
+                                    <operator>EQUAL</operator>
+                                    <rightValue>Draft</rightValue>
+                                </criteria>
+                            </visibilityRule>
                         </valueListItems>
                         <valueListItems>
                             <value>Edit</value>
@@ -55,24 +62,7 @@
                             <value>Delete</value>
                         </valueListItems>
                         <valueListItems>
-                            <value>CustomButton.Quote.Send_Quote_PDF</value>
-                            <visibilityRule>
-                                <criteria>
-                                    <leftValue>{!Record.Price_Status__c}</leftValue>
-                                    <operator>EQUAL</operator>
-                                    <rightValue>Not Required</rightValue>
-                                </criteria>
-                            </visibilityRule>
-                        </valueListItems>
-                        <valueListItems>
-                            <value>Quote.Send_Quote_PDF_Whatsapp</value>
-                            <visibilityRule>
-                                <criteria>
-                                    <leftValue>{!Record.Price_Status__c}</leftValue>
-                                    <operator>EQUAL</operator>
-                                    <rightValue>Not Required</rightValue>
-                                </criteria>
-                            </visibilityRule>
+                            <value>Quote.Send_Quote_PDF</value>
                         </valueListItems>
                     </valueList>
                 </componentInstanceProperties>
@@ -117,6 +107,12 @@
                 </componentInstanceProperties>
                 <componentName>runtime_sales_pathassistant:pathAssistant</componentName>
                 <identifier>runtime_sales_pathassistant_pathAssistant</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentName>quoteActionPanel</componentName>
+                <identifier>c_quoteActionPanel</identifier>
             </componentInstance>
         </itemInstances>
         <mode>Replace</mode>

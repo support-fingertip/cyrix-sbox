@@ -97,13 +97,13 @@
                                 <div class="qw-field">
                                     <lightning-input-field field-name="Contract_Period_From_Date__c" required onchange={handleContractFromDateChange}></lightning-input-field>
                                     <template if:true={isContractFromDateMissing}>
-                                        <div class="qw-field-error">Contract Period From Date is required for AMC / CAMC.</div>
+                                        <div class="qw-field-error">Contract Period From Date is required.</div>
                                     </template>
                                 </div>
                                 <div class="qw-field">
                                     <lightning-input-field field-name="Contract_Period_End_Date__c" required onchange={handleContractEndDateChange}></lightning-input-field>
                                     <template if:true={isContractEndDateMissing}>
-                                        <div class="qw-field-error">Contract Period End Date is required for AMC / CAMC.</div>
+                                        <div class="qw-field-error">Contract Period End Date is required.</div>
                                     </template>
                                     <template if:true={isContractDateInvalid}>
                                         <div class="qw-field-error">End Date must be greater than From Date.</div>
@@ -331,6 +331,15 @@
                                                 data-row-id={item.rowId} data-field="discount"
                                                 onchange={handleLineItemChange}>
                                             </lightning-input>
+                                        </div>
+                                        <div>
+                                            <div class="qw-field-label">Max Disc %</div>
+                                            <template if:true={item.hasMaxDiscount}>
+                                                <div class="qw-field-static">{item.maxDiscountDisplay}</div>
+                                            </template>
+                                            <template if:false={item.hasMaxDiscount}>
+                                                <div class="qw-field-static muted">—</div>
+                                            </template>
                                         </div>
                                         <div>
                                             <div class="qw-field-label">Tax %</div>

@@ -201,8 +201,14 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // takes over) so we don't validate it here.
     validateCurrentStep() {
         if (this.currentStep === 1) {
-            if (this.isContractFromDateMissing || this.isContractEndDateMissing) {
-                return 'Contract Period From Date and End Date are required for AMC / CAMC sub-verticals.';
+            if (this.isContractFromDateMissing && this.isContractEndDateMissing) {
+                return 'Contract Period From Date and End Date are required.';
+            }
+            if (this.isContractFromDateMissing) {
+                return 'Contract Period From Date is required.';
+            }
+            if (this.isContractEndDateMissing) {
+                return 'Contract Period End Date is required.';
             }
             if (this.isContractDateInvalid) {
                 return 'Contract End Date must be greater than From Date.';
@@ -672,9 +678,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         // AMC / CAMC sub-verticals require both contract dates — they
         // anchor the maintenance window so saves without them aren't valid.
         if (this.showContractDates && (!fromDate || !endDate)) {
+            const missing = [];
+            if (!fromDate) missing.push('Contract Period From Date');
+            if (!endDate) missing.push('Contract Period End Date');
             this.showError(
                 'Contract dates required',
-                'Contract Period From Date and End Date are mandatory for AMC / CAMC sub-verticals.'
+                `${missing.join(' and ')} ${missing.length === 1 ? 'is' : 'are'} required.`
             );
             return;
         }
@@ -818,9 +827,16 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     handleFormError(event) {
         this.isSaving = false;
         this.isLoading = false;
-        const message = event.detail?.message || 'An error occurred while saving the quote.';
+        const detail = event.detail || {};
+        // record-edit-form's onerror payload nests the field/page error
+        // bag under detail.output — reduceErrors knows how to walk it
+        // and yields friendlier multi-line messages than detail.message
+        // (which is just the top-line summary).
+        const message = this.reduceErrors({ body: detail })
+            || detail.message
+            || 'An error occurred while saving the quote.';
         this.showError('Save Failed', message);
-        console.error('Form error:', JSON.stringify(event.detail));
+        console.error('Form error:', JSON.stringify(detail));
     }
 
     // ===== SEARCH HANDLERS =====
@@ -905,18 +921,12 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         if (!isService && (!product.pricebookEntryId || product.unitPrice == null)) {
             this.showError(
                 'Cannot add product',
-                product.productName + ' does not have a Price list5 entry. Ask an admin to create one before adding it to a quote.'
+                product.productName + ' does not have a Price List 5 entry. Ask an admin to create one before adding it to a quote.'
             );
             return;
         }
 
         rowCounter++;
-        // Extract the discount-tier PBE prices (PL4 -> PL1) from the
-        // search result so computePriceStatus can iterate them without
-        // a server round-trip.
-        const tierPrices = Array.isArray(product.availablePrices)
-            ? product.availablePrices.map(p => p.price).filter(v => v != null)
-            : [];
         const priceStatus = 'Not Required';
         const newItem = {
             rowId: 'row-' + rowCounter,
@@ -937,7 +947,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             priceStatus: priceStatus,
             priceStatusBadgeClass: this.getPriceStatusBadgeClass(priceStatus),
             qwStatusClass: this.getQwStatusClass(priceStatus),
-            isApprovalRequired: priceStatus === 'Approval Required',
+            isApprovalRequired: false,
             lineTotal: (product.unitPrice || 0) * (1 + ((product.taxPercent || 0) / 100)),
             lineDescription: product.lineDescription || '',
             detailedDescription: product.detailedDescription || '',
@@ -945,8 +955,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             sourcePricebookName: product.sourcePricebook || (isService ? 'Service' : ''),
             priceBadgeClass: this.getPriceBadgeClass(product.sourcePricebookType),
             priceBadgeLabel: this.getPriceBadgeLabel(product.sourcePricebookType),
-            hasPriceSource: !!product.sourcePricebookType,
-            tierPrices: tierPrices
+            hasPriceSource: !!product.sourcePricebookType
         };
 
         this.lineItems = [...this.lineItems, newItem];
@@ -957,6 +966,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             if (r.pricebookEntryId !== pbeId) return r;
             return { ...r, alreadyAdded: true, cardClass: 'qw-product-card is-added' };
         });
+
+        // Run the discount/ceiling evaluator immediately so a freshly
+        // added line carries an accurate priceStatus and (for non-service
+        // products) the resolved tier badge.
+        if (!isService) this.refreshPricingPreview(newItem.rowId);
 
         this.showSuccess('Product Added', product.productName + ' added to the quote.');
     }
@@ -1020,38 +1034,26 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             const taxAmt = afterDiscount * ((updated.taxPercent || 0) / 100);
             updated.lineTotal = afterDiscount + taxAmt;
 
-            // Recompute price status against the product's tier PBE
-            // prices (PL4..PL1). Preserves an already-Approved line so
-            // approvers' decisions aren't silently undone by a later edit.
-            if (updated.priceStatus !== 'Approved') {
-                const live = this.computePriceStatus(
-                    updated.unitPrice,
-                    updated.discount,
-                    updated.listPrice,
-                    updated.isServiceItem,
-                    updated.taxPercent,
-                    updated.tierPrices
-                );
-                updated.priceStatus = live;
-                updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(live);
-                updated.qwStatusClass = this.getQwStatusClass(live);
-                updated.isApprovalRequired = live === 'Approval Required';
-            }
-
             return updated;
         });
 
+        // The discount-vs-Discount__c evaluator is server-side: ping it on
+        // every discount/quantity/unit-price change so the UI badge,
+        // mapped tier, and (re-fetched) UnitPrice stay in sync with what
+        // the QuoteLineItem trigger will stamp on save.
         if (refreshTier) this.refreshPricingPreview(rowId);
     }
 
-    // Asks the server for the tightest-fitting tier based on the current
-    // unit price and discount. The server answer is authoritative for the
-    // tier badge + Price_Status — matches what the QLI trigger will stamp
-    // on save. Skipped for service lines and for already-Approved lines.
+    // Asks the server to run the discount-vs-Discount__c algorithm and
+    // returns the tier the line should map to, the UnitPrice to re-fetch
+    // from that tier's PricebookEntry, and the resulting Price_Status.
+    // Already-Approved lines are skipped so an approver's decision isn't
+    // silently undone by a later edit. Service items short-circuit on
+    // the server (status = Not Required, no remap).
     async refreshPricingPreview(rowId) {
         const item = this.lineItems.find(it => it.rowId === rowId);
-        if (!item || item.isServiceItem || item.priceStatus === 'Approved') return;
-        if (!item.productId || item.unitPrice == null) return;
+        if (!item || item.priceStatus === 'Approved') return;
+        if (!item.productId) return;
 
         try {
             const preview = await getProductPricingPreview({
@@ -1061,12 +1063,7 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 quantity: item.quantity || 1
             });
 
-            // Apex returns resolvedTier = 'Standard' when the per-unit
-            // final is above PL4 (no discount tier applies), else one
-            // of 'Price list4'..'Price list1'. Fall back to 'Standard'
-            // so the UI matches the save-time stamp on the org's
-            // Standard Pricebook.
-            const resolvedPb = preview.resolvedTier || 'Standard';
+            const resolvedPb = preview.resolvedTier || '';
             this.lineItems = this.lineItems.map(it => {
                 if (it.rowId !== rowId) return it;
                 const updated = { ...it };
@@ -1074,20 +1071,43 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(updated.priceStatus);
                 updated.qwStatusClass = this.getQwStatusClass(updated.priceStatus);
                 updated.isApprovalRequired = updated.priceStatus === 'Approval Required';
-                updated.sourcePricebookId = preview.resolvedPricebookId || updated.sourcePricebookId;
-                updated.sourcePricebookName = resolvedPb;
-                updated.priceBadgeClass = this.getPriceBadgeClass(resolvedPb);
-                updated.priceBadgeLabel = this.getPriceBadgeLabel(resolvedPb);
-                updated.hasPriceSource = !!resolvedPb;
+                if (preview.resolvedPricebookId) updated.sourcePricebookId = preview.resolvedPricebookId;
+                if (resolvedPb) {
+                    updated.sourcePricebookName = resolvedPb;
+                    updated.priceBadgeClass = this.getPriceBadgeClass(resolvedPb);
+                    updated.priceBadgeLabel = this.getPriceBadgeLabel(resolvedPb);
+                    updated.hasPriceSource = true;
+                }
+                if (preview.pricebookEntryId || preview.resolvedPricebookEntryId) {
+                    updated.pricebookEntryId = preview.resolvedPricebookEntryId || preview.pricebookEntryId;
+                }
+                // Surface the rep's self-approval ceiling on the line so
+                // the row can show "Max Discount: N%". Falls back to the
+                // previous value when the server preview doesn't carry
+                // one (e.g. unknown profile, missing tier data).
+                if (preview.ceilingTierDiscount != null) {
+                    updated.maxDiscount = preview.ceilingTierDiscount;
+                    updated.maxDiscountDisplay = this.formatMaxDiscount(preview.ceilingTierDiscount);
+                    updated.hasMaxDiscount = true;
+                }
+                // UnitPrice is intentionally NOT updated from the preview.
+                // The rep entered it at the PL5 list price; escalation
+                // only affects the approval path, not the displayed
+                // Sales Price.
                 return updated;
             });
         } catch (error) {
-            // Server rejects UnitPrice < Price list5 by throwing — the
-            // client floor already caught that; any other rejection is
-            // non-fatal for the live UI (the save trigger remains the
-            // source of truth). Log quietly to the console.
             console.warn('Pricing preview unavailable:', error && error.body ? error.body.message : error);
         }
+    }
+
+    // 12.50% style trim — strip ".00" from clean integers and pad single
+    // decimals to two so the row chip stays consistent.
+    formatMaxDiscount(value) {
+        if (value == null) return '';
+        const n = Number(value);
+        if (!isFinite(n)) return '';
+        return (n % 1 === 0 ? n.toFixed(0) : n.toFixed(2)) + '%';
     }
 
     // ===== CANCEL =====
@@ -1171,7 +1191,9 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
     // Shared builder for grid rows sourced from the server — used by
     // edit-mode QLI loading and by the new-quote flow when prefilling
-    // from the parent Opportunity's products.
+    // from the parent Opportunity's products. Price status is read from
+    // the server payload (or 'Not Required' for service items); the
+    // live preview re-evaluates on the first edit.
     buildRowFromServerItem(item, index) {
         rowCounter++;
         const disc = item.discount || 0;
@@ -1181,23 +1203,14 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         const afterDiscount = base - discountAmt;
         const taxAmt = afterDiscount * ((item.taxPercent || 0) / 100);
 
-        // Server doesn't ship tier PBE prices on load — computePriceStatus
-        // falls back to the listPrice comparison; the live preview will
-        // refresh the status on the first edit.
-        const tierPricesFromDb = [];
         const VALID_LINE_STATUSES = ['Not Required', 'Approval Required', 'Approved'];
-        // Service items (Service_Item picklist = Yes) never require
-        // approval — ignore any stale server value that says otherwise.
         let priceStatus;
         if (isService) {
             priceStatus = 'Not Required';
         } else if (VALID_LINE_STATUSES.includes(item.priceStatus)) {
             priceStatus = item.priceStatus;
         } else {
-            priceStatus = this.computePriceStatus(
-                item.unitPrice, disc, item.listPrice, isService,
-                item.taxPercent, tierPricesFromDb
-            );
+            priceStatus = 'Not Required';
         }
 
         return {
@@ -1225,57 +1238,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             detailedDescription: item.detailedDescription || '',
             sourcePricebookId: item.sourcePricebookId || null,
             sourcePricebookName: item.sourcePricebookName || '',
-            tierPrices: tierPricesFromDb,
             priceBadgeClass: this.getPriceBadgeClass(item.sourcePricebookName),
             priceBadgeLabel: this.getPriceBadgeLabel(item.sourcePricebookName),
             hasPriceSource: !!item.sourcePricebookName
         };
     }
 
-    // ===== PRICE STATUS =====
-
-    // Client-side mirror of the server's Price_Status decision.
-    //
-    // Non-service logic:
-    //   finalPrice = unitPrice
-    //              - (discount% of unitPrice)
-    //              - (tax% of unitPrice)
-    //   Walk the product's existing discount-tier pricebooks (Price list4
-    //   down to Price list1, excluding the Standard pricebook). If
-    //   finalPrice is <= any of those tier list prices, return
-    //   'Approval Required'. Otherwise compare to listPrice (the Standard
-    //   / Price list5 anchor) as the last-resort fallback for products
-    //   that don't have any tier pricebooks populated.
-    //
-    // Service lines (Product's Service_Item picklist = Yes) always return
-    // 'Not Required' — the tier/list-price approval gate doesn't apply.
-    computePriceStatus(unitPrice, discount, listPrice, isServiceItem, taxpercentage, tierPrices) {
-        if (isServiceItem) return 'Not Required';
-
-        const tax = taxpercentage == null ? 0 : taxpercentage;
-        const up  = unitPrice == null ? 0 : unitPrice;
-        const d   = discount == null ? 0 : discount;
-        const taxprice = (up * tax) / 100;
-        const finalPrice = up - ((d * up) / 100) - taxprice;
-
-        // Iterate the product's tier PBE prices (PL4 -> PL1, already
-        // excludes Standard). If any tier price is >= finalPrice, the
-        // discount has dropped the line into that tier's band and the
-        // status flips to Approval Required.
-        if (Array.isArray(tierPrices)) {
-            for (const tp of tierPrices) {
-               
-                if (tp != null && finalPrice <= tp) return 'Approval Required';
-            }
-            // No tier matched and tier data was actually supplied —
-            // final price is above every discount tier; no approval.
-            if (tierPrices.length > 0) return 'Not Required';
-        }
-
-        // Fallback for products with no tier PBEs configured.
-        if (listPrice == null) return 'Not Required';
-        return finalPrice <= listPrice ? 'Approval Required' : 'Not Required';
-    }
+    // ===== PRICE STATUS BADGES =====
 
     getPriceStatusBadgeClass(priceStatus) {
         const base = 'slds-badge';
@@ -1311,30 +1280,42 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     getPriceBadgeClass(pricebookType) {
         const base = 'price-source-badge';
         if (!pricebookType) return base + ' price-source-standard';
-        switch (pricebookType) {
-            case 'Standard':    return base + ' price-source-standard';
-            case 'Price list 5': return base + ' price-source-standard';
-            case 'Price list 4': return base + ' price-source-tier4';
-            case 'Price list 3': return base + ' price-source-tier3';
-            case 'Price list 2': return base + ' price-source-tier2';
-            case 'Price list 1': return base + ' price-source-tier1';
-            case 'Service':    return base + ' price-source-service';
-            default:           return base + ' price-source-standard';
+        switch (this.normaliseTier(pricebookType)) {
+            case 'Standard':     return base + ' price-source-standard';
+            case 'Price List 5': return base + ' price-source-standard';
+            case 'Price List 4': return base + ' price-source-tier4';
+            case 'Price List 3': return base + ' price-source-tier3';
+            case 'Price List 2': return base + ' price-source-tier2';
+            case 'Price List 1': return base + ' price-source-tier1';
+            case 'Service':      return base + ' price-source-service';
+            default:             return base + ' price-source-standard';
         }
     }
 
     getPriceBadgeLabel(pricebookType) {
         if (!pricebookType) return '';
-        switch (pricebookType) {
-            case 'Standard':    return 'Standard';
-            case 'Price list 5': return 'Tier 5';
-            case 'Price list 4': return 'Tier 4';
-            case 'Price list 3': return 'Tier 3';
-            case 'Price list 2': return 'Tier 2';
-            case 'Price list 1': return 'Tier 1';
-            case 'Service':    return 'Service';
-            default:           return pricebookType;
+        switch (this.normaliseTier(pricebookType)) {
+            case 'Standard':     return 'Standard';
+            case 'Price List 5': return 'Tier 5';
+            case 'Price List 4': return 'Tier 4';
+            case 'Price List 3': return 'Tier 3';
+            case 'Price List 2': return 'Tier 2';
+            case 'Price List 1': return 'Tier 1';
+            case 'Service':      return 'Service';
+            default:             return pricebookType;
         }
+    }
+
+    // Older quote / order saves stored the tier name in mixed casing
+    // ('Price list4', 'Price list 4', etc.). Normalise to the canonical
+    // 'Price List N' form so the badge maps stay clean.
+    normaliseTier(name) {
+        if (!name) return '';
+        const m = String(name).trim().match(/^price\s*list\s*([1-5])$/i);
+        if (m) return 'Price List ' + m[1];
+        if (/^standard$/i.test(name)) return 'Standard';
+        if (/^service$/i.test(name)) return 'Service';
+        return name;
     }
 
     // ===== UTILITY =====
@@ -1348,28 +1329,86 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }).format(value);
     }
 
+    // Normalises every error shape the platform throws (Apex AuraHandled,
+    // record-edit-form DML errors, plain Errors, plain strings) into a
+    // single, user-readable string. Strips Salesforce's "FIELD_CUSTOM_VALIDATION_EXCEPTION,"
+    // and trailing ": [Field__c]" prefixes/suffixes so the toast shows the
+    // human-meaningful sentence and nothing else.
     reduceErrors(error) {
-        if (typeof error === 'string') return error;
-        if (error?.body?.message) return error.body.message;
-        if (error?.body?.fieldErrors) {
-            const fieldMsgs = Object.values(error.body.fieldErrors).flat().map(e => e.message);
-            if (fieldMsgs.length) return fieldMsgs.join(', ');
+        if (!error) return 'An unexpected error occurred.';
+        if (typeof error === 'string') return this.cleanErrorMessage(error);
+
+        const messages = [];
+        const errors = Array.isArray(error) ? error : [error];
+
+        for (const e of errors) {
+            if (!e) continue;
+            if (typeof e === 'string') {
+                messages.push(this.cleanErrorMessage(e));
+                continue;
+            }
+            if (e.body) {
+                if (Array.isArray(e.body)) {
+                    e.body.forEach(b => b && b.message && messages.push(this.cleanErrorMessage(b.message)));
+                    continue;
+                }
+                if (typeof e.body === 'string') {
+                    messages.push(this.cleanErrorMessage(e.body));
+                    continue;
+                }
+                if (e.body.fieldErrors) {
+                    Object.values(e.body.fieldErrors).flat().forEach(fe => {
+                        if (fe && fe.message) messages.push(this.cleanErrorMessage(fe.message));
+                    });
+                }
+                if (e.body.pageErrors) {
+                    e.body.pageErrors.forEach(pe => {
+                        if (pe && pe.message) messages.push(this.cleanErrorMessage(pe.message));
+                    });
+                }
+                if (e.body.output && Array.isArray(e.body.output.errors)) {
+                    e.body.output.errors.forEach(oe => {
+                        if (oe && oe.message) messages.push(this.cleanErrorMessage(oe.message));
+                    });
+                }
+                if (e.body.message) messages.push(this.cleanErrorMessage(e.body.message));
+                continue;
+            }
+            if (e.message) messages.push(this.cleanErrorMessage(e.message));
         }
-        if (error?.body?.pageErrors) {
-            const pageMsgs = error.body.pageErrors.map(e => e.message);
-            if (pageMsgs.length) return pageMsgs.join(', ');
+
+        const unique = [...new Set(messages.filter(m => m && m.trim()))];
+        if (!unique.length) {
+            console.error('Unhandled error format:', JSON.stringify(error));
+            return 'An unexpected error occurred. Please try again or contact your administrator.';
         }
-        if (error?.message) return error.message;
-        if (Array.isArray(error?.body)) return error.body.map(e => e.message).join(', ');
-        console.error('Unhandled error format:', JSON.stringify(error));
-        return 'An unexpected error occurred.';
+        return unique.join('\n');
+    }
+
+    // Strips Salesforce's noise ("FIELD_CUSTOM_VALIDATION_EXCEPTION, ",
+    // ": [Field__c]") so the rep sees the human sentence the admin wrote.
+    cleanErrorMessage(raw) {
+        if (!raw) return '';
+        let msg = String(raw).trim();
+        msg = msg.replace(/^[A-Z_]+_EXCEPTION\s*[,:]\s*/i, '');
+        msg = msg.replace(/^System\.[A-Za-z]+Exception:\s*/i, '');
+        msg = msg.replace(/:\s*\[[^\]]+\]\s*$/, '');
+        return msg.trim();
     }
 
     showSuccess(title, message) {
-        this.dispatchEvent(new ShowToastEvent({ title, message, variant: 'success' }));
+        this.dispatchEvent(new ShowToastEvent({
+            title, message, variant: 'success', mode: 'dismissable'
+        }));
     }
 
+    // 'dismissable' auto-closes after the platform's default timeout (~3s)
+    // and still lets the user click ✕ to close it sooner. 'sticky' kept
+    // earlier toasts on screen until manually dismissed, which left
+    // stale errors hanging around.
     showError(title, message) {
-        this.dispatchEvent(new ShowToastEvent({ title, message, variant: 'error', mode: 'sticky' }));
+        this.dispatchEvent(new ShowToastEvent({
+            title, message, variant: 'error', mode: 'dismissable'
+        }));
     }
 }

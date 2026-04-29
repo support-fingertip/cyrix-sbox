@@ -234,6 +234,10 @@
         </itemInstances>
         <itemInstances>
             <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
                 <fieldItem>Record.Sub_Vertical__c</fieldItem>
                 <identifier>RecordSub_Vertical__cField</identifier>
             </fieldInstance>
@@ -286,16 +290,6 @@
                         <operator>NE</operator>
                     </criteria>
                 </visibilityRule>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Converted_Comments__c</fieldItem>
-                <identifier>RecordConverted_Comments_cField</identifier>
             </fieldInstance>
         </itemInstances>
         <itemInstances>
@@ -1881,6 +1875,48 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
+                <fieldItem>Record.Converted_Comments__c</fieldItem>
+                <identifier>RecordConverted_Comments_cField</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <name>Facet-618629f3-4217-4e48-b673-f5e8501c0b6e</name>
+        <type>Facet</type>
+    </flexiPageRegions>
+    <flexiPageRegions>
+        <name>Facet-41598bcd-a3d7-4dfd-b889-5b7ed8fa4183</name>
+        <type>Facet</type>
+    </flexiPageRegions>
+    <flexiPageRegions>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>body</name>
+                    <value>Facet-618629f3-4217-4e48-b673-f5e8501c0b6e</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:column</componentName>
+                <identifier>flexipage_column46</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>body</name>
+                    <value>Facet-41598bcd-a3d7-4dfd-b889-5b7ed8fa4183</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:column</componentName>
+                <identifier>flexipage_column47</identifier>
+            </componentInstance>
+        </itemInstances>
+        <name>Facet-08c18c2a-fea2-46b4-89e4-31851c2faf8c</name>
+        <type>Facet</type>
+    </flexiPageRegions>
+    <flexiPageRegions>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
                 <fieldItem>Record.Requirement_Details__c</fieldItem>
                 <identifier>RecordRequirement_Detail_cField</identifier>
             </fieldInstance>
@@ -2526,6 +2562,31 @@
                     <criteria>
                         <leftValue>{!Record.Lead_ID__c}</leftValue>
                         <operator>NE</operator>
+                    </criteria>
+                </visibilityRule>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>columns</name>
+                    <value>Facet-08c18c2a-fea2-46b4-89e4-31851c2faf8c</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>horizontalAlignment</name>
+                    <value>false</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>label</name>
+                    <value>Closed Won</value>
+                </componentInstanceProperties>
+                <componentName>flexipage:fieldSection</componentName>
+                <identifier>flexipage_fieldSection24</identifier>
+                <visibilityRule>
+                    <criteria>
+                        <leftValue>{!Record.Status}</leftValue>
+                        <operator>EQUAL</operator>
+                        <rightValue>Closed Won</rightValue>
                     </criteria>
                 </visibilityRule>
             </componentInstance>

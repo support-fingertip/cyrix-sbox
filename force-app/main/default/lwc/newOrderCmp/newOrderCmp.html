@@ -295,6 +295,15 @@
                                             </lightning-input>
                                         </div>
                                         <div>
+                                            <div class="qw-field-label">Max Disc %</div>
+                                            <template if:true={item.hasMaxDiscount}>
+                                                <div class="qw-field-static">{item.maxDiscountDisplay}</div>
+                                            </template>
+                                            <template if:false={item.hasMaxDiscount}>
+                                                <div class="qw-field-static muted">—</div>
+                                            </template>
+                                        </div>
+                                        <div>
                                             <div class="qw-field-label">Tax %</div>
                                             <div class="qw-field-static muted">{item.taxPercentDisplay}</div>
                                             <template if:false={item.isServiceItem}>

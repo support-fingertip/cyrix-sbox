@@ -1,0 +1,148 @@
+<template>
+    <div class="qap-card">
+        <div class="qap-grid">
+            <template if:true={showApprovalButton}>
+                <button class="qap-btn" type="button" data-action="approval" onclick={handleAction}>
+                    <span class="qap-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 12l2 2 4-4"/>
+                            <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c2.39 0 4.68.93 6.36 2.64"/>
+                        </svg>
+                    </span>
+                    <span class="qap-label">Submit for approval</span>
+                </button>
+            </template>
+            <button class="qap-btn" type="button" data-action="pdf" onclick={handleAction}>
+                <span class="qap-icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 2L11 13"/>
+                        <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+                    </svg>
+                </span>
+                <span class="qap-label">Send quote PDF</span>
+            </button>
+            <button class="qap-btn" type="button" data-action="status" onclick={handleAction}>
+                <span class="qap-icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 7h13l3 3-3 3H4z"/>
+                        <path d="M4 14h10l3 3-3 3H4z"/>
+                        <path d="M4 4v17"/>
+                    </svg>
+                </span>
+                <span class="qap-label">Mark status</span>
+            </button>
+            <button class="qap-btn" type="button" data-action="preview" onclick={handleAction}>
+                <span class="qap-icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </span>
+                <span class="qap-label">Preview quote PDF</span>
+            </button>
+        </div>
+    </div>
+
+    <template if:true={isPopupOpen}>
+        <div class="qap-overlay" onclick={handleOverlayClick}>
+            <template if:true={isSendPdf}>
+                <!-- Embedded sendQuoteDocument — its own header /
+                     action row owns the popup chrome, so we render
+                     it inside a transparent shell that just sizes
+                     the modal to a comfortable desktop width. -->
+                <div class="qap-embed" onclick={stopPropagation} role="dialog" aria-modal="true">
+                    <c-send-quote-document record-id={recordId} onclose={handleEmbedClose}></c-send-quote-document>
+                </div>
+            </template>
+
+            <template if:false={isSendPdf}>
+                <div class="qap-popup" onclick={stopPropagation} role="dialog" aria-modal="true">
+                    <div class="qap-popup-head">
+                        <div class="qap-popup-title">{popupTitle}</div>
+                        <button class="qap-close-x" type="button" onclick={closePopup} aria-label="Close">×</button>
+                    </div>
+
+                    <template if:true={isApproval}>
+                        <label class="qap-field-label">Comments</label>
+                        <textarea class={approvalTextareaClass}
+                                  data-id="approval-comments"
+                                  rows="4"
+                                  placeholder="Optional — add a note for the approver…"
+                                  value={approvalComments}
+                                  onchange={handleApprovalCommentsChange}
+                                  oninput={handleApprovalCommentsChange}></textarea>
+                        <div class="qap-error">{approvalError}</div>
+                        <div class="qap-actions">
+                            <button class="qap-btn-ghost" type="button" onclick={closePopup}>Cancel</button>
+                            <button class="qap-btn-primary" type="button" onclick={handleApprovalSubmit} disabled={isBusy}>
+                                <template if:true={isBusy}>Submitting…</template>
+                                <template if:false={isBusy}>Submit</template>
+                            </button>
+                        </div>
+                    </template>
+
+                    <template if:true={isStatus}>
+                        <div class="qap-status-hint">Choose a new status</div>
+                        <template if:true={statusLoading}>
+                            <div class="qap-loading">
+                                <lightning-spinner alternative-text="Loading statuses…" size="small"></lightning-spinner>
+                            </div>
+                        </template>
+                        <template if:false={statusLoading}>
+                            <template if:true={hasStatusOptions}>
+                                <div class="qap-status-list">
+                                    <template for:each={statusOptions} for:item="opt">
+                                        <button key={opt.value}
+                                                class="qap-status-item"
+                                                type="button"
+                                                data-value={opt.value}
+                                                onclick={handleStatusPick}>
+                                            <div class="qap-status-meta">
+                                                <div class="qap-status-label">{opt.label}</div>
+                                                <div class="qap-status-desc">{opt.desc}</div>
+                                            </div>
+                                            <span class="qap-chev" aria-hidden="true">›</span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </template>
+                            <template if:false={hasStatusOptions}>
+                                <div class="qap-error">No selectable Status picklist values are available on the Quote object. Ask an admin to enable picklist values.</div>
+                            </template>
+                        </template>
+                    </template>
+
+                    <template if:true={isRevision}>
+                        <label class="qap-field-label">Why is this being sent back? <span class="qap-required">*</span></label>
+                        <textarea class={revisionTextareaClass}
+                                  data-id="revision-reason"
+                                  rows="4"
+                                  placeholder="e.g. Pricing on item 3 needs review…"
+                                  value={revisionReason}
+                                  onchange={handleRevisionReasonChange}
+                                  oninput={handleRevisionReasonChange}></textarea>
+                        <div class="qap-error">{revisionError}</div>
+                        <div class="qap-actions">
+                            <button class="qap-btn-ghost" type="button" onclick={closePopup}>Cancel</button>
+                            <button class="qap-btn-primary" type="button" onclick={handleRevisionSave} disabled={isBusy}>
+                                <template if:true={isBusy}>Saving…</template>
+                                <template if:false={isBusy}>Save reason</template>
+                            </button>
+                        </div>
+                    </template>
+
+                    <template if:true={isConfirm}>
+                        <div class="qap-confirm-msg">{confirmMessage}</div>
+                        <div class="qap-actions">
+                            <button class="qap-btn-ghost" type="button" onclick={closePopup}>Cancel</button>
+                            <button class="qap-btn-primary" type="button" onclick={handleConfirmYes} disabled={isBusy}>
+                                <template if:true={isBusy}>Saving…</template>
+                                <template if:false={isBusy}>Confirm</template>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
+    </template>
+</template>

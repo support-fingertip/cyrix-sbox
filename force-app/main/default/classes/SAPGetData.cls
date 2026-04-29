@@ -132,29 +132,35 @@ global class SAPGetData {
     /**
      * Invoice handler.
      *
-     * Each map in incoming represents one parent invoice; it may
-     * carry a nested array under "Invoice_Items" of child line items.
+     * SAP's payload uses some keys that don't exactly match the
+     * Salesforce field API names (e.g. SAP sends "InvoiceId__c"
+     * while the SF field is "Invoice_Id__c"). To keep the code
+     * tolerant of those differences, every field is mapped
+     * explicitly here instead of relying on JSON.deserialize.
      *
-     * Lookup resolution (single SOQL per object across the whole batch):
-     *   Customer__c (Account)         <- payload Customer_Code__c       -> Account.SAP_Code__c
-     *   Order__c    (Order)           <- payload OrderId__c             -> Order.SAP_Code__c
-     *   OwnerId     (User)            <- payload Employee_Code__c       -> User.Employee_Code__c
-     *   Product__c  (Product2)        <- line ProductCode__c            -> Product2.ProductCode
-     *   Order_Product__c (OrderItem)  <- line OrderItemId__c            -> OrderItem.SAP_OrderItem_Id__c
+     * SAP key                            -> SF field
+     * ---                                ---
+     * InvoiceId__c (parent)              -> Invoice__c.Invoice_Id__c
+     * InvoiceItems (array)               -> nested loop
+     * InvoiceId__c (line item)           -> Invoice_Item__c.Invoice_Id__c
+     * Total_Amount_Excl_Tax__c (line)    -> Invoice_Item__c.Total_Amount_with_out_GST__c
      *
-     * Upsert keys:
-     *   Invoice__c       by Invoice_Id__c
-     *   Invoice_Item__c  by lineItemId__c
+     * Lookup resolution (one SOQL per object across the batch):
+     *   Customer__c       <- payload Customer_Code__c     -> Account.SAP_Code__c
+     *   Order__c          <- payload OrderId__c           -> Order.SAP_Code__c
+     *   OwnerId           <- payload Employee_Code__c     -> User.Employee_Code__c
+     *   Product__c        <- line ProductCode__c          -> Product2.ProductCode
+     *   Order_Product__c  <- line OrderItemId__c          -> OrderItem.SAP_Order_Item_Id__c
      *
-     * SAP sync stamps (SAP_Sync_Status__c = true, Last_ERP_Sync_Date__c
-     * = now) are written to the parent invoice on every successful
-     * upsert.
+     * Upsert keys (External Id):
+     *   Invoice__c       Invoice_Id__c
+     *   Invoice_Item__c  lineItemId__c
      */
     private static List<Response> handleInvoice(List<Map<String, Object>> incoming) {
         List<Response> lstResponse = new List<Response>();
         DateTime nowStamp = DateTime.now();
 
-        // ---- Pre-pass: collect all the codes we'll need to resolve ----
+        // ---- Pre-pass: collect codes for lookup resolution ----
         Set<String> customerCodes = new Set<String>();
         Set<String> orderCodes    = new Set<String>();
         Set<String> employeeCodes = new Set<String>();
@@ -166,7 +172,7 @@ global class SAPGetData {
             addIfNotBlank(orderCodes,    inv.get('OrderId__c'));
             addIfNotBlank(employeeCodes, inv.get('Employee_Code__c'));
 
-            Object items = inv.get('Invoice_Items');
+            Object items = inv.get('InvoiceItems');
             if (items instanceof List<Object>) {
                 for (Object item : (List<Object>) items) {
                     if (item instanceof Map<String, Object>) {
@@ -179,8 +185,8 @@ global class SAPGetData {
             }
         }
 
-        // ---- Resolve every lookup with one SOQL each ----
-        Map<String, Id> accountByCode  = new Map<String, Id>();
+        // ---- Resolve lookups (one SOQL per object) ----
+        Map<String, Id> accountByCode = new Map<String, Id>();
         if (!customerCodes.isEmpty()) {
             for (Account a : [SELECT Id, SAP_Code__c FROM Account WHERE SAP_Code__c IN :customerCodes]) {
                 accountByCode.put(a.SAP_Code__c, a.Id);
@@ -210,22 +216,26 @@ global class SAPGetData {
 
         Map<String, Id> orderItemBySapId = new Map<String, Id>();
         if (!orderItemIds.isEmpty()) {
-            for (OrderItem oi : [SELECT Id, SAP_OrderItem_Id__c FROM OrderItem WHERE SAP_OrderItem_Id__c IN :orderItemIds]) {
-                orderItemBySapId.put(oi.SAP_OrderItem_Id__c, oi.Id);
+            for (OrderItem oi : [SELECT Id, SAP_Order_Item_Id__c FROM OrderItem WHERE SAP_Order_Item_Id__c IN :orderItemIds]) {
+                orderItemBySapId.put(oi.SAP_Order_Item_Id__c, oi.Id);
             }
         }
 
         // ---- Upsert each invoice + its line items ----
         for (Map<String, Object> inv : incoming) {
-            String invoiceId = stringOf(inv.get('Invoice_Id__c'));
+            String invoiceSapId = stringOf(inv.get('InvoiceId__c'));
             try {
-                Map<String, Object> invMap = new Map<String, Object>(inv);
-                invMap.remove('Invoice_Items');
-                invMap.put('attributes', new Map<String, String>{
-                    'type' => 'Invoice__c',
-                    'referenceId' => 'ref1'
-                });
-                Invoice__c parent = (Invoice__c) JSON.deserialize(JSON.serialize(invMap), Sobject.class);
+                Invoice__c parent = new Invoice__c();
+                parent.Name                    = stringOf(inv.get('Name'));
+                parent.Invoice_Id__c           = invoiceSapId;
+                parent.Invoice_Date__c         = parseDate(inv.get('Invoice_Date__c'));
+                parent.Customer_Code__c        = stringOf(inv.get('Customer_Code__c'));
+                parent.OrderId__c              = stringOf(inv.get('OrderId__c'));
+                parent.Total_Amount_Excl_Tax__c = parseDecimal(inv.get('Total_Amount_Excl_Tax__c'));
+                parent.Remarks__c              = stringOf(inv.get('Remarks__c'));
+                parent.Status__c               = stringOf(inv.get('Status__c'));
+                parent.Grand_Total__c          = parseDecimal(inv.get('Grand_Total__c'));
+                parent.Employee_Code__c        = stringOf(inv.get('Employee_Code__c'));
 
                 String custCode = stringOf(inv.get('Customer_Code__c'));
                 if (String.isNotBlank(custCode) && accountByCode.containsKey(custCode)) {
@@ -240,28 +250,33 @@ global class SAPGetData {
                     parent.OwnerId = userByEmpCode.get(empCode);
                 }
 
-                parent.SAP_Sync_Status__c = true;
+                parent.SAP_Sync_Status__c   = true;
                 parent.Last_ERP_Sync_Date__c = nowStamp;
 
                 upsert parent Invoice__c.Invoice_Id__c;
 
                 // ---- Children ----
-                Object items = inv.get('Invoice_Items');
+                Object items = inv.get('InvoiceItems');
                 if (items instanceof List<Object>) {
                     List<Invoice_Item__c> lineItems = new List<Invoice_Item__c>();
                     for (Object item : (List<Object>) items) {
                         if (!(item instanceof Map<String, Object>)) continue;
                         Map<String, Object> li = (Map<String, Object>) item;
 
-                        Map<String, Object> liMap = new Map<String, Object>(li);
-                        liMap.put('attributes', new Map<String, String>{
-                            'type' => 'Invoice_Item__c',
-                            'referenceId' => 'ref1'
-                        });
-                        Invoice_Item__c child = (Invoice_Item__c) JSON.deserialize(JSON.serialize(liMap), Sobject.class);
-
-                        // Always link to the just-upserted parent.
-                        child.Invoice__c = parent.Id;
+                        Invoice_Item__c child = new Invoice_Item__c();
+                        child.lineItemId__c       = stringOf(li.get('lineItemId__c'));
+                        child.Invoice_Id__c       = stringOf(li.get('InvoiceId__c'));
+                        child.Invoice__c          = parent.Id;
+                        child.OrderItemId__c      = stringOf(li.get('OrderItemId__c'));
+                        child.ProductCode__c      = stringOf(li.get('ProductCode__c'));
+                        child.Quantity__c         = parseDecimal(li.get('Quantity__c'));
+                        child.Order_Item_Quantity__c = parseDecimal(li.get('Order_Item_Quantity__c'));
+                        child.Unit_Price__c       = parseDecimal(li.get('Unit_Price__c'));
+                        child.Tax__c              = parseDecimal(li.get('Tax__c'));
+                        child.Tax_Amount__c       = parseDecimal(li.get('Tax_Amount__c'));
+                        child.Total_Amount__c     = parseDecimal(li.get('Total_Amount__c'));
+                        child.Total_Amount_with_out_GST__c =
+                            parseDecimal(li.get('Total_Amount_Excl_Tax__c'));
 
                         String pcode = stringOf(li.get('ProductCode__c'));
                         if (String.isNotBlank(pcode) && productByCode.containsKey(pcode)) {
@@ -282,9 +297,9 @@ global class SAPGetData {
                     }
                 }
 
-                lstResponse.add(new Response('Success', invoiceId));
+                lstResponse.add(new Response('Success', invoiceSapId));
             } catch (Exception ex) {
-                lstResponse.add(new Response('Failure', invoiceId, ex.getMessage()));
+                lstResponse.add(new Response('Failure', invoiceSapId, ex.getMessage()));
             }
         }
 
@@ -299,6 +314,27 @@ global class SAPGetData {
 
     private static String stringOf(Object val) {
         return val == null ? null : String.valueOf(val);
+    }
+
+    private static Date parseDate(Object val) {
+        if (val == null) return null;
+        try {
+            return Date.valueOf(String.valueOf(val));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static Decimal parseDecimal(Object val) {
+        if (val == null) return null;
+        if (val instanceof Decimal) return (Decimal) val;
+        if (val instanceof Integer) return Decimal.valueOf((Integer) val);
+        if (val instanceof Double)  return Decimal.valueOf((Double) val);
+        try {
+            return Decimal.valueOf(String.valueOf(val));
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private static void writeLog(String reqBody, String resBody, String objectName, String statusCode) {

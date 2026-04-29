@@ -24,7 +24,9 @@ public with sharing class quoteTriggerHandler {
      * Quote are preserved.
      */
     public static void populateApproversFromHierarchy(List<Quote> quotes) {
+        
         if (quotes == null || quotes.isEmpty()) return;
+       list< General_Settings__c> settingsList =[select Id, Order_Acceptance_Approver__c from General_Settings__c limit 1];  
 
         Set<Id> ownerIds = new Set<Id>();
         for (Quote q : quotes) {
@@ -34,8 +36,7 @@ public with sharing class quoteTriggerHandler {
 
         Map<Id, User> userMap = new Map<Id, User>([
             SELECT Id, ManagerId,
-                   Manager.ManagerId,
-                   Manager.Manager.ManagerId
+                   Manager.ManagerId
             FROM User
             WHERE Id IN :ownerIds
         ]);
@@ -51,10 +52,8 @@ public with sharing class quoteTriggerHandler {
                 && owner.Manager.ManagerId != null) {
                 q.L2_Approver__c = owner.Manager.ManagerId;
             }
-            if (q.L3_Approver__c == null && owner.Manager != null
-                && owner.Manager.Manager != null
-                && owner.Manager.Manager.ManagerId != null) {
-                q.L3_Approver__c = owner.Manager.Manager.ManagerId;
+            if (q.L3_Approver__c == null && !settingsList.isEmpty()) {
+                q.L3_Approver__c = settingsList[0].Order_Acceptance_Approver__c;
             }
         }
     }
@@ -286,7 +285,7 @@ public with sharing class quoteTriggerHandler {
 
 
             // Build the name
-            String baseName = 'C-' + shortCode +'/'+q.Business_Vertical__c +'/QTN-' + String.valueOf(nextNumber.intValue()).leftPad(3, '0') + '/' + financialYear;
+            String baseName = 'QTN-' + String.valueOf(nextNumber.intValue()).leftPad(4, '0') + '/CHC/' + financialYear+'-'+q.Business_Vertical__c ;
             if (q.Version_Nmber__c != null && q.Version_Nmber__c >= 1) {
                 baseName += '-RV' + q.Version_Nmber__c;
             }
