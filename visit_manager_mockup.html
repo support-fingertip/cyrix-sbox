@@ -1,0 +1,408 @@
+<h2 class="sr-only">Visit Manager redesign — six scenes covering the day-lifecycle, visit list, in-visit detail, and modals on both desktop and mobile.</h2>
+
+<style>
+  .vm-section-label { font-size: 12px; color: #6B4848; font-weight: 500; margin: 0 0 8px; }
+  .vm-caption { font-size: 11px; color: #993C1D; font-weight: 500; margin: 0 0 6px; }
+
+  .vm-card { background: #FFFFFF; border: 1px solid #E5C5C5; border-radius: var(--border-radius-lg); overflow: hidden; }
+  .vm-head { padding: 14px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #F0D5D5; background: #FFFFFF; }
+  .vm-icon { width: 28px; height: 28px; border-radius: 6px; background: #C8102E; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+  .vm-title { font-size: 14px; font-weight: 600; color: #1A1A1A; }
+  .vm-sub { font-size: 11px; color: #8A6B6B; }
+  .vm-meta-pills { margin-left: auto; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .vm-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 500; }
+  .vm-pill--neutral { background: #FCF5F5; color: #6B4848; border: 1px solid #F0D5D5; }
+  .vm-pill--ok { background: #E1F5EE; color: #0F6E56; border: 1px solid #5DCAA5; }
+  .vm-pill--warn { background: #FAECE7; color: #993C1D; border: 1px solid #F0997B; }
+  .vm-pill--alert { background: #FCEBEB; color: #A32D2D; border: 1px solid #F09595; }
+  .vm-pill--info { background: #FFFFFF; color: #6B4848; border: 1px solid #E5C5C5; }
+
+  .vm-toolbar { padding: 10px 16px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; background: #FCF5F5; border-bottom: 1px solid #F0D5D5; }
+  .vm-tool { background: #FFFFFF; color: #993C1D; border: 1px solid #F0997B; border-radius: var(--border-radius-md); padding: 7px 12px; font-size: 12px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .vm-tool--primary { background: #C8102E; color: #FFFFFF; border-color: #C8102E; }
+  .vm-tool--ghost { background: transparent; color: #6B4848; border-color: #E5C5C5; }
+  .vm-tool span.dot { width: 6px; height: 6px; border-radius: 999px; background: currentColor; display: inline-block; }
+
+  .vm-summary { padding: 12px 16px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; background: #FFFFFF; border-bottom: 1px solid #F0D5D5; }
+  .vm-summary-cell { background: #FCF5F5; border: 1px solid #F0D5D5; border-radius: var(--border-radius-md); padding: 10px 12px; }
+  .vm-summary-label { font-size: 10px; color: #8A6B6B; text-transform: uppercase; letter-spacing: 0.04em; }
+  .vm-summary-value { font-size: 13px; color: #1A1A1A; font-weight: 500; margin-top: 3px; }
+
+  .vm-list { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .vm-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid #E5C5C5; border-radius: var(--border-radius-md); background: #FFFFFF; cursor: pointer; }
+  .vm-row:hover { background: #FCF5F5; }
+  .vm-row--active { background: #FAECE7; border-color: #F0997B; }
+  .vm-row-thumb { width: 36px; height: 36px; border-radius: 50%; background: #FAECE7; color: #993C1D; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+  .vm-row-meta { flex: 1; min-width: 0; }
+  .vm-row-name { font-size: 13px; font-weight: 500; color: #1A1A1A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vm-row-sub { font-size: 11px; color: #6B4848; margin-top: 2px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .vm-row-chev { color: #993C1D; font-size: 16px; }
+
+  .vm-tabs { padding: 8px 16px 0; display: flex; gap: 4px; border-bottom: 1px solid #F0D5D5; background: #FFFFFF; }
+  .vm-tab { padding: 8px 12px; font-size: 12px; color: #6B4848; cursor: pointer; border-radius: 6px 6px 0 0; border-bottom: 2px solid transparent; }
+  .vm-tab--active { color: #993C1D; border-bottom-color: #C8102E; font-weight: 500; }
+
+  .vm-detail-body { padding: 14px 16px; background: #FFFFFF; }
+  .vm-actions { padding: 12px 16px; border-top: 1px solid #F0D5D5; background: #FFFFFF; display: flex; gap: 8px; justify-content: flex-end; }
+
+  .vm-empty { padding: 28px 20px; text-align: center; background: #FCF5F5; border: 1px dashed #F0D5D5; border-radius: var(--border-radius-md); color: #6B4848; font-size: 12px; line-height: 1.6; }
+  .vm-empty .cta { margin-top: 10px; }
+
+  .vm-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; padding: 16px; border-radius: var(--border-radius-lg); }
+  .vm-modal { background: #FFFFFF; width: 100%; max-width: 360px; border-radius: var(--border-radius-lg); border: 1px solid #E5C5C5; padding: 14px; box-sizing: border-box; }
+  .vm-modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .vm-modal-title { font-size: 14px; font-weight: 600; color: #1A1A1A; }
+  .vm-close { width: 24px; height: 24px; border-radius: 50%; border: 1px solid #E5C5C5; background: #FFFFFF; color: #6B4848; cursor: pointer; font-size: 12px; line-height: 1; display: flex; align-items: center; justify-content: center; padding: 0; }
+  .vm-form-row { margin-bottom: 8px; }
+  .vm-form-label { font-size: 11px; color: #6B4848; margin-bottom: 4px; display: flex; gap: 4px; }
+  .vm-form-control { width: 100%; height: 32px; padding: 4px 8px; font-size: 12px; border: 1px solid #E5C5C5; border-radius: var(--border-radius-md); background: #FFFFFF; box-sizing: border-box; font-family: inherit; }
+  .vm-form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+
+  .vm-viewport { background: #FCF5F5; border-radius: var(--border-radius-lg); padding: 14px; position: relative; min-height: 80px; }
+  .device-tag { font-size: 10px; color: #8A6B6B; margin-bottom: 8px; text-align: center; }
+  .phone-frame { background: #FFFFFF; border: 2px solid #E5C5C5; border-radius: 28px; padding: 8px; max-width: 300px; margin: 0 auto; }
+  .phone-screen { background: #FFFFFF; border: 1px solid #F0D5D5; border-radius: 22px; overflow: hidden; position: relative; min-height: 540px; }
+  .phone-statusbar { background: #FFFFFF; padding: 6px 16px 4px; display: flex; justify-content: space-between; font-size: 9px; color: #6B4848; font-weight: 500; }
+
+  .vm-mobile-bottom { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 12px; background: #FFFFFF; border-top: 1px solid #F0D5D5; display: flex; gap: 8px; }
+  .vm-mobile-bottom .vm-tool { flex: 1; justify-content: center; }
+</style>
+
+<div style="padding: 1rem 0; display: flex; flex-direction: column; gap: 28px;">
+
+  <!-- Scene 1: Desktop · day in progress · today's list -->
+  <div>
+    <p class="vm-section-label">Desktop · Day in progress · today's visits</p>
+    <p class="vm-caption">▾ Toolbar shows live day status, daily-log summary stays visible, visit list is one click into a row</p>
+    <div class="vm-viewport">
+      <div class="vm-card">
+        <div class="vm-head">
+          <div class="vm-icon">↗</div>
+          <div>
+            <div class="vm-title">Visit Manager</div>
+            <div class="vm-sub">Tue, 28 Apr · Priya Raghavan</div>
+          </div>
+          <div class="vm-meta-pills">
+            <span class="vm-pill vm-pill--ok"><span style="width:6px;height:6px;border-radius:999px;background:#0F6E56;display:inline-block;"></span> Day in progress · 09:14</span>
+            <span class="vm-pill vm-pill--info">42 km</span>
+          </div>
+        </div>
+        <div class="vm-toolbar">
+          <button class="vm-tool vm-tool--ghost">↻ Refresh</button>
+          <button class="vm-tool">＋ Create visit</button>
+          <button class="vm-tool vm-tool--primary">⏹ End day</button>
+          <span style="margin-left:auto;font-size:11px;color:#8A6B6B;">3 visits planned · 1 completed · 1 in progress</span>
+        </div>
+        <div class="vm-summary">
+          <div class="vm-summary-cell">
+            <div class="vm-summary-label">Work type</div>
+            <div class="vm-summary-value">Field sales</div>
+          </div>
+          <div class="vm-summary-cell">
+            <div class="vm-summary-label">Vehicle</div>
+            <div class="vm-summary-value">Own car</div>
+          </div>
+          <div class="vm-summary-cell">
+            <div class="vm-summary-label">Mode</div>
+            <div class="vm-summary-value">Drive</div>
+          </div>
+          <div class="vm-summary-cell">
+            <div class="vm-summary-label">With</div>
+            <div class="vm-summary-value">Solo</div>
+          </div>
+        </div>
+        <div class="vm-list">
+          <div class="vm-row">
+            <div class="vm-row-thumb" style="background:#E1F5EE;color:#0F6E56;">✓</div>
+            <div class="vm-row-meta">
+              <div class="vm-row-name">Acme Industries — Kochi</div>
+              <div class="vm-row-sub">
+                <span class="vm-pill vm-pill--ok">Completed</span>
+                <span>Sales · 09:30 → 10:12</span>
+                <span>· Quote Q-2401 sent</span>
+              </div>
+            </div>
+            <span class="vm-row-chev">›</span>
+          </div>
+          <div class="vm-row vm-row--active">
+            <div class="vm-row-thumb" style="background:#FAECE7;color:#993C1D;">▶</div>
+            <div class="vm-row-meta">
+              <div class="vm-row-name">Northwind Pvt Ltd — Trivandrum</div>
+              <div class="vm-row-sub">
+                <span class="vm-pill vm-pill--warn">In progress</span>
+                <span>Service · started 11:05</span>
+                <span>· 2 of 4 photos captured</span>
+              </div>
+            </div>
+            <span class="vm-row-chev">›</span>
+          </div>
+          <div class="vm-row">
+            <div class="vm-row-thumb">3</div>
+            <div class="vm-row-meta">
+              <div class="vm-row-name">Globex Hospital — Kollam</div>
+              <div class="vm-row-sub">
+                <span class="vm-pill vm-pill--neutral">Pending</span>
+                <span>Demo · planned 14:00</span>
+                <span>· 38 km from current</span>
+              </div>
+            </div>
+            <span class="vm-row-chev">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 2: Desktop · inside a visit · execute screen -->
+  <div>
+    <p class="vm-section-label">Desktop · Inside a visit · execute screen</p>
+    <p class="vm-caption">▾ Tabs replace the deeply-nested child-LWC swap; "Complete visit" anchored bottom-right</p>
+    <div class="vm-viewport">
+      <div class="vm-card">
+        <div class="vm-head">
+          <button class="vm-tool vm-tool--ghost" style="padding:5px 10px;">← Back</button>
+          <div>
+            <div class="vm-title">Northwind Pvt Ltd — Trivandrum</div>
+            <div class="vm-sub">Service visit · started 11:05 · 4.6 km from previous</div>
+          </div>
+          <div class="vm-meta-pills">
+            <span class="vm-pill vm-pill--warn">In progress</span>
+          </div>
+        </div>
+        <div class="vm-tabs">
+          <div class="vm-tab vm-tab--active">Check-in</div>
+          <div class="vm-tab">Products</div>
+          <div class="vm-tab">Quote</div>
+          <div class="vm-tab">Photos · 2</div>
+          <div class="vm-tab">Notes</div>
+        </div>
+        <div class="vm-detail-body">
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+            <div class="vm-summary-cell">
+              <div class="vm-summary-label">Visit purpose</div>
+              <div class="vm-summary-value">Quarterly review · pricing discussion</div>
+            </div>
+            <div class="vm-summary-cell">
+              <div class="vm-summary-label">Contact</div>
+              <div class="vm-summary-value">Mr. Suresh Kumar · Procurement Lead</div>
+            </div>
+            <div class="vm-summary-cell">
+              <div class="vm-summary-label">Geo check-in</div>
+              <div class="vm-summary-value">8.5241°N, 76.9366°E · ~12 m off site</div>
+            </div>
+            <div class="vm-summary-cell">
+              <div class="vm-summary-label">Last activity</div>
+              <div class="vm-summary-value">Photo captured 11:14</div>
+            </div>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="vm-tool">📷 Add photo</button>
+            <button class="vm-tool">＋ Add note</button>
+            <button class="vm-tool">📦 Open product list</button>
+            <button class="vm-tool">📄 Open quote builder</button>
+          </div>
+        </div>
+        <div class="vm-actions">
+          <button class="vm-tool vm-tool--ghost">Mark skipped</button>
+          <button class="vm-tool vm-tool--primary">Complete visit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 3: Desktop · pre-day state -->
+  <div>
+    <p class="vm-section-label">Desktop · Day not started · empty state</p>
+    <p class="vm-caption">▾ Replaces the silent blank list with a guided "Start day" call-to-action</p>
+    <div class="vm-viewport">
+      <div class="vm-card">
+        <div class="vm-head">
+          <div class="vm-icon">↗</div>
+          <div>
+            <div class="vm-title">Visit Manager</div>
+            <div class="vm-sub">Tue, 28 Apr · Priya Raghavan</div>
+          </div>
+          <div class="vm-meta-pills">
+            <span class="vm-pill vm-pill--alert"><span style="width:6px;height:6px;border-radius:999px;background:#A32D2D;display:inline-block;"></span> Day not started</span>
+          </div>
+        </div>
+        <div class="vm-toolbar">
+          <button class="vm-tool vm-tool--ghost">↻ Refresh</button>
+          <button class="vm-tool" disabled style="opacity:0.55;cursor:not-allowed;">＋ Create visit</button>
+          <button class="vm-tool vm-tool--primary">▶ Start day</button>
+        </div>
+        <div style="padding:24px 16px;">
+          <div class="vm-empty">
+            <div style="font-size:14px;font-weight:500;color:#993C1D;">Start your day to unlock today's visits</div>
+            <div style="margin-top:6px;">3 visits are planned. Capture your odometer reading and travel mode to begin.</div>
+            <div class="cta"><button class="vm-tool vm-tool--primary" style="font-size:13px;padding:8px 16px;">▶ Start day</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 4: Desktop · Start Day modal -->
+  <div>
+    <p class="vm-section-label">Desktop · Start Day modal</p>
+    <p class="vm-caption">▾ Captures the same Daily_Log__c fields the existing popup asks for, in a tighter form</p>
+    <div class="vm-viewport" style="min-height:420px;">
+      <div class="vm-card" style="opacity:0.45;pointer-events:none;">
+        <div class="vm-head">
+          <div class="vm-icon">↗</div>
+          <div><div class="vm-title">Visit Manager</div><div class="vm-sub">Tue, 28 Apr</div></div>
+        </div>
+        <div class="vm-toolbar">
+          <button class="vm-tool vm-tool--ghost">↻ Refresh</button>
+          <button class="vm-tool" disabled>＋ Create visit</button>
+          <button class="vm-tool vm-tool--primary">▶ Start day</button>
+        </div>
+        <div style="height:140px;background:#FCF5F5;"></div>
+      </div>
+      <div class="vm-overlay">
+        <div class="vm-modal" style="max-width:380px;">
+          <div class="vm-modal-head">
+            <div class="vm-modal-title">Start day</div>
+            <button class="vm-close">✕</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="vm-form-row">
+              <label class="vm-form-label">Work type <span style="color:#A32D2D;">*</span></label>
+              <select class="vm-form-control"><option>Field sales</option><option>Service</option><option>Office</option></select>
+            </div>
+            <div class="vm-form-row">
+              <label class="vm-form-label">Vehicle <span style="color:#A32D2D;">*</span></label>
+              <select class="vm-form-control"><option>Own car</option><option>Two-wheeler</option><option>Public</option></select>
+            </div>
+          </div>
+          <div class="vm-form-row">
+            <label class="vm-form-label">Mode of transport <span style="color:#A32D2D;">*</span></label>
+            <select class="vm-form-control"><option>Drive</option><option>Bike</option><option>Bus</option><option>Walk</option></select>
+          </div>
+          <div class="vm-form-row">
+            <label class="vm-form-label">ODO reading (km) <span style="color:#A32D2D;">*</span></label>
+            <input class="vm-form-control" placeholder="e.g. 84,521" />
+          </div>
+          <div class="vm-form-row">
+            <label class="vm-form-label">With companion</label>
+            <select class="vm-form-control"><option>No</option><option>Yes</option></select>
+          </div>
+          <div class="vm-form-actions">
+            <button class="vm-tool vm-tool--ghost">Cancel</button>
+            <button class="vm-tool vm-tool--primary">Start day</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 5: Mobile · visit list with bottom action bar -->
+  <div>
+    <p class="vm-section-label">Mobile · 320px · Day in progress</p>
+    <p class="vm-caption">▾ Sticky bottom action bar; status pill folded into the row's left edge</p>
+    <div class="vm-viewport">
+      <div class="device-tag">Salesforce mobile app</div>
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="phone-statusbar">
+            <span>9:41</span>
+            <span>●●● ▮</span>
+          </div>
+          <div class="vm-head" style="padding:10px 12px;">
+            <div class="vm-icon" style="width:24px;height:24px;font-size:12px;">↗</div>
+            <div style="min-width:0;">
+              <div class="vm-title" style="font-size:12px;">Visit Manager</div>
+              <div class="vm-sub" style="font-size:10px;">28 Apr · 3 visits</div>
+            </div>
+            <div class="vm-meta-pills">
+              <span class="vm-pill vm-pill--ok" style="font-size:10px;padding:2px 7px;">Live</span>
+            </div>
+          </div>
+          <div style="padding:8px 10px;display:flex;gap:6px;background:#FCF5F5;border-bottom:1px solid #F0D5D5;overflow-x:auto;">
+            <span class="vm-pill vm-pill--info" style="white-space:nowrap;">Work · Field sales</span>
+            <span class="vm-pill vm-pill--info" style="white-space:nowrap;">42 km</span>
+            <span class="vm-pill vm-pill--info" style="white-space:nowrap;">Solo</span>
+          </div>
+          <div style="padding:8px 10px;display:flex;flex-direction:column;gap:6px;">
+            <div class="vm-row" style="padding:8px 10px;">
+              <div class="vm-row-thumb" style="background:#E1F5EE;color:#0F6E56;width:28px;height:28px;font-size:11px;">✓</div>
+              <div class="vm-row-meta">
+                <div class="vm-row-name" style="font-size:12px;">Acme Industries</div>
+                <div class="vm-row-sub" style="font-size:10px;"><span class="vm-pill vm-pill--ok" style="font-size:9px;padding:1px 6px;">Done</span> 09:30</div>
+              </div>
+            </div>
+            <div class="vm-row vm-row--active" style="padding:8px 10px;">
+              <div class="vm-row-thumb" style="background:#FAECE7;color:#993C1D;width:28px;height:28px;font-size:11px;">▶</div>
+              <div class="vm-row-meta">
+                <div class="vm-row-name" style="font-size:12px;">Northwind Pvt Ltd</div>
+                <div class="vm-row-sub" style="font-size:10px;"><span class="vm-pill vm-pill--warn" style="font-size:9px;padding:1px 6px;">Live</span> 11:05</div>
+              </div>
+            </div>
+            <div class="vm-row" style="padding:8px 10px;">
+              <div class="vm-row-thumb" style="width:28px;height:28px;font-size:11px;">3</div>
+              <div class="vm-row-meta">
+                <div class="vm-row-name" style="font-size:12px;">Globex Hospital</div>
+                <div class="vm-row-sub" style="font-size:10px;"><span class="vm-pill vm-pill--neutral" style="font-size:9px;padding:1px 6px;">Pending</span> 14:00</div>
+              </div>
+            </div>
+          </div>
+          <div class="vm-mobile-bottom">
+            <button class="vm-tool" style="font-size:11px;padding:8px 6px;">＋ Visit</button>
+            <button class="vm-tool vm-tool--primary" style="font-size:11px;padding:8px 6px;">⏹ End day</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 6: Mobile · day ended -->
+  <div>
+    <p class="vm-section-label">Mobile · Day ended</p>
+    <p class="vm-caption">▾ Read-only summary surfaces what the rep just completed; everything else collapses</p>
+    <div class="vm-viewport">
+      <div class="phone-frame">
+        <div class="phone-screen" style="min-height:480px;">
+          <div class="phone-statusbar"><span>17:48</span><span>●●● ▮</span></div>
+          <div class="vm-head" style="padding:10px 12px;">
+            <div class="vm-icon" style="width:24px;height:24px;font-size:12px;">↗</div>
+            <div style="min-width:0;">
+              <div class="vm-title" style="font-size:12px;">Visit Manager</div>
+              <div class="vm-sub" style="font-size:10px;">28 Apr · ended 17:42</div>
+            </div>
+            <div class="vm-meta-pills">
+              <span class="vm-pill vm-pill--neutral" style="font-size:10px;padding:2px 7px;">Day ended</span>
+            </div>
+          </div>
+          <div style="padding:14px 12px;">
+            <div class="vm-summary-cell" style="margin-bottom:8px;">
+              <div class="vm-summary-label">Today</div>
+              <div class="vm-summary-value" style="font-size:12px;">3 visits · 2 completed · 1 skipped</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div class="vm-summary-cell">
+                <div class="vm-summary-label">Distance</div>
+                <div class="vm-summary-value" style="font-size:12px;">86 km</div>
+              </div>
+              <div class="vm-summary-cell">
+                <div class="vm-summary-label">Duration</div>
+                <div class="vm-summary-value" style="font-size:12px;">8h 28m</div>
+              </div>
+              <div class="vm-summary-cell">
+                <div class="vm-summary-label">Quotes sent</div>
+                <div class="vm-summary-value" style="font-size:12px;">2</div>
+              </div>
+              <div class="vm-summary-cell">
+                <div class="vm-summary-label">Photos</div>
+                <div class="vm-summary-value" style="font-size:12px;">11</div>
+              </div>
+            </div>
+            <div class="vm-empty" style="margin-top:12px;font-size:11px;padding:14px;">
+              Day's activity is locked. To resume, an admin can re-open the daily log from <strong>Setup → Visit Manager Console</strong>.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
