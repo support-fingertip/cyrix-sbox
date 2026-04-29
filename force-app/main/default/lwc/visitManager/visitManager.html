@@ -159,6 +159,16 @@
                                 </div>
                             </template>
                         </template>
+
+                        <!-- Order session screen -->
+                        <template lwc:if={isOrderScreen}>
+                            <template lwc:if={recordId}>
+                                <div>
+                                    <c-order-session-page record-id={recordId} is-desktop={isDesktop}
+                                        onbacktovisit={handleOrderBackToVisit}></c-order-session-page>
+                                </div>
+                            </template>
+                        </template>
                     </div>
 
                 </template>

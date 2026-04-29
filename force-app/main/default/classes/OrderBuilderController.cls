@@ -420,6 +420,127 @@ public with sharing class OrderBuilderController {
         return out;
     }
 
+    // ===== Order Session (per-Visit) =====
+
+    @AuraEnabled(cacheable=false)
+    public static VisitOrderSession getOrdersForVisit(Id visitId) {
+        VisitOrderSession session = new VisitOrderSession();
+        session.acceptedQuotes = new List<AcceptedQuoteSummary>();
+        session.activeOrders = new List<ActiveOrderSummary>();
+
+        if (visitId == null) return session;
+
+        Visit__c v = [
+            SELECT Id, Name, Account__c, Account__r.Name, Lead__c, Visit_for__c
+            FROM Visit__c
+            WHERE Id = :visitId
+            LIMIT 1
+        ];
+
+        session.visitId = v.Id;
+        session.visitName = v.Name;
+        session.accountId = v.Account__c;
+        session.accountName = v.Account__r != null ? v.Account__r.Name : '';
+
+        if (v.Account__c == null) return session;
+
+        // Customer Accepted Quotes that have NOT yet been converted to an Order
+        Set<Id> convertedQuoteIds = new Set<Id>();
+        for (Order o : [
+            SELECT QuoteId
+            FROM Order
+            WHERE AccountId = :v.Account__c
+              AND QuoteId != null
+        ]) {
+            convertedQuoteIds.add(o.QuoteId);
+        }
+
+        for (Quote q : [
+            SELECT Id, Name, QuoteNumber, Status, ExpirationDate,
+                   GrandTotal, TotalPrice, CreatedDate,
+                   OpportunityId, Opportunity.Name
+            FROM Quote
+            WHERE Opportunity.AccountId = :v.Account__c
+              AND Status = 'Customer Accepted'
+            ORDER BY CreatedDate DESC
+        ]) {
+            if (convertedQuoteIds.contains(q.Id)) continue;
+            AcceptedQuoteSummary qs = new AcceptedQuoteSummary();
+            qs.quoteId = q.Id;
+            qs.name = q.Name;
+            qs.quoteNumber = q.QuoteNumber;
+            qs.status = q.Status;
+            qs.expirationDate = q.ExpirationDate;
+            qs.grandTotal = q.GrandTotal != null ? q.GrandTotal : q.TotalPrice;
+            qs.createdDate = q.CreatedDate;
+            qs.opportunityId = q.OpportunityId;
+            qs.opportunityName = q.Opportunity != null ? q.Opportunity.Name : '';
+            session.acceptedQuotes.add(qs);
+        }
+
+        // Activated Orders for the account
+        for (Order o : [
+            SELECT Id, OrderNumber, Name, Status, EffectiveDate, TotalAmount,
+                   CreatedDate, OpportunityId, Opportunity.Name,
+                   QuoteId, Quote.QuoteNumber
+            FROM Order
+            WHERE AccountId = :v.Account__c
+              AND Status = 'Activated'
+            ORDER BY CreatedDate DESC
+        ]) {
+            ActiveOrderSummary os = new ActiveOrderSummary();
+            os.orderId = o.Id;
+            os.orderNumber = o.OrderNumber;
+            os.name = o.Name;
+            os.status = o.Status;
+            os.effectiveDate = o.EffectiveDate;
+            os.totalAmount = o.TotalAmount;
+            os.createdDate = o.CreatedDate;
+            os.opportunityId = o.OpportunityId;
+            os.opportunityName = o.Opportunity != null ? o.Opportunity.Name : '';
+            os.sourceQuoteId = o.QuoteId;
+            os.sourceQuoteNumber = o.Quote != null ? o.Quote.QuoteNumber : null;
+            session.activeOrders.add(os);
+        }
+
+        return session;
+    }
+
+    public class VisitOrderSession {
+        @AuraEnabled public Id visitId;
+        @AuraEnabled public String visitName;
+        @AuraEnabled public Id accountId;
+        @AuraEnabled public String accountName;
+        @AuraEnabled public List<AcceptedQuoteSummary> acceptedQuotes;
+        @AuraEnabled public List<ActiveOrderSummary> activeOrders;
+    }
+
+    public class AcceptedQuoteSummary {
+        @AuraEnabled public Id quoteId;
+        @AuraEnabled public String name;
+        @AuraEnabled public String quoteNumber;
+        @AuraEnabled public String status;
+        @AuraEnabled public Date expirationDate;
+        @AuraEnabled public Decimal grandTotal;
+        @AuraEnabled public Datetime createdDate;
+        @AuraEnabled public Id opportunityId;
+        @AuraEnabled public String opportunityName;
+    }
+
+    public class ActiveOrderSummary {
+        @AuraEnabled public Id orderId;
+        @AuraEnabled public String orderNumber;
+        @AuraEnabled public String name;
+        @AuraEnabled public String status;
+        @AuraEnabled public Date effectiveDate;
+        @AuraEnabled public Decimal totalAmount;
+        @AuraEnabled public Datetime createdDate;
+        @AuraEnabled public Id opportunityId;
+        @AuraEnabled public String opportunityName;
+        @AuraEnabled public Id sourceQuoteId;
+        @AuraEnabled public String sourceQuoteNumber;
+    }
+
     // ===== Inner Classes =====
     public class LineInput {
         public Id productId;
