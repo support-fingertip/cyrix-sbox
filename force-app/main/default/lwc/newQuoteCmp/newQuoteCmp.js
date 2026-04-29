@@ -9,6 +9,7 @@ import getProductPricingPreview from '@salesforce/apex/QuoteBuilderController.ge
 import saveQuoteLineItems from '@salesforce/apex/QuoteBuilderController.saveQuoteLineItems';
 import updateQuoteLineItems from '@salesforce/apex/QuoteBuilderController.updateQuoteLineItems';
 import savePaymentTerms from '@salesforce/apex/QuoteBuilderController.savePaymentTerms';
+import getShippingAddresses from '@salesforce/apex/QuoteBuilderController.getShippingAddresses';
 
 let rowCounter = 0;
 let ptCounter = 0;
@@ -19,7 +20,22 @@ const STEP_LABELS = [
 const TOTAL_STEPS = STEP_LABELS.length;
 
 export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
-    @api recordId;
+    // recordId is a getter/setter so that re-mounting the same component
+    // instance with a different record (e.g. a quick action / modal opened
+    // on a second Opportunity after the first was closed) wipes the prior
+    // state and reloads. Without this, the platform sometimes reuses the
+    // instance and the old record's data leaks into the new popup.
+    _recordId;
+    @api
+    get recordId() { return this._recordId; }
+    set recordId(value) {
+        const previous = this._recordId;
+        this._recordId = value;
+        if (value && value !== previous) {
+            this.resetState();
+            this.detectModeAndLoad();
+        }
+    }
     @api fromVisitPlan = false;
 
     get canvasClass() {
@@ -28,9 +44,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
     // Picks up recordId when launched from the "New Quote" Lightning Component Tab
     // (the record-home override navigates here with state.c__recordId set).
+    // Always honours the latest c__recordId — if the user navigates from one
+    // record to another, this fires again and the recordId setter triggers
+    // a clean reload.
     @wire(CurrentPageReference)
     wiredPageRef(pageRef) {
-        if (pageRef && pageRef.state && pageRef.state.c__recordId && !this.recordId) {
+        if (pageRef && pageRef.state && pageRef.state.c__recordId
+                && pageRef.state.c__recordId !== this._recordId) {
             this.recordId = pageRef.state.c__recordId;
         }
     }
@@ -65,6 +85,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // Address objects for custom address input
     @track billingAddress = { name: '', street: '', city: '', state: '', postalCode: '', country: 'IN' };
     @track shippingAddress = { name: '', street: '', city: '', state: '', postalCode: '', country: 'IN' };
+
+    // Saved Shipping_Address__c records for the chosen Account. The rep
+    // picks one from the combobox and we copy its parts into shippingAddress.
+    @track shippingAddressOptionsRaw = [];
+    selectedShippingAddressId = '';
 
     // Search
     searchTerm = '';
@@ -331,11 +356,55 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // ===== LIFECYCLE =====
 
     connectedCallback() {
-        this.detectModeAndLoad();
+        // The recordId setter already kicks the load when @api recordId is
+        // pushed in, so connectedCallback only needs to cover the case where
+        // a parent passed a value via attribute *before* the setter ran
+        // (rare in practice). Calling detectModeAndLoad here is harmless
+        // because it short-circuits when recordId is missing.
+        if (this._recordId && !this._loadStarted) {
+            this.detectModeAndLoad();
+        }
+    }
+
+    // Wipes every piece of per-record state so a re-opened popup with a
+    // different recordId can't leak data from the previous session.
+    resetState() {
+        this.isEditMode = false;
+        this.editRecordId = null;
+        this.defaultOpportunityId = null;
+        this.pricebookId = undefined;
+        this.currencyCode = 'INR';
+        this.accountId = undefined;
+        this.accountName = '';
+        this.regionId = undefined;
+        this.businessVertical = null;
+        this.subVertical = null;
+        this.billingAddress = { name: '', street: '', city: '', state: '', postalCode: '', country: 'IN' };
+        this.shippingAddress = { name: '', street: '', city: '', state: '', postalCode: '', country: 'IN' };
+        this.shippingAddressOptionsRaw = [];
+        this.selectedShippingAddressId = '';
+        this.searchTerm = '';
+        this.categoryFilter = '';
+        this.searchResults = [];
+        this.showSearchResults = false;
+        this.lineItems = [];
+        this.paymentTerms = [];
+        this.contractFromDate = null;
+        this.contractEndDate = null;
+        this.currentStep = 1;
+        this.sameAsBilling = false;
+        this.isLoading = false;
+        this.isSaving = false;
+        this._loadStarted = null;
     }
 
     async detectModeAndLoad() {
         if (!this.recordId) return;
+        // Track which recordId we started loading for so a second invocation
+        // on the same id doesn't double-fetch (happens when both
+        // connectedCallback and the recordId setter fire).
+        if (this._loadStarted === this.recordId) return;
+        this._loadStarted = this.recordId;
 
         this.isLoading = true;
 
@@ -350,6 +419,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.defaultOpportunityId = this.recordId;
             await this.loadOpportunityContext();
         }
+
+        await this.loadShippingAddressOptions();
 
         this.isLoading = false;
     }
@@ -477,6 +548,85 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }
     }
 
+    // ===== SHIPPING ADDRESS PICKER =====
+
+    // Fetches the saved Shipping_Address__c records on the current Account
+    // so the rep can pick which one to ship to. Called after the
+    // opportunity / quote context is loaded so accountId is known.
+    async loadShippingAddressOptions() {
+        if (!this.accountId) {
+            this.shippingAddressOptionsRaw = [];
+            return;
+        }
+        try {
+            const results = await getShippingAddresses({ accountId: this.accountId });
+            this.shippingAddressOptionsRaw = Array.isArray(results) ? results : [];
+            // Preselect the option that matches the loaded shipping
+            // address (edit mode), or the first one when there's only a
+            // single saved address on the account.
+            this.preselectShippingAddress();
+        } catch (error) {
+            this.shippingAddressOptionsRaw = [];
+            console.warn('Shipping addresses unavailable:', this.reduceErrors(error));
+        }
+    }
+
+    preselectShippingAddress() {
+        if (!this.shippingAddressOptionsRaw.length) {
+            this.selectedShippingAddressId = '';
+            return;
+        }
+        const current = (this.shippingAddress && this.shippingAddress.street || '').trim();
+        const match = this.shippingAddressOptionsRaw.find(
+            opt => (opt.street || '').trim() === current && current !== ''
+        );
+        if (match) {
+            this.selectedShippingAddressId = match.addressId;
+        } else if (this.shippingAddressOptionsRaw.length === 1 && !this.isEditMode) {
+            // Single saved address on a fresh quote — apply it so the rep
+            // doesn't have to click.
+            this.selectedShippingAddressId = this.shippingAddressOptionsRaw[0].addressId;
+            this.applyShippingAddressSelection(this.selectedShippingAddressId);
+        }
+    }
+
+    // True when the Account has more than one saved shipping address — the
+    // picker only makes sense in that case (a single saved address is just
+    // applied silently).
+    get hasMultipleShippingAddresses() {
+        return this.shippingAddressOptionsRaw.length > 1;
+    }
+
+    get shippingAddressOptions() {
+        const opts = this.shippingAddressOptionsRaw.map(opt => ({
+            label: opt.displayLabel || opt.name || 'Untitled address',
+            value: opt.addressId
+        }));
+        return [{ label: '— Select a saved address —', value: '' }, ...opts];
+    }
+
+    handleShippingAddressPickerChange(event) {
+        const id = event.detail ? event.detail.value : event.target.value;
+        this.selectedShippingAddressId = id || '';
+        this.applyShippingAddressSelection(this.selectedShippingAddressId);
+    }
+
+    applyShippingAddressSelection(addressId) {
+        if (!addressId) return;
+        const sel = this.shippingAddressOptionsRaw.find(opt => opt.addressId === addressId);
+        if (!sel) return;
+        this.shippingAddress = {
+            name: sel.name || '',
+            street: sel.street || '',
+            city: sel.city || '',
+            state: sel.state || '',
+            postalCode: sel.postalCode || '',
+            country: sel.country || 'IN'
+        };
+        // Picking from saved addresses overrides "same as billing".
+        this.sameAsBilling = false;
+    }
+
     // ===== ADDRESS CHANGE HANDLERS =====
 
     handleBillingAddressChange(event) {
@@ -581,6 +731,9 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 if (this.sameAsBilling) {
                     this.shippingAddress = { ...this.billingAddress };
                 }
+                // Re-fetch the shipping-address picker options against the
+                // newly selected Opportunity's account.
+                await this.loadShippingAddressOptions();
             }
             // Replace the auto-loaded payment terms with whatever the new
             // Opportunity's vertical / sub-vertical pair maps to.

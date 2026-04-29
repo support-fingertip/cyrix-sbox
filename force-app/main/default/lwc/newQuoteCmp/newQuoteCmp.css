@@ -443,6 +443,14 @@
 }
 .qw-same-addr input { margin: 0; cursor: pointer; }
 
+.qw-shipto-picker {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-subtle);
+}
+
 /* ===== Product search bar =====
    Layout: [Type combobox] [Search input] [Search button]. The Type
    filter is the narrower fixed column on the left so the rep

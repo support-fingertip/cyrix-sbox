@@ -161,6 +161,17 @@
                                     Ship to
                                     <span class="qw-card-sub">Delivery location</span>
                                 </div>
+                                <template if:true={hasMultipleShippingAddresses}>
+                                    <div class="qw-shipto-picker">
+                                        <lightning-combobox
+                                            label="Choose a saved shipping address"
+                                            value={selectedShippingAddressId}
+                                            options={shippingAddressOptions}
+                                            placeholder="— Select a saved address —"
+                                            onchange={handleShippingAddressPickerChange}>
+                                        </lightning-combobox>
+                                    </div>
+                                </template>
                                 <c-address-input
                                     label="Shipping Address"
                                     name={shippingAddress.name}
