@@ -4,11 +4,16 @@ import { NavigationMixin } from 'lightning/navigation';
 import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
 import FORM_FACTOR from '@salesforce/client/formFactor';
 import USER_ID from '@salesforce/user/Id';
-import QUOTE_PDF_PUBLIC_URL from '@salesforce/label/c.Quote_PDF_Public_URL';
 import PRICE_STATUS_FIELD from '@salesforce/schema/Quote.Price_Status__c';
 import submitForApproval from '@salesforce/apex/QuoteActionPanelController.submitForApproval';
 import getQuoteStatusOptions from '@salesforce/apex/QuoteActionPanelController.getQuoteStatusOptions';
 import updateStatus from '@salesforce/apex/QuoteActionPanelController.updateStatus';
+
+// Public-site Quote PDF endpoint used as the mobile preview redirect.
+// Hard-coded against the sandbox host today; if the org needs to swap
+// environments, edit this line.
+const QUOTE_PDF_PUBLIC_URL =
+    'https://cyrix-healthcare--sbox1.sandbox.my.salesforce-sites.com/quotepdf';
 
 // Friendly one-liner per known status value. Anything not listed
 // falls back to "Set status to <label>".
@@ -181,17 +186,8 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
         // resolves the Quote by Id + userId and returns a properly
         // rendered PDF the device's browser can open.
         if (FORM_FACTOR === 'Small') {
-            const base = (QUOTE_PDF_PUBLIC_URL || '').trim();
-            if (!base) {
-                this.showToast(
-                    'Preview unavailable',
-                    'Quote_PDF_Public_URL custom label is not configured.',
-                    'error'
-                );
-                return;
-            }
-            const sep = base.indexOf('?') >= 0 ? '&' : '?';
-            const url = base + sep + 'Id=' + encodeURIComponent(this.recordId) +
+            const url = QUOTE_PDF_PUBLIC_URL +
+                '?Id=' + encodeURIComponent(this.recordId) +
                 '&userId=' + encodeURIComponent(USER_ID || '');
             window.open(url, '_blank');
             return;
