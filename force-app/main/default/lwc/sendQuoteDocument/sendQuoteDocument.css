@@ -22,9 +22,14 @@
     background: #FFFFFF;
     border: 1px solid var(--sqd-border);
     border-radius: var(--sqd-radius-lg);
-    overflow: hidden;
+    /* No overflow:hidden here — it would break the sticky head / footer
+       inside the qap-embed scroll container. Border-radius clipping is
+       still effectively achieved by the head/footer backgrounds. */
 }
 
+/* The qap-embed wrapper is the scroll container; the card head pins
+   to its top so the rep always sees the title and the close X (added
+   on the embed shell) while scrolling a tall body. */
 .sqd-head {
     background: #FFFFFF;
     padding: 12px 14px;
@@ -32,6 +37,11 @@
     align-items: center;
     gap: 10px;
     border-bottom: 1px solid var(--sqd-border-soft);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    border-top-left-radius: var(--sqd-radius-lg);
+    border-top-right-radius: var(--sqd-radius-lg);
 }
 
 .sqd-icon {
@@ -293,13 +303,24 @@
     background: var(--sqd-tint);
 }
 
+/* Sticky action row keeps Cancel / Send reachable when the email
+   body (rich text editor) grows past the visible viewport. Pins to
+   the bottom of the qap-embed scroll container. */
 .sqd-action-row {
     display: flex;
     gap: 8px;
     justify-content: flex-end;
-    padding-top: 12px;
+    padding: 12px 14px;
     border-top: 1px solid var(--sqd-border-soft);
     margin-top: 12px;
+    background: #FFFFFF;
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    margin-left: -14px;
+    margin-right: -14px;
+    border-bottom-left-radius: var(--sqd-radius-lg);
+    border-bottom-right-radius: var(--sqd-radius-lg);
 }
 
 .sqd-btn-primary {

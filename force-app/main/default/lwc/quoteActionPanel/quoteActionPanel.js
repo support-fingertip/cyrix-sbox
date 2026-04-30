@@ -30,9 +30,12 @@ const STATUS_DESCRIPTIONS = {
 };
 
 // Statuses the rep should not change to from this panel — Draft is
-// the starting state, and Approved / Rejected are reserved for the
-// approval process to write.
-const STATUS_HIDDEN = new Set(['Draft', 'Approved', 'Rejected']);
+// the starting state, Approved / Rejected are reserved for the
+// approval process to write, and Needs Review / Need Review are
+// reviewer-owned states that the rep shouldn't move into manually.
+const STATUS_HIDDEN = new Set([
+    'Draft', 'Approved', 'Rejected', 'Needs Review', 'Need Review'
+]);
 
 // Submit-for-approval is only meaningful while the quote is sitting
 // at "Approval Required" pricing. Hide the button entirely outside
