@@ -56,7 +56,13 @@ export default class QuoteSessionPage extends LightningElement {
                 formattedAmount: this.formatCurrency(q.grandTotal),
                 formattedCreatedDate: this.formatDate(q.createdDate),
                 formattedExpiry: q.expirationDate ? this.formatDate(q.expirationDate) : '--',
-                statusClass: this.getStatusClass(q.status)
+                statusClass: this.getStatusClass(q.status),
+                // Hide the Edit button while the quote is locked by the
+                // approval workflow. Approval Required = pending sign-off,
+                // Approved = the approver already signed off and the
+                // record is read-only. Either way the rep can't edit
+                // until the approval state is reset.
+                canEdit: !this.isUnderApproval(q.priceStatus)
             }));
         } catch (error) {
             this.showError('Unable to load quotes', this.reduceErrors(error));
@@ -140,6 +146,17 @@ export default class QuoteSessionPage extends LightningElement {
         if (normalized.includes('reject') || normalized.includes('denied')) return base + ' status-rejected';
         if (normalized.includes('review')) return base + ' status-review';
         return base + ' status-draft';
+    }
+
+    // Quote is "under approval" when the price-status field is sitting
+    // at 'Approval Required' (waiting for a reviewer) or 'Approved' (the
+    // record has been signed off and is now read-only). Editing in
+    // either state would either invalidate the pending approval or
+    // tamper with an approved record, so the row hides the Edit button.
+    isUnderApproval(priceStatus) {
+        if (!priceStatus) return false;
+        const normalized = String(priceStatus).trim().toLowerCase();
+        return normalized === 'approval required' || normalized === 'approved';
     }
 
     formatCurrency(value) {

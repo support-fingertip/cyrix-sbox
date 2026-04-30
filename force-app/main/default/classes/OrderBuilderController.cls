@@ -444,7 +444,12 @@ public with sharing class OrderBuilderController {
 
         if (v.Account__c == null) return session;
 
-        // Customer Accepted Quotes that have NOT yet been converted to an Order
+        // Customer Accepted Quotes that have NOT yet been converted to an Order.
+        // Match both 'Customer Accepted' (current canonical value) and the
+        // legacy 'Accepted' some sandboxes still carry on the picklist —
+        // requiring an exact match made the section appear empty in orgs
+        // that hadn't yet renamed the value.
+        Set<String> acceptedStatuses = new Set<String>{ 'Customer Accepted', 'Accepted' };
         Set<Id> convertedQuoteIds = new Set<Id>();
         for (Order o : [
             SELECT QuoteId
@@ -461,7 +466,7 @@ public with sharing class OrderBuilderController {
                    OpportunityId, Opportunity.Name
             FROM Quote
             WHERE Opportunity.AccountId = :v.Account__c
-              AND Status = 'Customer Accepted'
+              AND Status IN :acceptedStatuses
             ORDER BY CreatedDate DESC
         ]) {
             if (convertedQuoteIds.contains(q.Id)) continue;

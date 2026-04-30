@@ -235,6 +235,12 @@
     color: #92400e;
 }
 
+.locked-hint {
+    color: #6b7280;
+    font-size: 12px;
+    font-style: italic;
+}
+
 /* ===== Mobile cards ===== */
 .quote-card {
     background: var(--qs-card-bg);
