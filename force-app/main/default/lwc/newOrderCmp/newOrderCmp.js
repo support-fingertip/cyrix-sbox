@@ -479,6 +479,14 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
             listPrice: item.listPrice || item.unitPrice,
             unitPrice: item.unitPrice,
             discount: disc,
+            // Discount value when the row was first loaded — either from
+            // the source quote (carry path) or from the saved order
+            // (edit path). refreshPricingPreview skips the priceStatus
+            // override while the rep keeps the row at this value, so a
+            // line that came over from an approved quote doesn't flip
+            // back to 'Approval Required' just because the rep is
+            // building an order.
+            originalDiscount: disc,
             taxPercent: item.taxPercent || 0,
             taxPercentDisplay: (item.taxPercent || 0) + '%',
             isServiceItem: isService,
@@ -806,6 +814,10 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
             listPrice: product.unitPrice || 0,
             unitPrice: product.unitPrice || 0,
             discount: 0,
+            // Brand-new line — no source-quote anchor, so any non-zero
+            // discount the rep types is a "change" that gets evaluated
+            // against the cap. 0% never escalates anyway.
+            originalDiscount: 0,
             taxPercent: product.taxPercent || 0,
             taxPercentDisplay: (product.taxPercent || 0) + '%',
             isServiceItem: isService,
@@ -894,6 +906,17 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
         if (!item || item.priceStatus === 'Approved') return;
         if (!item.productId) return;
 
+        // When the row's current discount matches the value it had on
+        // load (originalDiscount), the rep hasn't actually moved the
+        // discount off the source quote / saved order. In that case we
+        // still call the evaluator to refresh display fields like the
+        // ceiling chip and mapped tier badge, but we don't let the
+        // server's status decision overwrite the carried priceStatus —
+        // a quote that was already approved at 30% shouldn't flip to
+        // 'Approval Required' the moment the rep opens the order.
+        const discountUnchanged = item.originalDiscount != null
+            && Number(item.discount || 0) === Number(item.originalDiscount || 0);
+
         try {
             const preview = await getProductPricingPreview({
                 productId: item.productId,
@@ -906,9 +929,11 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
             this.lineItems = this.lineItems.map(it => {
                 if (it.rowId !== rowId) return it;
                 const updated = { ...it };
-                updated.priceStatus = preview.priceStatus || updated.priceStatus;
-                updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(updated.priceStatus);
-                updated.qwStatusClass = this.getQwStatusClass(updated.priceStatus);
+                if (!discountUnchanged) {
+                    updated.priceStatus = preview.priceStatus || updated.priceStatus;
+                    updated.priceStatusBadgeClass = this.getPriceStatusBadgeClass(updated.priceStatus);
+                    updated.qwStatusClass = this.getQwStatusClass(updated.priceStatus);
+                }
                 if (preview.resolvedPricebookId) updated.sourcePricebookId = preview.resolvedPricebookId;
                 if (resolvedPb) {
                     updated.sourcePricebookName = resolvedPb;
