@@ -57,12 +57,16 @@ export default class QuoteSessionPage extends LightningElement {
                 formattedCreatedDate: this.formatDate(q.createdDate),
                 formattedExpiry: q.expirationDate ? this.formatDate(q.expirationDate) : '--',
                 statusClass: this.getStatusClass(q.status),
-                // Hide the Edit button while the quote is locked by the
-                // approval workflow. Approval Required = pending sign-off,
-                // Approved = the approver already signed off and the
-                // record is read-only. Either way the rep can't edit
-                // until the approval state is reset.
+                // Hide the Edit button while the quote is locked. A quote
+                // is locked when:
+                //   - Price_Status is Approval Required (pending sign-off)
+                //   - Price_Status is Approved (signed off, read-only)
+                //   - Status is Customer Accepted / Accepted (the customer
+                //     has agreed to the terms; subsequent edits would
+                //     diverge from what was accepted, so the rep should
+                //     create an order or revise instead).
                 canEdit: !this.isUnderApproval(q.priceStatus)
+                    && !this.isCustomerAccepted(q.status)
             }));
         } catch (error) {
             this.showError('Unable to load quotes', this.reduceErrors(error));
@@ -157,6 +161,17 @@ export default class QuoteSessionPage extends LightningElement {
         if (!priceStatus) return false;
         const normalized = String(priceStatus).trim().toLowerCase();
         return normalized === 'approval required' || normalized === 'approved';
+    }
+
+    // Quote has been accepted by the customer — locking it is the BRD
+    // intent (any change after acceptance must come through the
+    // revision flow, not a silent edit). Tolerates the legacy
+    // 'Accepted' picklist variant alongside the canonical
+    // 'Customer Accepted'.
+    isCustomerAccepted(status) {
+        if (!status) return false;
+        const normalized = String(status).trim().toLowerCase();
+        return normalized === 'customer accepted' || normalized === 'accepted';
     }
 
     formatCurrency(value) {
