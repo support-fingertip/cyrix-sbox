@@ -12,34 +12,36 @@
                     <span class="qap-label">Submit for approval</span>
                 </button>
             </template>
-            <button class="qap-btn" type="button" data-action="pdf" onclick={handleAction}>
-                <span class="qap-icon" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 2L11 13"/>
-                        <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
-                    </svg>
-                </span>
-                <span class="qap-label">Send quote PDF</span>
-            </button>
-            <button class="qap-btn" type="button" data-action="status" onclick={handleAction}>
-                <span class="qap-icon" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 7h13l3 3-3 3H4z"/>
-                        <path d="M4 14h10l3 3-3 3H4z"/>
-                        <path d="M4 4v17"/>
-                    </svg>
-                </span>
-                <span class="qap-label">Mark status</span>
-            </button>
-            <button class="qap-btn" type="button" data-action="preview" onclick={handleAction}>
-                <span class="qap-icon" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                    </svg>
-                </span>
-                <span class="qap-label">Preview quote PDF</span>
-            </button>
+            <template if:true={showSecondaryButtons}>
+                <button class="qap-btn" type="button" data-action="pdf" onclick={handleAction}>
+                    <span class="qap-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 2L11 13"/>
+                            <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+                        </svg>
+                    </span>
+                    <span class="qap-label">Send quote PDF</span>
+                </button>
+                <button class="qap-btn" type="button" data-action="status" onclick={handleAction}>
+                    <span class="qap-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 7h13l3 3-3 3H4z"/>
+                            <path d="M4 14h10l3 3-3 3H4z"/>
+                            <path d="M4 4v17"/>
+                        </svg>
+                    </span>
+                    <span class="qap-label">Mark status</span>
+                </button>
+                <button class="qap-btn" type="button" data-action="preview" onclick={handleAction}>
+                    <span class="qap-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </span>
+                    <span class="qap-label">Preview quote PDF</span>
+                </button>
+            </template>
         </div>
     </div>
 
@@ -50,8 +52,9 @@
                      action row owns the popup chrome, so we render
                      it inside a transparent shell that just sizes
                      the modal to a comfortable desktop width. -->
-                <div class="qap-embed" onclick={stopPropagation} role="dialog" aria-modal="true">
-                    <c-send-quote-document record-id={recordId} onclose={handleEmbedClose}></c-send-quote-document>
+                <div class="qap-embed" onclick={stopPropagation} role="dialog" aria-modal="true" ondismiss={handleEmbedClose}>
+                    <button class="qap-embed-close" type="button" onclick={closePopup} aria-label="Close">×</button>
+                    <c-send-quote-document record-id={recordId} ondismiss={handleEmbedClose}></c-send-quote-document>
                 </div>
             </template>
 

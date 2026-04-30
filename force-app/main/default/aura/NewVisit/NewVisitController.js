@@ -6,8 +6,9 @@
         if(device == 'DESKTOP'){
              var cmpTarget = component.find('model');
         $A.util.removeClass(cmpTarget, 'slds-modal_full');
-          helper.handleFetchObj(component, event, helper);
         }
+          helper.handleFetchObj(component, event, helper);
+        
     },  
   handleSubmit: function(component, event, helper){
         event.preventDefault();
@@ -62,10 +63,11 @@
     },
      closeModal: function(component, event, helper) {
   component.set('v.showpopup',false);
-            var homeEvt = $A.get("e.force:navigateToObjectHome");
-            homeEvt.setParams({
-                "scope": "Campaign"
-            });
-            homeEvt.fire();
+            var navEvt = $A.get("e.force:navigateToSObject");
+        navEvt.setParams({
+            recordId: component.get('v.recordId'),
+            slideDevName: "detail"
+        });
+        navEvt.fire();
     },
 })

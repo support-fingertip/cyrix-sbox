@@ -11,6 +11,16 @@
         <reevaluateOnChange>false</reevaluateOnChange>
     </fieldUpdates>
     <fieldUpdates>
+        <fullName>Level_2</fullName>
+        <field>Approval_Status__c</field>
+        <literalValue>Level 2 Approved</literalValue>
+        <name>Level 2</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Literal</operation>
+        <protected>false</protected>
+        <reevaluateOnChange>false</reevaluateOnChange>
+    </fieldUpdates>
+    <fieldUpdates>
         <fullName>Price_Status</fullName>
         <field>Price_Status__c</field>
         <literalValue>Not Required</literalValue>
@@ -71,10 +81,10 @@
         <reevaluateOnChange>false</reevaluateOnChange>
     </fieldUpdates>
     <fieldUpdates>
-        <fullName>Quote_Stage</fullName>
+        <fullName>Quote_Status</fullName>
         <field>Status</field>
-        <literalValue>Approved</literalValue>
-        <name>Quote Stage</name>
+        <literalValue>Draft</literalValue>
+        <name>Quote Status</name>
         <notifyAssignee>false</notifyAssignee>
         <operation>Literal</operation>
         <protected>false</protected>
@@ -85,6 +95,16 @@
         <field>Approval_Status__c</field>
         <literalValue>Submitted</literalValue>
         <name>Quote Submitted</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Literal</operation>
+        <protected>false</protected>
+        <reevaluateOnChange>false</reevaluateOnChange>
+    </fieldUpdates>
+    <fieldUpdates>
+        <fullName>Update_level_1</fullName>
+        <field>Approval_Status__c</field>
+        <literalValue>Level 1 Approved</literalValue>
+        <name>Update level 1</name>
         <notifyAssignee>false</notifyAssignee>
         <operation>Literal</operation>
         <protected>false</protected>

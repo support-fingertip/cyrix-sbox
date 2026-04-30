@@ -237,7 +237,10 @@ public with sharing class PricebookTierService {
         ev.ceilingTierDiscount = ceilingDiscount;
 
         if (disc == 0) return ev;
-        if (ceilingDiscount != null && disc <= ceilingDiscount) return ev;
+        // Strict less-than: a discount that exactly hits the ceiling tier's
+        // Discount__c still escalates. Reps must stay below the cap to skip
+        // approval.
+        if (ceilingDiscount != null && disc < ceilingDiscount) return ev;
 
         // Step 3 — escalation ladder. Walk tightest band first; pick
         // the first tier whose Discount__c can cover the entered
@@ -247,7 +250,7 @@ public with sharing class PricebookTierService {
             if (tierPbe == null) continue;
             Decimal tierDisc = tierPbe.Discount__c;
             if (tierDisc == null) continue;
-            if (disc <= tierDisc) {
+            if (disc < tierDisc) {
                 ev.status                 = STATUS_APPROVAL_REQUIRED;
                 ev.mappedPricebookId      = tierPbe.Pricebook2Id;
                 ev.mappedPricebookEntryId = tierPbe.Id;

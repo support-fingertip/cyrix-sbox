@@ -146,7 +146,7 @@
             <fieldInstance>
                 <fieldInstanceProperties>
                     <name>uiBehavior</name>
-                    <value>none</value>
+                    <value>required</value>
                 </fieldInstanceProperties>
                 <fieldItem>Record.Lead_Category__c</fieldItem>
                 <identifier>RecordLead_Category_cField</identifier>
@@ -230,16 +230,6 @@
                 </fieldInstanceProperties>
                 <fieldItem>Record.PurchaseDate_Last_Updated__c</fieldItem>
                 <identifier>RecordPurchaseDate_Last_Updated__cField</identifier>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Sub_Vertical__c</fieldItem>
-                <identifier>RecordSub_Vertical__cField</identifier>
             </fieldInstance>
         </itemInstances>
         <name>Facet-4d1187e4-0a92-41b2-b625-27526473a035</name>
@@ -1634,6 +1624,16 @@
                     <name>uiBehavior</name>
                     <value>none</value>
                 </fieldInstanceProperties>
+                <fieldItem>Record.Sub_Vertical__c</fieldItem>
+                <identifier>RecordSub_Vertical__cField</identifier>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
                 <fieldItem>Record.Brand__c</fieldItem>
                 <identifier>RecordBrand_cField</identifier>
                 <visibilityRule>
@@ -1643,16 +1643,6 @@
                         <rightValue>Academy</rightValue>
                     </criteria>
                 </visibilityRule>
-            </fieldInstance>
-        </itemInstances>
-        <itemInstances>
-            <fieldInstance>
-                <fieldInstanceProperties>
-                    <name>uiBehavior</name>
-                    <value>none</value>
-                </fieldInstanceProperties>
-                <fieldItem>Record.Product__c</fieldItem>
-                <identifier>RecordProduct__cField</identifier>
             </fieldInstance>
         </itemInstances>
         <name>Facet-c07e9bc3-2aec-4550-ac5d-2624b7aea17a</name>
@@ -1725,6 +1715,16 @@
                         <rightValue>Academy</rightValue>
                     </criteria>
                 </visibilityRule>
+            </fieldInstance>
+        </itemInstances>
+        <itemInstances>
+            <fieldInstance>
+                <fieldInstanceProperties>
+                    <name>uiBehavior</name>
+                    <value>none</value>
+                </fieldInstanceProperties>
+                <fieldItem>Record.Product__c</fieldItem>
+                <identifier>RecordProduct__cField</identifier>
             </fieldInstance>
         </itemInstances>
         <name>Facet-22a2f247-a377-4643-9ad4-ccd4dbb31574</name>

@@ -1,4 +1,4 @@
-<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId" access="global">
+<aura:component implements="flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:appHostable,force:hasRecordId" access="global">
     <aura:attribute name="recordId" type="String" description="Record to which the files should be attached" />
     <aura:attribute name="myRecordID" type="String" description="Record to which the files should be attached" />
     <aura:attribute name="fileNames" type="Map" default="{'Aadhar':'No File Selected..', 'PAN':'No File Selected..', 'Passport':'No File Selected..', 'PassportPhoto':'No File Selected..'}" />

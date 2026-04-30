@@ -43,6 +43,12 @@
                 <stringValue>Approval Required</stringValue>
             </value>
         </inputAssignments>
+        <inputAssignments>
+            <field>Status</field>
+            <value>
+                <stringValue>Needs Review</stringValue>
+            </value>
+        </inputAssignments>
         <object>Quote</object>
     </recordUpdates>
     <start>

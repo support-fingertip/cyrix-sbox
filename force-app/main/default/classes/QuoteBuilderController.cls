@@ -1045,7 +1045,7 @@ public with sharing class QuoteBuilderController {
             }
 
             for (Quote q : [
-                SELECT Id, Name, QuoteNumber, Status, ExpirationDate,
+                SELECT Id, Name, QuoteNumber, Status, Price_Status__c, ExpirationDate,
                        GrandTotal, TotalPrice, CreatedDate,
                        OpportunityId, Opportunity.Name,
                        Opportunity.AccountId, Opportunity.Account.Name
@@ -1058,6 +1058,7 @@ public with sharing class QuoteBuilderController {
                 qs.name = q.Name;
                 qs.quoteNumber = q.QuoteNumber;
                 qs.status = q.Status;
+                qs.priceStatus = q.Price_Status__c;
                 qs.expirationDate = q.ExpirationDate;
                 qs.grandTotal = q.GrandTotal != null ? q.GrandTotal : q.TotalPrice;
                 qs.createdDate = q.CreatedDate;
@@ -1086,6 +1087,7 @@ public with sharing class QuoteBuilderController {
         @AuraEnabled public String name;
         @AuraEnabled public String quoteNumber;
         @AuraEnabled public String status;
+        @AuraEnabled public String priceStatus;
         @AuraEnabled public Date expirationDate;
         @AuraEnabled public Decimal grandTotal;
         @AuraEnabled public Datetime createdDate;

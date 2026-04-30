@@ -6,5 +6,5 @@
     <mayForecastManagerShare>false</mayForecastManagerShare>
     <name>TSM</name>
     <opportunityAccessLevel>Edit</opportunityAccessLevel>
-    <parentRole>GM</parentRole>
+    <parentRole>Coordinator</parentRole>
 </Role>

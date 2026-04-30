@@ -18,6 +18,12 @@ public with sharing class OrderItemTriggerHandler {
     private static final String STATUS_APPROVAL_REQUIRED = 'Approval Required';
     private static final String STATUS_NOT_REQUIRED      = 'Not Required';
     private static final String STATUS_APPROVED          = 'Approved';
+    // Order lifecycle (Order.Status) values referenced by the auto-
+    // transition when Price_Status__c flips to Approval Required.
+    private static final String STATUS_NEEDS_REVIEW      = 'Needs Review';
+    private static final Set<String> ORDER_TERMINAL_STATUSES = new Set<String>{
+        'Activated', 'Cancelled', 'Closed'
+    };
 
     /**
      * BEFORE insert/update. Mutates records in place.
@@ -26,8 +32,10 @@ public with sharing class OrderItemTriggerHandler {
         if (items == null || items.isEmpty()) return;
 
         Set<Id> productIds = new Set<Id>();
+        Set<Id> orderIds = new Set<Id>();
         for (OrderItem oi : items) {
             if (oi.Product2Id != null) productIds.add(oi.Product2Id);
+            if (oi.OrderId != null) orderIds.add(oi.OrderId);
         }
         if (productIds.isEmpty()) return;
 
@@ -46,6 +54,31 @@ public with sharing class OrderItemTriggerHandler {
 
         String profileName = PricebookTierService.runningUserProfileName();
 
+        // Source-quote QLI discounts keyed by parent QuoteId + Product2Id.
+        // If the OrderItem's discount matches the QLI it was sourced from,
+        // we don't escalate — the discount has already been approved on
+        // the quote and re-approving on the order is noise. Only items
+        // whose discount has been changed (or that have no matching QLI,
+        // i.e. brand-new lines added directly on the order) go through
+        // the cap evaluator.
+        Map<Id, Id> orderToQuote = new Map<Id, Id>();
+        if (!orderIds.isEmpty()) {
+            for (Order o : [SELECT Id, QuoteId FROM Order WHERE Id IN :orderIds]) {
+                if (o.QuoteId != null) orderToQuote.put(o.Id, o.QuoteId);
+            }
+        }
+        Map<String, Decimal> quoteLineDiscountByKey = new Map<String, Decimal>();
+        if (!orderToQuote.isEmpty()) {
+            Set<Id> quoteIds = new Set<Id>(orderToQuote.values());
+            for (QuoteLineItem qli : [
+                SELECT QuoteId, Product2Id, Discount
+                FROM QuoteLineItem
+                WHERE QuoteId IN :quoteIds AND Product2Id IN :productIds
+            ]) {
+                quoteLineDiscountByKey.put(qli.QuoteId + '|' + qli.Product2Id, qli.Discount);
+            }
+        }
+
         for (OrderItem oi : items) {
             Product2 p = prodMap.get(oi.Product2Id);
             if (p == null) continue;
@@ -58,7 +91,23 @@ public with sharing class OrderItemTriggerHandler {
                 profileName
             );
 
+            // Default to whatever the evaluator decided.
             oi.Price_Status__c = ev.status;
+
+            // If we can match this line back to its source QuoteLineItem
+            // and the discount hasn't changed from the quote, force the
+            // status to Not Required regardless of the cap. New lines
+            // (no matching QLI) and edited lines (discount drifted) still
+            // honour the evaluator's verdict.
+            Id parentQuoteId = orderToQuote.get(oi.OrderId);
+            if (parentQuoteId != null && oi.Product2Id != null) {
+                Decimal qliDisc = quoteLineDiscountByKey.get(parentQuoteId + '|' + oi.Product2Id);
+                Decimal orderDisc = oi.Discount__c == null ? 0 : oi.Discount__c;
+                Decimal sourceDisc = qliDisc == null ? 0 : qliDisc;
+                if (qliDisc != null && orderDisc == sourceDisc) {
+                    oi.Price_Status__c = STATUS_NOT_REQUIRED;
+                }
+            }
 
             if (isService) {
                 // Service items: don't touch the line's pricebook,
@@ -122,7 +171,7 @@ public with sharing class OrderItemTriggerHandler {
         }
 
         Map<Id, Order> currentOrders = new Map<Id, Order>([
-            SELECT Id, Price_Status__c FROM Order WHERE Id IN :orderIds
+            SELECT Id, Price_Status__c, Status FROM Order WHERE Id IN :orderIds
         ]);
 
         List<Order> toUpdate = new List<Order>();
@@ -131,7 +180,19 @@ public with sharing class OrderItemTriggerHandler {
             Order curr = currentOrders.get(oid);
             if (curr == null) continue;
             if (curr.Price_Status__c != rolled) {
-                toUpdate.add(new Order(Id = oid, Price_Status__c = rolled));
+                Order moved = new Order(Id = oid, Price_Status__c = rolled);
+                // When price escalates to Approval Required, also push
+                // the order's lifecycle status to Needs Review so the
+                // approver sees a single, unambiguous "this is awaiting
+                // me" state. Skip orders already at a terminal lifecycle
+                // (Activated / Cancelled) so we don't drag completed
+                // work backwards.
+                if (rolled == STATUS_APPROVAL_REQUIRED
+                        && curr.Status != STATUS_NEEDS_REVIEW
+                        && !ORDER_TERMINAL_STATUSES.contains(curr.Status)) {
+                    moved.Status = STATUS_NEEDS_REVIEW;
+                }
+                toUpdate.add(moved);
             }
         }
 

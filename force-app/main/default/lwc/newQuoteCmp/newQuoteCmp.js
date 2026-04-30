@@ -9,6 +9,7 @@ import getProductPricingPreview from '@salesforce/apex/QuoteBuilderController.ge
 import saveQuoteLineItems from '@salesforce/apex/QuoteBuilderController.saveQuoteLineItems';
 import updateQuoteLineItems from '@salesforce/apex/QuoteBuilderController.updateQuoteLineItems';
 import savePaymentTerms from '@salesforce/apex/QuoteBuilderController.savePaymentTerms';
+import getShippingAddresses from '@salesforce/apex/QuoteBuilderController.getShippingAddresses';
 
 let rowCounter = 0;
 let ptCounter = 0;
@@ -18,8 +19,61 @@ const STEP_LABELS = [
 ];
 const TOTAL_STEPS = STEP_LABELS.length;
 
+// Maps a Quote field API name to the wizard step that owns it. When the
+// rep clicks Save on the Review step and the platform / pre-flight reports
+// a problem with one of these fields, we jump back to the step that hosts
+// the input so the rep can see and fix the issue in place instead of
+// hunting for it.
+const STEP_FOR_FIELD = {
+    Quote_Date__c: 1,
+    Quote_Valid_Till_in_days__c: 1,
+    OpportunityId: 1,
+    Business_Vertical__c: 1,
+    Sub_Vertical__c: 1,
+    Shipping_Mode__c: 1,
+    Delivery__c: 1,
+    Contract_Period_From_Date__c: 1,
+    Contract_Period_End_Date__c: 1,
+    Number_of_Preventive_Maintenance__c: 1,
+    Installation_and_commissioning_required__c: 1,
+    Status: 1,
+    Reason_for_Revision__c: 1,
+    is_Active__c: 1,
+    BillingName: 2, BillingStreet: 2, BillingCity: 2,
+    BillingState: 2, BillingStateCode: 2,
+    BillingPostalCode: 2, BillingCountry: 2, BillingCountryCode: 2,
+    ShippingName: 2, ShippingStreet: 2, ShippingCity: 2,
+    ShippingState: 2, ShippingStateCode: 2,
+    ShippingPostalCode: 2, ShippingCountry: 2, ShippingCountryCode: 2,
+    Description: 5
+};
+
+// Friendly labels for the Quote fields that we explicitly pre-flight on
+// step 1 before submitting the form. Keeps the toast message readable.
+const STEP1_REQUIRED_LABELS = {
+    Quote_Date__c: 'Quote Date',
+    Quote_Valid_Till_in_days__c: 'Quote Valid Till (in days)',
+    OpportunityId: 'Opportunity',
+    Business_Vertical__c: 'Business Vertical'
+};
+
 export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
-    @api recordId;
+    // recordId is a getter/setter so that re-mounting the same component
+    // instance with a different record (e.g. a quick action / modal opened
+    // on a second Opportunity after the first was closed) wipes the prior
+    // state and reloads. Without this, the platform sometimes reuses the
+    // instance and the old record's data leaks into the new popup.
+    _recordId;
+    @api
+    get recordId() { return this._recordId; }
+    set recordId(value) {
+        const previous = this._recordId;
+        this._recordId = value;
+        if (value && value !== previous) {
+            this.resetState();
+            this.detectModeAndLoad();
+        }
+    }
     @api fromVisitPlan = false;
 
     get canvasClass() {
@@ -28,9 +82,13 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
 
     // Picks up recordId when launched from the "New Quote" Lightning Component Tab
     // (the record-home override navigates here with state.c__recordId set).
+    // Always honours the latest c__recordId — if the user navigates from one
+    // record to another, this fires again and the recordId setter triggers
+    // a clean reload.
     @wire(CurrentPageReference)
     wiredPageRef(pageRef) {
-        if (pageRef && pageRef.state && pageRef.state.c__recordId && !this.recordId) {
+        if (pageRef && pageRef.state && pageRef.state.c__recordId
+                && pageRef.state.c__recordId !== this._recordId) {
             this.recordId = pageRef.state.c__recordId;
         }
     }
@@ -65,6 +123,11 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // Address objects for custom address input
     @track billingAddress = { name: '', street: '', city: '', state: '', postalCode: '', country: 'IN' };
     @track shippingAddress = { name: '', street: '', city: '', state: '', postalCode: '', country: 'IN' };
+
+    // Saved Shipping_Address__c records for the chosen Account. The rep
+    // picks one from the combobox and we copy its parts into shippingAddress.
+    @track shippingAddressOptionsRaw = [];
+    selectedShippingAddressId = '';
 
     // Search
     searchTerm = '';
@@ -331,11 +394,55 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     // ===== LIFECYCLE =====
 
     connectedCallback() {
-        this.detectModeAndLoad();
+        // The recordId setter already kicks the load when @api recordId is
+        // pushed in, so connectedCallback only needs to cover the case where
+        // a parent passed a value via attribute *before* the setter ran
+        // (rare in practice). Calling detectModeAndLoad here is harmless
+        // because it short-circuits when recordId is missing.
+        if (this._recordId && !this._loadStarted) {
+            this.detectModeAndLoad();
+        }
+    }
+
+    // Wipes every piece of per-record state so a re-opened popup with a
+    // different recordId can't leak data from the previous session.
+    resetState() {
+        this.isEditMode = false;
+        this.editRecordId = null;
+        this.defaultOpportunityId = null;
+        this.pricebookId = undefined;
+        this.currencyCode = 'INR';
+        this.accountId = undefined;
+        this.accountName = '';
+        this.regionId = undefined;
+        this.businessVertical = null;
+        this.subVertical = null;
+        this.billingAddress = { name: '', street: '', city: '', state: '', postalCode: '', country: 'IN' };
+        this.shippingAddress = { name: '', street: '', city: '', state: '', postalCode: '', country: 'IN' };
+        this.shippingAddressOptionsRaw = [];
+        this.selectedShippingAddressId = '';
+        this.searchTerm = '';
+        this.categoryFilter = '';
+        this.searchResults = [];
+        this.showSearchResults = false;
+        this.lineItems = [];
+        this.paymentTerms = [];
+        this.contractFromDate = null;
+        this.contractEndDate = null;
+        this.currentStep = 1;
+        this.sameAsBilling = false;
+        this.isLoading = false;
+        this.isSaving = false;
+        this._loadStarted = null;
     }
 
     async detectModeAndLoad() {
         if (!this.recordId) return;
+        // Track which recordId we started loading for so a second invocation
+        // on the same id doesn't double-fetch (happens when both
+        // connectedCallback and the recordId setter fire).
+        if (this._loadStarted === this.recordId) return;
+        this._loadStarted = this.recordId;
 
         this.isLoading = true;
 
@@ -350,6 +457,8 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
             this.defaultOpportunityId = this.recordId;
             await this.loadOpportunityContext();
         }
+
+        await this.loadShippingAddressOptions();
 
         this.isLoading = false;
     }
@@ -477,6 +586,85 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         }
     }
 
+    // ===== SHIPPING ADDRESS PICKER =====
+
+    // Fetches the saved Shipping_Address__c records on the current Account
+    // so the rep can pick which one to ship to. Called after the
+    // opportunity / quote context is loaded so accountId is known.
+    async loadShippingAddressOptions() {
+        if (!this.accountId) {
+            this.shippingAddressOptionsRaw = [];
+            return;
+        }
+        try {
+            const results = await getShippingAddresses({ accountId: this.accountId });
+            this.shippingAddressOptionsRaw = Array.isArray(results) ? results : [];
+            // Preselect the option that matches the loaded shipping
+            // address (edit mode), or the first one when there's only a
+            // single saved address on the account.
+            this.preselectShippingAddress();
+        } catch (error) {
+            this.shippingAddressOptionsRaw = [];
+            console.warn('Shipping addresses unavailable:', this.reduceErrors(error));
+        }
+    }
+
+    preselectShippingAddress() {
+        if (!this.shippingAddressOptionsRaw.length) {
+            this.selectedShippingAddressId = '';
+            return;
+        }
+        const current = (this.shippingAddress && this.shippingAddress.street || '').trim();
+        const match = this.shippingAddressOptionsRaw.find(
+            opt => (opt.street || '').trim() === current && current !== ''
+        );
+        if (match) {
+            this.selectedShippingAddressId = match.addressId;
+        } else if (this.shippingAddressOptionsRaw.length === 1 && !this.isEditMode) {
+            // Single saved address on a fresh quote — apply it so the rep
+            // doesn't have to click.
+            this.selectedShippingAddressId = this.shippingAddressOptionsRaw[0].addressId;
+            this.applyShippingAddressSelection(this.selectedShippingAddressId);
+        }
+    }
+
+    // True when the Account has more than one saved shipping address — the
+    // picker only makes sense in that case (a single saved address is just
+    // applied silently).
+    get hasMultipleShippingAddresses() {
+        return this.shippingAddressOptionsRaw.length > 1;
+    }
+
+    get shippingAddressOptions() {
+        const opts = this.shippingAddressOptionsRaw.map(opt => ({
+            label: opt.displayLabel || opt.name || 'Untitled address',
+            value: opt.addressId
+        }));
+        return [{ label: '— Select a saved address —', value: '' }, ...opts];
+    }
+
+    handleShippingAddressPickerChange(event) {
+        const id = event.detail ? event.detail.value : event.target.value;
+        this.selectedShippingAddressId = id || '';
+        this.applyShippingAddressSelection(this.selectedShippingAddressId);
+    }
+
+    applyShippingAddressSelection(addressId) {
+        if (!addressId) return;
+        const sel = this.shippingAddressOptionsRaw.find(opt => opt.addressId === addressId);
+        if (!sel) return;
+        this.shippingAddress = {
+            name: sel.name || '',
+            street: sel.street || '',
+            city: sel.city || '',
+            state: sel.state || '',
+            postalCode: sel.postalCode || '',
+            country: sel.country || 'IN'
+        };
+        // Picking from saved addresses overrides "same as billing".
+        this.sameAsBilling = false;
+    }
+
     // ===== ADDRESS CHANGE HANDLERS =====
 
     handleBillingAddressChange(event) {
@@ -581,6 +769,9 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
                 if (this.sameAsBilling) {
                     this.shippingAddress = { ...this.billingAddress };
                 }
+                // Re-fetch the shipping-address picker options against the
+                // newly selected Opportunity's account.
+                await this.loadShippingAddressOptions();
             }
             // Replace the auto-loaded payment terms with whatever the new
             // Opportunity's vertical / sub-vertical pair maps to.
@@ -652,13 +843,31 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
     handleFormSubmit(event) {
         event.preventDefault();
 
-        const errors = this.validateLineItems();
-        if (errors.length > 0) {
-            this.showError('Validation Error', errors.join('\n'));
+        const fields = event.detail.fields;
+
+        // Step 1 required fields are far from the Save button on the Review
+        // step, so a missing value (e.g. Quote Valid Till) used to surface
+        // only as a generic save-failed toast — the rep had to walk back to
+        // step 1 to find the offending input. Pre-flight here, jump to
+        // step 1, and name the missing fields in the toast.
+        const step1Missing = this.findMissingStep1Fields(fields);
+        if (step1Missing.length > 0) {
+            this.jumpToStep(1);
+            this.showError(
+                'Quote info incomplete',
+                step1Missing.map(label => `${label} is required.`).join('\n')
+            );
             return;
         }
 
-        const fields = event.detail.fields;
+        const errors = this.validateLineItems();
+        if (errors.length > 0) {
+            // Line-item problems live on step 3 — jump there too so the
+            // rep lands on the affected grid.
+            this.jumpToStep(3);
+            this.showError('Products step needs attention', errors.join('\n'));
+            return;
+        }
 
         // Payment terms (if any) must sum to exactly 100%.
         if (this.paymentTerms.length > 0 && this.totalPercentage !== 100) {
@@ -855,8 +1064,69 @@ export default class NewQuoteCmp extends NavigationMixin(LightningElement) {
         const message = this.reduceErrors({ body: detail })
             || detail.message
             || 'An error occurred while saving the quote.';
+        // Server-side validation that flags a specific field (e.g. a
+        // missing required Quote field) is reported under
+        // detail.output.fieldErrors. Find the earliest wizard step that
+        // hosts any of those fields and jump there so the rep isn't left
+        // staring at the Review step trying to guess where the problem
+        // lives.
+        const targetStep = this.stepForErrorPayload(detail);
+        if (targetStep && targetStep !== this.currentStep) {
+            this.jumpToStep(targetStep);
+        }
         this.showError('Save Failed', message);
         console.error('Form error:', JSON.stringify(detail));
+    }
+
+    // Returns labels for known step-1 required fields that are blank in
+    // the submit payload. Pulls Opportunity / Business Vertical from the
+    // tracked component state because those aren't lightning-input-fields.
+    findMissingStep1Fields(fields) {
+        const missing = [];
+        const isBlank = v => v === undefined || v === null || v === '' ||
+            (typeof v === 'string' && v.trim() === '');
+        if (isBlank(fields.Quote_Date__c)) missing.push(STEP1_REQUIRED_LABELS.Quote_Date__c);
+        if (isBlank(fields.Quote_Valid_Till_in_days__c)) missing.push(STEP1_REQUIRED_LABELS.Quote_Valid_Till_in_days__c);
+        if (isBlank(this.defaultOpportunityId)) missing.push(STEP1_REQUIRED_LABELS.OpportunityId);
+        if (isBlank(this.businessVertical)) missing.push(STEP1_REQUIRED_LABELS.Business_Vertical__c);
+        return missing;
+    }
+
+    // Walks a record-edit-form onerror payload looking for a fieldErrors
+    // bag and returns the lowest wizard step that owns any of those
+    // fields. Falls back to null when nothing matches the field map.
+    stepForErrorPayload(detail) {
+        const candidates = [];
+        const collect = obj => {
+            if (!obj || typeof obj !== 'object') return;
+            const fieldErrors = obj.fieldErrors;
+            if (fieldErrors && typeof fieldErrors === 'object') {
+                Object.keys(fieldErrors).forEach(name => {
+                    if (STEP_FOR_FIELD[name] != null) {
+                        candidates.push(STEP_FOR_FIELD[name]);
+                    }
+                });
+            }
+            if (Array.isArray(obj.errors)) {
+                obj.errors.forEach(e => {
+                    if (e && e.field && STEP_FOR_FIELD[e.field] != null) {
+                        candidates.push(STEP_FOR_FIELD[e.field]);
+                    }
+                });
+            }
+        };
+        collect(detail);
+        collect(detail && detail.output);
+        if (!candidates.length) return null;
+        return Math.min(...candidates);
+    }
+
+    // Programmatic jump used by error recovery flows. Mirrors
+    // handleStepJump but skips the click-event plumbing.
+    jumpToStep(step) {
+        if (!step || step < 1 || step > TOTAL_STEPS) return;
+        this.currentStep = step;
+        this.scrollShellTop();
     }
 
     // ===== SEARCH HANDLERS =====

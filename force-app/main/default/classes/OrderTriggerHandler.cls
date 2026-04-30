@@ -13,6 +13,7 @@ public with sharing class OrderTriggerHandler {
     private static final String NOTIF_DEV_NAME = 'Order_Cancellation_Notification';
     private static final String APPROVAL_NOTIF_DEV_NAME = 'Order_Approval_Notification';
     private static final String CANCELLED_STATUS = 'Cancelled';
+    private static final String ACTIVATED_STATUS = 'Activated';
     private static final String APPROVAL_REQUIRED = 'Approval Required';
     private static final String PRICE_APPROVED = 'Approved';
     private static final String APPROVAL_STATUS_APPROVED = 'Approved';
@@ -71,6 +72,25 @@ public with sharing class OrderTriggerHandler {
      */
     public static void handleBeforeUpdate(List<Order> newList, Map<Id, Order> oldMap) {
         if (newList == null || oldMap == null) return;
+
+        // Block activation only while approval is in flight. An order
+        // sitting at 'Approval Required' is waiting on the reviewer
+        // and must not skip the queue. Anything else — Not Required
+        // (no approval needed in the first place), Approved (already
+        // signed off), or blank — is fine to activate.
+        for (Order o : newList) {
+            Order prev = oldMap.get(o.Id);
+            if (prev == null) continue;
+            if (o.Status == ACTIVATED_STATUS && prev.Status != ACTIVATED_STATUS) {
+                if (o.Price_Status__c == APPROVAL_REQUIRED) {
+                    o.addError(
+                        'This Order cannot be activated while it is pending ' +
+                        'approval. Wait for the approver to sign off (Price ' +
+                        'Status moves to "Approved") before activating.'
+                    );
+                }
+            }
+        }
 
         // Collect Orders attempting to transition into 'Cancelled'.
         Set<Id> attemptingCancelIds = new Set<Id>();

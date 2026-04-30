@@ -113,14 +113,19 @@
                                         <td>{q.formattedExpiry}</td>
                                         <td>{q.formattedCreatedDate}</td>
                                         <td class="slds-text-align_center">
-                                            <lightning-button-icon
-                                                icon-name="utility:edit"
-                                                alternative-text="Edit"
-                                                variant="border-filled"
-                                                data-quote-id={q.quoteId}
-                                                onclick={handleEditQuote}
-                                                class="edit-btn">
-                                            </lightning-button-icon>
+                                            <template if:true={q.canEdit}>
+                                                <lightning-button-icon
+                                                    icon-name="utility:edit"
+                                                    alternative-text="Edit"
+                                                    variant="border-filled"
+                                                    data-quote-id={q.quoteId}
+                                                    onclick={handleEditQuote}
+                                                    class="edit-btn">
+                                                </lightning-button-icon>
+                                            </template>
+                                            <template if:false={q.canEdit}>
+                                                <span class="locked-hint" title="Locked while under approval">—</span>
+                                            </template>
                                         </td>
                                     </tr>
                                 </template>
@@ -158,15 +163,22 @@
                                     <span class="card-value">{q.formattedCreatedDate}</span>
                                 </div>
                             </div>
-                            <div class="quote-card-actions">
-                                <lightning-button
-                                    label="Edit Quote"
-                                    icon-name="utility:edit"
-                                    variant="brand-outline"
-                                    data-quote-id={q.quoteId}
-                                    onclick={handleEditQuote}>
-                                </lightning-button>
-                            </div>
+                            <template if:true={q.canEdit}>
+                                <div class="quote-card-actions">
+                                    <lightning-button
+                                        label="Edit Quote"
+                                        icon-name="utility:edit"
+                                        variant="brand-outline"
+                                        data-quote-id={q.quoteId}
+                                        onclick={handleEditQuote}>
+                                    </lightning-button>
+                                </div>
+                            </template>
+                            <template if:false={q.canEdit}>
+                                <div class="quote-card-actions locked-hint">
+                                    Locked while under approval
+                                </div>
+                            </template>
                         </div>
                     </template>
                 </div>

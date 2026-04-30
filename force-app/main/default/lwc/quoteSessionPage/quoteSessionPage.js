@@ -56,7 +56,17 @@ export default class QuoteSessionPage extends LightningElement {
                 formattedAmount: this.formatCurrency(q.grandTotal),
                 formattedCreatedDate: this.formatDate(q.createdDate),
                 formattedExpiry: q.expirationDate ? this.formatDate(q.expirationDate) : '--',
-                statusClass: this.getStatusClass(q.status)
+                statusClass: this.getStatusClass(q.status),
+                // Hide the Edit button while the quote is locked. A quote
+                // is locked when:
+                //   - Price_Status is Approval Required (pending sign-off)
+                //   - Price_Status is Approved (signed off, read-only)
+                //   - Status is Customer Accepted / Accepted (the customer
+                //     has agreed to the terms; subsequent edits would
+                //     diverge from what was accepted, so the rep should
+                //     create an order or revise instead).
+                canEdit: !this.isUnderApproval(q.priceStatus)
+                    && !this.isCustomerAccepted(q.status)
             }));
         } catch (error) {
             this.showError('Unable to load quotes', this.reduceErrors(error));
@@ -140,6 +150,28 @@ export default class QuoteSessionPage extends LightningElement {
         if (normalized.includes('reject') || normalized.includes('denied')) return base + ' status-rejected';
         if (normalized.includes('review')) return base + ' status-review';
         return base + ' status-draft';
+    }
+
+    // Quote is "under approval" when the price-status field is sitting
+    // at 'Approval Required' (waiting for a reviewer) or 'Approved' (the
+    // record has been signed off and is now read-only). Editing in
+    // either state would either invalidate the pending approval or
+    // tamper with an approved record, so the row hides the Edit button.
+    isUnderApproval(priceStatus) {
+        if (!priceStatus) return false;
+        const normalized = String(priceStatus).trim().toLowerCase();
+        return normalized === 'approval required' || normalized === 'approved';
+    }
+
+    // Quote has been accepted by the customer — locking it is the BRD
+    // intent (any change after acceptance must come through the
+    // revision flow, not a silent edit). Tolerates the legacy
+    // 'Accepted' picklist variant alongside the canonical
+    // 'Customer Accepted'.
+    isCustomerAccepted(status) {
+        if (!status) return false;
+        const normalized = String(status).trim().toLowerCase();
+        return normalized === 'customer accepted' || normalized === 'accepted';
     }
 
     formatCurrency(value) {

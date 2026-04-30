@@ -80,6 +80,15 @@
     justify-content: center;
     z-index: 9000;
     padding: 16px;
+    /* Salesforce Mobile occasionally wraps the LWC inside a transformed
+       ancestor, which silently downgrades position: fixed to position:
+       absolute relative to that ancestor. The min-height + 100vw width
+       keep the overlay covering the visible area in that fallback path,
+       and the JS scrollIntoView call brings it into view. */
+    min-height: 100vh;
+    min-width: 100vw;
+    left: 0;
+    top: 0;
 }
 
 .qap-popup {
@@ -108,11 +117,79 @@
 }
 
 @media (max-width: 600px) {
+    /* Mobile keeps the centered-modal pattern — the rep asked
+       explicitly for the popup to sit in the middle of the screen,
+       not edge-to-edge. The overlay tightens its gutter so the
+       modal still feels native, and the popup / embed cap their
+       width to the device width minus a small margin. */
+    .qap-overlay {
+        padding: 12px;
+    }
     .qap-popup, .qap-embed {
         max-width: 100%;
-        max-height: 96vh;
+        width: 100%;
+        max-height: 88vh;
+    }
+    .qap-popup {
+        padding: 16px;
     }
 }
+
+/* Sticky head + sticky action row keep the title and the Cancel /
+   Submit buttons visible even when the popup body grows past the
+   viewport height (e.g. status list with many options, revision
+   reason textarea expanded). The popup itself scrolls; the head
+   pins to the top of the scroll container, the actions to the
+   bottom. */
+.qap-popup-head {
+    position: sticky;
+    top: 0;
+    background: #FFFFFF;
+    z-index: 2;
+    padding-top: 4px;
+    margin-top: -4px;
+}
+
+.qap-actions {
+    position: sticky;
+    bottom: 0;
+    background: #FFFFFF;
+    margin-top: auto;
+    padding-top: 12px;
+    padding-bottom: 4px;
+    z-index: 1;
+    border-top: 1px solid var(--qap-orange-line);
+}
+
+/* Header-level close button on the embedded sendQuoteDocument shell.
+   The child LWC does not draw an X, so the parent overlays one in the
+   top-right so the rep can always bail out — especially on mobile
+   where the form fills the screen. */
+.qap-embed {
+    position: relative;
+}
+
+.qap-embed-close {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    z-index: 2;
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--qap-text-muted);
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+.qap-embed-close:hover { color: var(--qap-orange); }
 
 .qap-popup-head {
     display: flex;

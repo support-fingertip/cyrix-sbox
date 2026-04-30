@@ -14,12 +14,14 @@
     <excludeButtons>CreateIncident</excludeButtons>
     <excludeButtons>CreatePartnerChannelQuickAction</excludeButtons>
     <excludeButtons>CreateSurveyInvitation</excludeButtons>
-    <excludeButtons>DataDotComCompanyHierarchy</excludeButtons>
+    <excludeButtons>DataDotComAccountInsights</excludeButtons>
+    <excludeButtons>DataDotComClean</excludeButtons>
     <excludeButtons>DisableCustomerPortalAccount</excludeButtons>
     <excludeButtons>DisablePartnerPortalAccount</excludeButtons>
     <excludeButtons>Entitlements</excludeButtons>
     <excludeButtons>EvalAccForResearchStudy</excludeButtons>
     <excludeButtons>IncludeOffline</excludeButtons>
+    <excludeButtons>OpenSlackRecordChannel</excludeButtons>
     <excludeButtons>PartnerScorecard</excludeButtons>
     <excludeButtons>PreviewInvoices</excludeButtons>
     <excludeButtons>PrintableView</excludeButtons>
@@ -459,6 +461,11 @@
     </relatedLists>
     <relatedLists>
         <fields>NAME</fields>
+        <fields>Address__Street__s</fields>
+        <fields>Address__City__s</fields>
+        <fields>Address__StateCode__s</fields>
+        <fields>Address_Code__c</fields>
+        <fields>Address__CountryCode__s</fields>
         <relatedList>Shipping_Address__c.Account__c</relatedList>
     </relatedLists>
     <relatedLists>

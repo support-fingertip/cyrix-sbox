@@ -22,7 +22,7 @@ public class LeadTriggerHandler {
     
     /* ---------------- Lead Assigned Notification ---------------- */
     public static void leadAssignedNotification(List<Lead> leads) {
-        
+        try{
         CustomNotificationType type = [
             SELECT Id
             FROM CustomNotificationType
@@ -44,6 +44,9 @@ public class LeadTriggerHandler {
                 SendEmailCustomNotification.sendNotification( 'Lead - ' + name + ' is assigned to '+l.Lead_Owner_Name__c,
                                                              'Lead Assigned' + companyInfo,senderId, type.Id,l.Id,new Set<String>{ l.ManagerId__c } ); 
             }
+        }
+        }catch(exception ex){
+                            ExceptionHandler.addLog( ex,string.valueof(leads));
         }
     }
     

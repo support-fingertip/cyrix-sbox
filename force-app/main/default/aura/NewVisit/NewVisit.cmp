@@ -5,10 +5,11 @@
        <aura:attribute name="objectName" type="string" default=""/>
        <aura:attribute name="profileName" type="string" default=""/>
     <aura:attribute name="formFactor" type="string"/>
-            <aura:attribute name="withCompanion" type="string"/>
+        <aura:attribute name="withCompanion" type="string"/>
         <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
        
     <aura:html tag="style">
+           @media (min-width: 1024px) {
         .slds-modal__container{ 
         max-width: 80rem !important;
         width:80% !important;
@@ -27,6 +28,8 @@
         .slds-col{
         margin-left:5px;
         }
+        
+}   
     </aura:html >
     <!-- Modal -->
         <lightning:recordEditForm  objectApiName="Visit__c"   aura:id="visit" onsubmit="{!c.handleSubmit}" onsuccess="{!c.handleSuccess}" onerror="{!c.handleError}"> 
@@ -70,15 +73,15 @@
                                     <lightning:inputField fieldName="Account__c" required="true" value="{!v.recordId}"/>
                                 </div>
                                 </aura:if>
-                                  <div class="slds-size_1-of-2 slds-max-small-size_1-of-1 slds-p-horizontal_small">
+                   <div class="slds-size_1-of-2 slds-max-small-size_1-of-1 slds-p-horizontal_small">
                                     <lightning:inputField fieldName="With_Companion__c" value="{!v.withCompanion}" required="true"/>
                                 </div>
-                                 <aura:if isTrue="{!v.withCompanion !='Yes'}">
+                                 <aura:if isTrue="{!v.withCompanion =='Yes'}">
                                  <div class="slds-size_1-of-2 slds-max-small-size_1-of-1 slds-p-horizontal_small">
                                     <lightning:inputField fieldName="Companion__c" required="true"/>
                                 </div>
                                 </aura:if>
-                                   <aura:if isTrue="{!v.profileName !='Sales Engineer'}">
+                                <aura:if isTrue="{!v.profileName !='Sales Engineer'}">
                                  <div class="slds-size_1-of-2 slds-max-small-size_1-of-1 slds-p-horizontal_small">
                                     <lightning:inputField fieldName="Assign_To__c" required="false"/>
                                 </div>

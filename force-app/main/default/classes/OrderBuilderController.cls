@@ -444,7 +444,12 @@ public with sharing class OrderBuilderController {
 
         if (v.Account__c == null) return session;
 
-        // Customer Accepted Quotes that have NOT yet been converted to an Order
+        // Customer Accepted Quotes that have NOT yet been converted to an Order.
+        // Match both 'Customer Accepted' (current canonical value) and the
+        // legacy 'Accepted' some sandboxes still carry on the picklist —
+        // requiring an exact match made the section appear empty in orgs
+        // that hadn't yet renamed the value.
+        Set<String> acceptedStatuses = new Set<String>{ 'Customer Accepted', 'Accepted' };
         Set<Id> convertedQuoteIds = new Set<Id>();
         for (Order o : [
             SELECT QuoteId
@@ -461,7 +466,7 @@ public with sharing class OrderBuilderController {
                    OpportunityId, Opportunity.Name
             FROM Quote
             WHERE Opportunity.AccountId = :v.Account__c
-              AND Status = 'Customer Accepted'
+              AND Status IN :acceptedStatuses
             ORDER BY CreatedDate DESC
         ]) {
             if (convertedQuoteIds.contains(q.Id)) continue;
@@ -478,14 +483,16 @@ public with sharing class OrderBuilderController {
             session.acceptedQuotes.add(qs);
         }
 
-        // Activated Orders for the account
+        // All orders for the account, regardless of lifecycle status —
+        // reps need visibility into draft / needs-review / activated /
+        // cancelled alike. Status is included in the projection so the
+        // LWC can render a status badge per row.
         for (Order o : [
             SELECT Id, OrderNumber, Name, Status, EffectiveDate, TotalAmount,
                    CreatedDate, OpportunityId, Opportunity.Name,
                    QuoteId, Quote.QuoteNumber
             FROM Order
             WHERE AccountId = :v.Account__c
-              AND Status = 'Activated'
             ORDER BY CreatedDate DESC
         ]) {
             ActiveOrderSummary os = new ActiveOrderSummary();
