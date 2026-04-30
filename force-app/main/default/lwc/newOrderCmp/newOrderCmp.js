@@ -593,6 +593,16 @@ export default class NewOrderCmp extends NavigationMixin(LightningElement) {
 
         const fields = event.detail.fields;
 
+        // The Quote selector on new orders is a lightning-record-picker,
+        // which doesn't surface in event.detail.fields. Copy the picker
+        // value into the field payload so the saved Order keeps its link
+        // back to the source quote — without this, orders created from
+        // the action panel ended up unlinked because fields.QuoteId was
+        // missing.
+        if (!this.isEditMode && this.sourceQuoteId && !fields.QuoteId) {
+            fields.QuoteId = this.sourceQuoteId;
+        }
+
         if (!this.isEditMode) {
             fields.Pricebook2Id = this.pricebookId;
             fields.Status = 'Draft';
