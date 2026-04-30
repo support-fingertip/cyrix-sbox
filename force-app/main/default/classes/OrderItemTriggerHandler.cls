@@ -18,6 +18,12 @@ public with sharing class OrderItemTriggerHandler {
     private static final String STATUS_APPROVAL_REQUIRED = 'Approval Required';
     private static final String STATUS_NOT_REQUIRED      = 'Not Required';
     private static final String STATUS_APPROVED          = 'Approved';
+    // Order lifecycle (Order.Status) values referenced by the auto-
+    // transition when Price_Status__c flips to Approval Required.
+    private static final String STATUS_NEEDS_REVIEW      = 'Needs Review';
+    private static final Set<String> ORDER_TERMINAL_STATUSES = new Set<String>{
+        'Activated', 'Cancelled', 'Closed'
+    };
 
     /**
      * BEFORE insert/update. Mutates records in place.
@@ -165,7 +171,7 @@ public with sharing class OrderItemTriggerHandler {
         }
 
         Map<Id, Order> currentOrders = new Map<Id, Order>([
-            SELECT Id, Price_Status__c FROM Order WHERE Id IN :orderIds
+            SELECT Id, Price_Status__c, Status FROM Order WHERE Id IN :orderIds
         ]);
 
         List<Order> toUpdate = new List<Order>();
@@ -174,7 +180,19 @@ public with sharing class OrderItemTriggerHandler {
             Order curr = currentOrders.get(oid);
             if (curr == null) continue;
             if (curr.Price_Status__c != rolled) {
-                toUpdate.add(new Order(Id = oid, Price_Status__c = rolled));
+                Order moved = new Order(Id = oid, Price_Status__c = rolled);
+                // When price escalates to Approval Required, also push
+                // the order's lifecycle status to Needs Review so the
+                // approver sees a single, unambiguous "this is awaiting
+                // me" state. Skip orders already at a terminal lifecycle
+                // (Activated / Cancelled) so we don't drag completed
+                // work backwards.
+                if (rolled == STATUS_APPROVAL_REQUIRED
+                        && curr.Status != STATUS_NEEDS_REVIEW
+                        && !ORDER_TERMINAL_STATUSES.contains(curr.Status)) {
+                    moved.Status = STATUS_NEEDS_REVIEW;
+                }
+                toUpdate.add(moved);
             }
         }
 
