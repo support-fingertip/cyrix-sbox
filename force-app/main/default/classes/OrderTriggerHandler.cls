@@ -73,22 +73,20 @@ public with sharing class OrderTriggerHandler {
     public static void handleBeforeUpdate(List<Order> newList, Map<Id, Order> oldMap) {
         if (newList == null || oldMap == null) return;
 
-        // Block activation of any Order that hasn't cleared the approval
-        // workflow. Activation is the point of no return — the order
-        // becomes the source of truth for the ERP push and the invoice
-        // chain — so we don't allow it before Price_Status__c rolls up
-        // to Approved. Reps must Submit for approval and let the
-        // approval flow stamp Price_Status__c first.
+        // Block activation only while approval is in flight. An order
+        // sitting at 'Approval Required' is waiting on the reviewer
+        // and must not skip the queue. Anything else — Not Required
+        // (no approval needed in the first place), Approved (already
+        // signed off), or blank — is fine to activate.
         for (Order o : newList) {
             Order prev = oldMap.get(o.Id);
             if (prev == null) continue;
             if (o.Status == ACTIVATED_STATUS && prev.Status != ACTIVATED_STATUS) {
-                if (o.Price_Status__c != PRICE_APPROVED) {
+                if (o.Price_Status__c == APPROVAL_REQUIRED) {
                     o.addError(
-                        'This Order cannot be activated until it has been ' +
-                        'submitted for approval and the Price Status reads ' +
-                        '"Approved". Submit for approval and wait for the ' +
-                        'approver to sign off before activating.'
+                        'This Order cannot be activated while it is pending ' +
+                        'approval. Wait for the approver to sign off (Price ' +
+                        'Status moves to "Approved") before activating.'
                     );
                 }
             }
