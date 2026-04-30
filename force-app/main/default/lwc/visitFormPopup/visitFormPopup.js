@@ -299,6 +299,23 @@ handleEnable(e) {
     
     
     
+    // Format a date / ISO datetime as a local YYYY-MM-DD string so
+    // saving to a Salesforce Date field doesn't shift the value into
+    // a different timezone (the platform parses bare YYYY-MM-DD as
+    // the day the rep actually picked, no timezone math involved).
+    toLocalDateString(value) {
+        if (!value) return value;
+        if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+            return value;
+        }
+        const d = new Date(value);
+        if (isNaN(d.getTime())) return value;
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
     genericDispatchEvent(title, message, variant) {
         this.dispatchEvent(
             new ShowToastEvent({
@@ -451,7 +468,21 @@ handleEnable(e) {
             var leadId = this.visitData.Lead__c;
             var accId = this.visitData.Account__c;
             var vDate = new Date(this.visitData.Visit_Date__c).toLocaleDateString('en-GB');
-            const fields = this.visitData;
+            // Visit_Date__c is a Date field but the form uses
+            // <lightning-input type="datetime">, which emits an ISO
+            // datetime in UTC. For users in IST (UTC+5:30) picking a
+            // tomorrow-early-morning slot, the UTC string lands on
+            // today's date and Salesforce stores yesterday. Normalise
+            // to a local YYYY-MM-DD string so the saved Date matches
+            // what the rep actually picked. Same for the follow-up
+            // date which is also a Date field.
+            const fields = { ...this.visitData };
+            if (fields.Visit_Date__c) {
+                fields.Visit_Date__c = this.toLocalDateString(fields.Visit_Date__c);
+            }
+            if (fields.Next_Follow_Up_Date__c) {
+                fields.Next_Follow_Up_Date__c = this.toLocalDateString(fields.Next_Follow_Up_Date__c);
+            }
 
             const duplicatePlanned = this.visitOutletData.some(v => ((v.acccountId === accId) || (v.acccountId === leadId))
                 && (v.formattedVisitDate === vDate) && (v.status === 'Planned'));
