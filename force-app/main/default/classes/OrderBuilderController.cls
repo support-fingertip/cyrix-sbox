@@ -483,14 +483,16 @@ public with sharing class OrderBuilderController {
             session.acceptedQuotes.add(qs);
         }
 
-        // Activated Orders for the account
+        // All orders for the account, regardless of lifecycle status —
+        // reps need visibility into draft / needs-review / activated /
+        // cancelled alike. Status is included in the projection so the
+        // LWC can render a status badge per row.
         for (Order o : [
             SELECT Id, OrderNumber, Name, Status, EffectiveDate, TotalAmount,
                    CreatedDate, OpportunityId, Opportunity.Name,
                    QuoteId, Quote.QuoteNumber
             FROM Order
             WHERE AccountId = :v.Account__c
-              AND Status = 'Activated'
             ORDER BY CreatedDate DESC
         ]) {
             ActiveOrderSummary os = new ActiveOrderSummary();
