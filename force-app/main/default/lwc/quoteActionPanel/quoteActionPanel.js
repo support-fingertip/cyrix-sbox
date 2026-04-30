@@ -49,11 +49,6 @@ const APPROVAL_REQUIRED_PRICE_STATUS = 'Approval Required';
 // variant some sandboxes carry.
 const NEEDS_REVIEW_STATUSES = new Set(['needs review', 'need review']);
 
-// Order creation is only meaningful once the customer has signed off.
-// Match case-insensitively and tolerate the legacy 'Accepted' value
-// some sandboxes still carry.
-const CUSTOMER_ACCEPTED_STATUSES = new Set(['customer accepted', 'accepted']);
-
 export default class QuoteActionPanel extends NavigationMixin(LightningElement) {
     @api recordId;
 
@@ -111,23 +106,11 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
         return this.priceStatus === APPROVAL_REQUIRED_PRICE_STATUS;
     }
 
-    // The non-approval actions (PDF, Mark status, Preview, Edit
-    // quote) live behind this flag so the Needs Review lock can hide
-    // them in one place. Create order has its own visibility rule
-    // (showCreateOrderButton) layered on top.
+    // The non-approval actions (PDF, Mark status, Preview) live
+    // behind this flag so the Needs Review lock can hide them in
+    // one place.
     get showSecondaryButtons() {
         return !this.lockedForReview;
-    }
-
-    // Order creation only makes sense after the customer has accepted
-    // the quote — surfacing the button earlier lets a rep generate
-    // orders against draft / pending quotes and pollute downstream
-    // numbering. Hidden during Needs Review by piggy-backing on
-    // showSecondaryButtons.
-    get showCreateOrderButton() {
-        if (!this.showSecondaryButtons) return false;
-        const s = (this.quoteStatus || '').trim().toLowerCase();
-        return CUSTOMER_ACCEPTED_STATUSES.has(s);
     }
 
     // ---------- popup-state getters ----------
@@ -172,37 +155,7 @@ export default class QuoteActionPanel extends NavigationMixin(LightningElement) 
             this.openStatus();
         } else if (action === 'preview') {
             this.launchPreview();
-        } else if (action === 'createOrder') {
-            this.launchCreateOrder();
-        } else if (action === 'editQuote') {
-            this.launchEditQuote();
         }
-    }
-
-    // ---------- create order / edit quote (delegated to existing quick actions) ----------
-
-    launchCreateOrder() {
-        // Quote.Create_Sales_Order is the LWC-typed quick action that
-        // hosts newOrderCmp. Firing it via NavigationMixin keeps the
-        // standard chrome (modal, header, close X) the rep is used to.
-        this[NavigationMixin.Navigate]({
-            type: 'standard__quickAction',
-            attributes: {
-                apiName: 'Quote.Create_Sales_Order'
-            }
-        });
-    }
-
-    launchEditQuote() {
-        // Quote.Edit_Quote hosts newQuoteCmp in edit mode. Same rationale
-        // as the order action — let the platform open the quick action
-        // modal so we don't have to embed the quote builder ourselves.
-        this[NavigationMixin.Navigate]({
-            type: 'standard__quickAction',
-            attributes: {
-                apiName: 'Quote.Edit_Quote'
-            }
-        });
     }
 
     handleOverlayClick() { this.closePopup(); }
