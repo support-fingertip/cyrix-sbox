@@ -13,6 +13,7 @@ public with sharing class OrderTriggerHandler {
     private static final String NOTIF_DEV_NAME = 'Order_Cancellation_Notification';
     private static final String APPROVAL_NOTIF_DEV_NAME = 'Order_Approval_Notification';
     private static final String CANCELLED_STATUS = 'Cancelled';
+    private static final String ACTIVATED_STATUS = 'Activated';
     private static final String APPROVAL_REQUIRED = 'Approval Required';
     private static final String PRICE_APPROVED = 'Approved';
     private static final String APPROVAL_STATUS_APPROVED = 'Approved';
@@ -71,6 +72,27 @@ public with sharing class OrderTriggerHandler {
      */
     public static void handleBeforeUpdate(List<Order> newList, Map<Id, Order> oldMap) {
         if (newList == null || oldMap == null) return;
+
+        // Block activation of any Order that hasn't cleared the approval
+        // workflow. Activation is the point of no return — the order
+        // becomes the source of truth for the ERP push and the invoice
+        // chain — so we don't allow it before Price_Status__c rolls up
+        // to Approved. Reps must Submit for approval and let the
+        // approval flow stamp Price_Status__c first.
+        for (Order o : newList) {
+            Order prev = oldMap.get(o.Id);
+            if (prev == null) continue;
+            if (o.Status == ACTIVATED_STATUS && prev.Status != ACTIVATED_STATUS) {
+                if (o.Price_Status__c != PRICE_APPROVED) {
+                    o.addError(
+                        'This Order cannot be activated until it has been ' +
+                        'submitted for approval and the Price Status reads ' +
+                        '"Approved". Submit for approval and wait for the ' +
+                        'approver to sign off before activating.'
+                    );
+                }
+            }
+        }
 
         // Collect Orders attempting to transition into 'Cancelled'.
         Set<Id> attemptingCancelIds = new Set<Id>();
